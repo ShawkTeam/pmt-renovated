@@ -1,0 +1,12 @@
+{
+    "configurations": [
+        {
+            "includePath": [
+                "${workspaceFolder}/srclib/libhelper/include",
+                "${workspaceFolder}/srclib/libpartition_map/include",
+                "${workspaceFolder}/include"
+            ]
+        }
+    ],
+    "version": 4
+}
