@@ -223,13 +223,13 @@ bool eraseDirectoryRecursive(const std::string_view directory)
 	return true;
 }
 
-std::string_view readSymlink(const std::string_view entry)
+std::string readSymlink(const std::string_view entry)
 {
 	char target[PATH_MAX];
 	ssize_t len = readlink(entry.data(), target, (sizeof(target) - 1));
 	if (len == -1) {
 		throw Error("Cannot read symlink %s: %s", entry.data(), strerror(errno));
-		return entry;
+		return entry.data();
 	}
 
 	target[len] = '\0';

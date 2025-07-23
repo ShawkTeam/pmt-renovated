@@ -24,6 +24,7 @@
 #include <time.h>
 #include <libgen.h>
 #include <libhelper/lib.hpp>
+#include <generated/buildInfo.hpp>
 
 namespace Helper {
 
@@ -130,11 +131,9 @@ std::string pathDirname(const std::string_view entry)
 
 std::string getLibVersion()
 {
-	return std::string(
-		std::to_string(LIBHELPER_MAJOR) + "."
-		+ std::to_string(LIBHELPER_MINOR) + "."
-		+ std::to_string(LIBHELPER_PATCH)
-	);
+	char vinfo[512];
+	sprintf(vinfo, "libhelper %s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: %s\nBuildFlags: %s\n", BUILD_VERSION, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS);
+	return std::string(vinfo);
 }
 
 } // namespace Helper

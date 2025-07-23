@@ -69,6 +69,8 @@ int main(void) {
 
 		if (MyMap == MyMap2) std::cout << "map1 = map2" << std::endl;
 		if (MyMap != MyMap2) std::cout << "map1 != map2" << std::endl;
+
+		std::cout << PartitionMap::getLibVersion() << std::endl;
 	} catch (PartitionMap::Error& error) {
 		std::cerr << error.what() << std::endl;
 		return 1;

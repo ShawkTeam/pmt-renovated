@@ -1,0 +1,29 @@
+/*
+   Copyright 2025 Yağız Zengin
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+
+#ifndef VERSION_HPP
+#define VERSION_HPP
+
+// General build info
+#define BUILD_VERSION			"@PROJECT_VERSION@"
+#define BUILD_TYPE				"@CMAKE_BUILD_TYPE@"
+#define BUILD_DATE				"@BUILD_DATE@"
+#define BUILD_TIME				"@BUILD_TIME@"
+#define BUILD_FLAGS				"@BUILD_FLAGS@"
+#define BUILD_CMAKE_VERSION		"@CMAKE_VERSION@"
+#define BUILD_COMPILER_VERSION	"@COMPILER_VERSION_STRING@"
+
+#endif // #ifndef VERSION_HPP

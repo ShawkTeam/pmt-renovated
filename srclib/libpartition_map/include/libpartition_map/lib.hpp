@@ -17,10 +17,6 @@
 #ifndef LIBPARTITION_MAP_LIB_HPP
 #define LIBPARTITION_MAP_LIB_HPP
 
-#define LIBPARTITION_MAP_MAJOR 1
-#define LIBPARTITION_MAP_MINOR 0
-#define LIBPARTITION_MAP_PATCH 0
-
 #include <string>
 #include <string_view>
 #include <optional>

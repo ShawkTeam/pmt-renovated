@@ -88,6 +88,8 @@ int main(int argc, char** argv)
 		std::cout << "pathJoin() test 3: " << Helper::pathJoin("mydir/", "/dir2") << std::endl;
 		std::cout << "pathJoin() test 4: " << Helper::pathJoin("mydir", "/dir2") << std::endl;
 
+		std::cout << Helper::getLibVersion() << std::endl;
+
 		LOG(INFO) << "Info message" << std::endl;
 		LOG(WARNING) << "Warning message" << std::endl;
 		LOG(ERROR) << "Error message" << std::endl;

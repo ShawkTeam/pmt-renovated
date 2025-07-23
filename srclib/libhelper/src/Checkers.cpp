@@ -74,8 +74,8 @@ bool isHardLink(const std::string_view entry)
 
 bool areLinked(const std::string_view entry1, const std::string_view entry2)
 {
-	const std::string_view st1 = (isSymbolicLink(entry1)) ? readSymlink(entry1) : entry1;
-	const std::string_view st2 = (isSymbolicLink(entry2)) ? readSymlink(entry2) : entry2;
+	const std::string st1 = (isSymbolicLink(entry1)) ? readSymlink(entry1) : std::string(entry1.data());
+	const std::string st2 = (isSymbolicLink(entry2)) ? readSymlink(entry2) : std::string(entry2.data());
 
 	return (st1 == st2);
 }

@@ -21,10 +21,7 @@ BUILD_64="build_arm64-v8a"
 BUILD_32="build_armeabi-v7a"
 THIS="$(basename $0)"
 
-echo()
-{
-    command echo "[$THIS]: $*"
-}
+echo() { command echo "[$THIS]: $@"; }
 
 checks()
 {
@@ -41,7 +38,11 @@ checks()
 clean()
 {
     echo "Cleaning workspace."
-    rm -rf $BUILD_32 $BUILD_64 srclib/libhelper/tests/dir srclib/libhelper/tests/linkdir srclib/libhelper/tests/file.txt
+    rm -rf $BUILD_32 $BUILD_64 \
+        include/generated \
+        srclib/libhelper/tests/dir \
+        srclib/libhelper/tests/linkdir \
+        srclib/libhelper/tests/file.txt
 }
 
 build()

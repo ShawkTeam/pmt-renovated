@@ -25,7 +25,7 @@
 
 namespace Helper {
 
-std::optional<std::string_view> sha256Of(const std::string_view path)
+std::optional<std::string> sha256Of(const std::string_view path)
 {
 	if (!fileIsExists(path)) {
 		throw Error("Is not exists or not file: %s", path.data());

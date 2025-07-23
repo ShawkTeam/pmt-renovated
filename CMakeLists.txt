@@ -18,13 +18,18 @@
 cmake_minimum_required(VERSION 3.10)
 project(pmt VERSION 1.0.0)
 
-set(DEBUG_FLAGS -gdwarf-5 -fsanitize=address -fstack-protector -O0)
-
-# Add compiler flag based on build type
+# Set compiler flags
+add_compile_options(-Wall -Werror)
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${DEBUG_FLAGS}")
-	set(CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS} ${DEBUG_FLAGS}")
+	add_compile_options(-gdwarf-5 -fsanitize=address -fstack-protector)
 endif()
+
+# Add pmt's CMake module(s)
+include(cmake/generate_headers.cmake)
+
+# Generate header(s)
+get_property(FLAGS DIRECTORY PROPERTY COMPILE_OPTIONS)
+generateBuildInfo(${FLAGS})
 
 # Add include directories
 include_directories(include srclib/libhelper/include srclib/libpartition_map/include)

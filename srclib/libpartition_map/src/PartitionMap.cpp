@@ -29,6 +29,7 @@
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include <libpartition_map/lib.hpp>
+#include <generated/buildInfo.hpp>
 #include <string.h>
 #include <unistd.h>
 
@@ -199,11 +200,9 @@ bool basic_partition_map_builder::operator!() const
 
 std::string getLibVersion()
 {
-	return std::string(
-		std::to_string(LIBPARTITION_MAP_MAJOR) + "."
-		+ std::to_string(LIBPARTITION_MAP_MINOR) + "."
-		+ std::to_string(LIBPARTITION_MAP_PATCH)
-	);
+	char vinfo[512];
+	sprintf(vinfo, "libpartition_map %s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: %s\nBuildFlags: %s\n", BUILD_VERSION, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS);
+	return std::string(vinfo);
 }
 
 } // namespace PartitionMap

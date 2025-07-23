@@ -17,10 +17,6 @@
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 
-#define LIBHELPER_MAJOR 1
-#define LIBHELPER_MINOR 0
-#define LIBHELPER_PATCH 0
-
 #include <string>
 #include <string_view>
 #include <sstream>
@@ -114,11 +110,11 @@ bool eraseDirectoryRecursive(const std::string_view directory);
 
 // Getters
 size_t fileSize(const std::string_view file);
-std::string_view readSymlink(const std::string_view entry);
+std::string readSymlink(const std::string_view entry);
 
 // SHA-256
 bool sha256Compare(const std::string_view file1, const std::string_view file2);
-std::optional<std::string_view> sha256Of(const std::string_view path);
+std::optional<std::string> sha256Of(const std::string_view path);
 
 // Utilities
 bool copyFile(const std::string_view file, const std::string_view dest);
