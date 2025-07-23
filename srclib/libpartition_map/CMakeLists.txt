@@ -20,7 +20,7 @@ set(LIBPARTITION_MAP_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/PartitionMap.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Type.cpp
 )
-set(LIBPARTITION_MAP_FLAGS -Wall -Werror -DLOG_FILE="/storage/emulated/0/.last_pmt.log" -DPROGRAM_NAME="libpartition_map")
+set(LIBPARTITION_MAP_FLAGS -DLOG_FILE="/storage/emulated/0/.last_pmt.log" -DPROGRAM_NAME="libpartition_map")
 
 # Add targets
 add_library(partition_map_shared SHARED ${LIBPARTITION_MAP_SOURCES})

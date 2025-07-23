@@ -14,7 +14,7 @@
 #  limitations under the License.
 #
 
-set(LIBHELPER_FLAGS -Wall -DLIB_BUILD_MODE)
+set(LIBHELPER_FLAGS -DLIB_BUILD_MODE)
 set(LIBHELPER_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Checkers.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Classes.cpp

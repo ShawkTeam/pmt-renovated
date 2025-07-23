@@ -35,7 +35,6 @@ generateBuildInfo(${FLAGS})
 include_directories(include srclib/libhelper/include srclib/libpartition_map/include)
 
 # Add libraries
-add_subdirectory(srclib/libhelper)
-add_subdirectory(srclib/libpartition_map)
+add_subdirectory(srclib)
 
 # NOTE: pmt is not ready, this CMakeFiles.txt only builds libraries
