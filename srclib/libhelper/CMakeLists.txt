@@ -14,7 +14,6 @@
 #  limitations under the License.
 #
 
-set(LIBHELPER_FLAGS -DLIB_BUILD_MODE)
 set(LIBHELPER_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Checkers.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Classes.cpp
@@ -28,10 +27,7 @@ add_library(helper_shared SHARED ${LIBHELPER_SOURCES})
 add_library(helper_static STATIC ${LIBHELPER_SOURCES})
 add_executable(libhelper_test tests/test.cpp)
 
-# Set compiler flags
-target_compile_options(helper_shared PRIVATE ${LIBHELPER_FLAGS})
-target_compile_options(helper_static PRIVATE ${LIBHELPER_FLAGS})
-target_compile_options(libhelper_test PRIVATE ${LIBHELPER_FLAGS})
+# Set linker flags
 target_link_libraries(libhelper_test PRIVATE helper_shared)
 target_link_options(libhelper_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
 target_link_options(helper_shared PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
