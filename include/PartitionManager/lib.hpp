@@ -22,9 +22,60 @@
 #include <string_view>
 #include <functional>
 #include <vector>
-#include <libpartition_map/lib.hpp>
 #include <libhelper/lib.hpp>
+#include <libpartition_map/lib.hpp>
 
-namespace PartitionManager {} // namespace PartitionManager
+#ifdef NEED_BASIC_FUNCTION_CLASSES
+#include <memory>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignore "-Wdeprecated-declarations"
+#include <CLI/CLI11.hpp>
+#pragma GCC diagnostic pop
+#endif // #ifdef NEED_BASIC_FUNCTION_CLASSES
+
+namespace PartitionManager {
+
+#ifdef NEED_BASIC_FUNCTION_CLASSES
+class basic_function {
+/**
+ * Example variables for writing your function:
+ * private:
+ *  CLI::App _cmd* = nullptr;
+ */
+public:
+	virtual bool init(CLI::App& _app) = 0;
+	virtual bool run() = 0;
+	virtual const char* name() = 0;
+	virtual ~basic_function() = default;
+};
+
+class basic_function_manager {
+private:
+	std::vector<std::unique_ptr<basic_function>> _functions;
+
+public:
+	void registerFunction(std::unique_ptr<basic_function> _func, CLI::App& _app);
+
+	void startUsedFunctions();
+};
+
+using FunctionBase = basic_function;
+using FunctionManager = basic_function_manager;
+
+#endif // #ifdef NEED_BASIC_FUNCTION_CLASSES
+
+namespace Variables {
+
+extern PartitionMap::BuildMap PartMap;
+
+} // namespace Variables
+
+int Main(int argc, char** argv);
+
+std::string getLibVersion();
+std::string getAppVersion();
+
+} // namespace PartitionManager
 
 #endif // #ifndef LIBPMT_LIB_HPP

@@ -27,6 +27,7 @@ namespace Helper {
 
 std::optional<std::string> sha256Of(const std::string_view path)
 {
+	LOGN(HELPER, INFO) << __func__ << "(): get sha256 of \"" << path << "\" request." << std::endl;
 	if (!fileIsExists(path)) {
 		throw Error("Is not exists or not file: %s", path.data());
 		return std::nullopt;
@@ -40,14 +41,17 @@ std::optional<std::string> sha256Of(const std::string_view path)
 
 	std::vector<unsigned char> hash(picosha2::k_digest_size);
 	picosha2::hash256(path, hash.begin(), hash.end());
+	LOGN(HELPER, INFO) << __func__ << "(): get sha256 of \"" << path << "\" successfull." << std::endl;
 	return picosha2::bytes_to_hex_string(hash.begin(), hash.end());
 }
 
 bool sha256Compare(const std::string_view file1, const std::string_view file2)
 {
+	LOGN(HELPER, INFO) << __func__ << "(): comparing sha256 signatures of input files." << std::endl;
 	auto f1 = sha256Of(file1);
 	auto f2 = sha256Of(file2);
 	if (f1->empty() || f2->empty()) return false;
+	LOGN_IF(HELPER, INFO, *f1 == *f2) << "(): input files is contains same sha256 signature." << std::endl;
 	return (*f1 == *f2);
 }
 

@@ -17,6 +17,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -27,14 +28,50 @@
 #include <generated/buildInfo.hpp>
 
 namespace Helper {
+namespace LoggingProperties {
+
+std::string_view FILE = "last_logs.log", NAME = "main";
+bool PRINT = NO, DISABLE = NO;
+
+void reset()
+{
+	FILE = "last_logs.log";
+	NAME = "main";
+	PRINT = NO;
+}
+
+void set(std::string_view file, std::string_view name)
+{
+	if (file.data() != nullptr) FILE = file;
+	if (name.data() != nullptr) NAME = name;
+}
+
+void setProgramName(std::string_view name) { NAME = name; }
+void setLogFile(std::string_view file) { FILE = file; }
+
+void setPrinting(int state)
+{
+	if (state == 1 || state == 0) PRINT = state;
+	else PRINT = NO;
+}
+
+void setLoggingState(int state)
+{
+	if (state == 1 || state == 0) DISABLE = state;
+	else DISABLE = NO;
+}
+
+} // namespace LoggingProperties
 
 bool runCommand(const std::string_view cmd)
 {
+	LOGN(HELPER, INFO) << __func__ << "(): run command request: " << cmd << std::endl;
 	return (system(cmd.data()) == 0) ? true : false;
 }
 
 bool confirmPropt(const std::string_view message)
 {
+	LOGN(HELPER, INFO) << __func__ << "(): create confirm propt request. Creating." << std::endl;
 	char p;
 
 	printf("%s [ y / n ]: ", message.data());
@@ -85,6 +122,7 @@ std::string currentTime()
 
 std::string runCommandWithOutput(const std::string_view cmd)
 {
+	LOGN(HELPER, INFO) << __func__ << "(): run command and catch out request: " << cmd << std::endl;
 	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.data(), "r"), pclose);
 	if (!pipe) {
 		throw Error("Cannot run command: %s", cmd.data());

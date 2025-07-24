@@ -325,4 +325,6 @@ using Map = basic_partition_map_builder;
 
 } // namespace PartitionMap
 
+#define MAP "libpartition_map"
+
 #endif // #ifndef LIBPARTITION_MAP_LIB_HPP

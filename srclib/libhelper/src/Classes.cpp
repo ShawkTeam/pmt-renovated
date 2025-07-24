@@ -25,9 +25,6 @@
 
 namespace Helper {
 
-std::string_view LoggingProperties::FILE = "last_logs.log", LoggingProperties::NAME = "main";
-bool LoggingProperties::PRINT = NO;
-
 Error::Error(const char* format, ...)
 {
 	char buf[1024];
@@ -36,6 +33,7 @@ Error::Error(const char* format, ...)
 	vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 	_message = std::string(buf);
+	LOGN(HELPER, ERROR) << "Error::Error(): " << _message << std::endl;
 }
 
 const char* Error::what() const noexcept
@@ -47,6 +45,7 @@ Logger::Logger(LogLevels level, const char* file, const char* name, const char* 
 
 Logger::~Logger()
 {
+	if (LoggingProperties::DISABLE) return;
 	char str[1024];
 	snprintf(str, sizeof(str), "<%c> [ <prog %s> <on %s:%d> %s %s] %s",
 	       (char)_level,
@@ -58,15 +57,14 @@ Logger::~Logger()
 	       _oss.str().data());
 
 	if (!isExists(_logFile)) createFile(_logFile);
+
 	FILE* fp = fopen(_logFile, "a");
 	if (fp != NULL) {
 		fprintf(fp, "%s", str);
 		fclose(fp);
 	}
-	if (LoggingProperties::PRINT) printf("%s\n", str);
 
-	if (_level == ERROR)		exit(1);
-	else if (_level == ABORT)	abort();
+	if (LoggingProperties::PRINT) printf("%s\n", str);
 }
 
 Logger& Logger::operator<<(std::ostream& (*msg)(std::ostream&))
@@ -74,23 +72,5 @@ Logger& Logger::operator<<(std::ostream& (*msg)(std::ostream&))
 	_oss << msg;
 	return *this;
 }
-
-void LoggingProperties::reset()
-{
-	FILE = "last_logs.log";
-	NAME = "main";
-	PRINT = NO;
-}
-
-void LoggingProperties::set(std::string_view file, std::string_view name)
-{
-	FILE = file;
-	NAME = name;
-}
-
-void LoggingProperties::setProgramName(std::string_view name) { NAME = name; }
-void LoggingProperties::setLogFile(std::string_view file) { FILE = file; }
-void LoggingProperties::setPrinting(int state) { PRINT = state; }
-
 
 } // namespace Helper

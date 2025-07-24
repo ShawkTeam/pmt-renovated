@@ -26,10 +26,10 @@
 #ifndef ONLY_HELPER_MACROS
 
 enum LogLevels {
-	INFO = (int)'I',
+	INFO    = (int)'I',
 	WARNING = (int)'W',
-	ERROR = (int)'E',
-	ABORT = (int)'A'
+	ERROR   = (int)'E',
+	ABORT   = (int)'A'
 };
 
 constexpr mode_t DEFAULT_FILE_PERMS = 0644;
@@ -60,18 +60,6 @@ public:
 	Logger& operator<<(std::ostream& (*msg)(std::ostream&));
 };
 
-class LoggingProperties {
-public:
-	static std::string_view FILE, NAME;
-	static bool PRINT;
-
-	static void set(std::string_view name, std::string_view file);
-	static void setProgramName(std::string_view name);
-	static void setLogFile(std::string_view file);
-	static void setPrinting(int state);
-	static void reset();
-};
-
 // Throwable error class
 class Error : public std::exception {
 private:
@@ -82,6 +70,20 @@ public:
 
 	const char* what() const noexcept override;
 };
+
+namespace LoggingProperties {
+
+extern std::string_view FILE, NAME;
+extern bool PRINT, DISABLE;
+
+void set(std::string_view name, std::string_view file);
+void setProgramName(std::string_view name);
+void setLogFile(std::string_view file);
+void setPrinting(int state);
+void setLoggingState(int state); // Disable/enable logginf
+void reset();
+
+} // namespace LoggingProperties
 
 // Checkers
 bool hasSuperUser();
@@ -135,9 +137,14 @@ std::string getLibVersion();
 
 #endif // #ifndef ONLY_HELPER_MACROS
 
+#define HELPER "libhelper"
+
 #define KB(x) (x * 1024)     // KB(8) = 8192 (8 * 1024)
 #define MB(x) (KB(x) * 1024) // MB(4) = 4194304 (KB(4) * 1024)
 #define GB(x) (MB(x) * 1024) // GB(1) = 1073741824 (MB(1) * 1024)
+
+#define TO_MB(x) (x / 1024)        // TO_MB(2048) (2048 / 1024)
+#define TO_GB(x) (TO_GB(x) / 1024) // TO_GB(1048576) (TO_MB(1048576) / 1024)
 
 #define STYLE_RESET		"\033[0m"
 #define BOLD			"\033[1m"
@@ -178,5 +185,14 @@ std::string getLibVersion();
 #endif // #ifndef NO_C_TYPE_HANDLERS
 
 #define LOG(level) Helper::Logger(level, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+#define LOGN(name, level) Helper::Logger(level, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
+#define LOGNF(name, file, level) Helper::Logger(level, file, name, __FILE__, __LINE__)
+
+#define LOG_IF(level, condition) \
+	if (condition) Helper::Logger(level, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+#define LOGN_IF(name, level, condition) \
+	if (condition) Helper::Logger(level, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
+#define LOGNF_IF(name, file, level, condition) \
+	if (condition) Helper::Logger(level, file, name, __FILE__, __LINE__)
 
 #endif // #ifndef LIBHELPER_LIB_HPP
