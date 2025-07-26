@@ -32,8 +32,9 @@ enum LogLevels {
 	ABORT   = (int)'A'
 };
 
-constexpr mode_t DEFAULT_FILE_PERMS = 0644;
-constexpr mode_t DEFAULT_DIR_PERMS  = 0755;
+constexpr mode_t DEFAULT_FILE_PERMS				= 0644;
+constexpr mode_t DEFAULT_EXTENDED_FILE_PERMS	= 0755;
+constexpr mode_t DEFAULT_DIR_PERMS				= 0755;
 constexpr int    YES = 1;
 constexpr int    NO  = 0;
 

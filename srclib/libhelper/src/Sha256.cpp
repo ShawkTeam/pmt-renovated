@@ -27,20 +27,22 @@ namespace Helper {
 
 std::optional<std::string> sha256Of(const std::string_view path)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): get sha256 of \"" << path << "\" request." << std::endl;
-	if (!fileIsExists(path)) {
-		throw Error("Is not exists or not file: %s", path.data());
+	LOGN(HELPER, INFO) << __func__ << "(): get sha256 of \"" << path << "\" request. Getting full path (if input is link and exists)." << std::endl;
+	std::string fp = (isLink(path)) ? readSymlink(path) : std::string(path);
+
+	if (!fileIsExists(fp)) {
+		throw Error("Is not exists or not file: %s", fp.data());
 		return std::nullopt;
 	}
 
-	std::ifstream file(path, std::ios::binary);
+	std::ifstream file(fp, std::ios::binary);
 	if (!file) {
-		throw Error("Cannot open file: %s", path.data());
+		throw Error("Cannot open file: %s", fp.data());
 		return std::nullopt;
 	}
 
 	std::vector<unsigned char> hash(picosha2::k_digest_size);
-	picosha2::hash256(path, hash.begin(), hash.end());
+	picosha2::hash256(fp, hash.begin(), hash.end());
 	LOGN(HELPER, INFO) << __func__ << "(): get sha256 of \"" << path << "\" successfull." << std::endl;
 	return picosha2::bytes_to_hex_string(hash.begin(), hash.end());
 }

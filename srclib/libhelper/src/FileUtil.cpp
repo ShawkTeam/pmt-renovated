@@ -246,6 +246,7 @@ bool eraseDirectoryRecursive(const std::string_view directory)
 std::string readSymlink(const std::string_view entry)
 {
 	LOGN(HELPER, INFO) << __func__ << "(): read symlink request: " << entry << std::endl;
+
 	char target[PATH_MAX];
 	ssize_t len = readlink(entry.data(), target, (sizeof(target) - 1));
 	if (len == -1) {

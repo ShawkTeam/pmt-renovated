@@ -29,7 +29,7 @@ add_executable(libhelper_test tests/test.cpp)
 
 # Set linker flags
 target_link_libraries(libhelper_test PRIVATE helper_shared)
-target_link_options(libhelper_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
+target_link_options(libhelper_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib" "LINKER:-rpath,/data/local")
 target_link_options(helper_shared PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
 
 # Set appropriate output names

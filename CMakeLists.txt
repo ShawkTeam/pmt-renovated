@@ -20,8 +20,9 @@ project(pmt VERSION 1.0.0)
 
 # Set compiler flags
 add_compile_options(-Wall -Werror)
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
 	add_compile_options(-gdwarf-5 -fsanitize=address -fstack-protector)
+	add_link_options(-fsanitize=address)
 endif()
 
 # Add pmt's CMake module(s)
@@ -29,7 +30,7 @@ include(cmake/generate_headers.cmake)
 
 # Generate header(s)
 get_property(FLAGS DIRECTORY PROPERTY COMPILE_OPTIONS)
-generateBuildInfo(${FLAGS})
+generateBuildInfo("${FLAGS}")
 
 # Add include directories
 include_directories(include srclib/libhelper/include srclib/libpartition_map/include)

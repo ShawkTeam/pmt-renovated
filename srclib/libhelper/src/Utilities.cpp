@@ -123,18 +123,21 @@ std::string currentTime()
 std::string runCommandWithOutput(const std::string_view cmd)
 {
 	LOGN(HELPER, INFO) << __func__ << "(): run command and catch out request: " << cmd << std::endl;
-	std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd.data(), "r"), pclose);
+
+	FILE* pipe = popen(cmd.data(), "r");
 	if (!pipe) {
 		throw Error("Cannot run command: %s", cmd.data());
 		return {};
 	}
 
-	std::string end;
+	std::unique_ptr<FILE, decltype(&pclose)> pipe_holder(pipe, pclose);
+
+	std::string output;
 	char buffer[1024];
 
-	while (fgets(buffer, sizeof(buffer), pipe.get()) != nullptr) end += buffer;
+	while (fgets(buffer, sizeof(buffer), pipe_holder.get()) != nullptr) output += buffer;
 
-	return end;
+	return output;
 }
 
 std::string pathJoin(std::string base, std::string relative)

@@ -23,6 +23,15 @@
 #include <stdarg.h>
 #include <libhelper/lib.hpp>
 
+static void __create_log_file(const char* file)
+{
+	int fd = open(file, O_WRONLY | O_TRUNC, DEFAULT_EXTENDED_FILE_PERMS);
+	if (fd == -1) {
+		fd = open(file, O_WRONLY | O_CREAT, DEFAULT_EXTENDED_FILE_PERMS);
+		if (fd != -1) close(fd);
+	} else if (fd != -1) close(fd);
+}
+
 namespace Helper {
 
 Error::Error(const char* format, ...)
@@ -56,7 +65,7 @@ Logger::~Logger()
 	       currentTime().data(),
 	       _oss.str().data());
 
-	if (!isExists(_logFile)) createFile(_logFile);
+	if (!isExists(_logFile)) __create_log_file(_logFile);
 
 	FILE* fp = fopen(_logFile, "a");
 	if (fp != NULL) {

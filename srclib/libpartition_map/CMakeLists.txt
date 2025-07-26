@@ -31,7 +31,7 @@ set_target_properties(partition_map_shared PROPERTIES OUTPUT_NAME "partition_map
 set_target_properties(partition_map_static PROPERTIES OUTPUT_NAME "partition_map")
 
 # Set linker flags
-target_link_options(libpartition_map_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
+target_link_options(libpartition_map_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib" "LINKER:-rpath,/data/local")
 target_link_options(partition_map_shared PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
 target_link_libraries(libpartition_map_test PRIVATE partition_map_shared PRIVATE helper_shared)
 target_link_libraries(partition_map_shared PRIVATE helper_shared)
