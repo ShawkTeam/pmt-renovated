@@ -41,20 +41,20 @@ namespace Helper {
 
 bool writeFile(const std::string_view file, const std::string_view text)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): write \"" << text << "\" to " << file << "requested." << std::endl;
+	LOGN(HELPER, INFO) << "write \"" << text << "\" to " << file << "requested." << std::endl;
 	FILE* fp = open_file(file, "a");
 	if (fp == nullptr) return false;
 
 	fprintf(fp, "%s", text.data());
 	fclose(fp);
 
-	LOGN(HELPER, INFO) << __func__ << "(): write " << file << " successfull." << std::endl;
+	LOGN(HELPER, INFO) << "write " << file << " successfull." << std::endl;
 	return true;
 }
 
 std::optional<std::string> readFile(const std::string_view file)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): read " << file << " requested." << std::endl;
+	LOGN(HELPER, INFO) << "read " << file << " requested." << std::endl;
 	FILE* fp = open_file(file, "r");
 	if (fp == nullptr) return std::nullopt;
 
@@ -63,13 +63,13 @@ std::optional<std::string> readFile(const std::string_view file)
 	while (fgets(buffer, sizeof(buffer), fp)) str += buffer;
 
 	fclose(fp);
-	LOGN(HELPER, INFO) << __func__ << "(): read " << file << " successfull, readed text: \"" << str << "\"" << std::endl;
+	LOGN(HELPER, INFO) << "read " << file << " successfull, readed text: \"" << str << "\"" << std::endl;
 	return str;
 }
 
 bool copyFile(const std::string_view file, const std::string_view dest)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): copy " << file << " to " << dest << " requested." << std::endl;
+	LOGN(HELPER, INFO) << "copy " << file << " to " << dest << " requested." << std::endl;
 
 	int src_fd = open(file.data(), O_RDONLY);
 	if (src_fd == - 1) {
@@ -103,20 +103,20 @@ bool copyFile(const std::string_view file, const std::string_view dest)
 		return false;
 	}
 
-	LOGN(HELPER, INFO) << __func__ << "(); copy " << file << " to " << dest << " successfull." << std::endl;
+	LOGN(HELPER, INFO) << "copy " << file << " to " << dest << " successfull." << std::endl;
 	return true;
 }
 
 bool makeDirectory(const std::string_view path)
 {
 	if (isExists(path)) return false;
-	LOGN(HELPER, INFO) << __func__ << "(): trying making directory: " << path << std::endl;
+	LOGN(HELPER, INFO) << "trying making directory: " << path << std::endl;
 	return (mkdir(path.data(), DEFAULT_DIR_PERMS) == 0) ? true : false;
 }
 
 bool makeRecursiveDirectory(const std::string_view paths)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): make recursive directory requested: " << paths << std::endl;
+	LOGN(HELPER, INFO) << "make recursive directory requested: " << paths << std::endl;
 
 	char tmp[PATH_MAX], *p;
 	size_t len;
@@ -146,13 +146,13 @@ bool makeRecursiveDirectory(const std::string_view paths)
 		}
 	}
 
-	LOGN(HELPER, INFO) << __func__ << "(): " << paths << " successfully created." << std::endl;
+	LOGN(HELPER, INFO) << "" << paths << " successfully created." << std::endl;
 	return true;
 }
 
 bool createFile(const std::string_view path)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): create file request: " << path << std::endl;
+	LOGN(HELPER, INFO) << "create file request: " << path << std::endl;
 
 	if (isExists(path)) {
 		throw Error("%s: is exists", path.data());
@@ -166,35 +166,35 @@ bool createFile(const std::string_view path)
 	}
 
 	close(fd);
-	LOGN(HELPER, INFO) << __func__ << "(): create file \"" << path << "\" successfull." << std::endl;
+	LOGN(HELPER, INFO) << "create file \"" << path << "\" successfull." << std::endl;
 	return true;
 }
 
 bool createSymlink(const std::string_view entry1, const std::string_view entry2)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): symlink \"" << entry1 << "\" to \"" << entry2 << "\" requested." << std::endl;
+	LOGN(HELPER, INFO) << "symlink \"" << entry1 << "\" to \"" << entry2 << "\" requested." << std::endl;
 	int ret = symlink(entry1.data(), entry2.data());
 	if (ret != 0)
 		throw Error("Cannot symlink %s: %s", entry2.data(), strerror(errno));
 
-	LOGN_IF(HELPER, INFO, ret == 0) << __func__ << "(): \"" << entry1 << "\" symlinked to \"" << entry2 << "\" successfully." << std::endl;
+	LOGN_IF(HELPER, INFO, ret == 0) << "\"" << entry1 << "\" symlinked to \"" << entry2 << "\" successfully." << std::endl;
 	return (ret == 0);
 }
 
 bool eraseEntry(const std::string_view entry)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): erase \"" << entry << "\" requested." << std::endl;
+	LOGN(HELPER, INFO) << "erase \"" << entry << "\" requested." << std::endl;
 	int ret = remove(entry.data());
 	if (ret != 0)
 		throw Error("Cannot remove %s: %s", entry.data(), strerror(errno));
 
-	LOGN_IF(HELPER, INFO, ret == 0) << __func__ << "(): \"" << entry << "\" erased successfully." << std::endl;
+	LOGN_IF(HELPER, INFO, ret == 0) << "\"" << entry << "\" erased successfully." << std::endl;
 	return (ret == 0);
 }
 
 bool eraseDirectoryRecursive(const std::string_view directory)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): erase recursive requested: " << directory << std::endl;
+	LOGN(HELPER, INFO) << "erase recursive requested: " << directory << std::endl;
 	struct stat buf;
 	struct dirent *entry;
 
@@ -239,13 +239,13 @@ bool eraseDirectoryRecursive(const std::string_view directory)
 		return false;
 	}
 
-	LOGN(HELPER, INFO) << __func__ << "(): \"" << directory << "\" successfully erased." << std::endl; 
+	LOGN(HELPER, INFO) << "\"" << directory << "\" successfully erased." << std::endl; 
 	return true;
 }
 
 std::string readSymlink(const std::string_view entry)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): read symlink request: " << entry << std::endl;
+	LOGN(HELPER, INFO) << "read symlink request: " << entry << std::endl;
 
 	char target[PATH_MAX];
 	ssize_t len = readlink(entry.data(), target, (sizeof(target) - 1));
@@ -255,13 +255,13 @@ std::string readSymlink(const std::string_view entry)
 	}
 
 	target[len] = '\0';
-	LOGN(HELPER, INFO) << __func__ << "(): \"" << entry << "\" symlink to \"" << target << "\"" << std::endl;
+	LOGN(HELPER, INFO) << "\"" << entry << "\" symlink to \"" << target << "\"" << std::endl;
 	return target;
 }
 
 size_t fileSize(const std::string_view file)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): get file size request: " << file << std::endl;
+	LOGN(HELPER, INFO) << "get file size request: " << file << std::endl;
 	struct stat st;
 	if (stat(file.data(), &st) != 0) return false;
 	return static_cast<size_t>(st.st_size);

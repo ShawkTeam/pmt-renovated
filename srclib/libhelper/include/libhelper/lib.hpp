@@ -45,11 +45,11 @@ class Logger {
 private:
 	LogLevels _level;
 	std::ostringstream _oss;
-	const char *_logFile, *_program_name, *_file;
+	const char *_funcname, *_logFile, *_program_name, *_file;
 	int _line;
 
 public:
-	Logger(LogLevels level, const char* file, const char* name, const char* sfile, int line);
+	Logger(LogLevels level, const char* func, const char* file, const char* name, const char* sfile, int line);
 	~Logger();
 
 	template <typename T>
@@ -185,15 +185,15 @@ std::string getLibVersion();
 	fprintf(stdout, "%s%sINFO%s: %s", BOLD, GREEN, STYLE_RESET, msg);
 #endif // #ifndef NO_C_TYPE_HANDLERS
 
-#define LOG(level) Helper::Logger(level, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
-#define LOGN(name, level) Helper::Logger(level, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
+#define LOG(level) Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+#define LOGN(name, level) Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
 #define LOGNF(name, file, level) Helper::Logger(level, file, name, __FILE__, __LINE__)
 
 #define LOG_IF(level, condition) \
-	if (condition) Helper::Logger(level, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+	if (condition) Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
 #define LOGN_IF(name, level, condition) \
-	if (condition) Helper::Logger(level, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
+	if (condition) Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
 #define LOGNF_IF(name, file, level, condition) \
-	if (condition) Helper::Logger(level, file, name, __FILE__, __LINE__)
+	if (condition) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
 #endif // #ifndef LIBHELPER_LIB_HPP

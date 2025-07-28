@@ -55,14 +55,14 @@ Map_t basic_partition_map_builder::_build_map(std::string_view path, bool logica
 		return a.path().filename() < b.path().filename();
 	});
 
-	LOGN_IF(MAP, WARNING, entries.empty()) << __func__ << "(): " << path << "is exists but generated vector is empty (std::vector<std::filesystem::directory_entry>)." << std::endl;
+	LOGN_IF(MAP, WARNING, entries.empty()) << "" << path << "is exists but generated vector is empty (std::vector<std::filesystem::directory_entry>)." << std::endl;
 	for (const auto& entry : entries) {
 		if (entry.path().filename() != "by-uuid"
 		    && std::string(entry.path()).find("com.") == std::string::npos)
 			map.insert(entry.path().filename().string(), _get_size(entry.path()), logical);
 	}
 
-	LOGN(MAP, INFO) << std::boolalpha << __func__ << "(): Map generated successfully. is_logical_map=" << logical << std::endl;
+	LOGN(MAP, INFO) << std::boolalpha << "Map generated successfully. is_logical_map=" << logical << std::endl;
 	return map;
 }
 
@@ -81,13 +81,16 @@ uint64_t basic_partition_map_builder::_get_size(const std::string path)
 {
 	std::string real = std::filesystem::read_symlink(path);
 	int fd = open(real.data(), O_RDONLY);
-	if (fd < 0)
-		throw Error("Cannot open %s: %s", real.data(), strerror(errno));
+	if (fd < 0) {
+		LOGN(MAP, ERROR) << "Cannot open " << real << ": " << strerror(errno) << std::endl;
+		return 0;
+	}
 
 	uint64_t size = 0;
 	if (ioctl(fd, BLKGETSIZE64, &size) != 0) {
 		close(fd);
-		throw Error("ioctl() process failed for %s: %s", real.data(), strerror(errno));
+		LOGN(MAP, ERROR) << "ioctl() process failed for " << real << ": " << strerror(errno) << std::endl;
+		return 0;
 	}
 
 	close(fd);
@@ -96,7 +99,7 @@ uint64_t basic_partition_map_builder::_get_size(const std::string path)
 
 basic_partition_map_builder::basic_partition_map_builder()
 {
-	LOGN(MAP, INFO) << __func__ << "(): default constructor called. Starting build." << std::endl;
+	LOGN(MAP, INFO) << "default constructor called. Starting build." << std::endl;
 
 	for (const auto& path : defaultEntryList) {
 		if (std::filesystem::exists(path)) {
@@ -112,16 +115,16 @@ basic_partition_map_builder::basic_partition_map_builder()
 	}
 
 	if (_current_map.empty())
-		throw Error("Cannot build map by any default search entry.");
+		LOGN(MAP, ERROR) << "Cannot build map by any default search entry." << std::endl;
 
-	LOGN(MAP, INFO) << __func__ << "(): default constructor successfully ended work." << std::endl;
+	LOGN(MAP, INFO) << "default constructor successfully ended work." << std::endl;
 	_insert_logicals(_build_map("/dev/block/mapper", true));
 	_map_builded = true;
 }
 
 basic_partition_map_builder::basic_partition_map_builder(const std::string_view path)
 {
-	LOGN(MAP, INFO) << __func__ << "(): argument-based constructor called. Starting build." << std::endl;
+	LOGN(MAP, INFO) << "argument-based constructor called. Starting build." << std::endl;
 
 	if (std::filesystem::exists(path)) {
 		_is_real_block_dir(path);
@@ -131,7 +134,7 @@ basic_partition_map_builder::basic_partition_map_builder(const std::string_view 
 	} else
 		throw Error("Cannot find directory: %s. Cannot build partition map!", path.data());
 
-	LOGN(MAP, INFO) << __func__ << "(): argument-based constructor successfully ended work." << std::endl;
+	LOGN(MAP, INFO) << "argument-based constructor successfully ended work." << std::endl;
 	_insert_logicals(_build_map("/dev/block/mapper", true));
 	_map_builded = true;
 }
@@ -158,7 +161,7 @@ void basic_partition_map_builder::clear()
 bool basic_partition_map_builder::readDirectory(const std::string_view path)
 {
 	_map_builded = false;
-	LOGN(MAP, INFO) << __func__ << "(): read " << path << " directory request." << std::endl;
+	LOGN(MAP, INFO) << "read " << path << " directory request." << std::endl;
 
 	if (std::filesystem::exists(path)) {
 		if (!_is_real_block_dir(path)) return false;
@@ -170,7 +173,7 @@ bool basic_partition_map_builder::readDirectory(const std::string_view path)
 	} else
 		throw Error("Cannot find directory: %s. Cannot build partition map!", path.data());
 
-	LOGN(MAP, INFO) << __func__ << "(): read " << path << " successfull." << std::endl;
+	LOGN(MAP, INFO) << "read " << path << " successfull." << std::endl;
 	_insert_logicals(_build_map("/dev/block/mapper", true));
 	_map_builded = true;
 	return true;

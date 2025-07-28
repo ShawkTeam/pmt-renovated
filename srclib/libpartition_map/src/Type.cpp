@@ -142,16 +142,16 @@ bool basic_partition_map::insert(const std::string name, uint64_t size, bool log
 	if (_count == _capacity) _resize_map();
 
 	_data[_count++] = {name, {size, logical}};
-	LOGN(MAP, INFO) << std::boolalpha << __func__ << "(): partition " << name << " inserted (size=" << size << ", is_logical=" << logical << ")." << std::endl;
+	LOGN(MAP, INFO) << std::boolalpha << "partition " << name << " inserted (size=" << size << ", is_logical=" << logical << ")." << std::endl;
 	return true;
 }
 
 void basic_partition_map::merge(const basic_partition_map& map)
 {
-	LOGN(MAP, INFO) << __func__ << "(): map merge request." << std::endl;
+	LOGN(MAP, INFO) << "map merge request." << std::endl;
 	for (const auto& [name, props] : map)
 		insert(name, props.size, props.isLogical);
-	LOGN(MAP, INFO) << __func__ << "(): map merged successfully." << std::endl;
+	LOGN(MAP, INFO) << "map merged successfully." << std::endl;
 }
 
 uint64_t basic_partition_map::get_size(const std::string_view name) const
@@ -206,7 +206,7 @@ bool basic_partition_map::empty() const
 
 void basic_partition_map::clear()
 {
-	LOGN(MAP, INFO) << __func__ << "(): map clean requested. Map is empty now." << std::endl;
+	LOGN(MAP, INFO) << "map clean requested. Map is empty now." << std::endl;
 	delete[] _data;
 	_count = 0;
 	_capacity = 6;

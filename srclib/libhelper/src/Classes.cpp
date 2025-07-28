@@ -25,11 +25,9 @@
 
 static void __create_log_file(const char* file)
 {
+	remove(file);
 	int fd = open(file, O_WRONLY | O_TRUNC, DEFAULT_EXTENDED_FILE_PERMS);
-	if (fd == -1) {
-		fd = open(file, O_WRONLY | O_CREAT, DEFAULT_EXTENDED_FILE_PERMS);
-		if (fd != -1) close(fd);
-	} else if (fd != -1) close(fd);
+	if (fd != -1) close(fd);
 }
 
 namespace Helper {
@@ -50,19 +48,20 @@ const char* Error::what() const noexcept
 	return _message.data();
 }
 
-Logger::Logger(LogLevels level, const char* file, const char* name, const char* sfile, int line) : _level(level), _logFile(file), _program_name(name), _file(sfile), _line(line) {}
+Logger::Logger(LogLevels level, const char* func, const char* file, const char* name, const char* sfile, int line) : _level(level), _funcname(func), _logFile(file), _program_name(name), _file(sfile), _line(line) {}
 
 Logger::~Logger()
 {
 	if (LoggingProperties::DISABLE) return;
 	char str[1024];
-	snprintf(str, sizeof(str), "<%c> [ <prog %s> <on %s:%d> %s %s] %s",
+	snprintf(str, sizeof(str), "<%c> [ <prog %s> <on %s:%d> %s %s] %s(): %s",
 	       (char)_level,
 	       _program_name,
 	       basename((char*)_file),
 	       _line,
 	       currentDate().data(),
 	       currentTime().data(),
+	       _funcname,
 	       _oss.str().data());
 
 	if (!isExists(_logFile)) __create_log_file(_logFile);

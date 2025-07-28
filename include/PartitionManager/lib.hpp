@@ -14,6 +14,13 @@
    limitations under the License.
 */
 
+/**
+ * WARNING
+ * --------
+ * This library (libpmt) isn't exactly suitable for use in different projects.
+ * But I'm not saying I've tested it or anything like that.
+ */
+
 #ifndef LIBPMT_LIB_HPP
 #define LIBPMT_LIB_HPP
 
@@ -25,9 +32,12 @@
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
 
+#define PMT  "libpmt"
+#define PMTE "pmt"
+#define PMTF "libpmt-function-manager"
+
 #ifdef NEED_BASIC_FUNCTION_CLASSES
 #include <memory>
-
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignore "-Wdeprecated-declarations"
 #include <CLI/CLI11.hpp>
@@ -36,12 +46,11 @@
 
 namespace PartitionManager {
 
-#ifdef NEED_BASIC_FUNCTION_CLASSES
 class basic_function {
 /**
  * Example variables for writing your function:
- * private:
- *  CLI::App _cmd* = nullptr;
+ * public:
+ *  CLI::App cmd* = nullptr;
  */
 public:
 	virtual bool init(CLI::App& _app) = 0;
@@ -56,25 +65,35 @@ private:
 
 public:
 	void registerFunction(std::unique_ptr<basic_function> _func, CLI::App& _app);
+	const char* whatIsRunnedCommandName();
 
-	void startUsedFunctions();
+	bool handleAll();
+};
+
+class basic_variables {
+public:
+	basic_variables();
+
+	PartitionMap::BuildMap PartMap;
+
+	std::string searchPath;
+	bool onLogical;
+	bool silentProcess;
+	bool verboseMode;
+	bool viewVersion;
 };
 
 using FunctionBase = basic_function;
 using FunctionManager = basic_function_manager;
+using VariableTable = basic_variables;
+using Error = Helper::Error;
 
-#endif // #ifdef NEED_BASIC_FUNCTION_CLASSES
-
-namespace Variables {
-
-extern PartitionMap::BuildMap PartMap;
-
-} // namespace Variables
+VariableTable* Variables;
 
 int Main(int argc, char** argv);
 
 std::string getLibVersion();
-std::string getAppVersion();
+std::string getAppVersion(); // Not Android app version (an Android app is planned!), tells pmt and libs versions.
 
 } // namespace PartitionManager
 

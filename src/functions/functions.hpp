@@ -21,10 +21,9 @@ namespace PartitionManager {
 
 // Back-up function
 class backupFunction : public PartitionManager::FunctionBase {
-private:
-	CLI::App* _cmd = nullptr;
-
 public:
+	CLI::App* cmd = nullptr;
+
 	bool init(CLI::App& _app) override;
 	bool run() override;
 	const char* name() override;
@@ -32,10 +31,9 @@ public:
 
 // Image flasher function
 class flashFunction : public PartitionManager::FunctionBase {
-private:
-	CLI::App* _cmd = nullptr;
-
 public:
+	CLI::App* cmd = nullptr;
+
 	bool init(CLI::App& _app) override;
 	bool run() override;
 	const char* name() override;
@@ -43,10 +41,9 @@ public:
 
 // Eraser function (only the partition content is cleared)
 class eraseFunction : public PartitionManager::FunctionBase {
-private:
-	CLI::App* _cmd = nullptr;
-
 public:
+	CLI::App* cmd = nullptr;
+
 	bool init(CLI::App& _app) override;
 	bool run() override;
 	const char* name() override;
@@ -54,10 +51,9 @@ public:
 
 // Partition size getter function
 class partitionSizeFunction : public PartitionManager::FunctionBase {
-private:
-	CLI::App* _cmd = nullptr;
-
 public:
+	CLI::App* cmd = nullptr;
+
 	bool init(CLI::App& _app) override;
 	bool run() override;
 	const char* name() override;

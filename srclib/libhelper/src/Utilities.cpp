@@ -65,13 +65,13 @@ void setLoggingState(int state)
 
 bool runCommand(const std::string_view cmd)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): run command request: " << cmd << std::endl;
+	LOGN(HELPER, INFO) << "run command request: " << cmd << std::endl;
 	return (system(cmd.data()) == 0) ? true : false;
 }
 
 bool confirmPropt(const std::string_view message)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): create confirm propt request. Creating." << std::endl;
+	LOGN(HELPER, INFO) << "create confirm propt request. Creating." << std::endl;
 	char p;
 
 	printf("%s [ y / n ]: ", message.data());
@@ -122,7 +122,7 @@ std::string currentTime()
 
 std::string runCommandWithOutput(const std::string_view cmd)
 {
-	LOGN(HELPER, INFO) << __func__ << "(): run command and catch out request: " << cmd << std::endl;
+	LOGN(HELPER, INFO) << "run command and catch out request: " << cmd << std::endl;
 
 	FILE* pipe = popen(cmd.data(), "r");
 	if (!pipe) {
