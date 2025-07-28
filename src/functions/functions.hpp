@@ -14,7 +14,6 @@
    limitations under the License.
 */
 
-#define NEED_BASIC_FUNCTION_CLASSES
 #include <libpmt/lib.hpp>
 
 namespace PartitionManager {

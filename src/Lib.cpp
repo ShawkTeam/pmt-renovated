@@ -18,6 +18,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <libpmt/lib.hpp>
+#include "functions/functions.hpp"
 
 namespace PartitionManager {
 
