@@ -21,12 +21,13 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <stdarg.h>
+#include <fcntl.h>
 #include <libhelper/lib.hpp>
 
 static void __create_log_file(const char* file)
 {
 	remove(file);
-	int fd = open(file, O_WRONLY | O_TRUNC, DEFAULT_EXTENDED_FILE_PERMS);
+	int fd = open(file, O_WRONLY | O_CREAT, DEFAULT_EXTENDED_FILE_PERMS);
 	if (fd != -1) close(fd);
 }
 

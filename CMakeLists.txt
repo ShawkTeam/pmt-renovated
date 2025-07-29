@@ -20,7 +20,7 @@ project(pmt VERSION 1.0.0)
 
 # Set compiler flags
 add_compile_options(-Wall -Werror)
-if(${CMAKE_BUILD_TYPE} STREQUAL Debug)
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	add_compile_options(-gdwarf-5 -fsanitize=address -fstack-protector)
 	add_link_options(-fsanitize=address)
 endif()
