@@ -24,13 +24,6 @@
 #include <fcntl.h>
 #include <libhelper/lib.hpp>
 
-static void __create_log_file(const char* file)
-{
-	remove(file);
-	int fd = open(file, O_WRONLY | O_CREAT, DEFAULT_EXTENDED_FILE_PERMS);
-	if (fd != -1) close(fd);
-}
-
 namespace Helper {
 
 Error::Error(const char* format, ...)
@@ -65,7 +58,11 @@ Logger::~Logger()
 	       _funcname,
 	       _oss.str().data());
 
-	if (!isExists(_logFile)) __create_log_file(_logFile);
+	if (!isExists(_logFile)) {
+		remove(_logFile);
+		int fd = open(_logFile, O_WRONLY | O_CREAT, DEFAULT_EXTENDED_FILE_PERMS);
+		if (fd != -1) close(fd);
+	}
 
 	FILE* fp = fopen(_logFile, "a");
 	if (fp != NULL) {
