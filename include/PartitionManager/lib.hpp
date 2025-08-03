@@ -29,36 +29,41 @@
 #include <string_view>
 #include <functional>
 #include <vector>
+#include <memory>
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignore "-Wdeprecated-declarations"
+#include <CLI/CLI11.hpp>
+#pragma GCC diagnostic pop
 
 #define PMT  "libpmt"
 #define PMTE "pmt"
 #define PMTF "libpmt-function-manager"
 
-#ifdef NEED_BASIC_FUNCTION_CLASSES
-#include <memory>
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignore "-Wdeprecated-declarations"
-#include <CLI/CLI11.hpp>
-#pragma GCC diagnostic pop
-#endif // #ifdef NEED_BASIC_FUNCTION_CLASSES
-
 namespace PartitionManager {
 
-class basic_function {
 /**
- * Example variables for writing your function:
- * public:
- *  CLI::App cmd* = nullptr;
+ * basic_function
+ * --------------
+ *   All function classes must inherit from this class.
  */
+class basic_function {
 public:
+	CLI::App* cmd = nullptr;
+
 	virtual bool init(CLI::App& _app) = 0;
 	virtual bool run() = 0;
 	virtual const char* name() = 0;
 	virtual ~basic_function() = default;
 };
 
+/**
+ * basic_function_manager
+ * ----------------------
+ *   A class for function management.
+ */
 class basic_function_manager {
 private:
 	std::vector<std::unique_ptr<basic_function>> _functions;
@@ -93,7 +98,7 @@ VariableTable* Variables;
 int Main(int argc, char** argv);
 
 std::string getLibVersion();
-std::string getAppVersion(); // Not Android app version (an Android app is planned!), tells pmt and libs versions.
+std::string getAppVersion(); // Not Android app version (an Android app is planned!), tells pmt version.
 
 } // namespace PartitionManager
 

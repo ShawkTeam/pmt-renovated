@@ -17,7 +17,7 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <libpmt/lib.hpp>
+#include <PartitionManager/lib.hpp>
 
 namespace PartitionManager {
 

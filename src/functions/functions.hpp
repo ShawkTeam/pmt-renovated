@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-#include <libpmt/lib.hpp>
+#include <PartitionManager/lib.hpp>
 
 namespace PartitionManager {
 

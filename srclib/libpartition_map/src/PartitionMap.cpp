@@ -211,10 +211,16 @@ bool basic_partition_map_builder::operator!() const
 	return this->_any_generating_error;
 }
 
+bool basic_partition_map_builder::operator()(const std::string_view path)
+{
+	LOGN(MAP, INFO) << "calling readDirectory() for building map with " << path << std::endl;
+	return readDirectory(path);
+}
+
 std::string getLibVersion()
 {
 	char vinfo[512];
-	sprintf(vinfo, "libpartition_map %s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: %s\nBuildFlags: %s\n", BUILD_VERSION, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS);
+	sprintf(vinfo, MKVERSION("libpartition_map"));
 	return std::string(vinfo);
 }
 

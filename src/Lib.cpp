@@ -17,17 +17,18 @@
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
-#include <libpmt/lib.hpp>
+#include <PartitionManager/lib.hpp>
+#include <generated/buildInfo.hpp>
 #include "functions/functions.hpp"
 
 namespace PartitionManager {
 
-VariableTable::VariableTable()	:	PartMap(),
-									searchPath(""),
-									onLogical(false),
-									silentProcess(false),
-									verboseMode(false),
-									viewVersion(false)
+basic_variables::basic_variables()	:	PartMap(),
+										searchPath(""),
+										onLogical(false),
+										silentProcess(false),
+										verboseMode(false),
+										viewVersion(false)
 {}
 
 VariableTable* Variables = new VariableTable();
@@ -44,10 +45,10 @@ try { // try-catch start
 	AppMain.add_flag("-V,--verbose", Variables->verboseMode, "Detailed information is written on the screen while the transaction is being carried out");
 	AppMain.add_flag("-v,--version", Variables->viewVersion, "Print version and exit");
 
-	FuncManager.registerFunction(std::make_unique<backupFunction>, AppMain);
-	FuncManager.registerFunction(std::make_unique<flashFunction>, AppMain);
-	FuncManager.registerFunction(std::make_unique<eraseFunction>, AppMain);
-	FuncManager.registerFunction(std::make_unique<partitionSizeFunction>, AppMain);
+	FuncManager.registerFunction(std::make_unique<backupFunction>(), AppMain);
+	FuncManager.registerFunction(std::make_unique<flashFunction>(), AppMain);
+	FuncManager.registerFunction(std::make_unique<eraseFunction>(), AppMain);
+	FuncManager.registerFunction(std::make_unique<partitionSizeFunction>(), AppMain);
 
 	CLI11_PARSE(AppMain, argc, argv);
 
@@ -56,7 +57,7 @@ try { // try-catch start
 		LOGN(PMTE, INFO) << "used command: " << used << std::endl;
 
 	if (!Variables->searchPath.empty())
-		Variables->PartMap(searchPath);
+		Variables->PartMap(Variables->searchPath);
 
 	if (!Variables->PartMap) {
 		if (Variables->searchPath.empty())
@@ -67,7 +68,7 @@ try { // try-catch start
 
 } catch (Helper::Error &error) { // catch Helper::Error
 
-	if (!Variables->silentProcess) fprintf(stde9rr, "%s: %s.\n", argv[0], error.what());
+	if (!Variables->silentProcess) fprintf(stderr, "%s: %s.\n", argv[0], error.what());
 	delete Variables;
 	return -1;
 
@@ -77,6 +78,20 @@ try { // try-catch start
 	return -1;
 
 } // try-catch block end
+}
+
+std::string getLibVersion()
+{
+	char vinfo[512];
+	sprintf(vinfo, MKVERSION("libpmt"));
+	return std::string(vinfo);
+}
+
+std::string getAppVersion()
+{
+	char vinfo[512];
+	sprintf(vinfo, MKVERSION("pmt"));
+	return std::string(vinfo);
 }
 
 } // namespace PartitionManager

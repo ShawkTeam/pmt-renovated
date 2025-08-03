@@ -81,7 +81,7 @@ void set(std::string_view name, std::string_view file);
 void setProgramName(std::string_view name);
 void setLogFile(std::string_view file);
 void setPrinting(int state);
-void setLoggingState(int state); // Disable/enable logginf
+void setLoggingState(int state); // Disable/enable logging
 void reset();
 
 } // namespace LoggingProperties
@@ -195,5 +195,8 @@ std::string getLibVersion();
 	if (condition) Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
 #define LOGNF_IF(name, file, level, condition) \
 	if (condition) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
+
+#define MKVERSION(name) \
+	"%s %s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: %s\nBuildFlags: %s\n", name, BUILD_VERSION, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS
 
 #endif // #ifndef LIBHELPER_LIB_HPP

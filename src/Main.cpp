@@ -14,7 +14,7 @@
    limitations under the License.
 */
 
-#include <libpmt/lib.hpp>
+#include <PartitionManager/lib.hpp>
 
 int main(int argc, char** argv)
 {

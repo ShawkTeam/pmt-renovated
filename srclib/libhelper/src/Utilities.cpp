@@ -173,7 +173,7 @@ std::string pathDirname(const std::string_view entry)
 std::string getLibVersion()
 {
 	char vinfo[512];
-	sprintf(vinfo, "libhelper %s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: %s\nBuildFlags: %s\n", BUILD_VERSION, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS);
+	sprintf(vinfo, MKVERSION("libhelper"));
 	return std::string(vinfo);
 }
 

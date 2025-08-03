@@ -38,6 +38,12 @@ struct _entry {
 	} props;
 };
 
+/**
+ * basic_partition_map
+ * -------------------
+ *   The main type of the library. The Builder class is designed
+ *   to be easily manipulated and modified only on this class.
+ */
 class basic_partition_map {
 private:
 	void _resize_map();
@@ -139,16 +145,14 @@ public:
 	/**
 	 * Secondary constructor
 	 * ---------------------
-	 *   It has two arguments:
+	 *   It has one arguments:
 	 *      - Directory path to search
 	 */
 	basic_partition_map_builder(const std::string_view path);
 
 	/**
 	 * getAll()
-	 * ------
-	 *   WARNING: Learn about std::optional before using this function.
-	 * 
+	 * --------
 	 *   Returns the current list content in Map_t type.
 	 *   If no list is created, returns std::nullopt.
 	 */
@@ -304,10 +308,17 @@ public:
 	/**
 	 * ! operator
 	 * ----------
-	 * Returns true if the object creation failed (i.e., there's a problem),
-	 * and false if the object is correctly created.
+	 *   Returns true if the object creation failed (i.e., there's a problem),
+	 *   and false if the object is correctly created.
 	 */
-	 bool operator!() const;
+	bool operator!() const;
+
+	/**
+	 * () operator
+	 * -----------
+	 *   Build map with input path. Implementation of readDirectory().
+	 */
+	bool operator()(const std::string_view path);
 };
 
 using Error = Helper::Error;
