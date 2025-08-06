@@ -14,48 +14,92 @@
    limitations under the License.
 */
 
-#include <PartitionManager/lib.hpp>
+#ifndef FUNCTIONS_HPP
+#define FUNCTIONS_HPP
+
+#include <PartitionManager/PartitionManager.hpp>
+#include <vector>
 
 namespace PartitionManager {
 
 // Back-up function
-class backupFunction : public PartitionManager::FunctionBase {
+class backupFunction final : public FunctionBase {
+private:
+	std::vector<std::string> partitions, outputNames;
+	std::string rawPartitions, rawOutputNames;
+	int bufferSize = 2048;
+
 public:
 	CLI::App* cmd = nullptr;
 
 	bool init(CLI::App& _app) override;
 	bool run() override;
-	const char* name() override;
+	[[nodiscard]] bool isUsed() const override;
+	[[nodiscard]] const char* name() const override;
 };
 
 // Image flasher function
-class flashFunction : public PartitionManager::FunctionBase {
+class flashFunction final : public FunctionBase {
+private:
+	std::vector<std::string> partitions, imageNames;
+	std::string rawPartitions, rawImageNames;
+	int bufferSize = 2048;
+
 public:
 	CLI::App* cmd = nullptr;
 
 	bool init(CLI::App& _app) override;
 	bool run() override;
-	const char* name() override;
+	[[nodiscard]] bool isUsed() const override;
+	[[nodiscard]] const char* name() const override;
 };
 
-// Eraser function (only the partition content is cleared)
-class eraseFunction : public PartitionManager::FunctionBase {
+// Eraser function (writes zero bytes to partition)
+class eraseFunction final : public FunctionBase {
+private:
+	std::vector<std::string> partitions;
+	int bufferSize = 2048;
+
 public:
 	CLI::App* cmd = nullptr;
 
 	bool init(CLI::App& _app) override;
 	bool run() override;
-	const char* name() override;
+	[[nodiscard]] bool isUsed() const override;
+	[[nodiscard]] const char* name() const override;
 };
 
 // Partition size getter function
-class partitionSizeFunction : public PartitionManager::FunctionBase {
+class partitionSizeFunction final : public FunctionBase {
+private:
+	std::vector<std::string> partitions;
+	bool onlySize = false, asByte = false, asKiloBytes = false, asMega = true, asGiga = false;
+
 public:
 	CLI::App* cmd = nullptr;
 
 	bool init(CLI::App& _app) override;
 	bool run() override;
-	const char* name() override;
+	[[nodiscard]] bool isUsed() const override;
+	[[nodiscard]] const char* name() const override;
+};
+
+// Partition info getter function
+class infoFunction final : public FunctionBase {
+private:
+	std::vector<std::string> partitions;
+	std::string jNamePartition = "name", jNameSize = "size", jNameLogical = "isLogical";
+	bool jsonFormat = false;
+
+public:
+	CLI::App* cmd = nullptr;
+
+	bool init(CLI::App& _app) override;
+	bool run() override;
+	[[nodiscard]] bool isUsed() const override;
+	[[nodiscard]] const char* name() const override;
 };
 
 } // namespace PartitionManager
+
+#endif // #ifndef FUNCTIONS_HPP

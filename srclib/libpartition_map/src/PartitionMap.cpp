@@ -18,19 +18,18 @@
 #include <vector>
 #include <filesystem>
 #include <memory>
-#include <vector>
 #include <algorithm>
 #include <array>
 #include <string>
 #include <string_view>
-#include <errno.h>
+#include <cerrno>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/fs.h>
 #include <libpartition_map/lib.hpp>
 #include <generated/buildInfo.hpp>
-#include <string.h>
+#include <cstring>
 #include <unistd.h>
 
 static constexpr std::array<std::string_view, 3> defaultEntryList = {
@@ -41,9 +40,12 @@ static constexpr std::array<std::string_view, 3> defaultEntryList = {
 
 namespace PartitionMap {
 
-bool basic_partition_map_builder::_is_real_block_dir(const std::string_view path) const
+bool basic_partition_map_builder::_is_real_block_dir(const std::string_view path)
 {
-	if (path.find("/block/") == std::string::npos) return false;
+	if (path.find("/block/") == std::string::npos) {
+		LOGN(MAP, ERROR) << "Path " << path << " is not a real block directory.";
+		return false;
+	}
 	return true;
 }
 
@@ -68,6 +70,7 @@ Map_t basic_partition_map_builder::_build_map(std::string_view path, bool logica
 
 void basic_partition_map_builder::_insert_logicals(Map_t&& logicals)
 {
+	LOGN(MAP, INFO) << "merging created logical partition list to this object's variable." << std::endl;
 	_current_map.merge(logicals);
 }
 
@@ -77,10 +80,10 @@ void basic_partition_map_builder::_map_build_check() const
 		throw Error("Please build partition map before!");
 }
 
-uint64_t basic_partition_map_builder::_get_size(const std::string path)
+uint64_t basic_partition_map_builder::_get_size(const std::string& path)
 {
-	std::string real = std::filesystem::read_symlink(path);
-	int fd = open(real.data(), O_RDONLY);
+	const std::string real = std::filesystem::read_symlink(path);
+	const int fd = open(real.data(), O_RDONLY);
 	if (fd < 0) {
 		LOGN(MAP, ERROR) << "Cannot open " << real << ": " << strerror(errno) << std::endl;
 		return 0;
@@ -106,7 +109,6 @@ basic_partition_map_builder::basic_partition_map_builder()
 			_current_map = _build_map(path);
 			if (_current_map.empty()) {
 				_any_generating_error = true;
-				continue;
 			} else {
 				_workdir = path;
 				break;
@@ -127,7 +129,7 @@ basic_partition_map_builder::basic_partition_map_builder(const std::string_view 
 	LOGN(MAP, INFO) << "argument-based constructor called. Starting build." << std::endl;
 
 	if (std::filesystem::exists(path)) {
-		_is_real_block_dir(path);
+		if (!_is_real_block_dir(path)) return;
 		_current_map = _build_map(path);
 		if (_current_map.empty()) _any_generating_error = true;
 		else _workdir = path;
@@ -179,6 +181,33 @@ bool basic_partition_map_builder::readDirectory(const std::string_view path)
 	return true;
 }
 
+bool basic_partition_map_builder::readDefaultDirectories()
+{
+	_map_builded = false;
+	LOGN(MAP, INFO) << "read default directories request." << std::endl;
+
+	for (const auto& path : defaultEntryList) {
+		if (std::filesystem::exists(path)) {
+			_current_map = _build_map(path);
+			if (_current_map.empty()) {
+				_any_generating_error = true;
+				return false;
+			} else {
+				_workdir = path;
+				break;
+			}
+		}
+	}
+
+	if (_current_map.empty())
+		LOGN(MAP, ERROR) << "Cannot build map by any default search entry." << std::endl;
+
+	LOGN(MAP, INFO) << "read default directories successfull." << std::endl;
+	_insert_logicals(_build_map("/dev/block/mapper", true));
+	_map_builded = true;
+	return true;
+}
+
 bool basic_partition_map_builder::empty() const
 {
 	_map_build_check();
@@ -191,12 +220,12 @@ uint64_t basic_partition_map_builder::sizeOf(const std::string_view name) const
 	return _current_map.get_size(name);
 }
 
-bool operator==(basic_partition_map_builder& lhs, basic_partition_map_builder& rhs)
+bool operator==(const basic_partition_map_builder& lhs, const basic_partition_map_builder& rhs)
 {
 	return lhs._current_map == rhs._current_map;
 }
 
-bool operator!=(basic_partition_map_builder& lhs, basic_partition_map_builder& rhs)
+bool operator!=(const basic_partition_map_builder& lhs, const basic_partition_map_builder& rhs)
 {
 	return !(lhs == rhs);
 }
@@ -219,9 +248,7 @@ bool basic_partition_map_builder::operator()(const std::string_view path)
 
 std::string getLibVersion()
 {
-	char vinfo[512];
-	sprintf(vinfo, MKVERSION("libpartition_map"));
-	return std::string(vinfo);
+	MKVERSION("libpartition_map");
 }
 
 } // namespace PartitionMap

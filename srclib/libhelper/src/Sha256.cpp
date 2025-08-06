@@ -30,16 +30,9 @@ std::optional<std::string> sha256Of(const std::string_view path)
 	LOGN(HELPER, INFO) << "get sha256 of \"" << path << "\" request. Getting full path (if input is link and exists)." << std::endl;
 	std::string fp = (isLink(path)) ? readSymlink(path) : std::string(path);
 
-	if (!fileIsExists(fp)) {
-		throw Error("Is not exists or not file: %s", fp.data());
-		return std::nullopt;
-	}
+	if (!fileIsExists(fp)) throw Error("Is not exists or not file: %s", fp.data());
 
-	std::ifstream file(fp, std::ios::binary);
-	if (!file) {
-		throw Error("Cannot open file: %s", fp.data());
-		return std::nullopt;
-	}
+	if (const std::ifstream file(fp, std::ios::binary); !file) throw Error("Cannot open file: %s", fp.data());
 
 	std::vector<unsigned char> hash(picosha2::k_digest_size);
 	picosha2::hash256(fp, hash.begin(), hash.end());
@@ -50,8 +43,8 @@ std::optional<std::string> sha256Of(const std::string_view path)
 bool sha256Compare(const std::string_view file1, const std::string_view file2)
 {
 	LOGN(HELPER, INFO) << "comparing sha256 signatures of input files." << std::endl;
-	auto f1 = sha256Of(file1);
-	auto f2 = sha256Of(file2);
+	const auto f1 = sha256Of(file1);
+	const auto f2 = sha256Of(file2);
 	if (f1->empty() || f2->empty()) return false;
 	LOGN_IF(HELPER, INFO, *f1 == *f2) << "(): input files is contains same sha256 signature." << std::endl;
 	return (*f1 == *f2);

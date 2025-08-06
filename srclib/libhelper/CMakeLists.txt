@@ -25,13 +25,17 @@ set(LIBHELPER_SOURCES
 # Add targets
 add_library(helper_shared SHARED ${LIBHELPER_SOURCES})
 add_library(helper_static STATIC ${LIBHELPER_SOURCES})
-add_executable(libhelper_test tests/test.cpp)
 
 # Set linker flags
-target_link_libraries(libhelper_test PRIVATE helper_shared)
-target_link_options(libhelper_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib" "LINKER:-rpath,/data/local")
 target_link_options(helper_shared PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
 
 # Set appropriate output names
 set_target_properties(helper_shared PROPERTIES OUTPUT_NAME "helper")
 set_target_properties(helper_static PROPERTIES OUTPUT_NAME "helper")
+
+# Build libhelper_test if CMAKE_BUILD_TYPE is not release
+if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+	add_executable(libhelper_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)
+	target_link_libraries(libhelper_test PRIVATE helper_shared)
+	target_link_options(libhelper_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
+endif()

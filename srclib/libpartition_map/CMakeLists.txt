@@ -24,14 +24,18 @@ set(LIBPARTITION_MAP_SOURCES
 # Add targets
 add_library(partition_map_shared SHARED ${LIBPARTITION_MAP_SOURCES})
 add_library(partition_map_static STATIC ${LIBPARTITION_MAP_SOURCES})
-add_executable(libpartition_map_test tests/test.cpp)
 
 # Set appropriate output names
 set_target_properties(partition_map_shared PROPERTIES OUTPUT_NAME "partition_map")
 set_target_properties(partition_map_static PROPERTIES OUTPUT_NAME "partition_map")
 
 # Set linker flags
-target_link_options(libpartition_map_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib" "LINKER:-rpath,/data/local")
 target_link_options(partition_map_shared PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
-target_link_libraries(libpartition_map_test PRIVATE partition_map_shared PRIVATE helper_shared)
 target_link_libraries(partition_map_shared PRIVATE helper_shared)
+
+# Build libpartition_map_test if CMAKE_BUILD_TYPE is not release
+if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+	add_executable(libpartition_map_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)
+	target_link_libraries(libpartition_map_test PRIVATE partition_map_shared PRIVATE helper_shared)
+	target_link_options(libpartition_map_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
+endif()

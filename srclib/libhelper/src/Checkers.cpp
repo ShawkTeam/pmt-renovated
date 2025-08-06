@@ -16,7 +16,6 @@
 
 #include <cstdio>
 #include <cstdlib>
-#include <cstring>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <libhelper/lib.hpp>
@@ -30,20 +29,20 @@ bool hasSuperUser()
 
 bool isExists(const std::string_view entry)
 {
-	struct stat st;
+	struct stat st{};
 	return (stat(entry.data(), &st) == 0);
 }
 
 bool fileIsExists(const std::string_view file)
 {
-	struct stat st;
+	struct stat st{};
 	if (stat(file.data(), &st) != 0) return false;
 	return S_ISREG(st.st_mode);
 }
 
 bool directoryIsExists(const std::string_view directory)
 {
-	struct stat st;
+	struct stat st{};
 	if (stat(directory.data(), &st) != 0) return false;
 	return S_ISDIR(st.st_mode);
 }
@@ -55,7 +54,7 @@ bool linkIsExists(const std::string_view entry)
 
 bool isLink(const std::string_view entry)
 {
-	struct stat st;
+	struct stat st{};
 	if (lstat(entry.data(), &st) != 0) return false;
 	return S_ISLNK(st.st_mode);
 }
@@ -67,7 +66,7 @@ bool isSymbolicLink(const std::string_view entry)
 
 bool isHardLink(const std::string_view entry)
 {
-	struct stat st;
+	struct stat st{};
 	if (lstat(entry.data(), &st) != 0) return false;
 	return (st.st_nlink >= 2);
 }

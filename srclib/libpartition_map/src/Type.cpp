@@ -23,12 +23,12 @@ namespace PartitionMap {
 
 basic_partition_map::iterator::iterator(_entry* p) : ptr(p) {}
 
-auto basic_partition_map::iterator::operator*() -> std::pair<std::string&, decltype(_entry::props)&> 
+auto basic_partition_map::iterator::operator*() const -> std::pair<std::string&, decltype(_entry::props)&>
 {
 	return {ptr->name, ptr->props};
 }
 
-_entry* basic_partition_map::iterator::operator->()
+_entry* basic_partition_map::iterator::operator->() const
 {
 	return ptr;
 }
@@ -41,17 +41,17 @@ basic_partition_map::iterator& basic_partition_map::iterator::operator++()
 
 basic_partition_map::iterator basic_partition_map::iterator::operator++(int)
 {
-	basic_partition_map::iterator tmp = *this;
+	iterator tmp = *this;
 	++ptr;
 	return tmp;
 }
 
-bool basic_partition_map::iterator::operator==(const basic_partition_map::iterator& other) const
+bool basic_partition_map::iterator::operator==(const iterator& other) const
 {
 	return ptr == other.ptr;
 }
 
-bool basic_partition_map::iterator::operator!=(const basic_partition_map::iterator& other) const
+bool basic_partition_map::iterator::operator!=(const iterator& other) const
 {
 	return ptr != other.ptr;
 }
@@ -76,25 +76,25 @@ basic_partition_map::constant_iterator& basic_partition_map::constant_iterator::
 
 basic_partition_map::constant_iterator basic_partition_map::constant_iterator::operator++(int)
 {
-	basic_partition_map::constant_iterator tmp = *this;
+	constant_iterator tmp = *this;
 	++ptr;
 	return tmp;
 }
 
-bool basic_partition_map::constant_iterator::operator==(const basic_partition_map::constant_iterator& other) const
+bool basic_partition_map::constant_iterator::operator==(const constant_iterator& other) const
 {
 	return ptr == other.ptr;
 }
 
-bool basic_partition_map::constant_iterator::operator!=(const basic_partition_map::constant_iterator& other) const
+bool basic_partition_map::constant_iterator::operator!=(const constant_iterator& other) const
 {
 	return ptr != other.ptr;
 }
 
 void basic_partition_map::_resize_map()
 {
-	size_t new_capacity = _capacity * 2;
-	_entry* new_data = new _entry[new_capacity];
+	const size_t new_capacity = _capacity * 2;
+	auto* new_data = new _entry[new_capacity];
 
 	for (size_t i = 0; i < _count; i++) new_data[i] = _data[i];
 
@@ -106,13 +106,13 @@ void basic_partition_map::_resize_map()
 int basic_partition_map::_index_of(const std::string_view name) const
 {
 	for (size_t i = 0; i < _count; i++) {
-		if (name == _data[i].name) return (int)i;
+		if (name == _data[i].name) return static_cast<int>(i);
 	}
 
 	return 0;
 }
 
-basic_partition_map::basic_partition_map(const std::string name, uint64_t size, bool logical)
+basic_partition_map::basic_partition_map(const std::string& name, const uint64_t size, const bool logical)
 {
 	_data = new _entry[_capacity];
 	insert(name, size, logical);
@@ -126,7 +126,7 @@ basic_partition_map::basic_partition_map(const basic_partition_map& other) :
 	std::copy(other._data, other._data + _count, _data);
 }
 
-basic_partition_map::basic_partition_map() : _count(0), _capacity(6)
+basic_partition_map::basic_partition_map() : _capacity(6)
 {
 	_data = new _entry[_capacity];
 }
@@ -136,7 +136,7 @@ basic_partition_map::~basic_partition_map()
 	delete[] _data;
 }
 
-bool basic_partition_map::insert(const std::string name, uint64_t size, bool logical)
+bool basic_partition_map::insert(const std::string& name, const uint64_t size, const bool logical)
 {
 	if (name == _data[_index_of(name)].name) return false;
 	if (_count == _capacity) _resize_map();
@@ -186,7 +186,7 @@ bool basic_partition_map::find(const std::string_view name) const
 	return false;
 }
 
-std::string basic_partition_map::find_(const std::string name) const
+std::string basic_partition_map::find_(const std::string& name) const
 {
 	if (name == _data[_index_of(name)].name) return name;
 
@@ -249,34 +249,24 @@ bool basic_partition_map::operator!=(const basic_partition_map& other) const
 	return !(*this == other);
 }
 
-basic_partition_map::iterator basic_partition_map::begin()
+basic_partition_map::iterator basic_partition_map::begin() const
 {
-	return basic_partition_map::iterator(_data);
+	return iterator(_data);
 }
 
-basic_partition_map::iterator basic_partition_map::end()
+basic_partition_map::iterator basic_partition_map::end() const
 {
-	return basic_partition_map::iterator(_data + _count);
-}
-
-basic_partition_map::constant_iterator basic_partition_map::begin() const
-{
-	return basic_partition_map::constant_iterator(_data);
+	return iterator(_data + _count);
 }
 
 basic_partition_map::constant_iterator basic_partition_map::cbegin() const
 {
-	return basic_partition_map::constant_iterator(_data);
-}
-
-basic_partition_map::constant_iterator basic_partition_map::end() const
-{
-	return basic_partition_map::constant_iterator(_data + _count);
+	return constant_iterator(_data);
 }
 
 basic_partition_map::constant_iterator basic_partition_map::cend() const
 {
-	return basic_partition_map::constant_iterator(_data + _count);
+	return constant_iterator(_data + _count);
 }
 
 } // namespace PartitionMap

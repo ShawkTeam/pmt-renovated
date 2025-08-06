@@ -59,6 +59,16 @@ std::optional<std::list<std::string>> basic_partition_map_builder::getPhysicalPa
 	return physicals;
 }
 
+std::optional<std::list<std::string>> basic_partition_map_builder::getPartitionList() const {
+	_map_build_check();
+
+	std::list<std::string> partitions;
+	for (const auto& [name, props] : _current_map) partitions.push_back(name);
+
+	if (partitions.empty()) return std::nullopt;
+	return partitions;
+}
+
 std::string basic_partition_map_builder::getRealLinkPathOf(const std::string_view name) const
 {
 	_map_build_check();

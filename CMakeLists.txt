@@ -19,7 +19,7 @@ cmake_minimum_required(VERSION 3.10)
 project(pmt VERSION 1.0.0)
 
 # Set compiler flags
-add_compile_options(-Wall -Werror)
+add_compile_options(-Wall -Werror -Wno-deprecated-declarations)
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
 	add_compile_options(-gdwarf-5 -fsanitize=address -fstack-protector)
 	add_link_options(-fsanitize=address)
@@ -38,4 +38,5 @@ include_directories(include srclib/libhelper/include srclib/libpartition_map/inc
 # Add libraries
 add_subdirectory(srclib)
 
-# NOTE: pmt is not ready, this CMakeFiles.txt only builds libraries
+# Include pmt
+add_subdirectory(src)

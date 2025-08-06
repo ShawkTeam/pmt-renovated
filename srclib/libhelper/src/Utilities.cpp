@@ -18,14 +18,14 @@
 #include <memory>
 #include <string>
 #include <string_view>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
 #include <unistd.h>
-#include <errno.h>
-#include <time.h>
+#include <ctime>
 #include <libgen.h>
 #include <libhelper/lib.hpp>
 #include <generated/buildInfo.hpp>
+#include <sys/stat.h>
 
 namespace Helper {
 namespace LoggingProperties {
@@ -78,28 +78,24 @@ bool confirmPropt(const std::string_view message)
 	std::cin >> p;
 
 	if (p == 'y' || p == 'Y') return true;
-	else if (p == 'n' || p == 'N') return false;
-	else {
-		printf("Unexpected answer: '%c'. Try again.\n", p);
-		return confirmPropt(message);
-	}
+	if (p == 'n' || p == 'N') return false;
 
-	return false;
+	printf("Unexpected answer: '%c'. Try again.\n", p);
+	return confirmPropt(message);
 }
 
 std::string currentWorkingDirectory()
 {
 	char cwd[1024];
-	if (getcwd(cwd, sizeof(cwd)) == nullptr) return std::string();
+	if (getcwd(cwd, sizeof(cwd)) == nullptr) return {};
 	return cwd;
 }
 
 std::string currentDate()
 {
-	time_t t = time(nullptr);
-	struct tm *date = localtime(&t);
+	const time_t t = time(nullptr);
 
-	if (date)
+	if (const tm *date = localtime(&t))
 		return std::string(
 			   std::to_string(date->tm_mday) + "/" +
 			   std::to_string(date->tm_mon + 1) + "/" +
@@ -109,10 +105,9 @@ std::string currentDate()
 
 std::string currentTime()
 {
-	time_t t = time(nullptr);
-	struct tm *date = localtime(&t);
+	const time_t t = time(nullptr);
 
-	if (date)
+	if (const tm *date = localtime(&t))
 		return std::string(
 			   std::to_string(date->tm_hour) + ":" +
 			   std::to_string(date->tm_min) + ":" +
@@ -125,10 +120,7 @@ std::string runCommandWithOutput(const std::string_view cmd)
 	LOGN(HELPER, INFO) << "run command and catch out request: " << cmd << std::endl;
 
 	FILE* pipe = popen(cmd.data(), "r");
-	if (!pipe) {
-		throw Error("Cannot run command: %s", cmd.data());
-		return {};
-	}
+	if (!pipe) return {};
 
 	std::unique_ptr<FILE, decltype(&pclose)> pipe_holder(pipe, pclose);
 
@@ -150,31 +142,31 @@ std::string pathJoin(std::string base, std::string relative)
 
 std::string pathBasename(const std::string_view entry)
 {
-	if (!isExists(entry)) {
-		throw Error("No such file or directory: %s", entry.data());
-		return {};
-	}
-
-	char* base = basename((char*)entry.data());
+	char* base = basename(const_cast<char *>(entry.data()));
 	return (base == nullptr) ? std::string() : std::string(base);
 }
 
 std::string pathDirname(const std::string_view entry)
 {
-	if (!isExists(entry)) {
-		throw Error("No such file or directory: %s", entry.data());
-		return {};
-	}
-
-	char* base = dirname((char*)entry.data());
+	char* base = dirname(const_cast<char *>(entry.data()));
 	return (base == nullptr) ? std::string() : std::string(base);
+}
+
+bool changeMode(const std::string_view file, const mode_t mode)
+{
+	LOGN(HELPER, INFO) << "change mode request: " << file << ". As mode: " << mode << std::endl;
+	return chmod(file.data(), mode) == 0;
+}
+
+bool changeOwner(const std::string_view file, const uid_t uid, const gid_t gid)
+{
+	LOGN(HELPER, INFO) << "change owner request: " << file << ". As owner:group: " << uid << ":" << gid << std::endl;
+	return chown(file.data(), uid, gid) == 0;
 }
 
 std::string getLibVersion()
 {
-	char vinfo[512];
-	sprintf(vinfo, MKVERSION("libhelper"));
-	return std::string(vinfo);
+	MKVERSION("libhelper");
 }
 
 } // namespace Helper

@@ -14,27 +14,18 @@
    limitations under the License.
 */
 
-/**
- * WARNING
- * --------
- * This library (libpmt) isn't exactly suitable for use in different projects.
- * But I'm not saying I've tested it or anything like that.
- */
-
 #ifndef LIBPMT_LIB_HPP
 #define LIBPMT_LIB_HPP
 
-#include <list>
 #include <string>
 #include <string_view>
-#include <functional>
 #include <vector>
 #include <memory>
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignore "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 #include <CLI/CLI11.hpp>
 #pragma GCC diagnostic pop
 
@@ -44,48 +35,48 @@
 
 namespace PartitionManager {
 
-/**
- * basic_function
- * --------------
- *   All function classes must inherit from this class.
- */
+// All function classes must inherit from this class.
 class basic_function {
 public:
 	CLI::App* cmd = nullptr;
 
 	virtual bool init(CLI::App& _app) = 0;
 	virtual bool run() = 0;
-	virtual const char* name() = 0;
+	[[nodiscard]] virtual bool isUsed() const = 0;
+	[[nodiscard]] virtual const char* name() const = 0;
 	virtual ~basic_function() = default;
 };
 
-/**
- * basic_function_manager
- * ----------------------
- *   A class for function management.
- */
-class basic_function_manager {
+// A class for function management.
+class basic_function_manager final {
 private:
 	std::vector<std::unique_ptr<basic_function>> _functions;
 
 public:
 	void registerFunction(std::unique_ptr<basic_function> _func, CLI::App& _app);
-	const char* whatIsRunnedCommandName();
 
-	bool handleAll();
+	[[nodiscard]] bool handleAll() const;
 };
 
-class basic_variables {
+// Sets logs file automatically
+class logSetter final { public: logSetter(); };
+
+class basic_variables final {
+private:
+	logSetter setLogSetting;
+
 public:
 	basic_variables();
+	~basic_variables();
 
-	PartitionMap::BuildMap PartMap;
+	PartitionMap::BuildMap* PartMap;
 
-	std::string searchPath;
+	std::string searchPath, logFile;
 	bool onLogical;
-	bool silentProcess;
+	bool quietProcess;
 	bool verboseMode;
 	bool viewVersion;
+	bool forceProcess;
 };
 
 using FunctionBase = basic_function;
@@ -93,9 +84,19 @@ using FunctionManager = basic_function_manager;
 using VariableTable = basic_variables;
 using Error = Helper::Error;
 
-VariableTable* Variables;
+extern VariableTable* Variables;
 
 int Main(int argc, char** argv);
+
+// Print messages if not using quiet mode
+__attribute__((format(printf, 1, 2)))
+void print(const char* format, ...);
+
+// If there is a delimiter in the string, CLI::detail::split returns; if not, an empty vector is returned. And checks duplicate arguments.
+std::vector<std::string> splitIfHasDelim(const std::string& s, char delim, bool checkForBadUsage = false);
+
+// Process vectors with input strings. Use for [flag(s)]-[other flag(s)] situations
+void processCommandLine(std::vector<std::string>& vec1, std::vector<std::string>& vec2, const std::string& s1, const std::string& s2, char delim, bool checkForBadUsage = false);
 
 std::string getLibVersion();
 std::string getAppVersion(); // Not Android app version (an Android app is planned!), tells pmt version.

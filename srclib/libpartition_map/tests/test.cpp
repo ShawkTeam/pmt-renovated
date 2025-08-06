@@ -18,7 +18,7 @@
 #include <unistd.h>
 #include <libpartition_map/lib.hpp>
 
-int main(void) {
+int main() {
 	if (getuid() != 0) return 2;
 
 	try {
@@ -28,7 +28,7 @@ int main(void) {
 			if (!MyMap) throw PartitionMap::Error("Cannot generate object!");
 		}
 
-		auto map = MyMap.getAll();
+		const auto map = MyMap.getAll();
 		if (map.empty()) throw PartitionMap::Error("getAll() empty");
 		for (const auto& [name, props] : map) {
 			std::cout << "Partition: " << name << ", size: "
@@ -36,19 +36,19 @@ int main(void) {
 			          << props.isLogical << std::endl;
 		}
 
-		auto boot = MyMap.get("boot");
+		const auto boot = MyMap.get("boot");
 		if (!boot) throw PartitionMap::Error("get(\"boot\") returned nullopt");
 		std::cout << "Name: boot" << ", size: "
 		          << boot->first << ", logical: "
 		          << boot->second << std::endl;
 
-		auto logicals = MyMap.getLogicalPartitionList();
+		const auto logicals = MyMap.getLogicalPartitionList();
 		if (!logicals) throw PartitionMap::Error("getLogicalPartitionList() returned nullopt");
 		std::cout << "Logical partitions: " << std::endl;
 		for (const auto& name : *logicals)
 			std::cout << "   - " << name << std::endl;
 
-		auto physicals = MyMap.getPhysicalPartitionList();
+		const auto physicals = MyMap.getPhysicalPartitionList();
 		if (!physicals) throw PartitionMap::Error("getPhysicalPartitionList() returned nullopt");
 		std::cout << "Physical partitions: " << std::endl;
 		for (const auto& name : *physicals)

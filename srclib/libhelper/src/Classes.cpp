@@ -16,11 +16,13 @@
 
 #include <exception>
 #include <sstream>
-#include <stdio.h>
-#include <stdlib.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <unistd.h>
 #include <libgen.h>
-#include <stdarg.h>
+#include <cstdarg>
+#include <cerrno>
 #include <fcntl.h>
 #include <libhelper/lib.hpp>
 
@@ -34,7 +36,7 @@ Error::Error(const char* format, ...)
 	vsnprintf(buf, sizeof(buf), format, args);
 	va_end(args);
 	_message = std::string(buf);
-	LOGN(HELPER, ERROR) << "Error::Error(): " << _message << std::endl;
+	LOGN(HELPER, ERROR) << _message << std::endl;
 }
 
 const char* Error::what() const noexcept
@@ -42,16 +44,16 @@ const char* Error::what() const noexcept
 	return _message.data();
 }
 
-Logger::Logger(LogLevels level, const char* func, const char* file, const char* name, const char* sfile, int line) : _level(level), _funcname(func), _logFile(file), _program_name(name), _file(sfile), _line(line) {}
+Logger::Logger(const LogLevels level, const char* func, const char* file, const char* name, const char* sfile, const int line) : _level(level), _funcname(func), _logFile(file), _program_name(name), _file(sfile), _line(line) {}
 
 Logger::~Logger()
 {
 	if (LoggingProperties::DISABLE) return;
 	char str[1024];
 	snprintf(str, sizeof(str), "<%c> [ <prog %s> <on %s:%d> %s %s] %s(): %s",
-	       (char)_level,
+	       static_cast<char>(_level),
 	       _program_name,
-	       basename((char*)_file),
+	       basename(const_cast<char *>(_file)),
 	       _line,
 	       currentDate().data(),
 	       currentTime().data(),
@@ -59,18 +61,22 @@ Logger::~Logger()
 	       _oss.str().data());
 
 	if (!isExists(_logFile)) {
-		remove(_logFile);
-		int fd = open(_logFile, O_WRONLY | O_CREAT, DEFAULT_EXTENDED_FILE_PERMS);
-		if (fd != -1) close(fd);
+		if (const int fd = open(_logFile, O_WRONLY | O_CREAT, DEFAULT_EXTENDED_FILE_PERMS); fd != -1) close(fd);
+		else {
+			LoggingProperties::setLogFile("last_logs.log");
+			LOGN(HELPER, INFO) << "Cannot create log file: " << _logFile << ": " << strerror(errno) << " New logging file: last_logs.log (this file)." << std::endl;
+		}
 	}
 
-	FILE* fp = fopen(_logFile, "a");
-	if (fp != NULL) {
+	if (FILE* fp = fopen(_logFile, "a"); fp != nullptr) {
 		fprintf(fp, "%s", str);
 		fclose(fp);
+	} else {
+		LoggingProperties::setLogFile("last_logs.log");
+		LOGN(HELPER, INFO) << "Cannot write logs to log file: " << _logFile << ": " << strerror(errno) << " Logging file setting up as: last_logs.log (this file)." << std::endl;
 	}
 
-	if (LoggingProperties::PRINT) printf("%s\n", str);
+	if (LoggingProperties::PRINT) printf("%s", str);
 }
 
 Logger& Logger::operator<<(std::ostream& (*msg)(std::ostream&))

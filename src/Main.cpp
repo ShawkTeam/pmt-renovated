@@ -14,10 +14,11 @@
    limitations under the License.
 */
 
-#include <PartitionManager/lib.hpp>
+#include <PartitionManager/PartitionManager.hpp>
 
 int main(int argc, char** argv)
 {
 	// Call integrated main function in library
+	Helper::LoggingProperties::setProgramName(PMTE);
 	return PartitionManager::Main(argc, argv);
 }

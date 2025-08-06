@@ -26,10 +26,10 @@
 #ifndef ONLY_HELPER_MACROS
 
 enum LogLevels {
-	INFO    = (int)'I',
-	WARNING = (int)'W',
-	ERROR   = (int)'E',
-	ABORT   = (int)'A'
+	INFO    = static_cast<int>('I'),
+	WARNING = static_cast<int>('W'),
+	ERROR   = static_cast<int>('E'),
+	ABORT   = static_cast<int>('A')
 };
 
 constexpr mode_t DEFAULT_FILE_PERMS				= 0644;
@@ -41,7 +41,7 @@ constexpr int    NO  = 0;
 namespace Helper {
 
 // Logging
-class Logger {
+class Logger final {
 private:
 	LogLevels _level;
 	std::ostringstream _oss;
@@ -62,14 +62,15 @@ public:
 };
 
 // Throwable error class
-class Error : public std::exception {
+class Error final : public std::exception {
 private:
 	std::string _message;
 
 public:
-	Error(const char* format, ...);
+	__attribute__((format(printf, 2, 3)))
+	explicit Error(const char* format, ...);
 
-	const char* what() const noexcept override;
+	[[nodiscard]] const char* what() const noexcept override;
 };
 
 namespace LoggingProperties {
@@ -88,48 +89,50 @@ void reset();
 
 // Checkers
 bool hasSuperUser();
-bool isExists(const std::string_view entry);
-bool fileIsExists(const std::string_view file);
-bool directoryIsExists(const std::string_view directory);
-bool linkIsExists(const std::string_view entry);
-bool isLink(const std::string_view entry);
-bool isSymbolicLink(const std::string_view entry);
-bool isHardLink(const std::string_view entry);
-bool areLinked(const std::string_view entry1, const std::string_view entry2);
+bool isExists(std::string_view entry);
+bool fileIsExists(std::string_view file);
+bool directoryIsExists(std::string_view directory);
+bool linkIsExists(std::string_view entry);
+bool isLink(std::string_view entry);
+bool isSymbolicLink(std::string_view entry);
+bool isHardLink(std::string_view entry);
+bool areLinked(std::string_view entry1, std::string_view entry2);
 
 // File I/O
-bool writeFile(const std::string_view file, const std::string_view text);
-std::optional<std::string> readFile(const std::string_view file);
+bool writeFile(std::string_view file, std::string_view text);
+std::optional<std::string> readFile(std::string_view file);
 
 // Creators
-bool makeDirectory(const std::string_view path);
-bool makeRecursiveDirectory(const std::string_view paths);
-bool createFile(const std::string_view path);
-bool createSymlink(const std::string_view entry1, const std::string_view entry2);
+bool makeDirectory(std::string_view path);
+bool makeRecursiveDirectory(std::string_view paths);
+bool createFile(std::string_view path);
+bool createSymlink(std::string_view entry1, std::string_view entry2);
 
 // Removers
-bool eraseEntry(const std::string_view entry);
-bool eraseDirectoryRecursive(const std::string_view directory);
+bool eraseEntry(std::string_view entry);
+bool eraseDirectoryRecursive(std::string_view directory);
 
 // Getters
-size_t fileSize(const std::string_view file);
-std::string readSymlink(const std::string_view entry);
+size_t fileSize(std::string_view file);
+std::string readSymlink(std::string_view entry);
 
 // SHA-256
-bool sha256Compare(const std::string_view file1, const std::string_view file2);
-std::optional<std::string> sha256Of(const std::string_view path);
+bool sha256Compare(std::string_view file1, std::string_view file2);
+std::optional<std::string> sha256Of(std::string_view path);
 
 // Utilities
-bool copyFile(const std::string_view file, const std::string_view dest);
-bool runCommand(const std::string_view cmd);
-bool confirmPropt(const std::string_view message);
+bool copyFile(std::string_view file, std::string_view dest);
+bool runCommand(std::string_view cmd);
+bool confirmPropt(std::string_view message);
+bool changeMode(std::string_view file, mode_t mode);
+bool changeOwner(std::string_view file, uid_t uid, gid_t gid);
 std::string currentWorkingDirectory();
 std::string currentDate();
 std::string currentTime();
-std::string runCommandWithOutput(const std::string_view cmd);
+std::string runCommandWithOutput(std::string_view cmd);
 std::string pathJoin(std::string base, std::string relative);
-std::string pathBasename(const std::string_view entry);
-std::string pathDirname(const std::string_view entry);
+std::string pathBasename(std::string_view entry);
+std::string pathDirname(std::string_view entry);
 
 // Library-specif
 std::string getLibVersion();
@@ -144,8 +147,9 @@ std::string getLibVersion();
 #define MB(x) (KB(x) * 1024) // MB(4) = 4194304 (KB(4) * 1024)
 #define GB(x) (MB(x) * 1024) // GB(1) = 1073741824 (MB(1) * 1024)
 
-#define TO_MB(x) (x / 1024)        // TO_MB(2048) (2048 / 1024)
-#define TO_GB(x) (TO_GB(x) / 1024) // TO_GB(1048576) (TO_MB(1048576) / 1024)
+#define TO_KB(x) (x / 1024)				  // TO_KB(1024) = 1
+#define TO_MB(x) (TO_KB(x) / 1024)        // TO_MB(2048) (2048 / 1024)
+#define TO_GB(x) (TO_MB(x) / 1024) // TO_GB(1048576) (TO_MB(1048576) / 1024)
 
 #define STYLE_RESET		"\033[0m"
 #define BOLD			"\033[1m"
@@ -197,6 +201,8 @@ std::string getLibVersion();
 	if (condition) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
 #define MKVERSION(name) \
-	"%s %s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: %s\nBuildFlags: %s\n", name, BUILD_VERSION, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS
+	char vinfo[512]; \
+	sprintf(vinfo, "%s %s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: %s\nBuildFlags: %s", name, BUILD_VERSION, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS); \
+	return std::string(vinfo)
 
 #endif // #ifndef LIBHELPER_LIB_HPP

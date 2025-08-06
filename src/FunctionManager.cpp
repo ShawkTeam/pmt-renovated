@@ -17,37 +17,56 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <PartitionManager/lib.hpp>
+#include <unordered_set>
+#include <PartitionManager/PartitionManager.hpp>
 
 namespace PartitionManager {
+
+std::vector<std::string> splitIfHasDelim(const std::string& s, const char delim, const bool checkForBadUsage)
+{
+	if (s.find(delim) == std::string::npos) return {};
+	auto vec = CLI::detail::split(s, delim);
+
+	if (checkForBadUsage) {
+		std::unordered_set<std::string> set;
+		for (const auto& str : vec) {
+			if (set.find(str) != set.end()) throw CLI::ValidationError("Duplicate element in your inputs!");
+			set.insert(str);
+		}
+	}
+
+	return vec;
+}
+
+void processCommandLine(std::vector<std::string>& vec1, std::vector<std::string>& vec2, const std::string& s1, const std::string& s2, const char delim, const bool checkForBadUsage)
+{
+	vec1 = splitIfHasDelim(s1, delim, checkForBadUsage);
+	vec2 = splitIfHasDelim(s2, delim, checkForBadUsage);
+
+	if (vec1.empty() && !s1.empty()) vec1.push_back(s1);
+	if (vec2.empty() && !s2.empty()) vec2.push_back(s2);
+}
 
 void basic_function_manager::registerFunction(std::unique_ptr<basic_function> _func, CLI::App& _app)
 {
 	LOGN(PMTF, INFO) << "registering function: " << _func->name() << std::endl;
 	if (!_func->init(_app)) throw Error("Cannot init function: %s\n", _func->name());
 	_functions.push_back(std::move(_func));
-	LOGN(PMTF, INFO) << _func->name() << " successfully registered." << std::endl;
+	LOGN(PMTF, INFO) << _functions.back()->name() << " successfully registered." << std::endl;
 }
 
-const char* basic_function_manager::whatIsRunnedCommandName()
+bool basic_function_manager::handleAll() const
 {
-	for (auto &func : _functions) {
-		if (func->cmd->parsed()) return func->name();
-	}
-
-	return nullptr;
-}
-
-bool basic_function_manager::handleAll()
-{
-	LOGN(PMTF, INFO) << "running catched function commands in command-line." << std::endl;
-	for (auto &func : _functions) {
-		if (func->cmd->parsed()) {
-			LOGN(PMTF, INFO) << "running function: " << func->name() << std::endl;
-			return (func->run()) ? true : false;
+	LOGN(PMTF, INFO) << "running caught function commands in command-line." << std::endl;
+	for (const auto& func : _functions) {
+		if (func->isUsed()) {
+			LOGN(PMTF, INFO) << func->name() << " is calling because used in command-line." << std::endl;
+			return func->run();
 		}
 	}
 
+	LOGN(PMTF, INFO) << "not found any used function from command-line." << std::endl;
+	print("Target progress is not specified. Specify a progress.");
 	return false;
 }
 
