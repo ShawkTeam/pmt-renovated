@@ -23,6 +23,8 @@ set(PMT_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/FlashFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/InfoFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/PartitionSizeFunction.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/functions/RealPathFunction.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/functions/RealLinkPathFunction.cpp
 )
 
 # Add pmt
@@ -34,10 +36,3 @@ target_link_libraries(pmt PRIVATE helper_shared PRIVATE partition_map_shared)
 target_link_libraries(pmt_static PRIVATE helper_static PRIVATE partition_map_static)
 target_link_options(pmt PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
 target_link_options(pmt_static PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
-
-if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	target_compile_options(pmt PRIVATE -Os)
-	target_compile_options(pmt_static PRIVATE -Os)
-	target_link_options(pmt PRIVATE -s)
-	target_link_options(pmt_static PRIVATE -s)
-endif()

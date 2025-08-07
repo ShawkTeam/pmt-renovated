@@ -17,6 +17,7 @@ Copyright 2025 Yağız Zengin
 #include <cstdlib>
 #include <fcntl.h>
 #include <cerrno>
+#include <future>
 #include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include "functions.hpp"
@@ -24,58 +25,37 @@ Copyright 2025 Yağız Zengin
 #define FFUN "flashFunction"
 
 namespace PartitionManager {
-
-bool flashFunction::init(CLI::App &_app)
-{
-    LOGN(FFUN, INFO) << "Initializing variables of flash function." << std::endl;
-    cmd = _app.add_subcommand("flash", "Flash image(s) to partition(s)");
-    cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
-    cmd->add_option("imageFile(s)", rawImageNames, "Name(s) of image file(s)")->required()->check([&](const std::string& val) {
-        const std::vector<std::string> inputs = splitIfHasDelim(val, ',');
-        for (const auto& input : inputs) {
-            if (!Helper::fileIsExists(input)) return std::string("Couldn't find image file: " + input);
-        }
-        return std::string();
-    });
-    cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading image(s) and writing to partition(s)");
-
-    return true;
-}
-
-bool flashFunction::run()
-{
-    processCommandLine(partitions, imageNames, rawPartitions, rawImageNames, ',', true);
-    if (partitions.size() != imageNames.size())
-        throw CLI::ValidationError("You must provide an image file(s) as long as the partition name(s)");
-
-    for (size_t i = 0; i < partitions.size(); i++) {
-        std::string& partitionName = partitions[i];
-        std::string& imageName = imageNames[i];
+    pair flashFunction::runAsync(const std::string &partitionName, const std::string &imageName, int bufferSize) {
+        if (!Helper::fileIsExists(imageName)) return {format("Couldn't find image file: %s", imageName.data()), false};
+        if (!Variables->PartMap->hasPartition(partitionName)) return {
+            format("Couldn't find partition: %s", partitionName.data()), false
+        };
 
         LOGN(FFUN, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;
 
-        if (!Variables->PartMap->hasPartition(partitionName))
-            throw Error("Couldn't find partition: %s", partitionName.data());
-
         if (Variables->onLogical && !Variables->PartMap->isLogical(partitionName)) {
-            if (Variables->forceProcess) LOGN(FFUN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
-            else throw Error("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
+            if (Variables->forceProcess)
+                LOGN(FFUN, WARNING) << "Partition " << partitionName <<
+                        " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
+            else return {
+                format("Used --logical (-l) flag but is not logical partition: %s", partitionName.data()), false
+            };
         }
 
-        bufferSize = (Helper::fileSize(imageName) % bufferSize == 0) ? bufferSize : 1;
+        setupBufferSize(bufferSize, imageName);
         LOGN(FFUN, INFO) << "Using buffer size: " << bufferSize;
 
         const int ffd = open(imageName.data(), O_RDONLY);
-        if (ffd < 0) throw Error("Can't open image file %s: %s", imageName.data(), strerror(errno));
+        if (ffd < 0) return {format("Can't open image file %s: %s", imageName.data(), strerror(errno)), false};
 
         const int pfd = open(Variables->PartMap->getRealPathOf(partitionName).data(), O_RDWR | O_TRUNC);
         if (pfd < 0) {
             close(ffd);
-            throw Error("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
+            return {format("Can't open partition: %s: %s", partitionName.data(), strerror(errno)), false};
         }
 
         LOGN(FFUN, INFO) << "Writing image " << imageName << " to partition: " << partitionName << std::endl;
-        auto* buffer = new char[bufferSize];
+        auto *buffer = new char[bufferSize];
         memset(buffer, 0x00, bufferSize);
         ssize_t bytesRead;
         while ((bytesRead = read(ffd, buffer, bufferSize)) > 0) {
@@ -83,22 +63,61 @@ bool flashFunction::run()
                 close(pfd);
                 close(ffd);
                 delete[] buffer;
-                throw Error("Can't write partition to output file %s: %s", imageName.data(), strerror(errno));
+                return {
+                    format("Can't write partition to output file %s: %s", imageName.data(), strerror(errno)), false
+                };
             }
         }
-        
+
         close(pfd);
         close(ffd);
         delete[] buffer;
+
+        return {format("%s is successfully wrote to %s partition\n", imageName.data(), partitionName.data()), true};
     }
 
-    LOGN(FFUN, INFO) << "Operation successfully completed." << std::endl;
-    return true;
-}
+    bool flashFunction::init(CLI::App &_app) {
+        LOGN(FFUN, INFO) << "Initializing variables of flash function." << std::endl;
+        cmd = _app.add_subcommand("flash", "Flash image(s) to partition(s)");
+        cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
+        cmd->add_option("imageFile(s)", rawImageNames, "Name(s) of image file(s)")->required();
+        cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading image(s) and writing to partition(s)");
+        cmd->add_option("-I,--image-directory", imageDirectory, "Directory to find image(s) and flash to partition(s)");
 
-bool flashFunction::isUsed() const { return cmd->parsed(); }
+        return true;
+    }
 
-const char* flashFunction::name() const { return FFUN; }
+    bool flashFunction::run() {
+        processCommandLine(partitions, imageNames, rawPartitions, rawImageNames, ',', true);
+        if (partitions.size() != imageNames.size())
+            throw CLI::ValidationError("You must provide an image file(s) as long as the partition name(s)");
 
+        std::vector<std::future<pair> > futures;
+        for (size_t i = 0; i < partitions.size(); i++) {
+            std::string imageName = imageNames[i];
+            if (!imageDirectory.empty()) imageName.insert(0, imageDirectory + '/');
+
+            futures.push_back(std::async(std::launch::async, runAsync, partitions[i], imageName, bufferSize));
+            LOGN(FFUN, INFO) << "Created thread for flashing image to " << partitions[i] << std::endl;
+        }
+
+        std::string end;
+        bool endResult = true;
+        for (auto &future: futures) {
+            auto [fst, snd] = future.get();
+            if (!snd) {
+                end += fst + '\n';
+                endResult = false;
+            } else print("%s", fst.c_str());
+        }
+
+        if (!endResult) throw Error("%s", end.c_str());
+
+        LOGN(FFUN, INFO) << "Operation successfully completed." << std::endl;
+        return endResult;
+    }
+
+    bool flashFunction::isUsed() const { return cmd->parsed(); }
+
+    const char *flashFunction::name() const { return FFUN; }
 } // namespace PartitionManager
-

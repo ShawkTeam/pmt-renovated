@@ -42,7 +42,7 @@ struct _entry {
  *   The main type of the library. The Builder class is designed
  *   to be easily manipulated and modified only on this class.
  */
-class basic_partition_map {
+class basic_partition_map final {
 private:
 	void _resize_map();
 	[[nodiscard]] int _index_of(std::string_view name) const;
@@ -116,7 +116,7 @@ public:
 
 using Map_t = basic_partition_map;
 
-class basic_partition_map_builder {
+class basic_partition_map_builder final {
 private:
 	Map_t _current_map;
 	std::string _workdir;

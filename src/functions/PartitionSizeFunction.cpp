@@ -19,8 +19,7 @@ Copyright 2025 Yağız Zengin
 
 #define SFUN "partitionSizeFunction"
 
-std::string convertTo(const uint64_t size, const std::string& multiple)
-{
+std::string convertTo(const uint64_t size, const std::string &multiple) {
     if (multiple == "KB") return std::to_string(TO_KB(size));
     if (multiple == "MB") return std::to_string(TO_MB(size));
     if (multiple == "GB") return std::to_string(TO_GB(size));
@@ -28,45 +27,44 @@ std::string convertTo(const uint64_t size, const std::string& multiple)
 }
 
 namespace PartitionManager {
-
-bool partitionSizeFunction::init(CLI::App& _app)
-{
-    LOGN(SFUN, INFO) << "Initializing variables of partition size getter function." << std::endl;
-    cmd = _app.add_subcommand("sizeof", "Tell size(s) of input partition list");
-    cmd->add_option("partition(s)", partitions, "Partition name(s).")->required()->delimiter(',');
-    cmd->add_flag("--as-byte", asByte, "Tell input size of partition list as byte.");
-    cmd->add_flag("--as-kilobyte", asKiloBytes, "Tell input size of partition list as kilobyte.");
-    cmd->add_flag("--as-megabyte", asMega,  "Tell input size of partition list as megabyte.");
-    cmd->add_flag("--as-gigabyte", asGiga, "Tell input size of partition list as gigabyte.");
-    cmd->add_flag("--only-size", onlySize,  "Tell input size of partition list as not printing multiple.");
-    return true;
-}
-
-bool partitionSizeFunction::run()
-{
-    for (const auto& partition : partitions) {
-        if (!Variables->PartMap->hasPartition(partition))
-            throw Error("Couldn't find partition: %s", partition.data());
-
-        if (Variables->onLogical && !Variables->PartMap->isLogical(partition)) {
-            if (Variables->forceProcess) LOGN(SFUN, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
-            else throw Error("Used --logical (-l) flag but is not logical partition: %s", partition.data());
-        }
-
-        std::string multiple;
-        if (asByte) multiple = "B";
-        if (asKiloBytes) multiple = "KB";
-        if (asMega) multiple = "MB";
-        if (asGiga) multiple = "GB";
-
-        print("%s: %s%s\n", partition.data(), convertTo(Variables->PartMap->sizeOf(partition), multiple).data(), multiple.data());
+    bool partitionSizeFunction::init(CLI::App &_app) {
+        LOGN(SFUN, INFO) << "Initializing variables of partition size getter function." << std::endl;
+        cmd = _app.add_subcommand("sizeof", "Tell size(s) of input partition list");
+        cmd->add_option("partition(s)", partitions, "Partition name(s).")->required()->delimiter(',');
+        cmd->add_flag("--as-byte", asByte, "Tell input size of partition list as byte.");
+        cmd->add_flag("--as-kilobyte", asKiloBytes, "Tell input size of partition list as kilobyte.");
+        cmd->add_flag("--as-megabyte", asMega, "Tell input size of partition list as megabyte.");
+        cmd->add_flag("--as-gigabyte", asGiga, "Tell input size of partition list as gigabyte.");
+        cmd->add_flag("--only-size", onlySize, "Tell input size of partition list as not printing multiple.");
+        return true;
     }
 
-    return true;
-}
+    bool partitionSizeFunction::run() {
+        for (const auto &partition: partitions) {
+            if (!Variables->PartMap->hasPartition(partition))
+                throw Error("Couldn't find partition: %s", partition.data());
 
-bool partitionSizeFunction::isUsed() const { return cmd->parsed(); }
+            if (Variables->onLogical && !Variables->PartMap->isLogical(partition)) {
+                if (Variables->forceProcess)
+                    LOGN(SFUN, WARNING) << "Partition " << partition <<
+                            " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
+                else throw Error("Used --logical (-l) flag but is not logical partition: %s", partition.data());
+            }
 
-const char* partitionSizeFunction::name() const { return SFUN; }
+            std::string multiple = "MB";
+            if (asByte) multiple = "B";
+            if (asKiloBytes) multiple = "KB";
+            if (asMega) multiple = "MB";
+            if (asGiga) multiple = "GB";
 
+            print("%s: %s%s\n", partition.data(), convertTo(Variables->PartMap->sizeOf(partition), multiple).data(),
+                  multiple.data());
+        }
+
+        return true;
+    }
+
+    bool partitionSizeFunction::isUsed() const { return cmd->parsed(); }
+
+    const char *partitionSizeFunction::name() const { return SFUN; }
 } // namespace PartitionManager

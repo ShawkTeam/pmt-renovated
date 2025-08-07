@@ -156,24 +156,21 @@ void basic_partition_map::merge(const basic_partition_map& map)
 
 uint64_t basic_partition_map::get_size(const std::string_view name) const
 {
-	int pos = _index_of(name);
-	if (name == _data[pos].name) return _data[pos].props.size;
+	if (const int pos = _index_of(name); name == _data[pos].name) return _data[pos].props.size;
 
 	return 0;
 }
 
 bool basic_partition_map::is_logical(const std::string_view name) const
 {
-	int pos = _index_of(name);
-	if (name == _data[pos].name) return _data[pos].props.isLogical;
+	if (const int pos = _index_of(name); name == _data[pos].name) return _data[pos].props.isLogical;
 
 	return false;
 }
 
 basic_partition_map::_returnable_entry basic_partition_map::get_all(const std::string_view name) const
 {
-	int pos = _index_of(name);
-	if (name == _data[pos].name) 
+	if (const int pos = _index_of(name); name == _data[pos].name)
 		return _returnable_entry{_data[pos].props.size, _data[pos].props.isLogical};
 
 	return _returnable_entry{};

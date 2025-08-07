@@ -81,7 +81,7 @@ std::string basic_partition_map_builder::getRealPathOf(const std::string_view na
 {
 	_map_build_check();
 
-	std::string full = _workdir + "/" + name.data();
+	const std::string full = (isLogical(name)) ? std::string("/dev/block/mapper/") + name.data() : _workdir + "/" + name.data();
 	if (!_current_map.find(name)
 	    || !std::filesystem::is_symlink(full))
 		return {};

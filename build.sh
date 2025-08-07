@@ -57,13 +57,15 @@ build()
     cmake -B $BUILD_64 -S . $1 \
         -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
         -DANDROID_ABI=arm64-v8a \
-        -DANDROID_PLATFORM=$ANDROID_PLATFORM
+        -DANDROID_PLATFORM=$ANDROID_PLATFORM \
+        -DANDROID_STL=c++_static
 
     echo "Configuring for armeabi-v7a..."
     cmake -B $BUILD_32 -S . $1 \
         -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
         -DANDROID_ABI=armeabi-v7a \
-        -DANDROID_PLATFORM=$ANDROID_PLATFORM
+        -DANDROID_PLATFORM=$ANDROID_PLATFORM \
+        -DANDROID_STL=c++_static
 
     echo "Building arm64-v8a artifacts..."
     cmake --build $BUILD_64

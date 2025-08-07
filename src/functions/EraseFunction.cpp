@@ -17,6 +17,7 @@ Copyright 2025 Yağız Zengin
 #include <cstdlib>
 #include <fcntl.h>
 #include <cerrno>
+#include <future>
 #include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include "functions.hpp"
@@ -24,38 +25,31 @@ Copyright 2025 Yağız Zengin
 #define EFUN "eraseFunction"
 
 namespace PartitionManager {
-
-bool eraseFunction::init(CLI::App &_app)
-{
-    LOGN(EFUN, INFO) << "Initializing variables of erase function." << std::endl;
-    cmd = _app.add_subcommand("erase", "Writes zero bytes to partition(s)");
-    cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
-    cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for writing zero bytes to partition(s)");
-    return true;
-}
-
-bool eraseFunction::run()
-{
-    for (const auto& partitionName : partitions) {
-        if (!Variables->PartMap->hasPartition(partitionName))
-            throw Error("Couldn't find partition: %s", partitionName.data());
+    pair eraseFunction::runAsync(const std::string &partitionName, int bufferSize) {
+        if (!Variables->PartMap->hasPartition(partitionName)) return {
+            format("Couldn't find partition: %s", partitionName.data()), false
+        };
 
         if (Variables->onLogical && !Variables->PartMap->isLogical(partitionName)) {
-            if (Variables->forceProcess) LOGN(EFUN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
-            else throw Error("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
+            if (Variables->forceProcess)
+                LOGN(EFUN, WARNING) << "Partition " << partitionName <<
+                        " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
+            else return {
+                format("Used --logical (-l) flag but is not logical partition: %s", partitionName.data()), false
+            };
         }
 
-        bufferSize = (Variables->PartMap->sizeOf(partitionName) % bufferSize == 0) ? bufferSize : 1;
+        setupBufferSize(bufferSize, partitionName);
         LOGN(EFUN, INFO) << "Using buffer size: " << bufferSize;
 
         const int pfd = open(Variables->PartMap->getRealPathOf(partitionName).data(), O_WRONLY);
-        if (pfd < 0)
-            throw Error("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
+        if (pfd < 0) return {format("Can't open partition: %s: %s", partitionName.data(), strerror(errno)), false};
 
-        if (!Variables->forceProcess) Helper::confirmPropt("Are you sure you want to continue? This could render your device unusable! Do not continue if you do not know what you are doing!");
+        if (!Variables->forceProcess) Helper::confirmPropt(
+            "Are you sure you want to continue? This could render your device unusable! Do not continue if you do not know what you are doing!");
 
         LOGN(EFUN, INFO) << "Writing zero bytes to partition: " << partitionName << std::endl;
-        auto* buffer = new char[bufferSize];
+        auto *buffer = new char[bufferSize];
         memset(buffer, 0x00, bufferSize);
         ssize_t bytesWritten = 0;
         const uint64_t partitionSize = Variables->PartMap->sizeOf(partitionName);
@@ -67,20 +61,48 @@ bool eraseFunction::run()
             if (const ssize_t result = write(pfd, buffer, toWrite); result == -1) {
                 close(pfd);
                 delete[] buffer;
-                throw Error("Can't write zero bytes to partition: %s: %s", partitionName.data(), strerror(errno));
+                return {
+                    format("Can't write zero bytes to partition: %s: %s", partitionName.data(), strerror(errno)), false
+                };
             } else bytesWritten += result;
         }
 
         close(pfd);
         delete[] buffer;
+
+        return {format("Successfully wrote zero bytes to the %s partition\n", partitionName.data()), true};
     }
 
-    LOGN(EFUN, INFO) << "Operation successfully completed." << std::endl;
-    return true;
-}
+    bool eraseFunction::init(CLI::App &_app) {
+        LOGN(EFUN, INFO) << "Initializing variables of erase function." << std::endl;
+        cmd = _app.add_subcommand("erase", "Writes zero bytes to partition(s)");
+        cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
+        cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for writing zero bytes to partition(s)");
+        return true;
+    }
 
-bool eraseFunction::isUsed() const { return cmd->parsed(); }
+    bool eraseFunction::run() {
+        std::vector<std::future<pair> > futures;
+        for (const auto &partitionName: partitions) {
+            futures.push_back(std::async(std::launch::async, runAsync, partitionName, bufferSize));
+            LOGN(EFUN, INFO) << "Created thread for writing zero bytes to " << partitionName << std::endl;
+        }
 
-const char* eraseFunction::name() const { return EFUN; }
+        std::string end;
+        bool endResult = true;
+        for (auto &future: futures) {
+            auto [fst, snd] = future.get();
+            if (!snd) { end += fst + '\n'; endResult = false; }
+            else print("%s\n", fst.c_str());
+        }
 
+        if (!endResult) throw Error("%s", end.c_str());
+
+        LOGN(EFUN, INFO) << "Operation successfully completed." << std::endl;
+        return endResult;
+    }
+
+    bool eraseFunction::isUsed() const { return cmd->parsed(); }
+
+    const char *eraseFunction::name() const { return EFUN; }
 } // namespace PartitionManager

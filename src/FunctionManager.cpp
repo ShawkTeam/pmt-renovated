@@ -21,53 +21,55 @@
 #include <PartitionManager/PartitionManager.hpp>
 
 namespace PartitionManager {
+	std::vector<std::string> splitIfHasDelim(const std::string &s, const char delim, const bool checkForBadUsage) {
+		if (s.find(delim) == std::string::npos) return {};
+		auto vec = CLI::detail::split(s, delim);
 
-std::vector<std::string> splitIfHasDelim(const std::string& s, const char delim, const bool checkForBadUsage)
-{
-	if (s.find(delim) == std::string::npos) return {};
-	auto vec = CLI::detail::split(s, delim);
+		if (checkForBadUsage) {
+			std::unordered_set<std::string> set;
+			for (const auto &str: vec) {
+				if (set.find(str) != set.end()) throw CLI::ValidationError("Duplicate element in your inputs!");
+				set.insert(str);
+			}
+		}
 
-	if (checkForBadUsage) {
-		std::unordered_set<std::string> set;
-		for (const auto& str : vec) {
-			if (set.find(str) != set.end()) throw CLI::ValidationError("Duplicate element in your inputs!");
-			set.insert(str);
+		return vec;
+	}
+
+	void setupBufferSize(int &size, const std::string &partition) {
+		if (Variables->PartMap->sizeOf(partition) % size != 0) {
+			print("%sWARNING%s: Specified buffer size is invalid! Using 1 byte as buffer size.", YELLOW, STYLE_RESET);
+			size = 1;
 		}
 	}
 
-	return vec;
-}
+	void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2, const std::string &s1,
+	                        const std::string &s2, const char delim, const bool checkForBadUsage) {
+		vec1 = splitIfHasDelim(s1, delim, checkForBadUsage);
+		vec2 = splitIfHasDelim(s2, delim, checkForBadUsage);
 
-void processCommandLine(std::vector<std::string>& vec1, std::vector<std::string>& vec2, const std::string& s1, const std::string& s2, const char delim, const bool checkForBadUsage)
-{
-	vec1 = splitIfHasDelim(s1, delim, checkForBadUsage);
-	vec2 = splitIfHasDelim(s2, delim, checkForBadUsage);
-
-	if (vec1.empty() && !s1.empty()) vec1.push_back(s1);
-	if (vec2.empty() && !s2.empty()) vec2.push_back(s2);
-}
-
-void basic_function_manager::registerFunction(std::unique_ptr<basic_function> _func, CLI::App& _app)
-{
-	LOGN(PMTF, INFO) << "registering function: " << _func->name() << std::endl;
-	if (!_func->init(_app)) throw Error("Cannot init function: %s\n", _func->name());
-	_functions.push_back(std::move(_func));
-	LOGN(PMTF, INFO) << _functions.back()->name() << " successfully registered." << std::endl;
-}
-
-bool basic_function_manager::handleAll() const
-{
-	LOGN(PMTF, INFO) << "running caught function commands in command-line." << std::endl;
-	for (const auto& func : _functions) {
-		if (func->isUsed()) {
-			LOGN(PMTF, INFO) << func->name() << " is calling because used in command-line." << std::endl;
-			return func->run();
-		}
+		if (vec1.empty() && !s1.empty()) vec1.push_back(s1);
+		if (vec2.empty() && !s2.empty()) vec2.push_back(s2);
 	}
 
-	LOGN(PMTF, INFO) << "not found any used function from command-line." << std::endl;
-	print("Target progress is not specified. Specify a progress.");
-	return false;
-}
+	void basic_function_manager::registerFunction(std::unique_ptr<basic_function> _func, CLI::App &_app) {
+		LOGN(PMTF, INFO) << "registering function: " << _func->name() << std::endl;
+		if (!_func->init(_app)) throw Error("Cannot init function: %s\n", _func->name());
+		_functions.push_back(std::move(_func));
+		LOGN(PMTF, INFO) << _functions.back()->name() << " successfully registered." << std::endl;
+	}
 
+	bool basic_function_manager::handleAll() const {
+		LOGN(PMTF, INFO) << "running caught function commands in command-line." << std::endl;
+		for (const auto &func: _functions) {
+			if (func->isUsed()) {
+				LOGN(PMTF, INFO) << func->name() << " is calling because used in command-line." << std::endl;
+				return func->run();
+			}
+		}
+
+		LOGN(PMTF, INFO) << "not found any used function from command-line." << std::endl;
+		print("Target progress is not specified. Specify a progress.");
+		return false;
+	}
 } // namespace PartitionManager
