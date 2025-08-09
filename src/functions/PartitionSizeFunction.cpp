@@ -35,7 +35,7 @@ namespace PartitionManager {
         cmd->add_flag("--as-kilobyte", asKiloBytes, "Tell input size of partition list as kilobyte.");
         cmd->add_flag("--as-megabyte", asMega, "Tell input size of partition list as megabyte.");
         cmd->add_flag("--as-gigabyte", asGiga, "Tell input size of partition list as gigabyte.");
-        cmd->add_flag("--only-size", onlySize, "Tell input size of partition list as not printing multiple.");
+        cmd->add_flag("--only-size", onlySize, "Tell input size of partition list as not printing multiple and partition name.");
         return true;
     }
 
@@ -57,7 +57,10 @@ namespace PartitionManager {
             if (asMega) multiple = "MB";
             if (asGiga) multiple = "GB";
 
-            println("%s: %s%s", partition.data(), convertTo(Variables->PartMap->sizeOf(partition), multiple).data(),
+            if (onlySize)
+                println("%s", convertTo(Variables->PartMap->sizeOf(partition), multiple).data());
+            else
+                println("%s: %s%s", partition.data(), convertTo(Variables->PartMap->sizeOf(partition), multiple).data(),
                   multiple.data());
         }
 
