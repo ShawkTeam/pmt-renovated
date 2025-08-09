@@ -14,6 +14,7 @@
    limitations under the License.
 */
 
+#include <fcntl.h>
 #include <vector>
 #include <memory>
 #include <string>
@@ -69,7 +70,7 @@ namespace PartitionManager {
 		}
 
 		LOGN(PMTF, INFO) << "not found any used function from command-line." << std::endl;
-		print("Target progress is not specified. Specify a progress.");
+		println("Target progress is not specified. Specify a progress.");
 		return false;
 	}
 } // namespace PartitionManager

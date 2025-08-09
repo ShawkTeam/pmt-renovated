@@ -18,7 +18,6 @@
 #define LIBPMT_LIB_HPP
 
 #include <string>
-#include <string_view>
 #include <vector>
 #include <memory>
 #include <libhelper/lib.hpp>
@@ -59,13 +58,7 @@ namespace PartitionManager {
 		[[nodiscard]] bool handleAll() const;
 	};
 
-	// Sets logs file automatically
-	class logSetter final { public: logSetter(); };
-
 	class basic_variables final {
-	private:
-		logSetter setLogSetting;
-
 	public:
 		basic_variables();
 		~basic_variables();
@@ -80,6 +73,17 @@ namespace PartitionManager {
 		bool forceProcess;
 	};
 
+	class variableProtect final {
+	private:
+		basic_variables* _ptr = nullptr;
+
+	public:
+		variableProtect();
+		~variableProtect();
+
+		void setVariablePointer(basic_variables* &_ptr);
+	};
+
 	using FunctionBase = basic_function;
 	using FunctionManager = basic_function_manager;
 	using VariableTable = basic_variables;
@@ -92,8 +96,10 @@ namespace PartitionManager {
 	// Print messages if not using quiet mode
 	__attribute__((format(printf, 1, 2)))
 	void print(const char *format, ...);
+	__attribute__((format(printf, 1, 2)))
+	void println(const char *format, ...);
 
-	// Format it input and return
+	// Format it input and return as std::string
 	__attribute__((format(printf, 1, 2)))
 	std::string format(const char *format, ...);
 

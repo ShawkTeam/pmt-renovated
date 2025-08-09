@@ -60,9 +60,9 @@ namespace PartitionManager {
 
 			if (jsonFormat)
 #ifdef __LP64__
-				print("{\"%s\": \"%s\", \"%s\": %lu, \"%s\": %s}\n",
+				println("{\"%s\": \"%s\", \"%s\": %lu, \"%s\": %s}",
 #else
-				print("{\"%s\": \"%s\", \"%s\": %llu, \"%s\": %s}\n",
+				println("{\"%s\": \"%s\", \"%s\": %llu, \"%s\": %s}",
 #endif
 				      jNamePartition.data(),
 				      partition.data(),
@@ -72,9 +72,9 @@ namespace PartitionManager {
 				      Variables->PartMap->isLogical(partition) ? "true" : "false");
 			else
 #ifdef __LP64__
-				print("partition=%s size=%lu isLogical=%s\n",
+				println("partition=%s size=%lu isLogical=%s",
 #else
-				print("partition=%s size=%llu isLogical=%s\n",
+				println("partition=%s size=%llu isLogical=%s",
 #endif
 				      partition.data(),
 				      Variables->PartMap->sizeOf(partition),

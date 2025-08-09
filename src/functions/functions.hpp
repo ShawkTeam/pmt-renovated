@@ -137,6 +137,36 @@ namespace PartitionManager {
 		[[nodiscard]] bool isUsed() const override;
 		[[nodiscard]] const char *name() const override;
 	};
+
+	class typeFunction final : public FunctionBase {
+	private:
+		std::vector<std::string> contents;
+		bool onlyCheckAndroidMagics = false, onlyCheckFileSystemMagics = false;
+		int bufferSize = 4096;
+
+	public:
+		CLI::App *cmd = nullptr;
+
+		bool init(CLI::App &_app) override;
+		bool run() override;
+
+		[[nodiscard]] bool isUsed() const override;
+		[[nodiscard]] const char *name() const override;
+	};
+
+	class rebootFunction final : public FunctionBase {
+	private:
+		std::string rebootTarget;
+
+	public:
+		CLI::App *cmd = nullptr;
+
+		bool init(CLI::App &_app) override;
+		bool run() override;
+
+		[[nodiscard]] bool isUsed() const override;
+		[[nodiscard]] const char *name() const override;
+	};
 } // namespace PartitionManager
 
 #endif // #ifndef FUNCTIONS_HPP

@@ -21,6 +21,7 @@
 #include <future>
 #include <chrono>
 #include <PartitionManager/PartitionManager.hpp>
+#include <private/android_filesystem_config.h>
 #include "functions.hpp"
 
 #define BFUN "backupFunction"
@@ -37,9 +38,7 @@ namespace PartitionManager {
             if (Variables->forceProcess)
                 LOGN(BFUN, WARNING) << "Partition " << partitionName <<
                         " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
-            else return {
-                format("Used --logical (-l) flag but is not logical partition: %s", partitionName.data()), false
-            };
+            else return {format("Used --logical (-l) flag but is not logical partition: %s", partitionName.data()), false};
         }
 
         if (Helper::fileIsExists(outputName) && !Variables->forceProcess) return {
@@ -49,32 +48,30 @@ namespace PartitionManager {
         setupBufferSize(bufferSize, partitionName);
         LOGN(BFUN, INFO) << "Using buffer size (for back upping " << partitionName << "): " << bufferSize << std::endl;
 
-        const int pfd = open(Variables->PartMap->getRealPathOf(partitionName).data(), O_RDONLY);
+        // Automatically close file descriptors and delete allocated memories (arrays)
+        Helper::garbageCollector collector;
+
+        const int pfd = Helper::openAndAddToCloseList(Variables->PartMap->getRealPathOf(partitionName), collector, O_RDONLY);
         if (pfd < 0) return {format("Can't open partition: %s: %s", partitionName.data(), strerror(errno)), false};
-        const int ffd = open(outputName.data(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        if (ffd < 0) {
-            close(pfd);
-            return {format("Can't create/open output file %s: %s", outputName.data(), strerror(errno)), false};
-        }
+
+        const int ffd = Helper::openAndAddToCloseList(outputName, collector, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        if (ffd < 0) return {format("Can't create/open output file %s: %s", outputName.data(), strerror(errno)), false};
 
         LOGN(BFUN, INFO) << "Writing partition " << partitionName << " to file: " << outputName << std::endl;
         auto *buffer = new char[bufferSize];
+        collector.delAfterProgress(buffer);
         memset(buffer, 0x00, bufferSize);
+
         ssize_t bytesRead;
         while ((bytesRead = read(pfd, buffer, bufferSize)) > 0) {
-            if (const ssize_t bytesWritten = write(ffd, buffer, bytesRead); bytesWritten != bytesRead) {
-                close(pfd);
-                close(ffd);
-                delete[] buffer;
-                return {
-                    format("Can't write partition to output file %s: %s", outputName.data(), strerror(errno)), false
-                };
-            }
+            if (const ssize_t bytesWritten = write(ffd, buffer, bytesRead); bytesWritten != bytesRead)
+                return {format("Can't write partition to output file %s: %s", outputName.data(), strerror(errno)), false};
         }
 
-        close(pfd);
-        close(ffd);
-        delete[] buffer;
+        if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY))
+            LOGN(BFUN, WARNING) << "Failed to change owner of output file: " << outputName << ". Access problems maybe occur in non-root mode" << std::endl;
+        if (!Helper::changeMode(outputName, 0660))
+            LOGN(BFUN, WARNING) << "Failed to change mode of output file as 660: " << outputName << ". Access problems maybe occur in non-root mode" << std::endl;
 
         return {format("%s partition successfully back upped to %s", partitionName.data(), outputName.data()), true};
     }
@@ -84,8 +81,7 @@ namespace PartitionManager {
         cmd = _app.add_subcommand("backup", "Backup partition(s) to file(s)");
         cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
         cmd->add_option("output(s)", rawOutputNames, "File name(s) (or path(s)) to save the partition image(s)");
-        cmd->add_option("-O,--output-directory", outputDirectory, "Directory to save the partition image(s)")->check(
-            CLI::ExistingDirectory);
+        cmd->add_option("-O,--output-directory", outputDirectory, "Directory to save the partition image(s)")->check(CLI::ExistingDirectory);
         cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)");
 
         return true;
@@ -96,7 +92,7 @@ namespace PartitionManager {
         if (!outputNames.empty() && partitions.size() != outputNames.size())
             throw CLI::ValidationError("You must provide an output name(s) as long as the partition name(s)");
 
-        std::vector<std::future<pair> > futures;
+        std::vector<std::future<pair>> futures;
         for (size_t i = 0; i < partitions.size(); i++) {
             std::string partitionName = partitions[i];
             std::string outputName = outputNames.empty() ? partitionName + ".img" : outputNames[i];
@@ -111,7 +107,7 @@ namespace PartitionManager {
         for (auto &future: futures) {
             auto [fst, snd] = future.get();
             if (!snd) { end += fst + '\n'; endResult = false; }
-            else print("%s\n", fst.c_str());
+            else println("%s", fst.c_str());
         }
 
         if (!endResult) throw Error("%s", end.c_str());

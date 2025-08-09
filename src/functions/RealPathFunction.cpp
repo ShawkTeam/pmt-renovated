@@ -39,7 +39,7 @@ namespace PartitionManager {
 				else throw Error("Used --logical (-l) flag but is not logical partition: %s", partition.data());
 			}
 
-			print("%s\n", Variables->PartMap->getRealPathOf(partition).data());
+			println("%s", Variables->PartMap->getRealPathOf(partition).data());
 		}
 
 		return true;

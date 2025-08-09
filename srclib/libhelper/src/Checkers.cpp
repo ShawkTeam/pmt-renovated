@@ -19,64 +19,54 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <libhelper/lib.hpp>
+#include <private/android_filesystem_config.h>
 
 namespace Helper {
+	bool hasSuperUser() {
+		return (getuid() == AID_ROOT);
+	}
 
-bool hasSuperUser()
-{
-	return (getuid() == 0);
-}
+	bool isExists(const std::string_view entry) {
+		struct stat st{};
+		return (stat(entry.data(), &st) == 0);
+	}
 
-bool isExists(const std::string_view entry)
-{
-	struct stat st{};
-	return (stat(entry.data(), &st) == 0);
-}
+	bool fileIsExists(const std::string_view file) {
+		struct stat st{};
+		if (stat(file.data(), &st) != 0) return false;
+		return S_ISREG(st.st_mode);
+	}
 
-bool fileIsExists(const std::string_view file)
-{
-	struct stat st{};
-	if (stat(file.data(), &st) != 0) return false;
-	return S_ISREG(st.st_mode);
-}
+	bool directoryIsExists(const std::string_view directory) {
+		struct stat st{};
+		if (stat(directory.data(), &st) != 0) return false;
+		return S_ISDIR(st.st_mode);
+	}
 
-bool directoryIsExists(const std::string_view directory)
-{
-	struct stat st{};
-	if (stat(directory.data(), &st) != 0) return false;
-	return S_ISDIR(st.st_mode);
-}
+	bool linkIsExists(const std::string_view entry) {
+		return (isLink(entry) || isHardLink(entry));
+	}
 
-bool linkIsExists(const std::string_view entry)
-{
-	return (isLink(entry) || isHardLink(entry));
-}
+	bool isLink(const std::string_view entry) {
+		struct stat st{};
+		if (lstat(entry.data(), &st) != 0) return false;
+		return S_ISLNK(st.st_mode);
+	}
 
-bool isLink(const std::string_view entry)
-{
-	struct stat st{};
-	if (lstat(entry.data(), &st) != 0) return false;
-	return S_ISLNK(st.st_mode);
-}
+	bool isSymbolicLink(const std::string_view entry) {
+		return isLink(entry);
+	}
 
-bool isSymbolicLink(const std::string_view entry)
-{
-	return isLink(entry);
-}
+	bool isHardLink(const std::string_view entry) {
+		struct stat st{};
+		if (lstat(entry.data(), &st) != 0) return false;
+		return (st.st_nlink >= 2);
+	}
 
-bool isHardLink(const std::string_view entry)
-{
-	struct stat st{};
-	if (lstat(entry.data(), &st) != 0) return false;
-	return (st.st_nlink >= 2);
-}
+	bool areLinked(const std::string_view entry1, const std::string_view entry2) {
+		const std::string st1 = (isSymbolicLink(entry1)) ? readSymlink(entry1) : std::string(entry1.data());
+		const std::string st2 = (isSymbolicLink(entry2)) ? readSymlink(entry2) : std::string(entry2.data());
 
-bool areLinked(const std::string_view entry1, const std::string_view entry2)
-{
-	const std::string st1 = (isSymbolicLink(entry1)) ? readSymlink(entry1) : std::string(entry1.data());
-	const std::string st2 = (isSymbolicLink(entry2)) ? readSymlink(entry2) : std::string(entry2.data());
-
-	return (st1 == st2);
-}
-
+		return (st1 == st2);
+	}
 } // namespace Helper

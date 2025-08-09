@@ -18,17 +18,20 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstdarg>
+#include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <generated/buildInfo.hpp>
 #include "functions/functions.hpp"
 
 namespace PartitionManager {
+	variableProtect protector;
 	auto Variables = new VariableTable();
 
-	logSetter::logSetter() { Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log"); }
+	variableProtect::variableProtect() { Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log"); }
+	variableProtect::~variableProtect() { delete _ptr; }
+	void variableProtect::setVariablePointer(basic_variables *&_ptr) { this->_ptr = _ptr; }
 
 	basic_variables::~basic_variables() { delete PartMap; }
-
 	basic_variables::basic_variables() : PartMap(new PartitionMap::BuildMap()),
 	                                     logFile("/sdcard/Documents/last_pmt_logs.log"),
 	                                     onLogical(false),
@@ -42,10 +45,11 @@ namespace PartitionManager {
 		try {
 			// try-catch start
 			CLI::App AppMain{"Partition Manager Tool"};
+			protector.setVariablePointer(Variables);
 			FunctionManager FuncManager;
 
 			AppMain.fallthrough(true);
-			AppMain.set_help_all_flag("--help-all", "Print full help message");
+			AppMain.set_help_all_flag("--help-all", "Print full help message and exit");
 			AppMain.footer("Partition Manager Tool is written by YZBruh\nThis project licensed under Apache 2.0 license\nReport bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
 			AppMain.add_option("-S,--search-path", Variables->searchPath, "Set partition search path")->check(
 				[&](const std::string &val) {
@@ -62,7 +66,7 @@ namespace PartitionManager {
 			AppMain.add_flag("-v,--version", Variables->viewVersion, "Print version and exit");
 
 			if (argc < 2) {
-				print("Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.\n", argv[0]);
+				println("Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.", argv[0]);
 				return EXIT_FAILURE;
 			}
 
@@ -73,34 +77,29 @@ namespace PartitionManager {
 			FuncManager.registerFunction(std::make_unique<infoFunction>(), AppMain);
 			FuncManager.registerFunction(std::make_unique<realPathFunction>(), AppMain);
 			FuncManager.registerFunction(std::make_unique<realLinkPathFunction>(), AppMain);
+			FuncManager.registerFunction(std::make_unique<typeFunction>(), AppMain);
+			FuncManager.registerFunction(std::make_unique<rebootFunction>(), AppMain);
 
 			CLI11_PARSE(AppMain, argc, argv);
 
 			if (Variables->verboseMode) Helper::LoggingProperties::setPrinting(YES);
-			if (Variables->viewVersion) {
-				print("%s\n", getAppVersion().data());
-				return EXIT_SUCCESS;
-			}
-
+			if (Variables->viewVersion) { println("%s", getAppVersion().data()); return EXIT_SUCCESS; }
 			if (!Variables->searchPath.empty()) (*Variables->PartMap)(Variables->searchPath);
 
 			if (!Variables->PartMap && Variables->searchPath.empty())
 				throw Error("No default search entries were found. Specify a search directory with -S (--search-path)");
 
-			if (!Helper::hasSuperUser()) throw Error("This program requires super-user privileges!");
+			if (!Helper::hasSuperUser()) throw Error("Partition Manager Tool is requires super-user privileges!\n");
 
 			return FuncManager.handleAll() == true ? EXIT_SUCCESS : EXIT_FAILURE;
 		} catch (Helper::Error &error) {
 			// catch Helper::Error
 
-			if (!Variables->quietProcess) fprintf(stderr, "%s%sERROR(S) OCCURRED%s:\n%s", RED, BOLD, STYLE_RESET,
-			                                      error.what());
-			delete Variables;
+			if (!Variables->quietProcess) fprintf(stderr, "%s%sERROR(S) OCCURRED:%s\n%s", RED, BOLD, STYLE_RESET, error.what());
 			return EXIT_FAILURE;
 		} catch (CLI::Error &error) {
 			// catch CLI::Error
 
-			delete Variables;
 			fprintf(stderr, "%s: %s%sFLAG PARSE ERROR:%s %s\n", argv[0], RED, BOLD, STYLE_RESET, error.what());
 			return EXIT_FAILURE;
 		} // try-catch block end
@@ -110,6 +109,13 @@ namespace PartitionManager {
 		va_list args;
 		va_start(args, format);
 		if (!Variables->quietProcess) vfprintf(stdout, format, args);
+		va_end(args);
+	}
+
+	void println(const char *format, ...) {
+		va_list args;
+		va_start(args, format);
+		if (!Variables->quietProcess) { vfprintf(stdout, format, args); print("\n"); }
 		va_end(args);
 	}
 

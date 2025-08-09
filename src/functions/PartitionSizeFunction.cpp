@@ -57,7 +57,7 @@ namespace PartitionManager {
             if (asMega) multiple = "MB";
             if (asGiga) multiple = "GB";
 
-            print("%s: %s%s\n", partition.data(), convertTo(Variables->PartMap->sizeOf(partition), multiple).data(),
+            println("%s: %s%s", partition.data(), convertTo(Variables->PartMap->sizeOf(partition), multiple).data(),
                   multiple.data());
         }
 

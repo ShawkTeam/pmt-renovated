@@ -34,15 +34,16 @@ namespace PartitionManager {
             if (Variables->forceProcess)
                 LOGN(EFUN, WARNING) << "Partition " << partitionName <<
                         " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
-            else return {
-                format("Used --logical (-l) flag but is not logical partition: %s", partitionName.data()), false
-            };
+            else return {format("Used --logical (-l) flag but is not logical partition: %s", partitionName.data()), false};
         }
 
         setupBufferSize(bufferSize, partitionName);
         LOGN(EFUN, INFO) << "Using buffer size: " << bufferSize;
 
-        const int pfd = open(Variables->PartMap->getRealPathOf(partitionName).data(), O_WRONLY);
+        // Automatically close file descriptors and delete allocated memories (arrays)
+        Helper::garbageCollector collector;
+
+        const int pfd = Helper::openAndAddToCloseList(Variables->PartMap->getRealPathOf(partitionName), collector, O_WRONLY);
         if (pfd < 0) return {format("Can't open partition: %s: %s", partitionName.data(), strerror(errno)), false};
 
         if (!Variables->forceProcess) Helper::confirmPropt(
@@ -50,7 +51,9 @@ namespace PartitionManager {
 
         LOGN(EFUN, INFO) << "Writing zero bytes to partition: " << partitionName << std::endl;
         auto *buffer = new char[bufferSize];
+        collector.delAfterProgress(buffer);
         memset(buffer, 0x00, bufferSize);
+
         ssize_t bytesWritten = 0;
         const uint64_t partitionSize = Variables->PartMap->sizeOf(partitionName);
 
@@ -58,17 +61,10 @@ namespace PartitionManager {
             size_t toWrite = sizeof(buffer);
             if (partitionSize - bytesWritten < sizeof(buffer)) toWrite = partitionSize - bytesWritten;
 
-            if (const ssize_t result = write(pfd, buffer, toWrite); result == -1) {
-                close(pfd);
-                delete[] buffer;
-                return {
-                    format("Can't write zero bytes to partition: %s: %s", partitionName.data(), strerror(errno)), false
-                };
-            } else bytesWritten += result;
+            if (const ssize_t result = write(pfd, buffer, toWrite); result == -1)
+                return {format("Can't write zero bytes to partition: %s: %s", partitionName.data(), strerror(errno)), false};
+            else bytesWritten += result;
         }
-
-        close(pfd);
-        delete[] buffer;
 
         return {format("Successfully wrote zero bytes to the %s partition\n", partitionName.data()), true};
     }
@@ -82,7 +78,7 @@ namespace PartitionManager {
     }
 
     bool eraseFunction::run() {
-        std::vector<std::future<pair> > futures;
+        std::vector<std::future<pair>> futures;
         for (const auto &partitionName: partitions) {
             futures.push_back(std::async(std::launch::async, runAsync, partitionName, bufferSize));
             LOGN(EFUN, INFO) << "Created thread for writing zero bytes to " << partitionName << std::endl;
@@ -93,7 +89,7 @@ namespace PartitionManager {
         for (auto &future: futures) {
             auto [fst, snd] = future.get();
             if (!snd) { end += fst + '\n'; endResult = false; }
-            else print("%s\n", fst.c_str());
+            else println("%s", fst.c_str());
         }
 
         if (!endResult) throw Error("%s", end.c_str());

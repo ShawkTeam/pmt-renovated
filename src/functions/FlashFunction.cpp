@@ -27,9 +27,9 @@ Copyright 2025 Yağız Zengin
 namespace PartitionManager {
     pair flashFunction::runAsync(const std::string &partitionName, const std::string &imageName, int bufferSize) {
         if (!Helper::fileIsExists(imageName)) return {format("Couldn't find image file: %s", imageName.data()), false};
-        if (!Variables->PartMap->hasPartition(partitionName)) return {
-            format("Couldn't find partition: %s", partitionName.data()), false
-        };
+        if (!Variables->PartMap->hasPartition(partitionName)) return {format("Couldn't find partition: %s", partitionName.data()), false};
+        if (Helper::fileSize(imageName) > Variables->PartMap->sizeOf(partitionName))
+            return {format("%s is larger than %s partition size!", imageName.data(), partitionName.data()), false};
 
         LOGN(FFUN, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;
 
@@ -45,35 +45,27 @@ namespace PartitionManager {
         setupBufferSize(bufferSize, imageName);
         LOGN(FFUN, INFO) << "Using buffer size: " << bufferSize;
 
-        const int ffd = open(imageName.data(), O_RDONLY);
+        // Automatically close file descriptors and delete allocated memories (arrays)
+        Helper::garbageCollector collector;
+
+        const int ffd = Helper::openAndAddToCloseList(imageName, collector, O_RDONLY);
         if (ffd < 0) return {format("Can't open image file %s: %s", imageName.data(), strerror(errno)), false};
 
-        const int pfd = open(Variables->PartMap->getRealPathOf(partitionName).data(), O_RDWR | O_TRUNC);
-        if (pfd < 0) {
-            close(ffd);
-            return {format("Can't open partition: %s: %s", partitionName.data(), strerror(errno)), false};
-        }
+        const int pfd = Helper::openAndAddToCloseList(Variables->PartMap->getRealPathOf(partitionName), collector, O_RDWR | O_TRUNC);
+        if (pfd < 0) return {format("Can't open partition: %s: %s", partitionName.data(), strerror(errno)), false};
 
         LOGN(FFUN, INFO) << "Writing image " << imageName << " to partition: " << partitionName << std::endl;
         auto *buffer = new char[bufferSize];
+        collector.delAfterProgress(buffer);
         memset(buffer, 0x00, bufferSize);
+
         ssize_t bytesRead;
         while ((bytesRead = read(ffd, buffer, bufferSize)) > 0) {
-            if (const ssize_t bytesWritten = write(pfd, buffer, bytesRead); bytesWritten != bytesRead) {
-                close(pfd);
-                close(ffd);
-                delete[] buffer;
-                return {
-                    format("Can't write partition to output file %s: %s", imageName.data(), strerror(errno)), false
-                };
-            }
+            if (const ssize_t bytesWritten = write(pfd, buffer, bytesRead); bytesWritten != bytesRead)
+                return {format("Can't write partition to output file %s: %s", imageName.data(), strerror(errno)), false};
         }
 
-        close(pfd);
-        close(ffd);
-        delete[] buffer;
-
-        return {format("%s is successfully wrote to %s partition\n", imageName.data(), partitionName.data()), true};
+        return {format("%s is successfully wrote to %s partition", imageName.data(), partitionName.data()), true};
     }
 
     bool flashFunction::init(CLI::App &_app) {
@@ -92,7 +84,7 @@ namespace PartitionManager {
         if (partitions.size() != imageNames.size())
             throw CLI::ValidationError("You must provide an image file(s) as long as the partition name(s)");
 
-        std::vector<std::future<pair> > futures;
+        std::vector<std::future<pair>> futures;
         for (size_t i = 0; i < partitions.size(); i++) {
             std::string imageName = imageNames[i];
             if (!imageDirectory.empty()) imageName.insert(0, imageDirectory + '/');
@@ -108,7 +100,7 @@ namespace PartitionManager {
             if (!snd) {
                 end += fst + '\n';
                 endResult = false;
-            } else print("%s", fst.c_str());
+            } else println("%s", fst.c_str());
         }
 
         if (!endResult) throw Error("%s", end.c_str());

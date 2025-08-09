@@ -17,6 +17,7 @@
 # Sources
 set(LIBPARTITION_MAP_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Getters.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/Magic.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/PartitionMap.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Type.cpp
 )

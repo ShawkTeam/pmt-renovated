@@ -39,216 +39,197 @@ static constexpr std::array<std::string_view, 3> defaultEntryList = {
 };
 
 namespace PartitionMap {
-
-bool basic_partition_map_builder::_is_real_block_dir(const std::string_view path)
-{
-	if (path.find("/block/") == std::string::npos) {
-		LOGN(MAP, ERROR) << "Path " << path << " is not a real block directory.";
-		return false;
-	}
-	return true;
-}
-
-Map_t basic_partition_map_builder::_build_map(std::string_view path, bool logical)
-{
-	Map_t map;
-	std::vector<std::filesystem::directory_entry> entries{std::filesystem::directory_iterator(path), std::filesystem::directory_iterator()};
-	std::sort(entries.begin(), entries.end(), [](const auto& a, const auto& b) {
-		return a.path().filename() < b.path().filename();
-	});
-
-	LOGN_IF(MAP, WARNING, entries.empty()) << "" << path << "is exists but generated vector is empty (std::vector<std::filesystem::directory_entry>)." << std::endl;
-	for (const auto& entry : entries) {
-		if (entry.path().filename() != "by-uuid"
-		    && std::string(entry.path()).find("com.") == std::string::npos)
-			map.insert(entry.path().filename().string(), _get_size(entry.path()), logical);
+	bool basic_partition_map_builder::_is_real_block_dir(const std::string_view path) {
+		if (path.find("/block/") == std::string::npos) {
+			LOGN(MAP, ERROR) << "Path " << path << " is not a real block directory.";
+			return false;
+		}
+		return true;
 	}
 
-	LOGN(MAP, INFO) << std::boolalpha << "Map generated successfully. is_logical_map=" << logical << std::endl;
-	return map;
-}
+	Map_t basic_partition_map_builder::_build_map(std::string_view path, bool logical) {
+		Map_t map;
+		std::vector<std::filesystem::directory_entry> entries{
+			std::filesystem::directory_iterator(path), std::filesystem::directory_iterator()
+		};
+		std::sort(entries.begin(), entries.end(), [](const auto &a, const auto &b) {
+			return a.path().filename() < b.path().filename();
+		});
 
-void basic_partition_map_builder::_insert_logicals(Map_t&& logicals)
-{
-	LOGN(MAP, INFO) << "merging created logical partition list to this object's variable." << std::endl;
-	_current_map.merge(logicals);
-}
+		LOGN_IF(MAP, WARNING, entries.empty()) << "" << path <<
+ "is exists but generated vector is empty (std::vector<std::filesystem::directory_entry>)." << std::endl;
+		for (const auto &entry: entries) {
+			if (entry.path().filename() != "by-uuid"
+			    && std::string(entry.path()).find("com.") == std::string::npos)
+				map.insert(entry.path().filename().string(), _get_size(entry.path()), logical);
+		}
 
-void basic_partition_map_builder::_map_build_check() const
-{
-	if (!_map_builded)
-		throw Error("Please build partition map before!");
-}
-
-uint64_t basic_partition_map_builder::_get_size(const std::string& path)
-{
-	const std::string real = std::filesystem::read_symlink(path);
-	const int fd = open(real.data(), O_RDONLY);
-	if (fd < 0) {
-		LOGN(MAP, ERROR) << "Cannot open " << real << ": " << strerror(errno) << std::endl;
-		return 0;
+		LOGN(MAP, INFO) << std::boolalpha << "Map generated successfully. is_logical_map=" << logical << std::endl;
+		return map;
 	}
 
-	uint64_t size = 0;
-	if (ioctl(fd, BLKGETSIZE64, &size) != 0) {
-		close(fd);
-		LOGN(MAP, ERROR) << "ioctl() process failed for " << real << ": " << strerror(errno) << std::endl;
-		return 0;
+	void basic_partition_map_builder::_insert_logicals(Map_t &&logicals) {
+		LOGN(MAP, INFO) << "merging created logical partition list to this object's variable." << std::endl;
+		_current_map.merge(logicals);
 	}
 
-	close(fd);
-	return size;
-}
+	void basic_partition_map_builder::_map_build_check() const {
+		if (!_map_builded)
+			throw Error("Please build partition map before!");
+	}
 
-basic_partition_map_builder::basic_partition_map_builder()
-{
-	LOGN(MAP, INFO) << "default constructor called. Starting build." << std::endl;
+	uint64_t basic_partition_map_builder::_get_size(const std::string &path) {
+		const std::string real = std::filesystem::read_symlink(path);
+		Helper::garbageCollector collector;
 
-	for (const auto& path : defaultEntryList) {
-		if (std::filesystem::exists(path)) {
-			_current_map = _build_map(path);
-			if (_current_map.empty()) {
-				_any_generating_error = true;
-			} else {
-				_workdir = path;
-				break;
+		const int fd = Helper::openAndAddToCloseList(real, collector, O_RDONLY);
+		if (fd < 0) {
+			LOGN(MAP, ERROR) << "Cannot open " << real << ": " << strerror(errno) << std::endl;
+			return 0;
+		}
+
+		uint64_t size = 0;
+		if (ioctl(fd, BLKGETSIZE64, &size) != 0) {
+			LOGN(MAP, ERROR) << "ioctl() process failed for " << real << ": " << strerror(errno) << std::endl;
+			return 0;
+		}
+
+		return size;
+	}
+
+	basic_partition_map_builder::basic_partition_map_builder() {
+		LOGN(MAP, INFO) << "default constructor called. Starting build." << std::endl;
+
+		for (const auto &path: defaultEntryList) {
+			if (std::filesystem::exists(path)) {
+				_current_map = _build_map(path);
+				if (_current_map.empty()) {
+					_any_generating_error = true;
+				} else {
+					_workdir = path;
+					break;
+				}
 			}
 		}
+
+		if (_current_map.empty())
+			LOGN(MAP, ERROR) << "Cannot build map by any default search entry." << std::endl;
+
+		LOGN(MAP, INFO) << "default constructor successfully ended work." << std::endl;
+		_insert_logicals(_build_map("/dev/block/mapper", true));
+		_map_builded = true;
 	}
 
-	if (_current_map.empty())
-		LOGN(MAP, ERROR) << "Cannot build map by any default search entry." << std::endl;
+	basic_partition_map_builder::basic_partition_map_builder(const std::string_view path) {
+		LOGN(MAP, INFO) << "argument-based constructor called. Starting build." << std::endl;
 
-	LOGN(MAP, INFO) << "default constructor successfully ended work." << std::endl;
-	_insert_logicals(_build_map("/dev/block/mapper", true));
-	_map_builded = true;
-}
-
-basic_partition_map_builder::basic_partition_map_builder(const std::string_view path)
-{
-	LOGN(MAP, INFO) << "argument-based constructor called. Starting build." << std::endl;
-
-	if (std::filesystem::exists(path)) {
-		if (!_is_real_block_dir(path)) return;
-		_current_map = _build_map(path);
-		if (_current_map.empty()) _any_generating_error = true;
-		else _workdir = path;
-	} else
-		throw Error("Cannot find directory: %s. Cannot build partition map!", path.data());
-
-	LOGN(MAP, INFO) << "argument-based constructor successfully ended work." << std::endl;
-	_insert_logicals(_build_map("/dev/block/mapper", true));
-	_map_builded = true;
-}
-
-bool basic_partition_map_builder::hasPartition(const std::string_view name) const
-{
-	_map_build_check();
-	return _current_map.find(name);
-}
-
-bool basic_partition_map_builder::isLogical(const std::string_view name) const
-{
-	_map_build_check();
-	return _current_map.is_logical(name);
-}
-
-void basic_partition_map_builder::clear()
-{
-	_current_map.clear();
-	_workdir.clear();
-	_any_generating_error = false;
-}
-
-bool basic_partition_map_builder::readDirectory(const std::string_view path)
-{
-	_map_builded = false;
-	LOGN(MAP, INFO) << "read " << path << " directory request." << std::endl;
-
-	if (std::filesystem::exists(path)) {
-		if (!_is_real_block_dir(path)) return false;
-		_current_map = _build_map(path);
-		if (_current_map.empty()) {
-			_any_generating_error = true;
-			return false;
-		} else _workdir = path;
-	} else
-		throw Error("Cannot find directory: %s. Cannot build partition map!", path.data());
-
-	LOGN(MAP, INFO) << "read " << path << " successfull." << std::endl;
-	_insert_logicals(_build_map("/dev/block/mapper", true));
-	_map_builded = true;
-	return true;
-}
-
-bool basic_partition_map_builder::readDefaultDirectories()
-{
-	_map_builded = false;
-	LOGN(MAP, INFO) << "read default directories request." << std::endl;
-
-	for (const auto& path : defaultEntryList) {
 		if (std::filesystem::exists(path)) {
+			if (!_is_real_block_dir(path)) return;
+			_current_map = _build_map(path);
+			if (_current_map.empty()) _any_generating_error = true;
+			else _workdir = path;
+		} else
+			throw Error("Cannot find directory: %s. Cannot build partition map!", path.data());
+
+		LOGN(MAP, INFO) << "argument-based constructor successfully ended work." << std::endl;
+		_insert_logicals(_build_map("/dev/block/mapper", true));
+		_map_builded = true;
+	}
+
+	bool basic_partition_map_builder::hasPartition(const std::string_view name) const {
+		_map_build_check();
+		return _current_map.find(name);
+	}
+
+	bool basic_partition_map_builder::isLogical(const std::string_view name) const {
+		_map_build_check();
+		return _current_map.is_logical(name);
+	}
+
+	void basic_partition_map_builder::clear() {
+		_current_map.clear();
+		_workdir.clear();
+		_any_generating_error = false;
+	}
+
+	bool basic_partition_map_builder::readDirectory(const std::string_view path) {
+		_map_builded = false;
+		LOGN(MAP, INFO) << "read " << path << " directory request." << std::endl;
+
+		if (std::filesystem::exists(path)) {
+			if (!_is_real_block_dir(path)) return false;
 			_current_map = _build_map(path);
 			if (_current_map.empty()) {
 				_any_generating_error = true;
 				return false;
-			} else {
-				_workdir = path;
-				break;
-			}
-		}
+			} else _workdir = path;
+		} else
+			throw Error("Cannot find directory: %s. Cannot build partition map!", path.data());
+
+		LOGN(MAP, INFO) << "read " << path << " successfull." << std::endl;
+		_insert_logicals(_build_map("/dev/block/mapper", true));
+		_map_builded = true;
+		return true;
 	}
 
-	if (_current_map.empty())
-		LOGN(MAP, ERROR) << "Cannot build map by any default search entry." << std::endl;
+	bool basic_partition_map_builder::readDefaultDirectories() {
+		_map_builded = false;
+		LOGN(MAP, INFO) << "read default directories request." << std::endl;
 
-	LOGN(MAP, INFO) << "read default directories successfull." << std::endl;
-	_insert_logicals(_build_map("/dev/block/mapper", true));
-	_map_builded = true;
-	return true;
-}
+		for (const auto &path: defaultEntryList) {
+			if (std::filesystem::exists(path)) {
+				_current_map = _build_map(path);
+				if (_current_map.empty()) {
+					_any_generating_error = true;
+					return false;
+				} else {
+					_workdir = path;
+					break;
+				}
+			}
+		}
 
-bool basic_partition_map_builder::empty() const
-{
-	_map_build_check();
-	return _current_map.empty();
-}
+		if (_current_map.empty())
+			LOGN(MAP, ERROR) << "Cannot build map by any default search entry." << std::endl;
 
-uint64_t basic_partition_map_builder::sizeOf(const std::string_view name) const
-{
-	_map_build_check();
-	return _current_map.get_size(name);
-}
+		LOGN(MAP, INFO) << "read default directories successfull." << std::endl;
+		_insert_logicals(_build_map("/dev/block/mapper", true));
+		_map_builded = true;
+		return true;
+	}
 
-bool operator==(const basic_partition_map_builder& lhs, const basic_partition_map_builder& rhs)
-{
-	return lhs._current_map == rhs._current_map;
-}
+	bool basic_partition_map_builder::empty() const {
+		_map_build_check();
+		return _current_map.empty();
+	}
 
-bool operator!=(const basic_partition_map_builder& lhs, const basic_partition_map_builder& rhs)
-{
-	return !(lhs == rhs);
-}
+	uint64_t basic_partition_map_builder::sizeOf(const std::string_view name) const {
+		_map_build_check();
+		return _current_map.get_size(name);
+	}
 
-basic_partition_map_builder::operator bool() const
-{
-	return !this->_any_generating_error;
-}
+	bool operator==(const basic_partition_map_builder &lhs, const basic_partition_map_builder &rhs) {
+		return lhs._current_map == rhs._current_map;
+	}
 
-bool basic_partition_map_builder::operator!() const
-{
-	return this->_any_generating_error;
-}
+	bool operator!=(const basic_partition_map_builder &lhs, const basic_partition_map_builder &rhs) {
+		return !(lhs == rhs);
+	}
 
-bool basic_partition_map_builder::operator()(const std::string_view path)
-{
-	LOGN(MAP, INFO) << "calling readDirectory() for building map with " << path << std::endl;
-	return readDirectory(path);
-}
+	basic_partition_map_builder::operator bool() const {
+		return !this->_any_generating_error;
+	}
 
-std::string getLibVersion()
-{
-	MKVERSION("libpartition_map");
-}
+	bool basic_partition_map_builder::operator!() const {
+		return this->_any_generating_error;
+	}
 
+	bool basic_partition_map_builder::operator()(const std::string_view path) {
+		LOGN(MAP, INFO) << "calling readDirectory() for building map with " << path << std::endl;
+		return readDirectory(path);
+	}
+
+	std::string getLibVersion() {
+		MKVERSION("libpartition_map");
+	}
 } // namespace PartitionMap

@@ -17,6 +17,7 @@
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 
+#include <cstdint>
 #include <string>
 #include <string_view>
 #include <sstream>
@@ -26,117 +27,140 @@
 #ifndef ONLY_HELPER_MACROS
 
 enum LogLevels {
-	INFO    = static_cast<int>('I'),
+	INFO = static_cast<int>('I'),
 	WARNING = static_cast<int>('W'),
-	ERROR   = static_cast<int>('E'),
-	ABORT   = static_cast<int>('A')
+	ERROR = static_cast<int>('E'),
+	ABORT = static_cast<int>('A')
 };
 
-constexpr mode_t DEFAULT_FILE_PERMS				= 0644;
-constexpr mode_t DEFAULT_EXTENDED_FILE_PERMS	= 0755;
-constexpr mode_t DEFAULT_DIR_PERMS				= 0755;
-constexpr int    YES = 1;
-constexpr int    NO  = 0;
+constexpr mode_t DEFAULT_FILE_PERMS = 0644;
+constexpr mode_t DEFAULT_EXTENDED_FILE_PERMS = 0755;
+constexpr mode_t DEFAULT_DIR_PERMS = 0755;
+constexpr int YES = 1;
+constexpr int NO = 0;
 
 namespace Helper {
+	// Logging
+	class Logger final {
+	private:
+		LogLevels _level;
+		std::ostringstream _oss;
+		const char *_funcname, *_logFile, *_program_name, *_file;
+		int _line;
 
-// Logging
-class Logger final {
-private:
-	LogLevels _level;
-	std::ostringstream _oss;
-	const char *_funcname, *_logFile, *_program_name, *_file;
-	int _line;
+	public:
+		Logger(LogLevels level, const char *func, const char *file, const char *name, const char *sfile, int line);
 
-public:
-	Logger(LogLevels level, const char* func, const char* file, const char* name, const char* sfile, int line);
-	~Logger();
+		~Logger();
 
-	template <typename T>
-	Logger& operator<<(const T& msg)
-	{
-		_oss << msg;
-		return *this;
-	}
-	Logger& operator<<(std::ostream& (*msg)(std::ostream&));
-};
+		template<typename T>
+		Logger &operator<<(const T &msg) {
+			_oss << msg;
+			return *this;
+		}
 
-// Throwable error class
-class Error final : public std::exception {
-private:
-	std::string _message;
+		Logger &operator<<(std::ostream & (*msg)(std::ostream &));
+	};
 
-public:
-	__attribute__((format(printf, 2, 3)))
-	explicit Error(const char* format, ...);
+	// Throwable error class
+	class Error final : public std::exception {
+	private:
+		std::string _message;
 
-	[[nodiscard]] const char* what() const noexcept override;
-};
+	public:
+		__attribute__((format(printf, 2, 3)))
+		explicit Error(const char *format, ...);
 
-namespace LoggingProperties {
+		[[nodiscard]] const char *what() const noexcept override;
+	};
 
-extern std::string_view FILE, NAME;
-extern bool PRINT, DISABLE;
+	// Close file descriptors and delete allocated array memory
+	class garbageCollector {
+	private:
+		std::vector<char*> _ptrs_c;
+		std::vector<uint8_t*> _ptrs_u;
+		std::vector<FILE*> _fps;
+		std::vector<int> _fds;
 
-void set(std::string_view name, std::string_view file);
-void setProgramName(std::string_view name);
-void setLogFile(std::string_view file);
-void setPrinting(int state);
-void setLoggingState(int state); // Disable/enable logging
-void reset();
+	public:
+		~garbageCollector();
 
-} // namespace LoggingProperties
+		void delAfterProgress(char* &_ptr);
+		void delAfterProgress(uint8_t* &_ptr);
+		void delAfterProgress(FILE* &_fp);
+		void closeAfterProgress(int _fd);
+	};
 
-// Checkers
-bool hasSuperUser();
-bool isExists(std::string_view entry);
-bool fileIsExists(std::string_view file);
-bool directoryIsExists(std::string_view directory);
-bool linkIsExists(std::string_view entry);
-bool isLink(std::string_view entry);
-bool isSymbolicLink(std::string_view entry);
-bool isHardLink(std::string_view entry);
-bool areLinked(std::string_view entry1, std::string_view entry2);
+	namespace LoggingProperties {
+		extern std::string_view FILE, NAME;
+		extern bool PRINT, DISABLE;
 
-// File I/O
-bool writeFile(std::string_view file, std::string_view text);
-std::optional<std::string> readFile(std::string_view file);
+		void set(std::string_view name, std::string_view file);
+		void setProgramName(std::string_view name);
+		void setLogFile(std::string_view file);
+		void setPrinting(int state);
+		void setLoggingState(int state); // Disable/enable logging
 
-// Creators
-bool makeDirectory(std::string_view path);
-bool makeRecursiveDirectory(std::string_view paths);
-bool createFile(std::string_view path);
-bool createSymlink(std::string_view entry1, std::string_view entry2);
+		void reset();
+	} // namespace LoggingProperties
 
-// Removers
-bool eraseEntry(std::string_view entry);
-bool eraseDirectoryRecursive(std::string_view directory);
+	// Checkers
+	bool hasSuperUser();
+	bool isExists(std::string_view entry);
+	bool fileIsExists(std::string_view file);
+	bool directoryIsExists(std::string_view directory);
+	bool linkIsExists(std::string_view entry);
+	bool isLink(std::string_view entry);
+	bool isSymbolicLink(std::string_view entry);
+	bool isHardLink(std::string_view entry);
+	bool areLinked(std::string_view entry1, std::string_view entry2);
 
-// Getters
-size_t fileSize(std::string_view file);
-std::string readSymlink(std::string_view entry);
+	// File I/O
+	bool writeFile(std::string_view file, std::string_view text);
+	std::optional<std::string> readFile(std::string_view file);
 
-// SHA-256
-bool sha256Compare(std::string_view file1, std::string_view file2);
-std::optional<std::string> sha256Of(std::string_view path);
+	// Creators
+	bool makeDirectory(std::string_view path);
+	bool makeRecursiveDirectory(std::string_view paths);
+	bool createFile(std::string_view path);
+	bool createSymlink(std::string_view entry1, std::string_view entry2);
 
-// Utilities
-bool copyFile(std::string_view file, std::string_view dest);
-bool runCommand(std::string_view cmd);
-bool confirmPropt(std::string_view message);
-bool changeMode(std::string_view file, mode_t mode);
-bool changeOwner(std::string_view file, uid_t uid, gid_t gid);
-std::string currentWorkingDirectory();
-std::string currentDate();
-std::string currentTime();
-std::string runCommandWithOutput(std::string_view cmd);
-std::string pathJoin(std::string base, std::string relative);
-std::string pathBasename(std::string_view entry);
-std::string pathDirname(std::string_view entry);
+	// Removers
+	bool eraseEntry(std::string_view entry);
+	bool eraseDirectoryRecursive(std::string_view directory);
 
-// Library-specif
-std::string getLibVersion();
+	// Getters
+	size_t fileSize(std::string_view file);
+	std::string readSymlink(std::string_view entry);
 
+	// SHA-256
+	bool sha256Compare(std::string_view file1, std::string_view file2);
+	std::optional<std::string> sha256Of(std::string_view path);
+
+	// Utilities
+	bool copyFile(std::string_view file, std::string_view dest);
+	bool runCommand(std::string_view cmd);
+	bool confirmPropt(std::string_view message);
+	bool changeMode(std::string_view file, mode_t mode);
+	bool changeOwner(std::string_view file, uid_t uid, gid_t gid);
+	std::string currentWorkingDirectory();
+	std::string currentDate();
+	std::string currentTime();
+	std::string runCommandWithOutput(std::string_view cmd);
+	std::string pathJoin(std::string base, std::string relative);
+	std::string pathBasename(std::string_view entry);
+	std::string pathDirname(std::string_view entry);
+
+	// Android
+	std::string getProperty(std::string_view prop);
+	bool reboot(std::string_view arg);
+
+	// Library-specif
+	std::string getLibVersion();
+
+	// Open input path with flags and add to integrity list. And return file descriptor
+	[[nodiscard]] int openAndAddToCloseList(const std::string_view& path, garbageCollector &collector, int flags, mode_t mode = 0000);
+	[[nodiscard]] FILE* openAndAddToCloseList(const std::string_view& path, garbageCollector &collector, const char* mode);
 } // namespace Helper
 
 #endif // #ifndef ONLY_HELPER_MACROS

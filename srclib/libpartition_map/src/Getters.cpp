@@ -20,78 +20,71 @@
 #include <libpartition_map/lib.hpp>
 
 namespace PartitionMap {
+	Map_t basic_partition_map_builder::getAll() const {
+		_map_build_check();
+		return _current_map;
+	}
 
-Map_t basic_partition_map_builder::getAll() const
-{
-	_map_build_check();
-	return _current_map;
-}
+	std::optional<std::pair<uint64_t, bool> > basic_partition_map_builder::get(const std::string_view name) const {
+		_map_build_check();
 
-std::optional<std::pair<uint64_t, bool>> basic_partition_map_builder::get(const std::string_view name) const
-{
-	_map_build_check();
+		if (!_current_map.find(name)) return std::nullopt;
+		return std::make_pair(_current_map.get_size(name), _current_map.is_logical(name));
+	}
 
-	if (!_current_map.find(name)) return std::nullopt;
-	return std::make_pair(_current_map.get_size(name), _current_map.is_logical(name));
-}
+	std::optional<std::list<std::string> > basic_partition_map_builder::getLogicalPartitionList() const {
+		_map_build_check();
 
-std::optional<std::list<std::string>> basic_partition_map_builder::getLogicalPartitionList() const
-{
-	_map_build_check();
+		std::list<std::string> logicals;
+		for (const auto &[name, props]: _current_map)
+			if (props.isLogical) logicals.push_back(name);
 
-	std::list<std::string> logicals;
-	for (const auto& [name, props] : _current_map)
-		if (props.isLogical) logicals.push_back(name);
+		if (logicals.empty()) return std::nullopt;
+		return logicals;
+	}
 
-	if (logicals.empty()) return std::nullopt;
-	return logicals;
-}
+	std::optional<std::list<std::string> > basic_partition_map_builder::getPhysicalPartitionList() const {
+		_map_build_check();
 
-std::optional<std::list<std::string>> basic_partition_map_builder::getPhysicalPartitionList() const
-{
-	_map_build_check();
+		std::list<std::string> physicals;
+		for (const auto &[name, props]: _current_map)
+			if (!props.isLogical) physicals.push_back(name);
 
-	std::list<std::string> physicals;
-	for (const auto& [name, props] : _current_map)
-		if (!props.isLogical) physicals.push_back(name);
+		if (physicals.empty()) return std::nullopt;
+		return physicals;
+	}
 
-	if (physicals.empty()) return std::nullopt;
-	return physicals;
-}
+	std::optional<std::list<std::string> > basic_partition_map_builder::getPartitionList() const {
+		_map_build_check();
 
-std::optional<std::list<std::string>> basic_partition_map_builder::getPartitionList() const {
-	_map_build_check();
+		std::list<std::string> partitions;
+		for (const auto &[name, props]: _current_map) partitions.push_back(name);
 
-	std::list<std::string> partitions;
-	for (const auto& [name, props] : _current_map) partitions.push_back(name);
+		if (partitions.empty()) return std::nullopt;
+		return partitions;
+	}
 
-	if (partitions.empty()) return std::nullopt;
-	return partitions;
-}
+	std::string basic_partition_map_builder::getRealLinkPathOf(const std::string_view name) const {
+		_map_build_check();
 
-std::string basic_partition_map_builder::getRealLinkPathOf(const std::string_view name) const
-{
-	_map_build_check();
+		if (!_current_map.find(name)) return {};
+		return std::string(_workdir + "/" + name.data());
+	}
 
-	if (!_current_map.find(name)) return {};
-	return std::string(_workdir + "/" + name.data());
-}
+	std::string basic_partition_map_builder::getRealPathOf(const std::string_view name) const {
+		_map_build_check();
 
-std::string basic_partition_map_builder::getRealPathOf(const std::string_view name) const
-{
-	_map_build_check();
+		const std::string full = (isLogical(name))
+			                         ? std::string("/dev/block/mapper/") + name.data()
+			                         : _workdir + "/" + name.data();
+		if (!_current_map.find(name)
+		    || !std::filesystem::is_symlink(full))
+			return {};
 
-	const std::string full = (isLogical(name)) ? std::string("/dev/block/mapper/") + name.data() : _workdir + "/" + name.data();
-	if (!_current_map.find(name)
-	    || !std::filesystem::is_symlink(full))
-		return {};
+		return std::filesystem::read_symlink(full);
+	}
 
-	return std::filesystem::read_symlink(full);
-}
-
-std::string basic_partition_map_builder::getCurrentWorkDir() const
-{
-	return _workdir;
-}
-
+	std::string basic_partition_map_builder::getCurrentWorkDir() const {
+		return _workdir;
+	}
 } // namespace PartitionMap
