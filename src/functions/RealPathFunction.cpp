@@ -23,7 +23,7 @@ namespace PartitionManager {
 	bool realPathFunction::init(CLI::App &_app) {
 		LOGN(RPFUN, INFO) << "Initializing variables of real path function." << std::endl;
 		cmd = _app.add_subcommand("real-path", "Tell real paths of partition(s)");
-		cmd->add_option("partition(s)", partitions, "Partition name(s)")->required();
+		cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
 		return true;
 	}
 

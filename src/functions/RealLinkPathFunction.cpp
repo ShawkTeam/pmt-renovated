@@ -23,7 +23,7 @@ namespace PartitionManager {
 	bool realLinkPathFunction::init(CLI::App &_app) {
 		LOGN(RLPFUN, INFO) << "Initializing variables of real link path function." << std::endl;
 		cmd = _app.add_subcommand("real-linkpath", "Tell real link paths of partition(s)");
-		cmd->add_option("partition(s)", partitions, "Partition name(s)")->required();
+		cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
 		return true;
 	}
 

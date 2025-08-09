@@ -60,8 +60,7 @@ namespace PartitionManager {
             if (onlySize)
                 println("%s", convertTo(Variables->PartMap->sizeOf(partition), multiple).data());
             else
-                println("%s: %s%s", partition.data(), convertTo(Variables->PartMap->sizeOf(partition), multiple).data(),
-                  multiple.data());
+                println("%s: %s%s", partition.data(), convertTo(Variables->PartMap->sizeOf(partition), multiple).data(), multiple.data());
         }
 
         return true;
