@@ -202,6 +202,7 @@ pmt reboot [rebootTarget] [OPTIONS]
 - **Asynchronous execution**: For `backup`, `flash`, and `erase`, each partition is processed in a separate thread for maximum speed.
 - **Error isolation**: A failure in processing one partition will not cancel the others. Only for `backup`, `flash` and `erase` functions.
 - **Automatic diagnostics**: By default, whether a partition is dynamic or regular is determined automatically. With global options, you only specify precision.
+- **Root access**: Root access is required if operations are to be performed on partitions.
 
 ## Extra Note: Comma Usage
 

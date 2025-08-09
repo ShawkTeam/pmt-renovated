@@ -1,0 +1,48 @@
+name: "💡 Feature Request"
+description: Suggest a new idea or enhancement for PMT
+title: "[FEATURE] "
+labels: ["enhancement"]
+body:
+  - type: input
+    id: feature-title
+    attributes:
+      label: "📝 Feature Title"
+      placeholder: "Example: Add support for ext4 resize"
+    validations:
+      required: true
+
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: "📌 Feature Description"
+      description: "Clearly describe the feature you want."
+      placeholder: "What should PMT be able to do?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: why-needed
+    attributes:
+      label: "💡 Why This Feature?"
+      description: "Explain the value or problem it solves."
+      placeholder: "This would be useful because..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: possible-implementation
+    attributes:
+      label: "🛠️ Possible Implementation"
+      description: "(Optional) Suggest how it might be implemented."
+      placeholder: "Technical ideas, CLI options, examples..."
+    validations:
+      required: false
+
+  - type: textarea
+    id: extra-notes
+    attributes:
+      label: "🗒️ Extra Notes"
+      description: "(Optional) Any other details, diagrams, or references."
+      placeholder: "Additional info..."
+    validations:
+      required: false

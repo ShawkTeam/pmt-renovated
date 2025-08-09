@@ -1,0 +1,89 @@
+name: "⁉️ Bug Report"
+description: Report a reproducible problem or crash
+title: "[BUG] "
+labels: ["bug"]
+body:
+  - type: input
+    id: bug-description
+    attributes:
+      label: "📝 Bug Description"
+      description: "Clearly describe the bug you encountered."
+      placeholder: "Example: PMT crashes when running `pmt info` on system partition."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: "🔄 Steps to Reproduce"
+      description: "List the exact steps to reproduce the issue."
+      placeholder: |
+        1. Command or action you performed
+        2. Next step
+        3. Result
+    validations:
+      required: true
+
+  - type: dropdown
+    id: proof-type
+    attributes:
+      label: "📷 Screenshots or 📜 Logs"
+      description: "At least one is required."
+      multiple: true
+      options:
+        - "Screenshots"
+        - "Logs"
+    validations:
+      required: true
+
+  - type: textarea
+    id: proof-content
+    attributes:
+      label: "Attach Screenshots or Logs"
+      description: "Paste logs or drag-and-drop image files here."
+      placeholder: "Paste logs or drop images here..."
+    validations:
+      required: true
+
+  - type: input
+    id: pmt-version
+    attributes:
+      label: "💻 PMT Version"
+      placeholder: "Example: v2.3.1"
+    validations:
+      required: true
+
+  - type: input
+    id: android-version
+    attributes:
+      label: "📱 Android Version"
+      placeholder: "Example: Android 13"
+    validations:
+      required: true
+
+  - type: input
+    id: device-model
+    attributes:
+      label: "📟 Device Model"
+      placeholder: "Example: Pixel 6 Pro"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: root-access
+    attributes:
+      label: "🔑 Root Access"
+      options:
+        - "Yes"
+        - "No"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "⚠️ Additional Context"
+      description: "Any extra details that could help reproduce the bug."
+      placeholder: "Other relevant info..."
+    validations:
+      required: false
