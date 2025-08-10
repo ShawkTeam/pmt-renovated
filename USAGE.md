@@ -21,6 +21,7 @@ It supports **asynchronous operations**, allowing multiple partitions to be proc
 ---
 
 ## Usage
+Don't forget to check out how to use it with **ADB**!
 
 ```bash
 pmt [OPTIONS] [SUBCOMMAND]
