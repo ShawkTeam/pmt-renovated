@@ -23,7 +23,7 @@
 
 namespace Helper {
 bool hasSuperUser() { return (getuid() == AID_ROOT); }
-bool hasAdbPermissions() { return (getuid() == AID_ADB); }
+bool hasAdbPermissions() { return (getuid() == AID_SHELL); }
 
 bool isExists(const std::string_view entry) {
   struct stat st{};
