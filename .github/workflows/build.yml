@@ -1,0 +1,65 @@
+name: Build and release
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        id: checkout
+        uses: actions/checkout@v4
+
+      - name: Cleanup
+        id: cleanup
+        uses: rokibhasansagar/slimhub_actions@main
+
+      - name: Setup Packages
+        id: setup-packages
+        run: |
+          sudo apt update
+          sudo apt upgrade -y
+          sudo apt install make cmake extra-cmake-modules zip -y
+
+      - name: Setup Android NDK
+        uses: nttld/setup-ndk@v1
+        id: setup-ndk
+        with:
+          ndk-version: r21e
+          add-to-path: false
+        env:
+          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk
+
+      - name: Build And Prepare For Release
+        id: build
+        run: |
+          cd ${{ github.workspace }}
+          git clone https://github.com/ShawkTeam/pmt-renovated -b main ./pmt && cd pmt
+          export ANDROID_NDK="${{ github.workspace }}/android-ndk"
+          bash build.sh clean
+          bash build.sh build -DCMAKE_BUILD_TYPE=Release
+          cd build_arm64-v8a
+          cp src/pmt src/pmt_static srclib/libhelper/libhelper.so srclib/libpartition_map/libpartition_map.so .
+          zip pmt-arm64-v8a.zip pmt libhelper.so ibpartition_map.so
+          zip pmt-static-arm64-v8a.zip pmt_static
+          cd ../build_armeabi-v7a
+          cp src/pmt src/pmt_static srclib/libhelper/libhelper.so srclib/libpartition_map/libpartition_map.so .
+          zip pmt-armeabi-v7a.zip pmt libhelper.so ibpartition_map.so
+          zip pmt-static-armeabi-v7a.zip pmt_static
+          echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV 
+          echo "BUILD=${{ github.workspace }}/pmt" >> $GITHUB_ENV
+
+      - name: Upload To GitHub Releases
+        id: upload-to-release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            ${{ env.BUILD }}/build_arm64-v8a/*.zip
+            ${{ env.BUILD }}/build_armeabi-v7a/*.zip
+          name: Partition Manager Tool Release ${{ env.BUILD_DATE }}
+          tag_name: ${{ env.BUILD_DATE }}
+          body: "Read [RELEASE-TYPES.md](https://github.com/ShawkTeam/pmt-renovated/blob/main/RELEASE-TYPES.md) for getting more information."
