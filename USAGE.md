@@ -262,6 +262,9 @@ Unzip the downloaded `.zip` file — you should now have a `pmt` binary.
 ### 2️⃣ Push the Binary to Your Device
 Use ADB to copy the `pmt` file to your phone’s temporary folder:
 ```bash
+# Rename for more easily usage
+mv pmt_static pmt
+
 adb push pmt /data/local/tmp/pmt
 ```
 
@@ -280,10 +283,7 @@ cd /data/local/tmp
 ### 5️⃣ Give Execute Permission
 Allow the binary to be executed:
 ```bash
-chmod 755 pmt_static
-
-# Rename for more easily
-mv pmt_static pmt
+chmod 755 pmt
 ```
 
 ### 6️⃣ Run PMT
