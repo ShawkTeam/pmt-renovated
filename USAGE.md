@@ -290,6 +290,9 @@ mv pmt_static pmt
 You can now run PMT directly from this directory:
 
 ```bash
+# Open root terminal
+su
+
 ./pmt --help
 ```
 Example — Back up the boot partition:
