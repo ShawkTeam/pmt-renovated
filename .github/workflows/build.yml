@@ -32,14 +32,14 @@ jobs:
           ndk-version: r28b
           add-to-path: false
         env:
-          ANDROID_NDK_HOME: ${{ github.workspace }}/android-ndk
+          ANDROID_NDK_HOME: ${{ github.workspace }}
 
       - name: Build And Prepare For Release
         id: build
         run: |
           cd ${{ github.workspace }}
           git clone https://github.com/ShawkTeam/pmt-renovated -b main ./pmt && cd pmt
-          export ANDROID_NDK="${{ github.workspace }}/android-ndk"
+          export ANDROID_NDK="${{ github.workspace }}"
           bash build.sh clean
           bash build.sh build -DCMAKE_BUILD_TYPE=Release
           cd build_arm64-v8a
