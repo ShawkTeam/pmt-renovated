@@ -5,7 +5,7 @@ Copyright 2025 Yağız Zengin
    you may not use this file except in compliance with the License.
    You may obtain a copy of the License at
 
-	   http://www.apache.org/licenses/LICENSE-2.0
+           http://www.apache.org/licenses/LICENSE-2.0
 
    Unless required by applicable law or agreed to in writing, software
    distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,29 +14,32 @@ Copyright 2025 Yağız Zengin
    limitations under the License.
 */
 
-#include <PartitionManager/PartitionManager.hpp>
 #include "functions.hpp"
+#include <PartitionManager/PartitionManager.hpp>
 
 #define RFUN "rebootFunction"
 
 namespace PartitionManager {
-	bool rebootFunction::init(CLI::App &_app) {
-		LOGN(RFUN, INFO) << "Initializing variables of reboot function." << std::endl;
-		cmd = _app.add_subcommand("reboot", "Reboots device");
-		cmd->add_option("rebootTarget", rebootTarget, "Reboot target (default: normal)");
-		return true;
-	}
+bool rebootFunction::init(CLI::App &_app) {
+  LOGN(RFUN, INFO) << "Initializing variables of reboot function." << std::endl;
+  cmd = _app.add_subcommand("reboot", "Reboots device");
+  cmd->add_option("rebootTarget", rebootTarget,
+                  "Reboot target (default: normal)");
+  return true;
+}
 
-	bool rebootFunction::run() {
-		LOGN(RFUN, INFO) << "Rebooting device!!! (custom reboot target: " << (rebootTarget.empty() ? "none" : rebootTarget) << std::endl;
+bool rebootFunction::run() {
+  LOGN(RFUN, INFO) << "Rebooting device!!! (custom reboot target: "
+                   << (rebootTarget.empty() ? "none" : rebootTarget)
+                   << std::endl;
 
-		if (Helper::reboot(rebootTarget)) println("Reboot command was sent");
-		else throw Error("Cannot reboot device");
+  if (Helper::reboot(rebootTarget)) println("Reboot command was sent");
+  else throw Error("Cannot reboot device");
 
-		return true;
-	}
+  return true;
+}
 
-	bool rebootFunction::isUsed() const { return cmd->parsed(); }
+bool rebootFunction::isUsed() const { return cmd->parsed(); }
 
-	const char* rebootFunction::name() const { return RFUN; }
+const char *rebootFunction::name() const { return RFUN; }
 } // namespace PartitionManager

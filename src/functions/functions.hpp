@@ -22,151 +22,155 @@
 #include <vector>
 
 namespace PartitionManager {
-	using pair = std::pair<std::string, bool>;
+using pair = std::pair<std::string, bool>;
 
-	// Back-up function
-	class backupFunction final : public FunctionBase {
-	private:
-		std::vector<std::string> partitions, outputNames;
-		std::string rawPartitions, rawOutputNames, outputDirectory;
-		int bufferSize = 4096;
+// Back-up function
+class backupFunction final : public FunctionBase {
+private:
+  std::vector<std::string> partitions, outputNames;
+  std::string rawPartitions, rawOutputNames, outputDirectory;
+  int bufferSize = 4096;
 
-	public:
-		CLI::App *cmd = nullptr;
+public:
+  CLI::App *cmd = nullptr;
 
-		bool init(CLI::App &_app) override;
-		bool run() override;
-		static pair runAsync(const std::string &partitionName, const std::string &outputName, int bufferSize);
+  bool init(CLI::App &_app) override;
+  bool run() override;
+  static pair runAsync(const std::string &partitionName,
+                       const std::string &outputName, int bufferSize);
 
-		[[nodiscard]] bool isUsed() const override;
-		[[nodiscard]] const char *name() const override;
-	};
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
 
-	// Image flasher function
-	class flashFunction final : public FunctionBase {
-	private:
-		std::vector<std::string> partitions, imageNames;
-		std::string rawPartitions, rawImageNames, imageDirectory;
-		int bufferSize = 4096;
+// Image flasher function
+class flashFunction final : public FunctionBase {
+private:
+  std::vector<std::string> partitions, imageNames;
+  std::string rawPartitions, rawImageNames, imageDirectory;
+  int bufferSize = 4096;
 
-	public:
-		CLI::App *cmd = nullptr;
+public:
+  CLI::App *cmd = nullptr;
 
-		bool init(CLI::App &_app) override;
-		bool run() override;
-		static pair runAsync(const std::string &partitionName, const std::string &imageName, int bufferSize);
+  bool init(CLI::App &_app) override;
+  bool run() override;
+  static pair runAsync(const std::string &partitionName,
+                       const std::string &imageName, int bufferSize);
 
-		[[nodiscard]] bool isUsed() const override;
-		[[nodiscard]] const char *name() const override;
-	};
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
 
-	// Eraser function (writes zero bytes to partition)
-	class eraseFunction final : public FunctionBase {
-	private:
-		std::vector<std::string> partitions;
-		int bufferSize = 4096;
+// Eraser function (writes zero bytes to partition)
+class eraseFunction final : public FunctionBase {
+private:
+  std::vector<std::string> partitions;
+  int bufferSize = 4096;
 
-	public:
-		CLI::App *cmd = nullptr;
+public:
+  CLI::App *cmd = nullptr;
 
-		bool init(CLI::App &_app) override;
-		bool run() override;
-		static pair runAsync(const std::string &partitionName, int bufferSize);
+  bool init(CLI::App &_app) override;
+  bool run() override;
+  static pair runAsync(const std::string &partitionName, int bufferSize);
 
-		[[nodiscard]] bool isUsed() const override;
-		[[nodiscard]] const char *name() const override;
-	};
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
 
-	// Partition size getter function
-	class partitionSizeFunction final : public FunctionBase {
-	private:
-		std::vector<std::string> partitions;
-		bool onlySize = false, asByte = false, asKiloBytes = false, asMega = false, asGiga = false;
+// Partition size getter function
+class partitionSizeFunction final : public FunctionBase {
+private:
+  std::vector<std::string> partitions;
+  bool onlySize = false, asByte = false, asKiloBytes = false, asMega = false,
+       asGiga = false;
 
-	public:
-		CLI::App *cmd = nullptr;
+public:
+  CLI::App *cmd = nullptr;
 
-		bool init(CLI::App &_app) override;
-		bool run() override;
+  bool init(CLI::App &_app) override;
+  bool run() override;
 
-		[[nodiscard]] bool isUsed() const override;
-		[[nodiscard]] const char *name() const override;
-	};
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
 
-	// Partition info getter function
-	class infoFunction final : public FunctionBase {
-	private:
-		std::vector<std::string> partitions;
-		std::string jNamePartition = "name", jNameSize = "size", jNameLogical = "isLogical";
-		bool jsonFormat = false;
+// Partition info getter function
+class infoFunction final : public FunctionBase {
+private:
+  std::vector<std::string> partitions;
+  std::string jNamePartition = "name", jNameSize = "size",
+              jNameLogical = "isLogical";
+  bool jsonFormat = false;
 
-	public:
-		CLI::App *cmd = nullptr;
+public:
+  CLI::App *cmd = nullptr;
 
-		bool init(CLI::App &_app) override;
-		bool run() override;
+  bool init(CLI::App &_app) override;
+  bool run() override;
 
-		[[nodiscard]] bool isUsed() const override;
-		[[nodiscard]] const char *name() const override;
-	};
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
 
-	class realPathFunction final : public FunctionBase {
-	private:
-		std::vector<std::string> partitions;
+class realPathFunction final : public FunctionBase {
+private:
+  std::vector<std::string> partitions;
 
-	public:
-		CLI::App *cmd = nullptr;
+public:
+  CLI::App *cmd = nullptr;
 
-		bool init(CLI::App &_app) override;
-		bool run() override;
+  bool init(CLI::App &_app) override;
+  bool run() override;
 
-		[[nodiscard]] bool isUsed() const override;
-		[[nodiscard]] const char *name() const override;
-	};
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
 
-	class realLinkPathFunction final : public FunctionBase {
-	private:
-		std::vector<std::string> partitions;
+class realLinkPathFunction final : public FunctionBase {
+private:
+  std::vector<std::string> partitions;
 
-	public:
-		CLI::App *cmd = nullptr;
+public:
+  CLI::App *cmd = nullptr;
 
-		bool init(CLI::App &_app) override;
-		bool run() override;
+  bool init(CLI::App &_app) override;
+  bool run() override;
 
-		[[nodiscard]] bool isUsed() const override;
-		[[nodiscard]] const char *name() const override;
-	};
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
 
-	class typeFunction final : public FunctionBase {
-	private:
-		std::vector<std::string> contents;
-		bool onlyCheckAndroidMagics = false, onlyCheckFileSystemMagics = false;
-		int bufferSize = 4096;
+class typeFunction final : public FunctionBase {
+private:
+  std::vector<std::string> contents;
+  bool onlyCheckAndroidMagics = false, onlyCheckFileSystemMagics = false;
+  int bufferSize = 4096;
 
-	public:
-		CLI::App *cmd = nullptr;
+public:
+  CLI::App *cmd = nullptr;
 
-		bool init(CLI::App &_app) override;
-		bool run() override;
+  bool init(CLI::App &_app) override;
+  bool run() override;
 
-		[[nodiscard]] bool isUsed() const override;
-		[[nodiscard]] const char *name() const override;
-	};
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
 
-	class rebootFunction final : public FunctionBase {
-	private:
-		std::string rebootTarget;
+class rebootFunction final : public FunctionBase {
+private:
+  std::string rebootTarget;
 
-	public:
-		CLI::App *cmd = nullptr;
+public:
+  CLI::App *cmd = nullptr;
 
-		bool init(CLI::App &_app) override;
-		bool run() override;
+  bool init(CLI::App &_app) override;
+  bool run() override;
 
-		[[nodiscard]] bool isUsed() const override;
-		[[nodiscard]] const char *name() const override;
-	};
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
 } // namespace PartitionManager
 
 #endif // #ifndef FUNCTIONS_HPP
