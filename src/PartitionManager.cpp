@@ -112,9 +112,11 @@ int Main(int argc, char **argv) {
                   "directory with -S "
                   "(--search-path)");
 
-    if (!Helper::hasSuperUser())
-      throw Error(
-          "Partition Manager Tool is requires super-user privileges!\n");
+    if (!Helper::hasSuperUser()) {
+      if (!(FuncManager.isUsed("reboot") && Helper::hasAdbPermissions()))
+        throw Error(
+            "Partition Manager Tool is requires super-user privileges!\n");
+    }
 
     return FuncManager.handleAll() == true ? EXIT_SUCCESS : EXIT_FAILURE;
   } catch (Helper::Error &error) {

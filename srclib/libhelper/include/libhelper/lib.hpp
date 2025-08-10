@@ -105,6 +105,7 @@ void reset();
 
 // Checkers
 bool hasSuperUser();
+bool hasAdbPermissions();
 bool isExists(std::string_view entry);
 bool fileIsExists(std::string_view file);
 bool directoryIsExists(std::string_view directory);

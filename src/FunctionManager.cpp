@@ -69,6 +69,14 @@ void basic_function_manager::registerFunction(
                    << std::endl;
 }
 
+bool basic_function_manager::isUsed(const std::string name) const {
+  if (_functions.empty()) return false;
+  for (const auto &func : _functions) {
+    if (func->name() == name) return func->isUsed();
+  }
+  return false;
+}
+
 bool basic_function_manager::handleAll() const {
   LOGN(PMTF, INFO) << "running caught function commands in command-line."
                    << std::endl;

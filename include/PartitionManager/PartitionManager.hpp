@@ -55,6 +55,7 @@ private:
 public:
   void registerFunction(std::unique_ptr<basic_function> _func, CLI::App &_app);
 
+  [[nodiscard]] bool isUsed(std::string name) const;
   [[nodiscard]] bool handleAll() const;
 };
 

@@ -187,7 +187,7 @@ pmt type partition(s) [OPTIONS]
 ---
 
 ### 9. `reboot`
-Reboot the device. Default reboot target is normal. General syntax:
+Reboot the device. Default reboot target is normal. If you are using it via ADB terminal, you **DO NOT** need root to use this feature. General syntax:
 ```bash
 pmt reboot [rebootTarget] [OPTIONS]
 ```
