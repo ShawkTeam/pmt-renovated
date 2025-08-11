@@ -37,10 +37,12 @@ void variableProtect::setVariablePointer(basic_variables *&_ptr) {
 
 basic_variables::~basic_variables() { delete PartMap; }
 basic_variables::basic_variables()
-    : PartMap(new PartitionMap::BuildMap()),
-      logFile("/sdcard/Documents/last_pmt_logs.log"), onLogical(false),
+    : logFile("/sdcard/Documents/last_pmt_logs.log"), onLogical(false),
       quietProcess(false), verboseMode(false), viewVersion(false),
-      forceProcess(false) {}
+      forceProcess(false) {
+  try { PartMap = new PartitionMap::BuildMap(); }
+  catch (std::exception&) {}
+}
 
 int Main(int argc, char **argv) {
   try {
