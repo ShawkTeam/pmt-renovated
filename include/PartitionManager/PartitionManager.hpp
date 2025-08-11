@@ -19,14 +19,10 @@
 
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
+#include <CLI/CLI11.hpp>
 #include <memory>
 #include <string>
 #include <vector>
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#include <CLI/CLI11.hpp>
-#pragma GCC diagnostic pop
 
 #define PMT "libpmt"
 #define PMTE "pmt"

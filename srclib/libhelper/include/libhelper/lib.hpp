@@ -23,6 +23,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #ifndef ONLY_HELPER_MACROS
 
@@ -86,7 +87,7 @@ public:
 
   void delAfterProgress(char *&_ptr);
   void delAfterProgress(uint8_t *&_ptr);
-  void delAfterProgress(FILE *&_fp);
+  void closeAfterProgress(FILE *&_fp);
   void closeAfterProgress(int _fd);
 };
 

@@ -106,5 +106,5 @@ void garbageCollector::delAfterProgress(uint8_t *&_ptr) {
 void garbageCollector::closeAfterProgress(const int _fd) {
   _fds.push_back(_fd);
 }
-void garbageCollector::delAfterProgress(FILE *&_fp) { _fps.push_back(_fp); }
+void garbageCollector::closeAfterProgress(FILE *&_fp) { _fps.push_back(_fp); }
 } // namespace Helper

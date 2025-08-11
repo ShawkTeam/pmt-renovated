@@ -194,7 +194,7 @@ int openAndAddToCloseList(const std::string_view &path,
 FILE *openAndAddToCloseList(const std::string_view &path,
                             garbageCollector &collector, const char *mode) {
   FILE *fp = fopen(path.data(), mode);
-  collector.delAfterProgress(fp);
+  collector.closeAfterProgress(fp);
   return fp;
 }
 
