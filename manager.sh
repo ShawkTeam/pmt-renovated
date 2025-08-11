@@ -64,7 +64,7 @@ download()
 
 setup()
 {
-	[ -f $PREFIX/tmp/pmt_static ]; mv $PREFIX/tmp/pmt_static $PREFIX/tmp/pmt
+	[ -f $PREFIX/tmp/pmt_static ] && mv $PREFIX/tmp/pmt_static $PREFIX/tmp/pmt
 	set -e
 	install -t $PREFIX/bin $PREFIX/tmp/pmt
 	if [ -f $PREFIX/tmp/libhelper.so ]; then
@@ -76,7 +76,7 @@ setup()
 
 uninstall()
 {
-	rm -f $PREFIX/bin7pmt $PREFIX/lib/libhelper* $PREFIX/lib/libpartition_map* &>/dev/null
+	rm -f $PREFIX/bin/pmt $PREFIX/lib/libhelper* $PREFIX/lib/libpartition_map* &>/dev/null
 }
 
 is_installed()
