@@ -56,7 +56,7 @@ download()
 	fi
 
 	echo "Extracting..."
-	if ! unzip -d $PREFIX/tmp $PREFIX/tmp/pmt.zip &>/dev/null; then
+	if ! unzip -f -d $PREFIX/tmp $PREFIX/tmp/pmt.zip &>/dev/null; then
 		echo "Extraction failed!"
 		exit 1
 	fi
@@ -95,6 +95,11 @@ cleanup()
 if [ $# -eq 0 ]; then
     command echo "Usage: $0 install|uninstall [--static]"
     exit 1
+fi
+
+if ! basename -a ${PREFIX}/bin/* | grep "termux" &>/dev/null; then
+	echo "This script only for termux!"
+	exit 1
 fi
 
 case $1 in
