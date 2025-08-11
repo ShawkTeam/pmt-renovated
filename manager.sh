@@ -40,7 +40,7 @@ select_variant()
 	if getprop ro.product.cpu.abi | grep "arm64-v8a" &>/dev/null; then ARCH="arm64-v8a";
 	else ARCH="armeabi-v7a"
 	fi
-  [ $1 == "static" ] && VARIANT="static-"
+  [ $1 = "static" ] && VARIANT="static-"
 
   LINK="https://github.com/ShawkTeam/pmt-renovated/releases/download/${RELEASE}/pmt-${VARIANT}${ARCH}.zip"
 }
@@ -49,7 +49,7 @@ download()
 {
 	mkdir -p $PREFIX/tmp
 	echo "Downloading pmt-${VARIANT}${ARCH}.zip (${RELEASE})"
-	if ! wget -o $PREFIX/tmp/pmt.zip "${LINK}" &>/dev/null; then
+	if ! wget -O $PREFIX/tmp/pmt.zip "${LINK}" &>/dev/null; then
 		echo "Download failed! LINK=${LINK}"
 		rm $PREFIX/tmp/*.zip
 		exit 1
