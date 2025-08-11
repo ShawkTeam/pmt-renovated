@@ -76,7 +76,7 @@ setup()
 
 uninstall()
 {
-	rm -f $PREFIX/pmt $PREFIX/lib/libhelper* $PREFIX/libpartition_map* &>/dev/null
+	rm -f $PREFIX/bin7pmt $PREFIX/lib/libhelper* $PREFIX/lib/libpartition_map* &>/dev/null
 }
 
 is_installed()
