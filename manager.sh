@@ -1,4 +1,3 @@
-#!/data/data/com.termux/files/usr/bin/env bash
 #
 #  Copyright 2025 Yağız Zengin
 #
@@ -30,7 +29,7 @@ checks()
 	echo "Updating repositories and checking required packages..."
 	pkg update &>/dev/null
 	[ ! -f $PREFIX/bin/unzip ] && pkg install -y unzip
-  [ ! -f $PREFIX/bin/wget ] && pkg install -y wget
+    [ ! -f $PREFIX/bin/wget ] && pkg install -y wget
 }
 
 select_variant()
@@ -40,14 +39,13 @@ select_variant()
 	if getprop ro.product.cpu.abi | grep "arm64-v8a" &>/dev/null; then ARCH="arm64-v8a";
 	else ARCH="armeabi-v7a"
 	fi
-  [ $1 = "static" ] && VARIANT="static-"
+    [ -n $1 ] && VARIANT="static-"
 
-  LINK="https://github.com/ShawkTeam/pmt-renovated/releases/download/${RELEASE}/pmt-${VARIANT}${ARCH}.zip"
+    LINK="https://github.com/ShawkTeam/pmt-renovated/releases/download/${RELEASE}/pmt-${VARIANT}${ARCH}.zip"
 }
 
 download()
 {
-	mkdir -p $PREFIX/tmp
 	echo "Downloading pmt-${VARIANT}${ARCH}.zip (${RELEASE})"
 	if ! wget -O $PREFIX/tmp/pmt.zip "${LINK}" &>/dev/null; then
 		echo "Download failed! LINK=${LINK}"
@@ -107,18 +105,18 @@ case $1 in
     	is_installed
     	checks
     	select_variant $([ "$2" == "--static" ] && echo static)
-			download
-			setup
+		download
+		setup
     ;;
     "uninstall")
     	uninstall && echo "Uninstalled successfully."
     ;;
     "reinstall")
-  		uninstall
-  		checks
-      select_variant $([ "$2" == "--static" ] && echo static)
-      download
-      setup
+    	uninstall
+    	checks
+        select_variant $([ "$2" == "--static" ] && echo static)
+        download
+        setup
     ;;
     *)
         command echo "$0: Unknown argument: $1"
