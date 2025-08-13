@@ -251,5 +251,13 @@ bool basic_partition_map_builder::operator()(const std::string_view path) {
   return readDirectory(path);
 }
 
+Map_t& basic_partition_map_builder::operator*() {
+  return _current_map;
+}
+
+const Map_t& basic_partition_map_builder::operator*() const {
+  return _current_map;
+}
+
 std::string getLibVersion() { MKVERSION("libpartition_map"); }
 } // namespace PartitionMap

@@ -282,6 +282,12 @@ public:
    *   Build map with input path. Implementation of readDirectory().
    */
   bool operator()(std::string_view path);
+
+  /**
+   *   Get Map_t object reference
+   */
+  Map_t& operator*();
+  const Map_t& operator*() const;
 };
 
 using Error = Helper::Error;

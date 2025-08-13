@@ -89,7 +89,7 @@ bool hasMagic(const uint64_t magic, const ssize_t buf,
     return false;
   }
 
-  auto *buffer = new uint8_t[buf];
+  auto *buffer = new(std::nothrow) uint8_t[buf];
   collector.delAfterProgress(buffer);
 
   const ssize_t bytesRead = read(fd, buffer, buf);
