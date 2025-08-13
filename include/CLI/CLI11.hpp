@@ -3902,9 +3902,9 @@ get_default_flag_values(const std::string &str);
 
 /// Get a vector of short names, one of long names, and a single name
 CLI11_INLINE
-    std::tuple<std::vector<std::string>, std::vector<std::string>, std::string>
-    get_names(const std::vector<std::string> &input,
-              bool allow_non_standard = false);
+std::tuple<std::vector<std::string>, std::vector<std::string>, std::string>
+get_names(const std::vector<std::string> &input,
+          bool allow_non_standard = false);
 
 } // namespace detail
 
@@ -3995,8 +3995,8 @@ get_default_flag_values(const std::string &str) {
 }
 
 CLI11_INLINE
-    std::tuple<std::vector<std::string>, std::vector<std::string>, std::string>
-    get_names(const std::vector<std::string> &input, bool allow_non_standard) {
+std::tuple<std::vector<std::string>, std::vector<std::string>, std::string>
+get_names(const std::vector<std::string> &input, bool allow_non_standard) {
 
   std::vector<std::string> short_names;
   std::vector<std::string> long_names;

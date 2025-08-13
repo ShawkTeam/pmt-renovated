@@ -36,16 +36,21 @@ bool partitionSizeFunction::init(CLI::App &_app) {
       ->required()
       ->delimiter(',');
   cmd->add_flag("--as-byte", asByte,
-                "Tell input size of partition list as byte.")->default_val(false);
+                "Tell input size of partition list as byte.")
+      ->default_val(false);
   cmd->add_flag("--as-kilobyte", asKiloBytes,
-                "Tell input size of partition list as kilobyte.")->default_val(false);
+                "Tell input size of partition list as kilobyte.")
+      ->default_val(false);
   cmd->add_flag("--as-megabyte", asMega,
-                "Tell input size of partition list as megabyte.")->default_val(false);
+                "Tell input size of partition list as megabyte.")
+      ->default_val(false);
   cmd->add_flag("--as-gigabyte", asGiga,
-                "Tell input size of partition list as gigabyte.")->default_val(false);
+                "Tell input size of partition list as gigabyte.")
+      ->default_val(false);
   cmd->add_flag("--only-size", onlySize,
                 "Tell input size of partition list as not printing multiple "
-                "and partition name.")->default_val(false);
+                "and partition name.")
+      ->default_val(false);
   return true;
 }
 

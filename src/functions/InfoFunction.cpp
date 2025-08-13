@@ -36,13 +36,17 @@ bool infoFunction::init(CLI::App &_app) {
       ->delimiter(',');
   cmd->add_flag("-J,--json", jsonFormat,
                 "Print info(s) as JSON body. The body of each partition will "
-                "be written separately")->default_val(false);
+                "be written separately")
+      ->default_val(false);
   cmd->add_option("--json-partition-name", jNamePartition,
-                  "Speficy partition name element for JSON body")->default_val("name");
+                  "Speficy partition name element for JSON body")
+      ->default_val("name");
   cmd->add_option("--json-size-name", jNameSize,
-                  "Speficy size element name for JSON body")->default_val("size");
+                  "Speficy size element name for JSON body")
+      ->default_val("size");
   cmd->add_option("--json-logical-name", jNameLogical,
-                  "Speficy logical element name for JSON body")->default_val("isLogical");
+                  "Speficy logical element name for JSON body")
+      ->default_val("isLogical");
   return true;
 }
 

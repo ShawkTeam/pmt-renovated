@@ -25,7 +25,8 @@ Copyright 2025 Yağız Zengin
 #define EFUN "eraseFunction"
 
 namespace PartitionManager {
-pair eraseFunction::runAsync(const std::string &partitionName, const uint64_t bufferSize) {
+pair eraseFunction::runAsync(const std::string &partitionName,
+                             const uint64_t bufferSize) {
   if (!Variables->PartMap->hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 
@@ -62,7 +63,7 @@ pair eraseFunction::runAsync(const std::string &partitionName, const uint64_t bu
 
   LOGN(EFUN, INFO) << "Writing zero bytes to partition: " << partitionName
                    << std::endl;
-  auto *buffer = new(std::nothrow) char[bufferSize];
+  auto *buffer = new (std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
   memset(buffer, 0x00, bufferSize);
 
@@ -93,7 +94,9 @@ bool eraseFunction::init(CLI::App &_app) {
       ->required()
       ->delimiter(',');
   cmd->add_option("-b,--buffer-size", bufferSize,
-                  "Buffer size for writing zero bytes to partition(s)")->transform(CLI::AsSizeValue(false))->default_val("4KB");
+                  "Buffer size for writing zero bytes to partition(s)")
+      ->transform(CLI::AsSizeValue(false))
+      ->default_val("4KB");
   return true;
 }
 

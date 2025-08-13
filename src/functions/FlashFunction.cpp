@@ -26,7 +26,8 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 pair flashFunction::runAsync(const std::string &partitionName,
-                             const std::string &imageName, const uint64_t bufferSize) {
+                             const std::string &imageName,
+                             const uint64_t bufferSize) {
   if (!Helper::fileIsExists(imageName))
     return {format("Couldn't find image file: %s", imageName.data()), false};
   if (!Variables->PartMap->hasPartition(partitionName))
@@ -73,7 +74,7 @@ pair flashFunction::runAsync(const std::string &partitionName,
 
   LOGN(FFUN, INFO) << "Writing image " << imageName
                    << " to partition: " << partitionName << std::endl;
-  auto *buffer = new(std::nothrow) char[bufferSize];
+  auto *buffer = new (std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
   memset(buffer, 0x00, bufferSize);
 
@@ -99,8 +100,10 @@ bool flashFunction::init(CLI::App &_app) {
   cmd->add_option("imageFile(s)", rawImageNames, "Name(s) of image file(s)")
       ->required();
   cmd->add_option(
-      "-b,--buffer-size", bufferSize,
-      "Buffer size for reading image(s) and writing to partition(s)")->transform(CLI::AsSizeValue(false))->default_val("4KB");
+         "-b,--buffer-size", bufferSize,
+         "Buffer size for reading image(s) and writing to partition(s)")
+      ->transform(CLI::AsSizeValue(false))
+      ->default_val("4KB");
   cmd->add_option("-I,--image-directory", imageDirectory,
                   "Directory to find image(s) and flash to partition(s)");
 

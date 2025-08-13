@@ -27,11 +27,15 @@ bool typeFunction::init(CLI::App &_app) {
       ->required()
       ->delimiter(',');
   cmd->add_option("-b,--buffer-size", bufferSize,
-                  "Buffer size for max seek depth")->transform(CLI::AsSizeValue(false))->default_val("4KB");
+                  "Buffer size for max seek depth")
+      ->transform(CLI::AsSizeValue(false))
+      ->default_val("4KB");
   cmd->add_flag("--only-check-android-magics", onlyCheckAndroidMagics,
-                "Only check Android magic values.")->default_val(false);
+                "Only check Android magic values.")
+      ->default_val(false);
   cmd->add_flag("--only-check-filesystem-magics", onlyCheckFileSystemMagics,
-                "Only check filesystem magic values.")->default_val(false);
+                "Only check filesystem magic values.")
+      ->default_val(false);
   return true;
 }
 

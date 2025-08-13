@@ -286,8 +286,8 @@ public:
   /**
    *   Get Map_t object reference
    */
-  Map_t& operator*();
-  const Map_t& operator*() const;
+  Map_t &operator*();
+  const Map_t &operator*() const;
 };
 
 using Error = Helper::Error;

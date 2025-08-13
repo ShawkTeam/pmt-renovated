@@ -28,7 +28,8 @@
 
 namespace PartitionManager {
 pair backupFunction::runAsync(const std::string &partitionName,
-                              const std::string &outputName, const uint64_t bufferSize) {
+                              const std::string &outputName,
+                              const uint64_t bufferSize) {
   if (!Variables->PartMap->hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 
@@ -75,7 +76,7 @@ pair backupFunction::runAsync(const std::string &partitionName,
 
   LOGN(BFUN, INFO) << "Writing partition " << partitionName
                    << " to file: " << outputName << std::endl;
-  auto *buffer = new(std::nothrow) char[bufferSize];
+  auto *buffer = new (std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
   memset(buffer, 0x00, bufferSize);
 
@@ -114,9 +115,10 @@ bool backupFunction::init(CLI::App &_app) {
   cmd->add_option("-O,--output-directory", outputDirectory,
                   "Directory to save the partition image(s)")
       ->check(CLI::ExistingDirectory);
-  cmd->add_option(
-      "-b,--buffer-size", bufferSize,
-      "Buffer size for reading partition(s) and writing to file(s)")->transform(CLI::AsSizeValue(false))->default_val("4KB");
+  cmd->add_option("-b,--buffer-size", bufferSize,
+                  "Buffer size for reading partition(s) and writing to file(s)")
+      ->transform(CLI::AsSizeValue(false))
+      ->default_val("4KB");
 
   return true;
 }
