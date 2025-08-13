@@ -100,8 +100,8 @@ int Main(int argc, char **argv) {
                                  AppMain);
     FuncManager.registerFunction(std::make_unique<typeFunction>(), AppMain);
     FuncManager.registerFunction(std::make_unique<rebootFunction>(), AppMain);
-    // FuncManager.registerFunction(std::make_unique<memoryTestFunction>(),
-    // AppMain);
+    FuncManager.registerFunction(std::make_unique<memoryTestFunction>(),
+                                 AppMain);
 
     CLI11_PARSE(AppMain, argc, argv);
 
@@ -119,7 +119,9 @@ int Main(int argc, char **argv) {
                   "(--search-path)");
 
     if (!Helper::hasSuperUser()) {
-      if (!((FuncManager.isUsed("rebootFunction") /* || FuncManager.isUsed("memoryTestFunction") */) && Helper::hasAdbPermissions()))
+      if (!((FuncManager.isUsed("rebootFunction") ||
+             FuncManager.isUsed("memoryTestFunction")) &&
+            Helper::hasAdbPermissions()))
         throw Error(
             "Partition Manager Tool is requires super-user privileges!\n");
     }

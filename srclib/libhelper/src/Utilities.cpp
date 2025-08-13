@@ -216,5 +216,11 @@ bool reboot(const std::string_view arg) {
   return android_reboot(cmd, 0, arg.empty() ? nullptr : arg.data()) != -1;
 }
 
+uint64_t getRandomOffset(const uint64_t size, const uint64_t bufferSize) {
+  if (size <= bufferSize) return 0;
+  const uint64_t maxOffset = size - bufferSize;
+  return rand() % maxOffset;
+}
+
 std::string getLibVersion() { MKVERSION("libhelper"); }
 } // namespace Helper

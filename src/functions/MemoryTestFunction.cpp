@@ -39,10 +39,6 @@ bool memoryTestFunction::init(CLI::App &_app) {
                              ", no root? Try executing in ADB shell.");
         return std::string();
       });
-  cmd->add_option("-b,--buffer-size", bufferSize,
-                  "Buffer size for reading partition(s) and writing to file(s)")
-      ->transform(CLI::AsSizeValue(false))
-      ->default_val("4MB");
   cmd->add_option("-s,--file-size", testFileSize, "File size of test file")
       ->transform(CLI::AsSizeValue(false))
       ->default_val("1GB");
@@ -69,10 +65,12 @@ bool memoryTestFunction::run() {
   auto *buffer = new (std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
   std::mt19937 rng(std::random_device{}());
-  std::uniform_int_distribution<int> dist(0, 255);
+  std::uniform_int_distribution dist(0, 255);
 
   for (size_t i = 0; i < bufferSize; i++)
     buffer[i] = static_cast<char>(dist(rng));
+
+  collector.delFileAfterProgress(test);
 
   if (!doNotWriteTest) {
     const int wfd = Helper::openAndAddToCloseList(
@@ -99,25 +97,30 @@ bool memoryTestFunction::run() {
   }
 
   if (!doNotReadTest) {
+    auto *rawBuffer = new char[bufferSize + 4096];
+    collector.delAfterProgress(rawBuffer);
+    auto *bufferRead = reinterpret_cast<char*>((reinterpret_cast<uintptr_t>(rawBuffer) + 4096 - 1) & ~(4096 - 1));
     const int rfd =
-        Helper::openAndAddToCloseList(test, collector, O_RDONLY | O_SYNC);
+        Helper::openAndAddToCloseList(test, collector, O_RDONLY | O_DIRECT);
     if (rfd < 0) throw Error("Can't open test file: %s", strerror(errno));
 
     LOGN(MTFUN, INFO) << "Sequential read test started!" << std::endl;
     const auto startRead = std::chrono::high_resolution_clock::now();
-    while (read(rfd, buffer, bufferSize) > 0) {
+    size_t total = 0;
+    ssize_t bytesRead;
+    while ((bytesRead = read(rfd, bufferRead, bufferSize)) > 0) {
+      total += bytesRead;
     }
     const auto endRead = std::chrono::high_resolution_clock::now();
 
     const double read_time =
         std::chrono::duration<double>(endRead - startRead).count();
     println("Sequential read speed: %f MB/s",
-            (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) /
+            (static_cast<double>(total) / (1024.0 * 1024.0)) /
                 read_time);
     LOGN(MTFUN, INFO) << "Sequential read test done!" << std::endl;
   }
 
-  Helper::eraseEntry(test);
   return true;
 }
 

@@ -81,12 +81,14 @@ private:
   std::vector<uint8_t *> _ptrs_u;
   std::vector<FILE *> _fps;
   std::vector<int> _fds;
+  std::vector<std::string_view> _files;
 
 public:
   ~garbageCollector();
 
   void delAfterProgress(char *&_ptr);
   void delAfterProgress(uint8_t *&_ptr);
+  void delFileAfterProgress(std::string_view path);
   void closeAfterProgress(FILE *&_fp);
   void closeAfterProgress(int _fd);
 };
@@ -151,6 +153,7 @@ std::string runCommandWithOutput(std::string_view cmd);
 std::string pathJoin(std::string base, std::string relative);
 std::string pathBasename(std::string_view entry);
 std::string pathDirname(std::string_view entry);
+uint64_t getRandomOffset(uint64_t size, uint64_t bufferSize);
 
 // Android
 std::string getProperty(std::string_view prop);

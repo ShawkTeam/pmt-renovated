@@ -95,6 +95,8 @@ garbageCollector::~garbageCollector() {
     close(fd);
   for (const auto &fp : _fps)
     fclose(fp);
+  for (const auto &file: _files)
+    eraseEntry(file);
 }
 
 void garbageCollector::delAfterProgress(char *&_ptr) {
@@ -102,6 +104,9 @@ void garbageCollector::delAfterProgress(char *&_ptr) {
 }
 void garbageCollector::delAfterProgress(uint8_t *&_ptr) {
   _ptrs_u.push_back(_ptr);
+}
+void garbageCollector::delFileAfterProgress(const std::string_view path) {
+  _files.push_back(path);
 }
 void garbageCollector::closeAfterProgress(const int _fd) {
   _fds.push_back(_fd);

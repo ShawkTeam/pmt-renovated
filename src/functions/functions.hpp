@@ -173,7 +173,7 @@ public:
 
 class memoryTestFunction final : public FunctionBase {
 private:
-  uint64_t bufferSize = 0, testFileSize = 0;
+  uint64_t bufferSize = MB(4), /* bufferSizeRandom = KB(4),*/ testFileSize = 0;
   std::string testPath;
   bool doNotWriteTest = false, doNotReadTest = false;
 
