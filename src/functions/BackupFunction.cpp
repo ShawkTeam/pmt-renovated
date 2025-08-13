@@ -28,7 +28,7 @@
 
 namespace PartitionManager {
 pair backupFunction::runAsync(const std::string &partitionName,
-                              const std::string &outputName, int bufferSize) {
+                              const std::string &outputName, const uint64_t bufferSize) {
   if (!Variables->PartMap->hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 
@@ -53,7 +53,6 @@ pair backupFunction::runAsync(const std::string &partitionName,
                    outputName.data()),
             false};
 
-  setupBufferSize(bufferSize, partitionName);
   LOGN(BFUN, INFO) << "Using buffer size (for back upping " << partitionName
                    << "): " << bufferSize << std::endl;
 
@@ -76,7 +75,7 @@ pair backupFunction::runAsync(const std::string &partitionName,
 
   LOGN(BFUN, INFO) << "Writing partition " << partitionName
                    << " to file: " << outputName << std::endl;
-  auto *buffer = new char[bufferSize];
+  auto *buffer = new(std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
   memset(buffer, 0x00, bufferSize);
 
@@ -94,7 +93,7 @@ pair backupFunction::runAsync(const std::string &partitionName,
                         << outputName
                         << ". Access problems maybe occur in non-root mode"
                         << std::endl;
-  if (!Helper::changeMode(outputName, 0660))
+  if (!Helper::changeMode(outputName, 0664))
     LOGN(BFUN, WARNING) << "Failed to change mode of output file as 660: "
                         << outputName
                         << ". Access problems maybe occur in non-root mode"
@@ -117,7 +116,7 @@ bool backupFunction::init(CLI::App &_app) {
       ->check(CLI::ExistingDirectory);
   cmd->add_option(
       "-b,--buffer-size", bufferSize,
-      "Buffer size for reading partition(s) and writing to file(s)");
+      "Buffer size for reading partition(s) and writing to file(s)")->transform(CLI::AsSizeValue(false))->default_val("4KB");
 
   return true;
 }
@@ -131,13 +130,15 @@ bool backupFunction::run() {
 
   std::vector<std::future<pair>> futures;
   for (size_t i = 0; i < partitions.size(); i++) {
+    uint64_t buf = bufferSize;
     std::string partitionName = partitions[i];
     std::string outputName =
         outputNames.empty() ? partitionName + ".img" : outputNames[i];
     if (!outputDirectory.empty()) outputName.insert(0, outputDirectory + '/');
 
+    setupBufferSize(buf, partitionName);
     futures.push_back(std::async(std::launch::async, runAsync, partitionName,
-                                 outputName, bufferSize));
+                                 outputName, buf));
     LOGN(BFUN, INFO) << "Created thread backup upping " << partitionName
                      << std::endl;
   }

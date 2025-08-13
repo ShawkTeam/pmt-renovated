@@ -29,7 +29,7 @@ class backupFunction final : public FunctionBase {
 private:
   std::vector<std::string> partitions, outputNames;
   std::string rawPartitions, rawOutputNames, outputDirectory;
-  int bufferSize = 4096;
+  uint64_t bufferSize = 0;
 
 public:
   CLI::App *cmd = nullptr;
@@ -37,7 +37,7 @@ public:
   bool init(CLI::App &_app) override;
   bool run() override;
   static pair runAsync(const std::string &partitionName,
-                       const std::string &outputName, int bufferSize);
+                       const std::string &outputName, uint64_t bufferSize);
 
   [[nodiscard]] bool isUsed() const override;
   [[nodiscard]] const char *name() const override;
@@ -48,7 +48,7 @@ class flashFunction final : public FunctionBase {
 private:
   std::vector<std::string> partitions, imageNames;
   std::string rawPartitions, rawImageNames, imageDirectory;
-  int bufferSize = 4096;
+  uint64_t bufferSize = 0;
 
 public:
   CLI::App *cmd = nullptr;
@@ -56,7 +56,7 @@ public:
   bool init(CLI::App &_app) override;
   bool run() override;
   static pair runAsync(const std::string &partitionName,
-                       const std::string &imageName, int bufferSize);
+                       const std::string &imageName, uint64_t bufferSize);
 
   [[nodiscard]] bool isUsed() const override;
   [[nodiscard]] const char *name() const override;
@@ -66,14 +66,14 @@ public:
 class eraseFunction final : public FunctionBase {
 private:
   std::vector<std::string> partitions;
-  int bufferSize = 4096;
+  uint64_t bufferSize = 0;
 
 public:
   CLI::App *cmd = nullptr;
 
   bool init(CLI::App &_app) override;
   bool run() override;
-  static pair runAsync(const std::string &partitionName, int bufferSize);
+  static pair runAsync(const std::string &partitionName, uint64_t bufferSize);
 
   [[nodiscard]] bool isUsed() const override;
   [[nodiscard]] const char *name() const override;
@@ -100,8 +100,7 @@ public:
 class infoFunction final : public FunctionBase {
 private:
   std::vector<std::string> partitions;
-  std::string jNamePartition = "name", jNameSize = "size",
-              jNameLogical = "isLogical";
+  std::string jNamePartition, jNameSize, jNameLogical;
   bool jsonFormat = false;
 
 public:
@@ -146,7 +145,7 @@ class typeFunction final : public FunctionBase {
 private:
   std::vector<std::string> contents;
   bool onlyCheckAndroidMagics = false, onlyCheckFileSystemMagics = false;
-  int bufferSize = 4096;
+  uint64_t bufferSize = 0;
 
 public:
   CLI::App *cmd = nullptr;
@@ -171,6 +170,23 @@ public:
   [[nodiscard]] bool isUsed() const override;
   [[nodiscard]] const char *name() const override;
 };
+
+class memoryTestFunction final : public FunctionBase {
+private:
+  uint64_t bufferSize = 0, testFileSize = 0;
+  std::string testPath;
+  bool doNotWriteTest = false, doNotReadTest = false;
+
+public:
+  CLI::App *cmd = nullptr;
+
+  bool init(CLI::App &_app) override;
+  bool run() override;
+
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
+
 } // namespace PartitionManager
 
 #endif // #ifndef FUNCTIONS_HPP

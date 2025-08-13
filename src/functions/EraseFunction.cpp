@@ -25,7 +25,7 @@ Copyright 2025 Yağız Zengin
 #define EFUN "eraseFunction"
 
 namespace PartitionManager {
-pair eraseFunction::runAsync(const std::string &partitionName, int bufferSize) {
+pair eraseFunction::runAsync(const std::string &partitionName, const uint64_t bufferSize) {
   if (!Variables->PartMap->hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 
@@ -42,7 +42,6 @@ pair eraseFunction::runAsync(const std::string &partitionName, int bufferSize) {
           false};
   }
 
-  setupBufferSize(bufferSize, partitionName);
   LOGN(EFUN, INFO) << "Using buffer size: " << bufferSize;
 
   // Automatically close file descriptors and delete allocated memories (arrays)
@@ -63,7 +62,7 @@ pair eraseFunction::runAsync(const std::string &partitionName, int bufferSize) {
 
   LOGN(EFUN, INFO) << "Writing zero bytes to partition: " << partitionName
                    << std::endl;
-  auto *buffer = new char[bufferSize];
+  auto *buffer = new(std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
   memset(buffer, 0x00, bufferSize);
 
@@ -94,15 +93,17 @@ bool eraseFunction::init(CLI::App &_app) {
       ->required()
       ->delimiter(',');
   cmd->add_option("-b,--buffer-size", bufferSize,
-                  "Buffer size for writing zero bytes to partition(s)");
+                  "Buffer size for writing zero bytes to partition(s)")->transform(CLI::AsSizeValue(false))->default_val("4KB");
   return true;
 }
 
 bool eraseFunction::run() {
   std::vector<std::future<pair>> futures;
   for (const auto &partitionName : partitions) {
+    uint64_t buf = bufferSize;
+    setupBufferSize(buf, partitionName);
     futures.push_back(
-        std::async(std::launch::async, runAsync, partitionName, bufferSize));
+        std::async(std::launch::async, runAsync, partitionName, buf));
     LOGN(EFUN, INFO) << "Created thread for writing zero bytes to "
                      << partitionName << std::endl;
   }

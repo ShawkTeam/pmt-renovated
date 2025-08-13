@@ -111,7 +111,7 @@ void processCommandLine(std::vector<std::string> &vec1,
                         bool checkForBadUsage = false);
 
 // Setting ups buffer size
-void setupBufferSize(int &size, const std::string &partition);
+void setupBufferSize(uint64_t &size, const std::string &entry);
 
 std::string getLibVersion();
 

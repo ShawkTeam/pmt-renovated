@@ -15,9 +15,10 @@ Copyright 2025 Yağız Zengin
 */
 
 #include <chrono>
+#include <random>
 #include <fcntl.h>
-#include <string.h>
-#include <stdlib.h>
+#include <cstring>
+#include <cstdlib>
 #include <unistd.h>
 #include "functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
@@ -31,10 +32,10 @@ bool memoryTestFunction::init(CLI::App &_app) {
   cmd = _app.add_subcommand("memtest", "Test your write/read speed of device.");
   cmd->add_option("testDirectory", testPath, "Path to test directory")->default_val("/data/local/tmp")->check([&](const std::string &val) {
     if (val != "/data/local/tmp" && !Helper::directoryIsExists(val))
-      return std::string("Couldn't find directory: " + val);
+      return std::string("Couldn't find directory: " + val + ", no root? Try executing in ADB shell.");
     return std::string();
   });
-  cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")->transform(CLI::AsSizeValue(false))->default_val("4KB");
+  cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")->transform(CLI::AsSizeValue(false))->default_val("4MB");
   cmd->add_option("-s,--file-size", testFileSize, "File size of test file")->transform(CLI::AsSizeValue(false))->default_val("1GB");
   cmd->add_flag("--no-write-test", doNotWriteTest, "Don't write test data to disk")->default_val(false);
   cmd->add_flag("--no-read-test", doNotReadTest, "Don't read test data from disk")->default_val(false);
@@ -53,8 +54,10 @@ bool memoryTestFunction::run() {
   LOGN(MTFUN, INFO) << "Generating random data for testing" << std::endl;
   auto *buffer = new(std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
-  srand(time(nullptr));
-  for (size_t i = 0; i < bufferSize; i++) buffer[i] = rand() % 256;
+  std::mt19937 rng(std::random_device{}());
+  std::uniform_int_distribution<int> dist(0, 255);
+
+  for (size_t i = 0; i < bufferSize; i++) buffer[i] = static_cast<char>(dist(rng));
 
   if (!doNotWriteTest) {
     const int wfd = Helper::openAndAddToCloseList(test, collector, O_WRONLY | O_CREAT | O_TRUNC | O_SYNC, 0644);
@@ -71,7 +74,7 @@ bool memoryTestFunction::run() {
     const auto endWrite = std::chrono::high_resolution_clock::now();
 
     const double writeTime = std::chrono::duration<double>(endWrite - startWrite).count();
-    println("Write speed: %f MB/s", (testFileSize / (1024.0 * 1024.0)) / writeTime);
+    println("Write speed: %f MB/s", (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / writeTime);
     LOGN(MTFUN, INFO) << "Write test done!" << std::endl;
   }
 
@@ -85,7 +88,7 @@ bool memoryTestFunction::run() {
     const auto endRead = std::chrono::high_resolution_clock::now();
 
     const double read_time = std::chrono::duration<double>(endRead - startRead).count();
-    println("Read speed: %f MB/s", (testFileSize / (1024.0 * 1024.0)) / read_time);
+    println("Read speed: %f MB/s", (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / read_time);
     LOGN(MTFUN, INFO) << "Read test done!" << std::endl;
   }
 

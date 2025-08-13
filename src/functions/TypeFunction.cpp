@@ -27,11 +27,11 @@ bool typeFunction::init(CLI::App &_app) {
       ->required()
       ->delimiter(',');
   cmd->add_option("-b,--buffer-size", bufferSize,
-                  "Buffer size for max seek depth");
+                  "Buffer size for max seek depth")->transform(CLI::AsSizeValue(false))->default_val("4KB");
   cmd->add_flag("--only-check-android-magics", onlyCheckAndroidMagics,
-                "Only check Android magic values.");
+                "Only check Android magic values.")->default_val(false);
   cmd->add_flag("--only-check-filesystem-magics", onlyCheckFileSystemMagics,
-                "Only check filesystem magic values.");
+                "Only check filesystem magic values.")->default_val(false);
   return true;
 }
 
@@ -52,7 +52,7 @@ bool typeFunction::run() {
     bool found = false;
     for (const auto &[magic, name] : magics) {
       if (PartitionMap::Extras::hasMagic(
-              magic, bufferSize,
+              magic, static_cast<ssize_t>(bufferSize),
               Helper::fileIsExists(content)
                   ? content
                   : Variables->PartMap->getRealPathOf(content))) {

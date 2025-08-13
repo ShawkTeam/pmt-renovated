@@ -53,8 +53,8 @@ int Main(int argc, char **argv) {
 
     AppMain.fallthrough(true);
     AppMain.set_help_all_flag("--help-all", "Print full help message and exit");
-    AppMain.footer("Partition Manager Tool is written by YZBruh\nThis project "
-                   "licensed under "
+    AppMain.footer("Partition Manager Tool is written by YZBruh\n"
+                   "This project licensed under "
                    "Apache 2.0 license\nReport "
                    "bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
     AppMain
@@ -62,7 +62,7 @@ int Main(int argc, char **argv) {
                     "Set partition search path")
         ->check([&](const std::string &val) {
           if (val.find("/block") == std::string::npos)
-            throw CLI::ValidationError(
+            return std::string(
                 "Partition search path is unexpected! Couldn't find "
                 "'block' in input path!");
           return std::string();
@@ -98,6 +98,7 @@ int Main(int argc, char **argv) {
                                  AppMain);
     FuncManager.registerFunction(std::make_unique<typeFunction>(), AppMain);
     FuncManager.registerFunction(std::make_unique<rebootFunction>(), AppMain);
+    // FuncManager.registerFunction(std::make_unique<memoryTestFunction>(), AppMain);
 
     CLI11_PARSE(AppMain, argc, argv);
 
@@ -115,7 +116,7 @@ int Main(int argc, char **argv) {
                   "(--search-path)");
 
     if (!Helper::hasSuperUser()) {
-      if (!(FuncManager.isUsed("rebootFunction") && Helper::hasAdbPermissions()))
+      if (!((FuncManager.isUsed("rebootFunction") || FuncManager.isUsed("memoryTestFunction")) && Helper::hasAdbPermissions()))
         throw Error(
             "Partition Manager Tool is requires super-user privileges!\n");
     }

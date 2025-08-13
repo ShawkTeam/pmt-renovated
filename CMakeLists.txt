@@ -16,7 +16,7 @@
 
 # Project info
 cmake_minimum_required(VERSION 3.10)
-project(pmt VERSION 1.0.0)
+project(pmt VERSION 1.1.0)
 
 # Set compiler flags
 add_compile_options(-Wall -Werror -Wno-deprecated-declarations)

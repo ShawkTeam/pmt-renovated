@@ -26,7 +26,7 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 pair flashFunction::runAsync(const std::string &partitionName,
-                             const std::string &imageName, int bufferSize) {
+                             const std::string &imageName, const uint64_t bufferSize) {
   if (!Helper::fileIsExists(imageName))
     return {format("Couldn't find image file: %s", imageName.data()), false};
   if (!Variables->PartMap->hasPartition(partitionName))
@@ -52,8 +52,7 @@ pair flashFunction::runAsync(const std::string &partitionName,
           false};
   }
 
-  setupBufferSize(bufferSize, imageName);
-  LOGN(FFUN, INFO) << "Using buffer size: " << bufferSize;
+  LOGN(FFUN, INFO) << "Using buffer size: " << bufferSize << std::endl;
 
   // Automatically close file descriptors and delete allocated memories (arrays)
   Helper::garbageCollector collector;
@@ -74,7 +73,7 @@ pair flashFunction::runAsync(const std::string &partitionName,
 
   LOGN(FFUN, INFO) << "Writing image " << imageName
                    << " to partition: " << partitionName << std::endl;
-  auto *buffer = new char[bufferSize];
+  auto *buffer = new(std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
   memset(buffer, 0x00, bufferSize);
 
@@ -101,7 +100,7 @@ bool flashFunction::init(CLI::App &_app) {
       ->required();
   cmd->add_option(
       "-b,--buffer-size", bufferSize,
-      "Buffer size for reading image(s) and writing to partition(s)");
+      "Buffer size for reading image(s) and writing to partition(s)")->transform(CLI::AsSizeValue(false))->default_val("4KB");
   cmd->add_option("-I,--image-directory", imageDirectory,
                   "Directory to find image(s) and flash to partition(s)");
 
@@ -115,13 +114,17 @@ bool flashFunction::run() {
     throw CLI::ValidationError(
         "You must provide an image file(s) as long as the partition name(s)");
 
+  for (size_t i = 0; i < partitions.size(); i++) {
+    if (!imageDirectory.empty()) imageNames[i].insert(0, imageDirectory + '/');
+  }
+
   std::vector<std::future<pair>> futures;
   for (size_t i = 0; i < partitions.size(); i++) {
-    std::string imageName = imageNames[i];
-    if (!imageDirectory.empty()) imageName.insert(0, imageDirectory + '/');
+    uint64_t buf = bufferSize;
 
+    setupBufferSize(buf, imageNames[i]);
     futures.push_back(std::async(std::launch::async, runAsync, partitions[i],
-                                 imageName, bufferSize));
+                                 imageNames[i], bufferSize));
     LOGN(FFUN, INFO) << "Created thread for flashing image to " << partitions[i]
                      << std::endl;
   }

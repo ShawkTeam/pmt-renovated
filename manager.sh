@@ -29,7 +29,7 @@ checks()
 	echo "Updating repositories and checking required packages..."
 	pkg update &>/dev/null
 	[ ! -f $PREFIX/bin/unzip ] && pkg install -y unzip
-    [ ! -f $PREFIX/bin/wget ] && pkg install -y wget
+  [ ! -f $PREFIX/bin/wget ] && pkg install -y wget
 }
 
 select_variant()
