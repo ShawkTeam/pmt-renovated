@@ -71,7 +71,6 @@ pmt backup partition(s) [output(s)] [OPTIONS]
 `pmt backup boot`\
 `pmt backup boot boot_backup.img`\
 `pmt backup boot,recovery,vendor`\
-`pmt backup boot`\
 `pmt backup boot,recovery -O /sdcard`\
 `pmt backup system,vendor --buffer-size=8KB # '=' is not mandatory`
 
@@ -109,7 +108,7 @@ pmt erase partition(s) [OPTIONS]
 **Example usages (DO NOT USE FOR TRYING!!!):**\
 `pmt erase boot`\
 `pmt erase nvdata,nvram`\
-`pmt erase system,vendor --buffer-size=8KB`
+`pmt erase system,vendor --buffer-size 8KB`
 
 ---
 
@@ -199,6 +198,8 @@ pmt reboot [rebootTarget] [OPTIONS]
 `pmt reboot recovery`
 `pmt reboot download`
 
+---
+
 ### 10. `memtest`
 Test your sequential (random tests is soon) read/write speed of your memory.
 ```bash
@@ -213,6 +214,8 @@ pmt memtest [testPath]
 `pmt memtest`\
 `pmt memtest /data`\
 `pmt memtest -s 2GB`
+
+---
 
 ## Additional Notes
 
