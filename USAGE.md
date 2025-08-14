@@ -17,6 +17,7 @@ It supports **asynchronous operations**, allowing multiple partitions to be proc
 - **Retrieve** real paths and symbolic link paths of partitions.
 - **Identify** file system or image types by checking magic numbers.
 - **Reboot** the device into different modes.
+- **Test** sequential read/write speed of your memory.
 
 ---
 
@@ -62,6 +63,7 @@ pmt backup partition(s) [output(s)] [OPTIONS]
 
 **Notes:**
 - Partition names are separated by commas.
+- When providing size information, you can use expressions such as 1KB, 1MB, 1GB.
 - If custom output names are provided, they must match the number of partitions.
 - Automatically adjusts permissions so backup files can be read/written without root.
 
@@ -71,7 +73,7 @@ pmt backup partition(s) [output(s)] [OPTIONS]
 `pmt backup boot,recovery,vendor`\
 `pmt backup boot`\
 `pmt backup boot,recovery -O /sdcard`\
-`pmt backup system,vendor --buffer-size=8192 # '=' is not mandatory`
+`pmt backup system,vendor --buffer-size=8KB # '=' is not mandatory`
 
 ---
 
@@ -107,7 +109,7 @@ pmt erase partition(s) [OPTIONS]
 **Example usages (DO NOT USE FOR TRYING!!!):**\
 `pmt erase boot`\
 `pmt erase nvdata,nvram`\
-`pmt erase system,vendor --buffer-size=8192`
+`pmt erase system,vendor --buffer-size=8KB`
 
 ---
 
@@ -145,8 +147,8 @@ pmt info partition(s) [OPTIONS]
 
 **Example usages:**\
 `pmt info boot` - Example output: `partition=boot size=100663296 isLogical=false`\
-`pmt info boot -J` - Example output: `{"name": "boot", "size": 100663296, "isLogical": false}`\
-`pmt info boot -J --json-partition-name=partitionName` - Example output: `{"partitionName": "boot", "size": 100663296, "isLogical": false}`
+`pmt info boot -J` - Example output: `{"partitions": [ { "isLogical": false, "name": "boot", "size": 100663296 } ] }`\
+`pmt info boot -J --json-partition-name=partitionName` - Example output: `{"partitions": [ { "isLogical": false, "partitionName": "boot", "size": 100663296 } ] }`
 
 ---
 
@@ -196,6 +198,21 @@ pmt reboot [rebootTarget] [OPTIONS]
 `pmt reboot`
 `pmt reboot recovery`
 `pmt reboot download`
+
+### 10. `memtest`
+Test your sequential (random tests is soon) read/write speed of your memory.
+```bash
+pmt memtest [testPath]
+```
+
+**Options:**
+ - `-s`, `--file-size` → Specify size of test file.
+ - `--no-read-test` → Don't do read test.
+
+**Example Usages:**\
+`pmt memtest`\
+`pmt memtest /data`\
+`pmt memtest -s 2GB`
 
 ## Additional Notes
 

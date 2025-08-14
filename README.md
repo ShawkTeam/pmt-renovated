@@ -19,6 +19,7 @@ PMT is designed for developers, technicians, and Android enthusiasts who need fi
 - **Reboot** the device into multiple modes (normal, recovery, etc.).
 - **Asynchronous processing** for speed — each partition runs in its own thread.
 - **Error isolation** so one failing operation doesn’t cancel the rest. For back upping, flashing and erasing.
+- **Test** sequential read/write speed of your memory.
 
 ---
 
