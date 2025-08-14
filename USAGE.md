@@ -140,6 +140,7 @@ pmt info partition(s) [OPTIONS]
 
 **Options:**
 - `-J`, `--json` → Output in JSON format.
+- `--json-indent-size` → Specify indent size of JSON string.
 - `--json-partition-name NAME` → Custom JSON key for partition name.
 - `--json-size-name NAME` → Custom JSON key for size.
 - `--json-logical-name NAME` → Custom JSON key for dynamic status.
