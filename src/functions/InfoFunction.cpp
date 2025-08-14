@@ -19,7 +19,7 @@ Copyright 2025 Yağız Zengin
 #include <cerrno>
 #include <cstdlib>
 #include <fcntl.h>
-#include <unistd.h>
+#include <nlohmann/json.hpp>
 
 #define IFUN "infoFunction"
 
@@ -39,14 +39,17 @@ bool infoFunction::init(CLI::App &_app) {
                 "be written separately")
       ->default_val(false);
   cmd->add_option("--json-partition-name", jNamePartition,
-                  "Speficy partition name element for JSON body")
+                  "Specify partition name element for JSON body")
       ->default_val("name");
   cmd->add_option("--json-size-name", jNameSize,
-                  "Speficy size element name for JSON body")
+                  "Specify size element name for JSON body")
       ->default_val("size");
   cmd->add_option("--json-logical-name", jNameLogical,
-                  "Speficy logical element name for JSON body")
+                  "Specify logical element name for JSON body")
       ->default_val("isLogical");
+  cmd->add_option("--json-indent-size", jIndentSize,
+                  "Set JSON indent size for printing to screen")
+      ->default_val(2);
   return true;
 }
 
@@ -63,6 +66,7 @@ bool infoFunction::run() {
       partitions.push_back(name);
   }
 
+  std::vector<PartitionMap::Partition_t> jParts;
   for (const auto &partition : partitions) {
     if (!Variables->PartMap->hasPartition(partition))
       throw Error("Couldn't find partition: %s", partition.data());
@@ -79,14 +83,9 @@ bool infoFunction::run() {
     }
 
     if (jsonFormat)
-#ifdef __LP64__
-      println("{\"%s\": \"%s\", \"%s\": %lu, \"%s\": %s}",
-#else
-      println("{\"%s\": \"%s\", \"%s\": %llu, \"%s\": %s}",
-#endif
-              jNamePartition.data(), partition.data(), jNameSize.data(),
-              Variables->PartMap->sizeOf(partition), jNameLogical.data(),
-              Variables->PartMap->isLogical(partition) ? "true" : "false");
+      jParts.push_back({partition,
+                        {Variables->PartMap->sizeOf(partition),
+                         Variables->PartMap->isLogical(partition)}});
     else
 #ifdef __LP64__
       println("partition=%s size=%lu isLogical=%s",
@@ -95,6 +94,18 @@ bool infoFunction::run() {
 #endif
               partition.data(), Variables->PartMap->sizeOf(partition),
               Variables->PartMap->isLogical(partition) ? "true" : "false");
+  }
+
+  if (jsonFormat) {
+    nlohmann::json j;
+    j["partitions"] = nlohmann::json::array();
+    for (const auto &[name, props] : jParts) {
+      j["partitions"].push_back({{jNamePartition, name},
+                                 {jNameSize, props.size},
+                                 {jNameLogical, props.isLogical}});
+    }
+
+    println("%s", j.dump(jIndentSize).data());
   }
 
   return true;

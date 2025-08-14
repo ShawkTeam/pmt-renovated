@@ -101,6 +101,7 @@ class infoFunction final : public FunctionBase {
 private:
   std::vector<std::string> partitions;
   std::string jNamePartition, jNameSize, jNameLogical;
+  int jIndentSize = 2;
   bool jsonFormat = false;
 
 public:
@@ -175,7 +176,7 @@ class memoryTestFunction final : public FunctionBase {
 private:
   uint64_t bufferSize = MB(4), /* bufferSizeRandom = KB(4),*/ testFileSize = 0;
   std::string testPath;
-  bool doNotWriteTest = false, doNotReadTest = false;
+  bool doNotReadTest = false;
 
 public:
   CLI::App *cmd = nullptr;

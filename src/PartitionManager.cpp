@@ -119,9 +119,9 @@ int Main(int argc, char **argv) {
                   "(--search-path)");
 
     if (!Helper::hasSuperUser()) {
-      if (!((FuncManager.isUsed("rebootFunction") ||
-             FuncManager.isUsed("memoryTestFunction")) &&
-            Helper::hasAdbPermissions()))
+      if (!((FuncManager.isUsed("rebootFunction") &&
+             Helper::hasAdbPermissions()) ||
+            FuncManager.isUsed("memoryTestFunction")))
         throw Error(
             "Partition Manager Tool is requires super-user privileges!\n");
     }

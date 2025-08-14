@@ -81,14 +81,14 @@ private:
   std::vector<uint8_t *> _ptrs_u;
   std::vector<FILE *> _fps;
   std::vector<int> _fds;
-  std::vector<std::string_view> _files;
+  std::vector<std::string> _files;
 
 public:
   ~garbageCollector();
 
   void delAfterProgress(char *&_ptr);
   void delAfterProgress(uint8_t *&_ptr);
-  void delFileAfterProgress(std::string_view path);
+  void delFileAfterProgress(const std::string& path);
   void closeAfterProgress(FILE *&_fp);
   void closeAfterProgress(int _fd);
 };

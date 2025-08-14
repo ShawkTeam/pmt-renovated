@@ -31,3 +31,4 @@ Detailed usage instructions and option references can be found in the [USAGE.md]
 ## Credits
  - [CLI11: Command line parser for C++11](https://github.com/CLIUtils/CLI11)
  - [PicoSHA2: A header-file-only, SHA256 hash generator in C++](https://github.com/okdshin/PicoSHA2)
+ - [nlohmann/json: JSON for Modern C++](https://github.com/nlohmann/json)

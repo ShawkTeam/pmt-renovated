@@ -118,6 +118,7 @@ public:
   [[nodiscard]] constant_iterator cend() const;
 };
 
+using Partition_t = _entry;
 using Map_t = basic_partition_map;
 
 class basic_partition_map_builder final {

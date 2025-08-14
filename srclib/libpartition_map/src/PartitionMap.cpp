@@ -47,7 +47,7 @@ bool basic_partition_map_builder::_is_real_block_dir(
 }
 
 Map_t basic_partition_map_builder::_build_map(std::string_view path,
-                                              bool logical) {
+                                              const bool logical) {
   Map_t map;
   std::vector<std::filesystem::directory_entry> entries{
       std::filesystem::directory_iterator(path),
