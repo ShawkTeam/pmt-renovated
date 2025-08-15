@@ -37,7 +37,7 @@ void variableProtect::setVariablePointer(basic_variables *&_ptr) {
 
 basic_variables::~basic_variables() { delete PartMap; }
 basic_variables::basic_variables()
-    : logFile("/sdcard/Documents/last_pmt_logs.log"), onLogical(false),
+    : logFile(Helper::LoggingProperties::FILE), onLogical(false),
       quietProcess(false), verboseMode(false), viewVersion(false),
       forceProcess(false) {
   try {
