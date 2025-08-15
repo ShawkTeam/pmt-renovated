@@ -27,6 +27,7 @@ bool realPathFunction::init(CLI::App &_app) {
   cmd->add_option("partition(s)", partitions, "Partition name(s)")
       ->required()
       ->delimiter(',');
+  cmd->add_flag("--real-link-path", realLinkPath, "Print real link path(s)")->default_val(false);
   return true;
 }
 
@@ -46,7 +47,10 @@ bool realPathFunction::run() {
                     partition.data());
     }
 
-    println("%s", Variables->PartMap->getRealPathOf(partition).data());
+    if (realLinkPath)
+      println("%s", Variables->PartMap->getRealLinkPathOf(partition).data());
+    else
+      println("%s", Variables->PartMap->getRealPathOf(partition).data());
   }
 
   return true;

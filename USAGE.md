@@ -158,20 +158,16 @@ Show the **absolute block device path** for each partition. General syntax:
 pmt real-path partition(s) [OPTIONS]
 ```
 
+**Options:**
+- `--real-link-path` → Tells real link path.
+
 **Example usages:**\
-`pmt real-path boot` - Example output: `/dev/block/sda25`
+`pmt real-path boot` - Example output: `/dev/block/sda25`\
+`pmt real-path boot --real-link-path` - Example output: `/dev/block/by-name/boot`
 
 ---
 
-### 7. `real-linkpath`
-Show the **symbolic link path** for each partition (e.g., `/dev/block/by-name/boot`). General syntax:
-```bash
-pmt real-link-path partition(s) [OPTIONS]
-```
-
----
-
-### 8. `type`
+### 7. `type`
 Check magic numbers to determine file system or other types of partition(s) or image(s). General syntax:
 ```bash
 pmt type partition(s) [OPTIONS]
@@ -188,7 +184,7 @@ pmt type partition(s) [OPTIONS]
 
 ---
 
-### 9. `reboot`
+### 8. `reboot`
 Reboot the device. Default reboot target is normal. If you are using it via ADB terminal, you **DO NOT** need root to use this feature. General syntax:
 ```bash
 pmt reboot [rebootTarget] [OPTIONS]
@@ -201,7 +197,7 @@ pmt reboot [rebootTarget] [OPTIONS]
 
 ---
 
-### 10. `memtest`
+### 9. `memtest`
 Test your sequential (random tests is soon) read/write speed of your memory.
 ```bash
 pmt memtest [testPath]

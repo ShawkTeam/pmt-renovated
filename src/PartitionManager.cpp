@@ -96,8 +96,6 @@ int Main(int argc, char **argv) {
                                  AppMain);
     FuncManager.registerFunction(std::make_unique<infoFunction>(), AppMain);
     FuncManager.registerFunction(std::make_unique<realPathFunction>(), AppMain);
-    FuncManager.registerFunction(std::make_unique<realLinkPathFunction>(),
-                                 AppMain);
     FuncManager.registerFunction(std::make_unique<typeFunction>(), AppMain);
     FuncManager.registerFunction(std::make_unique<rebootFunction>(), AppMain);
     FuncManager.registerFunction(std::make_unique<memoryTestFunction>(),

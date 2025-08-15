@@ -117,20 +117,7 @@ public:
 class realPathFunction final : public FunctionBase {
 private:
   std::vector<std::string> partitions;
-
-public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
-};
-
-class realLinkPathFunction final : public FunctionBase {
-private:
-  std::vector<std::string> partitions;
+  bool realLinkPath = false;
 
 public:
   CLI::App *cmd = nullptr;

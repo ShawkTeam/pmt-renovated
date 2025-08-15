@@ -25,7 +25,6 @@ set(PMT_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/MemoryTestFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/PartitionSizeFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/RealPathFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/RealLinkPathFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/RebootFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/TypeFunction.cpp
 )
