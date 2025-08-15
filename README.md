@@ -25,9 +25,9 @@ PMT is designed for developers, technicians, and Android enthusiasts who need fi
 
 ## Documentation
 
-Read [INSTALLING.md - Using PMT via Termux](./INSTALLING.md#using-pmt-via-termux) for learn installing to termux.\
-Read [INSTALLING.md - Using PMT via ADB](./INSTALLING.md#using-pmt-via-adb) for learn how to use PMT with ADB.\
-Detailed usage instructions and option references can be found in the [USAGE.md](./USAGE.md) file.
+For all information about PMT, see the [wiki](https://github.com/ShawkTeam/pmt-renovated/wiki)\
+Read [Wiki - Using PMT via Termux or ADB](https://github.com/ShawkTeam/pmt-renovated/wiki/Using-PMT-via-Termux-or-ADB) for learn how to use PMT via Termux or ADB.\
+Detailed usage instructions and option references can be found in the [Wiki - Usage](https://github.com/ShawkTeam/pmt-renovated/wiki/Usage).
 
 ---
 

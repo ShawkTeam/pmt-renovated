@@ -60,4 +60,4 @@ jobs:
             ${{ env.BUILD }}/build_armeabi-v7a/*.zip
           name: Partition Manager Tool Release ${{ env.BUILD_DATE }}
           tag_name: ${{ env.BUILD_DATE }}
-          body: "Read [RELEASE-TYPES.md](https://github.com/ShawkTeam/pmt-renovated/blob/main/RELEASE-TYPES.md) for getting more information."
+          body: "Read [Wiki - About Release Types](https://github.com/ShawkTeam/pmt-renovated/wiki/About-Release-Types) for getting more information."
