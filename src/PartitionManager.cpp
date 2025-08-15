@@ -25,18 +25,21 @@
 
 namespace PartitionManager {
 
-__attribute__((constructor)) void init() {
+__attribute__((constructor))
+void init() {
   Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log");
+}
+
+__attribute__((destructor))
+void cleanup() {
+  delete Variables;
 }
 
 auto Variables = new VariableTable();
 
-void protector::setVariablePtr(basic_variables *&_var) { this->_var = _var; }
-protector::~protector() { delete _var; }
-
 basic_variables::~basic_variables() { delete PartMap; }
 basic_variables::basic_variables()
-    : logFile(Helper::LoggingProperties::FILE), onLogical(false),
+    : logFile("/sdcard/Documents/last_pmt_logs.log"), onLogical(false),
       quietProcess(false), verboseMode(false), viewVersion(false),
       forceProcess(false) {
   try {
@@ -49,8 +52,6 @@ int Main(int argc, char **argv) {
   try {
     // try-catch start
     CLI::App AppMain{"Partition Manager Tool"};
-    protector prot;
-    prot.setVariablePtr(Variables);
     FunctionManager FuncManager;
 
     AppMain.fallthrough(true);

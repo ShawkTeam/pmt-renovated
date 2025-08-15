@@ -70,16 +70,6 @@ public:
   bool forceProcess;
 };
 
-class protector final {
-private:
-  basic_variables *_var = nullptr;
-
-public:
-  ~protector();
-
-  void setVariablePtr(basic_variables *&_var);
-};
-
 using FunctionBase = basic_function;
 using FunctionManager = basic_function_manager;
 using VariableTable = basic_variables;
