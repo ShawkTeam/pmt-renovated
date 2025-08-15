@@ -84,16 +84,16 @@ bool memoryTestFunction::run() {
     const ssize_t ret = write(wfd, buffer, bufferSize);
     if (ret < 0) throw Error("Can't write to test file: %s\n", strerror(errno));
     bytesWritten += ret;
-
-    const auto endWrite = std::chrono::high_resolution_clock::now();
-
-    const double writeTime =
-        std::chrono::duration<double>(endWrite - startWrite).count();
-    println("Sequential write speed: %3.f MB/s",
-            (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) /
-                writeTime);
-    LOGN(MTFUN, INFO) << "Sequential write test done!" << std::endl;
   }
+
+  const auto endWrite = std::chrono::high_resolution_clock::now();
+
+  const double writeTime =
+      std::chrono::duration<double>(endWrite - startWrite).count();
+  println("Sequential write speed: %3.f MB/s",
+          (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) /
+              writeTime);
+  LOGN(MTFUN, INFO) << "Sequential write test done!" << std::endl;
 
   if (!doNotReadTest) {
     auto *rawBuffer = new char[bufferSize + 4096];
