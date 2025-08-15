@@ -29,6 +29,9 @@ For all information about PMT, see the [wiki](https://github.com/ShawkTeam/pmt-r
 Read [Wiki - Using PMT via Termux or ADB](https://github.com/ShawkTeam/pmt-renovated/wiki/Using-PMT-via-Termux-or-ADB) for learn how to use PMT via Termux or ADB.\
 Detailed usage instructions and option references can be found in the [Wiki - Usage](https://github.com/ShawkTeam/pmt-renovated/wiki/Usage).
 
+## Bug Reporting
+Please submit bugs at [Issues](https://github.com/ShawkTeam/pmt-renovated/issues) page.
+
 ---
 
 ## Credits
