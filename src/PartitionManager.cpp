@@ -24,16 +24,18 @@
 #include <unistd.h>
 
 namespace PartitionManager {
-variableProtect protector;
-auto Variables = new VariableTable();
 
-variableProtect::variableProtect() {
+__attribute__((constructor))
+void init() {
   Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log");
 }
-variableProtect::~variableProtect() { delete _ptr; }
-void variableProtect::setVariablePointer(basic_variables *&_ptr) {
-  this->_ptr = _ptr;
+
+__attribute__((destructor))
+void cleanup() {
+  delete Variables;
 }
+
+auto Variables = new VariableTable();
 
 basic_variables::~basic_variables() { delete PartMap; }
 basic_variables::basic_variables()
@@ -50,7 +52,6 @@ int Main(int argc, char **argv) {
   try {
     // try-catch start
     CLI::App AppMain{"Partition Manager Tool"};
-    protector.setVariablePointer(Variables);
     FunctionManager FuncManager;
 
     AppMain.fallthrough(true);
