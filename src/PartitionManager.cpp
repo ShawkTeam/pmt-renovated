@@ -30,20 +30,14 @@ void init() {
   Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log");
 }
 
-__attribute__((destructor))
-void cleanup() {
-  delete Variables;
-}
+auto Variables = std::make_unique<VariableTable>();
 
-auto Variables = new VariableTable();
-
-basic_variables::~basic_variables() { delete PartMap; }
 basic_variables::basic_variables()
     : logFile("/sdcard/Documents/last_pmt_logs.log"), onLogical(false),
       quietProcess(false), verboseMode(false), viewVersion(false),
       forceProcess(false) {
   try {
-    PartMap = new PartitionMap::BuildMap();
+    PartMap = std::make_unique<PartitionMap::BuildMap>();
   } catch (std::exception &) {
   }
 }

@@ -58,9 +58,8 @@ public:
 class basic_variables final {
 public:
   basic_variables();
-  ~basic_variables();
 
-  PartitionMap::BuildMap *PartMap;
+  std::unique_ptr<PartitionMap::BuildMap> PartMap;
 
   std::string searchPath, logFile;
   bool onLogical;
@@ -75,7 +74,7 @@ using FunctionManager = basic_function_manager;
 using VariableTable = basic_variables;
 using Error = Helper::Error;
 
-extern VariableTable *Variables;
+extern std::unique_ptr<VariableTable> Variables;
 
 int Main(int argc, char **argv);
 
