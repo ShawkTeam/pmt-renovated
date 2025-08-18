@@ -36,10 +36,10 @@ select_variant()
 {
 	LINK=""; ARCH=""; VARIANT=""
 
-	if getprop ro.product.cpu.abi | grep "arm64-v8a" &>/dev/null; then ARCH="arm64-v8a";
+	if getprop ro.product.cpu.abi | grep "arm64-v8a" &>/dev/null; then ARCH="arm64-v8a"
 	else ARCH="armeabi-v7a"
 	fi
-  grep "static" <<< $1 &>/dev/null && VARIANT="static-"
+  if grep "static" <<< $1 &>/dev/null; then VARIANT="static-"; fi
 
 	LINK="https://github.com/ShawkTeam/pmt-renovated/releases/download/${RELEASE}/pmt-${VARIANT}${ARCH}.zip"
 }
@@ -104,7 +104,7 @@ case $1 in
     "install")
     	is_installed
     	checks
-    	select_variant $(grep "static" <<< $2 &>/dev/null && echo static)
+    	select_variant $(grep "static" <<< $2 &>/dev/null && command echo static)
 			download
 			setup
     ;;
@@ -112,13 +112,13 @@ case $1 in
     	uninstall && echo "Uninstalled successfully."
     ;;
     "reinstall")
-    		uninstall
-    		checks
-        select_variant $(grep "static" <<< $2 &>/dev/null && echo static)
-        download
-        setup
+    	uninstall
+    	checks
+      select_variant $(grep "static" <<< $2 &>/dev/null && command echo static)
+      download
+      setup
     ;;
     *)
-        command echo "$0: Unknown argument: $1"
-        exit 1 ;;
+      command echo "$0: Unknown argument: $1"
+      exit 1 ;;
 esac
