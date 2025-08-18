@@ -39,9 +39,9 @@ select_variant()
 	if getprop ro.product.cpu.abi | grep "arm64-v8a" &>/dev/null; then ARCH="arm64-v8a";
 	else ARCH="armeabi-v7a"
 	fi
-    grep "static" <<< $1 &>/dev/null && VARIANT="static-"
+  grep "static" <<< $1 &>/dev/null && VARIANT="static-"
 
-    LINK="https://github.com/ShawkTeam/pmt-renovated/releases/download/${RELEASE}/pmt-${VARIANT}${ARCH}.zip"
+	LINK="https://github.com/ShawkTeam/pmt-renovated/releases/download/${RELEASE}/pmt-${VARIANT}${ARCH}.zip"
 }
 
 download()
@@ -105,15 +105,15 @@ case $1 in
     	is_installed
     	checks
     	select_variant $(grep "static" <<< $2 &>/dev/null && echo static)
-		download
-		setup
+			download
+			setup
     ;;
     "uninstall")
     	uninstall && echo "Uninstalled successfully."
     ;;
     "reinstall")
-    	uninstall
-    	checks
+    		uninstall
+    		checks
         select_variant $(grep "static" <<< $2 &>/dev/null && echo static)
         download
         setup

@@ -42,7 +42,7 @@ struct _entry {
  *   The main type of the library. The Builder class is designed
  *   to be easily manipulated and modified only on this class.
  */
-class basic_partition_map final {
+class basic_partition_map {
 private:
   void _resize_map();
 

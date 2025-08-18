@@ -16,12 +16,13 @@
 
 #include "functions/functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
+#include <unistd.h>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
+#include <csignal>
 #include <generated/buildInfo.hpp>
 #include <string>
-#include <unistd.h>
 
 namespace PartitionManager {
 
@@ -30,10 +31,16 @@ void init() {
   Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log");
 }
 
+static void sigHandler(const int sig) {
+  // Even if only SIGINT is to be captured for now, this is still a more appropriate code
+  if (sig == SIGINT) println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
+  exit(sig);
+}
+
 auto Variables = std::make_unique<VariableTable>();
 
 basic_variables::basic_variables()
-    : logFile("/sdcard/Documents/last_pmt_logs.log"), onLogical(false),
+    : logFile(Helper::LoggingProperties::FILE), onLogical(false),
       quietProcess(false), verboseMode(false), viewVersion(false),
       forceProcess(false) {
   try {
@@ -45,6 +52,15 @@ basic_variables::basic_variables()
 int Main(int argc, char **argv) {
   try {
     // try-catch start
+    if (argc < 2) {
+      println(
+          "Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.",
+          argv[0]);
+      return EXIT_FAILURE;
+    }
+
+    signal(SIGINT, sigHandler);
+
     CLI::App AppMain{"Partition Manager Tool"};
     FunctionManager FuncManager;
 
@@ -76,13 +92,6 @@ int Main(int argc, char **argv) {
                      "being carried out");
     AppMain.add_flag("-v,--version", Variables->viewVersion,
                      "Print version and exit");
-
-    if (argc < 2) {
-      println(
-          "Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.",
-          argv[0]);
-      return EXIT_FAILURE;
-    }
 
     FuncManager.registerFunction(std::make_unique<backupFunction>(), AppMain);
     FuncManager.registerFunction(std::make_unique<flashFunction>(), AppMain);
