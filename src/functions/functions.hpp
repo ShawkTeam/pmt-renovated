@@ -175,6 +175,17 @@ public:
   [[nodiscard]] const char *name() const override;
 };
 
+class shellFunction final : public FunctionBase {
+public:
+  CLI::App *cmd = nullptr;
+
+  bool init(CLI::App &_app) override;
+  bool run() override;
+
+  [[nodiscard]] bool isUsed() const override;
+  [[nodiscard]] const char *name() const override;
+};
+
 } // namespace PartitionManager
 
 #endif // #ifndef FUNCTIONS_HPP

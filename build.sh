@@ -15,74 +15,61 @@
 #  limitations under the License.
 #
 
-set -e
-
-BUILD_64="build_arm64-v8a"
-BUILD_32="build_armeabi-v7a"
 THIS="$(basename $0)"
+TARGET_ABI_LIST=("arm64-v8a" "armeabi-v7a")
 
 echo() { command echo "[$THIS]: $@"; }
 
-checks()
-{
+checks() {
     if [ -z "$ANDROID_NDK" ]; then
         echo "Please set ANDROID_NDK variable as your NDK path."
         exit 1
     fi
-    if [ ! -f /usr/bin/cmake ] && [ ! -f /bin/cmake ]; then
+    if ! which cmake &>/dev/null; then
         echo "Please verify your CMake installation."
         exit 1
     fi
 }
 
-clean()
-{
+clean() {
     echo "Cleaning workspace."
-    rm -rf $BUILD_32 $BUILD_64 \
-        include/generated \
+    for a in ${TARGET_ABI_LIST[@]}; do rm -rf build_$a; done
+    rm -rf include/generated \
         srclib/libhelper/tests/dir \
         srclib/libhelper/tests/linkdir \
         srclib/libhelper/tests/file.txt
 }
 
-build()
-{
-    mkdir -p $BUILD_64 $BUILD_32
+build() {
+    set -e
     command echo -e "BUILD INFO:
-    ARCHS: arm64-v8a armeabi-v7a
+    ARCHS: ${TARGET_ABI_LIST[@]}
     ANDROID_PLATFORM: $ANDROID_PLATFORM
     ANDROID_TOOLCHAIN_FILE: $ANDROID_NDK/build/cmake/android.toolchain.cmake\n"
 
-    echo "Configuring for arm64-v8a..."
-    cmake -B $BUILD_64 -S . $1 \
-        -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
-        -DANDROID_ABI=arm64-v8a \
-        -DANDROID_PLATFORM=$ANDROID_PLATFORM \
-        -DANDROID_STL=c++_static
+    for a in ${TARGET_ABI_LIST[@]}; do
+        echo "Configuring for $a..."
+        mkdir -p build_$a
+        cmake -B build_$a -S . $1 \
+            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
+            -DANDROID_ABI=$a \
+            -DANDROID_PLATFORM=$ANDROID_PLATFORM \
+            -DANDROID_STL=c++_static
+    done
 
-    echo "Configuring for armeabi-v7a..."
-    cmake -B $BUILD_32 -S . $1 \
-        -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
-        -DANDROID_ABI=armeabi-v7a \
-        -DANDROID_PLATFORM=$ANDROID_PLATFORM \
-        -DANDROID_STL=c++_static
-
-    echo "Building arm64-v8a artifacts..."
-    cmake --build $BUILD_64
-    echo "arm64-v8a build complete, artifacts: $PWD/$BUILD_64"
-
-    echo "Building armeabi-v7a artifacts..."
-    cmake --build $BUILD_32
-    echo "armeabi-v7a build complete, artifacts: $PWD/$BUILD_32"
+    for a in ${TARGET_ABI_LIST[@]}; do
+        echo "Building $a artifacts..."
+        cmake --build build_$a
+        echo "$a build complete, artifacts: $PWD/build_$a"
+    done
 }
 
 if [ $# -eq 0 ]; then
-    command echo "Usage: $0 build|rebuild|clean [EXTRA_CMAKE_FLAGS] [ANDROID_PLATFORM=SELECTED_ANDROID_PLATFORM]"
+    command echo -e "Usage: $0 build|rebuild|clean [EXTRA_CMAKE_FLAGS]\n  HINT: Export ANDROID_PLATFORM if you set min Android target.\n  HINT: Change TARGET_ABI_LIST array in build.sh if you build other archs."
     exit 1
 fi
 
-if [ -z $ANDROID_PLATFORM ]; then ANDROID_PLATFORM="android-21"; fi
-
+[ -z $ANDROID_PLATFORM ] && ANDROID_PLATFORM="android-21"
 checks
 
 case $1 in

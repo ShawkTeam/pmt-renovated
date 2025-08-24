@@ -29,7 +29,7 @@ else()
 endif()
 
 # Add pmt's CMake module(s)
-include(cmake/generate_headers.cmake)
+include(build/cmake/generate_headers.cmake)
 
 # Generate header(s)
 get_property(FLAGS DIRECTORY PROPERTY COMPILE_OPTIONS)
