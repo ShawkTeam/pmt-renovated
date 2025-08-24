@@ -30,7 +30,8 @@ set(PMT_SOURCES
 )
 
 # Add pmt
-add_executable(pmt ${PMT_SOURCES})
+add_executable(pmt ${PMT_SOURCES}
+        functions/ShellFunction.cpp)
 add_executable(pmt_static ${PMT_SOURCES})
 
 # Set linker options
