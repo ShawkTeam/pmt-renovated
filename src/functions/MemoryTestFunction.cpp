@@ -91,8 +91,7 @@ bool memoryTestFunction::run() {
   const double writeTime =
       std::chrono::duration<double>(endWrite - startWrite).count();
   println("Sequential write speed: %3.f MB/s",
-          (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) /
-              writeTime);
+          (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / writeTime);
   LOGN(MTFUN, INFO) << "Sequential write test done!" << std::endl;
 
   if (!doNotReadTest) {

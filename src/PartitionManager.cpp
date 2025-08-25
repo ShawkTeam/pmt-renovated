@@ -16,18 +16,18 @@
 
 #include "functions/functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
-#include <unistd.h>
+#include <csignal>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
-#include <csignal>
 #include <generated/buildInfo.hpp>
 #include <string>
+#include <unistd.h>
 
 namespace PartitionManager {
 
 // Usage: REGISTER_FUNCTION(FUNCTION_CLASS);
-#define REGISTER_FUNCTION(cls) \
+#define REGISTER_FUNCTION(cls)                                                 \
   FuncManager.registerFunction(std::make_unique<cls>(), AppMain)
 
 basic_variables::basic_variables()
@@ -40,30 +40,31 @@ basic_variables::basic_variables()
   }
 }
 
-__attribute__((constructor))
-void init() {
+__attribute__((constructor)) void init() {
   Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log");
 }
 
 static void sigHandler(const int sig) {
-  // Even if only SIGINT is to be captured for now, this is still a more appropriate code
+  // Even if only SIGINT is to be captured for now, this is still a more
+  // appropriate code
   if (sig == SIGINT) println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
   exit(sig);
 }
 
 static int write(void *cookie, const char *buf, const int size) {
-  auto *real = static_cast<FILE*>(cookie);
-  if (!Variables->quietProcess) return fwrite(buf, 1, static_cast<size_t>(size), real);
+  auto *real = static_cast<FILE *>(cookie);
+  if (!Variables->quietProcess)
+    return fwrite(buf, 1, static_cast<size_t>(size), real);
   else return size;
 }
 
-static FILE* make_fp(FILE* real) {
+static FILE *make_fp(FILE *real) {
   return funopen(real, nullptr, write, nullptr, nullptr);
 }
 
 auto Variables = std::make_unique<VariableTable>();
-FILE* pstdout = make_fp(stdout);
-FILE* pstderr = make_fp(stderr);
+FILE *pstdout = make_fp(stdout);
+FILE *pstderr = make_fp(stderr);
 
 int Main(int argc, char **argv) {
   try {
@@ -151,7 +152,7 @@ int Main(int argc, char **argv) {
     // catch Helper::Error
 
     fprintf(pstderr, "%s%sERROR(S) OCCURRED:%s\n%s", RED, BOLD, STYLE_RESET,
-              error.what());
+            error.what());
     return EXIT_FAILURE;
   } catch (CLI::Error &error) {
     // catch CLI::Error

@@ -70,9 +70,10 @@ void processCommandLine(std::vector<std::string> &vec1,
 void basic_function_manager::registerFunction(
     std::unique_ptr<basic_function> _func, CLI::App &_app) {
   LOGN(PMTF, INFO) << "registering function: " << _func->name() << std::endl;
-  for (const auto& f : _functions) {
+  for (const auto &f : _functions) {
     if (strcmp(f->name(), _func->name()) != 0) {
-      LOGN(PMTF, INFO) << "Function is already registered: " << _func->name() << ". Skipping." << std::endl;
+      LOGN(PMTF, INFO) << "Function is already registered: " << _func->name()
+                       << ". Skipping." << std::endl;
       return;
     }
   }
