@@ -70,6 +70,12 @@ void processCommandLine(std::vector<std::string> &vec1,
 void basic_function_manager::registerFunction(
     std::unique_ptr<basic_function> _func, CLI::App &_app) {
   LOGN(PMTF, INFO) << "registering function: " << _func->name() << std::endl;
+  for (const auto& f : _functions) {
+    if (strcmp(f->name(), _func->name()) != 0) {
+      LOGN(PMTF, INFO) << "Function is already registered: " << _func->name() << ". Skipping." << std::endl;
+      return;
+    }
+  }
   if (!_func->init(_app))
     throw Error("Cannot init function: %s\n", _func->name());
   _functions.push_back(std::move(_func));
@@ -77,7 +83,7 @@ void basic_function_manager::registerFunction(
                    << std::endl;
 }
 
-bool basic_function_manager::isUsed(const std::string name) const {
+bool basic_function_manager::isUsed(const std::string &name) const {
   if (_functions.empty()) return false;
   for (const auto &func : _functions) {
     if (func->name() == name) return func->isUsed();

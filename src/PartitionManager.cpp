@@ -26,18 +26,9 @@
 
 namespace PartitionManager {
 
-__attribute__((constructor))
-void init() {
-  Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log");
-}
-
-static void sigHandler(const int sig) {
-  // Even if only SIGINT is to be captured for now, this is still a more appropriate code
-  if (sig == SIGINT) println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
-  exit(sig);
-}
-
-auto Variables = std::make_unique<VariableTable>();
+// Usage: REGISTER_FUNCTION(FUNCTION_CLASS);
+#define REGISTER_FUNCTION(cls) \
+  FuncManager.registerFunction(std::make_unique<cls>(), AppMain)
 
 basic_variables::basic_variables()
     : logFile(Helper::LoggingProperties::FILE), onLogical(false),
@@ -49,9 +40,38 @@ basic_variables::basic_variables()
   }
 }
 
+__attribute__((constructor))
+void init() {
+  Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log");
+}
+
+static void sigHandler(const int sig) {
+  // Even if only SIGINT is to be captured for now, this is still a more appropriate code
+  if (sig == SIGINT) println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
+  exit(sig);
+}
+
+static int write(void *cookie, const char *buf, const int size) {
+  auto *real = static_cast<FILE*>(cookie);
+  if (!Variables->quietProcess) return fwrite(buf, 1, static_cast<size_t>(size), real);
+  else return size;
+}
+
+static FILE* make_fp(FILE* real) {
+  return funopen(real, nullptr, write, nullptr, nullptr);
+}
+
+auto Variables = std::make_unique<VariableTable>();
+FILE* pstdout = make_fp(stdout);
+FILE* pstderr = make_fp(stderr);
+
 int Main(int argc, char **argv) {
   try {
     // try-catch start
+    Helper::garbageCollector collector;
+    collector.closeAfterProgress(pstdout);
+    collector.closeAfterProgress(pstderr);
+
     if (argc < 2) {
       println(
           "Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.",
@@ -93,17 +113,15 @@ int Main(int argc, char **argv) {
     AppMain.add_flag("-v,--version", Variables->viewVersion,
                      "Print version and exit");
 
-    FuncManager.registerFunction(std::make_unique<backupFunction>(), AppMain);
-    FuncManager.registerFunction(std::make_unique<flashFunction>(), AppMain);
-    FuncManager.registerFunction(std::make_unique<eraseFunction>(), AppMain);
-    FuncManager.registerFunction(std::make_unique<partitionSizeFunction>(),
-                                 AppMain);
-    FuncManager.registerFunction(std::make_unique<infoFunction>(), AppMain);
-    FuncManager.registerFunction(std::make_unique<realPathFunction>(), AppMain);
-    FuncManager.registerFunction(std::make_unique<typeFunction>(), AppMain);
-    FuncManager.registerFunction(std::make_unique<rebootFunction>(), AppMain);
-    FuncManager.registerFunction(std::make_unique<memoryTestFunction>(),
-                                 AppMain);
+    REGISTER_FUNCTION(backupFunction);
+    REGISTER_FUNCTION(flashFunction);
+    REGISTER_FUNCTION(eraseFunction);
+    REGISTER_FUNCTION(partitionSizeFunction);
+    REGISTER_FUNCTION(infoFunction);
+    REGISTER_FUNCTION(realPathFunction);
+    REGISTER_FUNCTION(typeFunction);
+    REGISTER_FUNCTION(rebootFunction);
+    REGISTER_FUNCTION(memoryTestFunction);
 
     CLI11_PARSE(AppMain, argc, argv);
 
@@ -132,8 +150,7 @@ int Main(int argc, char **argv) {
   } catch (Helper::Error &error) {
     // catch Helper::Error
 
-    if (!Variables->quietProcess)
-      fprintf(stderr, "%s%sERROR(S) OCCURRED:%s\n%s", RED, BOLD, STYLE_RESET,
+    fprintf(pstderr, "%s%sERROR(S) OCCURRED:%s\n%s", RED, BOLD, STYLE_RESET,
               error.what());
     return EXIT_FAILURE;
   } catch (CLI::Error &error) {
@@ -148,17 +165,15 @@ int Main(int argc, char **argv) {
 void print(const char *format, ...) {
   va_list args;
   va_start(args, format);
-  if (!Variables->quietProcess) vfprintf(stdout, format, args);
+  vfprintf(pstdout, format, args);
   va_end(args);
 }
 
 void println(const char *format, ...) {
   va_list args;
   va_start(args, format);
-  if (!Variables->quietProcess) {
-    vfprintf(stdout, format, args);
-    print("\n");
-  }
+  vfprintf(pstdout, format, args);
+  print("\n");
   va_end(args);
 }
 

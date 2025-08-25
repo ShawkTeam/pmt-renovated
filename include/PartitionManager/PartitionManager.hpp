@@ -51,7 +51,7 @@ private:
 public:
   void registerFunction(std::unique_ptr<basic_function> _func, CLI::App &_app);
 
-  [[nodiscard]] bool isUsed(std::string name) const;
+  [[nodiscard]] bool isUsed(const std::string &name) const;
   [[nodiscard]] bool handleAll() const;
 };
 
@@ -75,6 +75,7 @@ using VariableTable = basic_variables;
 using Error = Helper::Error;
 
 extern std::unique_ptr<VariableTable> Variables;
+extern FILE *pstdout, *pstderr;
 
 int Main(int argc, char **argv);
 
