@@ -20,7 +20,7 @@
 #define TFUN "typeFunction"
 
 namespace PartitionManager {
-bool typeFunction::init(CLI::App &_app) {
+INIT(typeFunction) {
   LOGN(TFUN, INFO) << "Initializing variables of type function." << std::endl;
   cmd = _app.add_subcommand("type", "Get type of the partition(s) or image(s)");
   cmd->add_option("content(s)", contents, "Content(s)")
@@ -39,7 +39,7 @@ bool typeFunction::init(CLI::App &_app) {
   return true;
 }
 
-bool typeFunction::run() {
+RUN(typeFunction) {
   std::unordered_map<uint64_t, std::string> magics;
   if (onlyCheckAndroidMagics)
     magics.merge(PartitionMap::Extras::AndroidMagicMap);
@@ -75,8 +75,8 @@ bool typeFunction::run() {
   return true;
 }
 
-bool typeFunction::isUsed() const { return cmd->parsed(); }
+IS_USED_COMMON_BODY(typeFunction)
 
-const char *typeFunction::name() const { return TFUN; }
+NAME(typeFunction) { return TFUN; }
 
 } // namespace PartitionManager

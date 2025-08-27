@@ -71,7 +71,7 @@ void basic_function_manager::registerFunction(
     std::unique_ptr<basic_function> _func, CLI::App &_app) {
   LOGN(PMTF, INFO) << "registering function: " << _func->name() << std::endl;
   for (const auto &f : _functions) {
-    if (strcmp(f->name(), _func->name()) != 0) {
+    if (std::string(_func->name()) == std::string(f->name())) {
       LOGN(PMTF, INFO) << "Function is already registered: " << _func->name()
                        << ". Skipping." << std::endl;
       return;

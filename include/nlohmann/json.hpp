@@ -6090,12 +6090,7 @@ inline void to_json(BasicJsonType& j, const T& t)
 template<typename BasicJsonType>
 inline void to_json(BasicJsonType& j, const std_fs::path& p)
 {
-#ifdef JSON_HAS_CPP_20
-    const std::u8string s = p.u8string();
-    j = std::string(s.begin(), s.end());
-#else
     j = p.u8string(); // returns std::string in C++17
-#endif
 }
 #endif
 

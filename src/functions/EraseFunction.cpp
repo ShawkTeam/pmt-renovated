@@ -25,7 +25,7 @@ Copyright 2025 Yağız Zengin
 #define EFUN "eraseFunction"
 
 namespace PartitionManager {
-pair eraseFunction::runAsync(const std::string &partitionName,
+RUN_ASYNC(eraseFunction)(const std::string &partitionName,
                              const uint64_t bufferSize) {
   if (!Variables->PartMap->hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
@@ -87,7 +87,7 @@ pair eraseFunction::runAsync(const std::string &partitionName,
           true};
 }
 
-bool eraseFunction::init(CLI::App &_app) {
+INIT(eraseFunction) {
   LOGN(EFUN, INFO) << "Initializing variables of erase function." << std::endl;
   cmd = _app.add_subcommand("erase", "Writes zero bytes to partition(s)");
   cmd->add_option("partition(s)", partitions, "Partition name(s)")
@@ -100,7 +100,7 @@ bool eraseFunction::init(CLI::App &_app) {
   return true;
 }
 
-bool eraseFunction::run() {
+RUN(eraseFunction) {
   std::vector<std::future<pair>> futures;
   for (const auto &partitionName : partitions) {
     uint64_t buf = bufferSize;
@@ -127,7 +127,7 @@ bool eraseFunction::run() {
   return endResult;
 }
 
-bool eraseFunction::isUsed() const { return cmd->parsed(); }
+IS_USED_COMMON_BODY(eraseFunction)
 
-const char *eraseFunction::name() const { return EFUN; }
+NAME(eraseFunction) { return EFUN; }
 } // namespace PartitionManager

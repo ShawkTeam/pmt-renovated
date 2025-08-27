@@ -24,7 +24,8 @@ Copyright 2025 Yağız Zengin
 #define IFUN "infoFunction"
 
 namespace PartitionManager {
-bool infoFunction::init(CLI::App &_app) {
+
+INIT(infoFunction) {
   LOGN(IFUN, INFO) << "Initializing variables of info printer function."
                    << std::endl;
   cmd = _app.add_subcommand("info", "Tell info(s) of input partition list")
@@ -53,7 +54,7 @@ bool infoFunction::init(CLI::App &_app) {
   return true;
 }
 
-bool infoFunction::run() {
+RUN(infoFunction) {
   if (partitions.back() == "get-all" || partitions.back() == "getvar-all") {
     partitions.clear();
     const auto parts = Variables->PartMap->getPartitionList();
@@ -111,7 +112,7 @@ bool infoFunction::run() {
   return true;
 }
 
-bool infoFunction::isUsed() const { return cmd->parsed(); }
+IS_USED_COMMON_BODY(infoFunction)
 
-const char *infoFunction::name() const { return IFUN; };
+NAME(infoFunction) { return IFUN; };
 } // namespace PartitionManager

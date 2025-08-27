@@ -20,7 +20,9 @@
 #include <cstring>
 #include <fcntl.h>
 #include <filesystem>
+#ifndef ANDROID_BUILD
 #include <generated/buildInfo.hpp>
+#endif
 #include <iostream>
 #include <libpartition_map/lib.hpp>
 #include <linux/fs.h>

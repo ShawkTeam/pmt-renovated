@@ -20,7 +20,7 @@ Copyright 2025 Yağız Zengin
 #define RFUN "rebootFunction"
 
 namespace PartitionManager {
-bool rebootFunction::init(CLI::App &_app) {
+INIT(rebootFunction) {
   LOGN(RFUN, INFO) << "Initializing variables of reboot function." << std::endl;
   cmd = _app.add_subcommand("reboot", "Reboots device");
   cmd->add_option("rebootTarget", rebootTarget,
@@ -28,7 +28,7 @@ bool rebootFunction::init(CLI::App &_app) {
   return true;
 }
 
-bool rebootFunction::run() {
+RUN(rebootFunction) {
   LOGN(RFUN, INFO) << "Rebooting device!!! (custom reboot target: "
                    << (rebootTarget.empty() ? "none" : rebootTarget)
                    << std::endl;
@@ -39,7 +39,7 @@ bool rebootFunction::run() {
   return true;
 }
 
-bool rebootFunction::isUsed() const { return cmd->parsed(); }
+IS_USED_COMMON_BODY(rebootFunction)
 
-const char *rebootFunction::name() const { return RFUN; }
+NAME(rebootFunction) { return RFUN; }
 } // namespace PartitionManager

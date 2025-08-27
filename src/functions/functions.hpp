@@ -21,6 +21,20 @@
 #include <utility>
 #include <vector>
 
+#define INIT(cls) bool cls::init(CLI::App &_app)
+#define RUN(cls) bool cls::run()
+#define RUN_ASYNC(cls) pair cls::runAsync
+#define IS_USED(cls) bool cls::isUsed() const
+#define IS_USED_COMMON_BODY(cls) bool cls::isUsed() const { return cmd->parsed(); }
+#define NAME(cls) const char *cls::name() const
+
+#define COMMON_FUNCTION_BODY() \
+  CLI::App *cmd = nullptr; \
+  bool init(CLI::App &_app) override; \
+  bool run() override; \
+  [[nodiscard]] bool isUsed() const override; \
+  [[nodiscard]] const char *name() const override
+
 namespace PartitionManager {
 using pair = std::pair<std::string, bool>;
 
@@ -32,15 +46,9 @@ private:
   uint64_t bufferSize = 0;
 
 public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
+  COMMON_FUNCTION_BODY();
   static pair runAsync(const std::string &partitionName,
                        const std::string &outputName, uint64_t bufferSize);
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
 };
 
 // Image flasher function
@@ -51,15 +59,9 @@ private:
   uint64_t bufferSize = 0;
 
 public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
+  COMMON_FUNCTION_BODY();
   static pair runAsync(const std::string &partitionName,
                        const std::string &imageName, uint64_t bufferSize);
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
 };
 
 // Eraser function (writes zero bytes to partition)
@@ -69,14 +71,8 @@ private:
   uint64_t bufferSize = 0;
 
 public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
+  COMMON_FUNCTION_BODY();
   static pair runAsync(const std::string &partitionName, uint64_t bufferSize);
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
 };
 
 // Partition size getter function
@@ -87,13 +83,7 @@ private:
        asGiga = false;
 
 public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
+  COMMON_FUNCTION_BODY();
 };
 
 // Partition info getter function
@@ -105,13 +95,7 @@ private:
   bool jsonFormat = false;
 
 public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
+  COMMON_FUNCTION_BODY();
 };
 
 class realPathFunction final : public FunctionBase {
@@ -120,13 +104,7 @@ private:
   bool realLinkPath = false;
 
 public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
+  COMMON_FUNCTION_BODY();
 };
 
 class typeFunction final : public FunctionBase {
@@ -136,13 +114,7 @@ private:
   uint64_t bufferSize = 0;
 
 public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
+  COMMON_FUNCTION_BODY();
 };
 
 class rebootFunction final : public FunctionBase {
@@ -150,13 +122,7 @@ private:
   std::string rebootTarget;
 
 public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
+  COMMON_FUNCTION_BODY();
 };
 
 class memoryTestFunction final : public FunctionBase {
@@ -166,13 +132,7 @@ private:
   bool doNotReadTest = false;
 
 public:
-  CLI::App *cmd = nullptr;
-
-  bool init(CLI::App &_app) override;
-  bool run() override;
-
-  [[nodiscard]] bool isUsed() const override;
-  [[nodiscard]] const char *name() const override;
+  COMMON_FUNCTION_BODY();
 };
 
 } // namespace PartitionManager

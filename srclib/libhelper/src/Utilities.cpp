@@ -19,7 +19,12 @@
 #include <ctime>
 #include <cutils/android_reboot.h>
 #include <fcntl.h>
+#ifndef ANDROID_BUILD
 #include <generated/buildInfo.hpp>
+#include <sys/_system_properties.h>
+#else
+#include <sys/system_properties.h>
+#endif
 #include <iostream>
 #include <libgen.h>
 #include <libhelper/lib.hpp>

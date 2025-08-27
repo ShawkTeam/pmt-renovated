@@ -1,0 +1,110 @@
+//
+//   Copyright 2025 Yağız Zengin
+//
+//   Licensed under the Apache License, Version 2.0 (the "License");
+//   you may not use this file except in compliance with the License.
+//   You may obtain a copy of the License at
+//
+//       http://www.apache.org/licenses/LICENSE-2.0
+//
+//   Unless required by applicable law or agreed to in writing, software
+//   distributed under the License is distributed on an "AS IS" BASIS,
+//   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+//   See the License for the specific language governing permissions and
+//   limitations under the License.
+//
+
+// Partition manager tool source list
+filegroup {
+    name: "pmt_srcs",
+    srcs: [
+        "src/FunctionManager.cpp",
+        "src/Main.cpp",
+        "src/PartitionManager.cpp",
+        "src/functions/BackupFunction.cpp",
+        "src/functions/EraseFunction.cpp",
+        "src/functions/FlashFunction.cpp",
+        "src/functions/InfoFunction.cpp",
+        "src/functions/MemoryTestFunction.cpp",
+        "src/functions/PartitionSizeFunction.cpp",
+        "src/functions/RealPathFunction.cpp",
+        "src/functions/RebootFunction.cpp",
+        "src/functions/TypeFunction.cpp",
+    ],
+}
+
+// libhelper source list
+filegroup {
+    name: "libhelper_srcs",
+    srcs: [
+        "srclib/libhelper/src/Checkers.cpp",
+        "srclib/libhelper/src/Classes.cpp",
+        "srclib/libhelper/src/FileUtil.cpp",
+        "srclib/libhelper/src/Sha256.cpp",
+        "srclib/libhelper/src/Utilities.cpp",
+    ],
+}
+
+// libpartition_map source list
+filegroup {
+    name: "libpartition_map_srcs",
+    srcs: [
+        "srclib/libpartition_map/src/Getters.cpp",
+        "srclib/libpartition_map/src/Magic.cpp",
+        "srclib/libpartition_map/src/PartitionMap.cpp",
+        "srclib/libpartition_map/src/Type.cpp",
+    ],
+}
+
+// Default configurations of pmt
+cc_defaults {
+    name: "pmt_defaults",
+    recovery_available: true,
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-deprecated-declarations",
+        "-Os",
+        "-fexceptions",
+        "-DANDROID_BUILD",
+    ],
+    ldflags: ["-Wl,-s"],
+    local_include_dirs: [
+        "include",
+        "srclib/libhelper/include",
+        "srclib/libpartition_map/include",
+    ],
+    export_include_dirs: [
+        "include",
+        "srclib/libhelper/include",
+        "srclib/libpartition_map/include",
+    ],
+    shared_libs: ["libbase"],
+}
+
+// Build libhelper library
+cc_library_shared {
+    name: "libhelper",
+    defaults: ["pmt_defaults"],
+    srcs: [":libhelper_srcs"],
+}
+
+// Build libpartition_map library
+cc_library_shared {
+    name: "libpartition_map",
+    defaults: ["pmt_defaults"],
+    srcs: [":libpartition_map_srcs"],
+    shared_libs: ["libhelper"],
+    static_libs: ["libc++fs"],
+}
+
+// Build pmt
+cc_binary {
+    name: "pmt",
+    defaults: ["pmt_defaults"],
+    srcs: [":pmt_srcs"],
+    shared_libs: [
+        "libhelper",
+        "libpartition_map",
+    ],
+}

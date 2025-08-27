@@ -20,7 +20,7 @@
 #define RPFUN "realPathFunction"
 
 namespace PartitionManager {
-bool realPathFunction::init(CLI::App &_app) {
+INIT(realPathFunction) {
   LOGN(RPFUN, INFO) << "Initializing variables of real path function."
                     << std::endl;
   cmd = _app.add_subcommand("real-path", "Tell real paths of partition(s)");
@@ -32,7 +32,7 @@ bool realPathFunction::init(CLI::App &_app) {
   return true;
 }
 
-bool realPathFunction::run() {
+RUN(realPathFunction) {
   for (const auto &partition : partitions) {
     if (!Variables->PartMap->hasPartition(partition))
       throw Error("Couldn't find partition: %s", partition.data());
@@ -56,7 +56,7 @@ bool realPathFunction::run() {
   return true;
 }
 
-bool realPathFunction::isUsed() const { return cmd->parsed(); }
+IS_USED_COMMON_BODY(realPathFunction)
 
-const char *realPathFunction::name() const { return RPFUN; }
+NAME(realPathFunction) { return RPFUN; }
 } // namespace PartitionManager

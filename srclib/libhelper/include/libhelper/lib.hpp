@@ -243,6 +243,14 @@ std::string getLibVersion();
 #define LOGNF_IF(name, file, level, condition)                                 \
   if (condition) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
+#ifdef ANDROID_BUILD
+#define MKVERSION(name)                                                           \
+  char vinfo[512];                                                                \
+  sprintf(vinfo,                                                                  \
+          "%s 1.2.0 [XXXX-XX-XX XX.XX.XX]\nBuildType: Release\nCompiler: clang\n" \
+          "BuildFlags: -Wall;-Werror;-Wno-deprecated-declarations;-Os", name);    \
+  return std::string(vinfo)
+#else
 #define MKVERSION(name)                                                        \
   char vinfo[512];                                                             \
   sprintf(vinfo,                                                               \
@@ -251,5 +259,6 @@ std::string getLibVersion();
           name, BUILD_VERSION, BUILD_DATE, BUILD_TIME, BUILD_TYPE,             \
           BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS);           \
   return std::string(vinfo)
+#endif
 
 #endif // #ifndef LIBHELPER_LIB_HPP

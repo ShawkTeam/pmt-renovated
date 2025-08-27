@@ -27,7 +27,7 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 
-bool memoryTestFunction::init(CLI::App &_app) {
+INIT(memoryTestFunction) {
   LOGN(MTFUN, INFO) << "Initializing variables of memory test function."
                     << std::endl;
   cmd = _app.add_subcommand("memtest", "Test your write/read speed of device.");
@@ -56,7 +56,7 @@ bool memoryTestFunction::init(CLI::App &_app) {
   return true;
 }
 
-bool memoryTestFunction::run() {
+RUN(memoryTestFunction) {
   LOGN(MTFUN, INFO) << "Starting memory test on " << testPath << std::endl;
   Helper::garbageCollector collector;
   const std::string test = Helper::pathJoin(testPath, "test.bin");
@@ -122,8 +122,7 @@ bool memoryTestFunction::run() {
   return true;
 }
 
-bool memoryTestFunction::isUsed() const { return cmd->parsed(); }
+IS_USED_COMMON_BODY(memoryTestFunction)
 
-const char *memoryTestFunction::name() const { return MTFUN; }
-
+NAME(memoryTestFunction) { return MTFUN; }
 } // namespace PartitionManager

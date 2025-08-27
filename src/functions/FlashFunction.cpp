@@ -25,7 +25,7 @@ Copyright 2025 Yağız Zengin
 #define FFUN "flashFunction"
 
 namespace PartitionManager {
-pair flashFunction::runAsync(const std::string &partitionName,
+RUN_ASYNC(flashFunction)(const std::string &partitionName,
                              const std::string &imageName,
                              const uint64_t bufferSize) {
   if (!Helper::fileIsExists(imageName))
@@ -92,7 +92,7 @@ pair flashFunction::runAsync(const std::string &partitionName,
           true};
 }
 
-bool flashFunction::init(CLI::App &_app) {
+INIT(flashFunction) {
   LOGN(FFUN, INFO) << "Initializing variables of flash function." << std::endl;
   cmd = _app.add_subcommand("flash", "Flash image(s) to partition(s)");
   cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")
@@ -110,7 +110,7 @@ bool flashFunction::init(CLI::App &_app) {
   return true;
 }
 
-bool flashFunction::run() {
+RUN(flashFunction) {
   processCommandLine(partitions, imageNames, rawPartitions, rawImageNames, ',',
                      true);
   if (partitions.size() != imageNames.size())
@@ -148,7 +148,7 @@ bool flashFunction::run() {
   return endResult;
 }
 
-bool flashFunction::isUsed() const { return cmd->parsed(); }
+IS_USED_COMMON_BODY(flashFunction)
 
-const char *flashFunction::name() const { return FFUN; }
+NAME(flashFunction) { return FFUN; }
 } // namespace PartitionManager

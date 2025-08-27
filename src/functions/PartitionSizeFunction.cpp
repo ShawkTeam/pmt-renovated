@@ -27,7 +27,7 @@ std::string convertTo(const uint64_t size, const std::string &multiple) {
 }
 
 namespace PartitionManager {
-bool partitionSizeFunction::init(CLI::App &_app) {
+INIT(partitionSizeFunction) {
   LOGN(SFUN, INFO)
       << "Initializing variables of partition size getter function."
       << std::endl;
@@ -54,7 +54,7 @@ bool partitionSizeFunction::init(CLI::App &_app) {
   return true;
 }
 
-bool partitionSizeFunction::run() {
+RUN(partitionSizeFunction) {
   for (const auto &partition : partitions) {
     if (!Variables->PartMap->hasPartition(partition))
       throw Error("Couldn't find partition: %s", partition.data());
@@ -89,7 +89,7 @@ bool partitionSizeFunction::run() {
   return true;
 }
 
-bool partitionSizeFunction::isUsed() const { return cmd->parsed(); }
+IS_USED_COMMON_BODY(partitionSizeFunction)
 
-const char *partitionSizeFunction::name() const { return SFUN; }
+NAME(partitionSizeFunction) { return SFUN; }
 } // namespace PartitionManager

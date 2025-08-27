@@ -20,7 +20,9 @@
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
+#ifndef ANDROID_BUILD
 #include <generated/buildInfo.hpp>
+#endif
 #include <string>
 #include <unistd.h>
 
