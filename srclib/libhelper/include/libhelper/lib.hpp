@@ -88,7 +88,7 @@ public:
 
   void delAfterProgress(char *&_ptr);
   void delAfterProgress(uint8_t *&_ptr);
-  void delFileAfterProgress(const std::string& path);
+  void delFileAfterProgress(const std::string &path);
   void closeAfterProgress(FILE *&_fp);
   void closeAfterProgress(int _fd);
 };
@@ -244,11 +244,12 @@ std::string getLibVersion();
   if (condition) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
 #ifdef ANDROID_BUILD
-#define MKVERSION(name)                                                           \
-  char vinfo[512];                                                                \
-  sprintf(vinfo,                                                                  \
-          "%s 1.2.0\nBuildType: Release\nCompiler: clang\n" \
-          "BuildFlags: -Wall;-Werror;-Wno-deprecated-declarations;-Os", name);    \
+#define MKVERSION(name)                                                        \
+  char vinfo[512];                                                             \
+  sprintf(vinfo,                                                               \
+          "%s 1.2.0\nBuildType: Release\nCompiler: clang\n"                    \
+          "BuildFlags: -Wall;-Werror;-Wno-deprecated-declarations;-Os",        \
+          name);                                                               \
   return std::string(vinfo)
 #else
 #define MKVERSION(name)                                                        \

@@ -218,7 +218,8 @@ bool basic_partition_map_builder::readDefaultDirectories() {
   return true;
 }
 
-bool basic_partition_map_builder::copyPartitionsToVector(std::vector<std::string> &vec) const {
+bool basic_partition_map_builder::copyPartitionsToVector(
+    std::vector<std::string> &vec) const {
   if (_current_map.empty()) {
     LOGN(MAP, ERROR) << "Current map is empty.";
     return false;
@@ -229,7 +230,8 @@ bool basic_partition_map_builder::copyPartitionsToVector(std::vector<std::string
   return true;
 }
 
-bool basic_partition_map_builder::copyLogicalPartitionsToVector(std::vector<std::string> &vec) const {
+bool basic_partition_map_builder::copyLogicalPartitionsToVector(
+    std::vector<std::string> &vec) const {
   if (_current_map.empty()) {
     LOGN(MAP, ERROR) << "Current map is empty.";
     return false;
@@ -245,7 +247,8 @@ bool basic_partition_map_builder::copyLogicalPartitionsToVector(std::vector<std:
   return true;
 }
 
-bool basic_partition_map_builder::copyPhysicalPartitionsToVector(std::vector<std::string> &vec) const {
+bool basic_partition_map_builder::copyPhysicalPartitionsToVector(
+    std::vector<std::string> &vec) const {
   if (_current_map.empty()) {
     LOGN(MAP, ERROR) << "Current map is empty.";
     return false;

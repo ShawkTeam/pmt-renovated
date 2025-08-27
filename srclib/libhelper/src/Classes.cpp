@@ -63,14 +63,14 @@ Logger::~Logger() {
 #else
       LoggingProperties::setLogFile("last_logs.log");
 #endif
-      LOGN(HELPER, INFO) << "Cannot create log file: " << _logFile << ": "
-                         << strerror(errno)
+              LOGN(HELPER, INFO)
+          << "Cannot create log file: " << _logFile << ": " << strerror(errno)
 #ifdef ANDROID_BUILD
-                         << " New logging file: /tmp/last_pmt_logs.log (this file)."
+          << " New logging file: /tmp/last_pmt_logs.log (this file)."
 #else
-                         << " New logging file: last_logs.log (this file)."
+          << " New logging file: last_logs.log (this file)."
 #endif
-                         << std::endl;
+          << std::endl;
     }
   }
 

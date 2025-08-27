@@ -26,8 +26,8 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 RUN_ASYNC(flashFunction)(const std::string &partitionName,
-                             const std::string &imageName,
-                             const uint64_t bufferSize) {
+                         const std::string &imageName,
+                         const uint64_t bufferSize) {
   if (!Helper::fileIsExists(imageName))
     return {format("Couldn't find image file: %s", imageName.data()), false};
   if (!Variables->PartMap->hasPartition(partitionName))

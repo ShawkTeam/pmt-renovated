@@ -28,8 +28,8 @@
 
 namespace PartitionManager {
 RUN_ASYNC(backupFunction)(const std::string &partitionName,
-                              const std::string &outputName,
-                              const uint64_t bufferSize) {
+                          const std::string &outputName,
+                          const uint64_t bufferSize) {
   if (!Variables->PartMap->hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 

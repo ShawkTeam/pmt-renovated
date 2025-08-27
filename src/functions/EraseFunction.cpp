@@ -26,7 +26,7 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 RUN_ASYNC(eraseFunction)(const std::string &partitionName,
-                             const uint64_t bufferSize) {
+                         const uint64_t bufferSize) {
   if (!Variables->PartMap->hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 

@@ -32,9 +32,9 @@ INIT(partitionSizeFunction) {
       << "Initializing variables of partition size getter function."
       << std::endl;
   cmd = _app.add_subcommand("sizeof", "Tell size(s) of input partition list")
-      ->footer("Use get-all or getvar-all as partition name for getting "
-                 "sizes of all "
-                 "partitions.");
+            ->footer("Use get-all or getvar-all as partition name for getting "
+                     "sizes of all "
+                     "partitions.");
   cmd->add_option("partition(s)", partitions, "Partition name(s).")
       ->required()
       ->delimiter(',');

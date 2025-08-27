@@ -25,14 +25,15 @@
 #define RUN(cls) bool cls::run()
 #define RUN_ASYNC(cls) pair cls::runAsync
 #define IS_USED(cls) bool cls::isUsed() const
-#define IS_USED_COMMON_BODY(cls) bool cls::isUsed() const { return cmd->parsed(); }
+#define IS_USED_COMMON_BODY(cls)                                               \
+  bool cls::isUsed() const { return cmd->parsed(); }
 #define NAME(cls) const char *cls::name() const
 
-#define COMMON_FUNCTION_BODY() \
-  CLI::App *cmd = nullptr; \
-  bool init(CLI::App &_app) override; \
-  bool run() override; \
-  [[nodiscard]] bool isUsed() const override; \
+#define COMMON_FUNCTION_BODY()                                                 \
+  CLI::App *cmd = nullptr;                                                     \
+  bool init(CLI::App &_app) override;                                          \
+  bool run() override;                                                         \
+  [[nodiscard]] bool isUsed() const override;                                  \
   [[nodiscard]] const char *name() const override
 
 namespace PartitionManager {
