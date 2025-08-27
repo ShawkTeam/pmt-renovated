@@ -63,7 +63,7 @@ build() {
 
     for a in ${TARGET_ABI_LIST[@]}; do
         echo "Building $a artifacts..."
-        cmake --build build_$a -j$(nproc)
+        cmake --build build_$a -j$(($(nproc) - 2))
         echo "$a build complete, artifacts: $PWD/build_$a"
     done
 }
