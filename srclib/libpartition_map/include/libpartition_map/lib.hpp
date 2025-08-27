@@ -222,6 +222,21 @@ public:
   [[nodiscard]] bool isLogical(std::string_view name) const;
 
   /**
+   *   Copy partition list to vec, current vec contents are cleaned
+   */
+  bool copyPartitionsToVector(std::vector<std::string> &vec) const;
+
+  /**
+   *   Copy logical partition list to vec, current vec contents are cleaned
+   */
+  bool copyLogicalPartitionsToVector(std::vector<std::string> &vec) const;
+
+  /**
+   *   Copy physical partition list to vec, current vec contents are cleaned
+   */
+  bool copyPhysicalPartitionsToVector(std::vector<std::string> &vec) const;
+
+  /**
    *   The created list and the current search index name are cleared.
    */
   void clear();

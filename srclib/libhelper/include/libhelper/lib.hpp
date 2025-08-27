@@ -247,7 +247,7 @@ std::string getLibVersion();
 #define MKVERSION(name)                                                           \
   char vinfo[512];                                                                \
   sprintf(vinfo,                                                                  \
-          "%s 1.2.0 [XXXX-XX-XX XX.XX.XX]\nBuildType: Release\nCompiler: clang\n" \
+          "%s 1.2.0\nBuildType: Release\nCompiler: clang\n" \
           "BuildFlags: -Wall;-Werror;-Wno-deprecated-declarations;-Os", name);    \
   return std::string(vinfo)
 #else

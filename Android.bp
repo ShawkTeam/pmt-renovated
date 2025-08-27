@@ -82,14 +82,14 @@ cc_defaults {
     shared_libs: ["libbase"],
 }
 
-// Build libhelper library
+// libhelper library target
 cc_library_shared {
     name: "libhelper",
     defaults: ["pmt_defaults"],
     srcs: [":libhelper_srcs"],
 }
 
-// Build libpartition_map library
+// libpartition_map library target
 cc_library_shared {
     name: "libpartition_map",
     defaults: ["pmt_defaults"],
@@ -98,7 +98,7 @@ cc_library_shared {
     static_libs: ["libc++fs"],
 }
 
-// Build pmt
+// pmt executable target
 cc_binary {
     name: "pmt",
     defaults: ["pmt_defaults"],

@@ -56,15 +56,10 @@ INIT(infoFunction) {
 
 RUN(infoFunction) {
   if (partitions.back() == "get-all" || partitions.back() == "getvar-all") {
-    partitions.clear();
-    const auto parts = Variables->PartMap->getPartitionList();
-    if (!parts)
+    if (!Variables->PartMap->copyPartitionsToVector(partitions))
       throw Error("Cannot get list of all partitions! See logs for more "
                   "information (%s)",
                   Helper::LoggingProperties::FILE.data());
-
-    for (const auto &name : *parts)
-      partitions.push_back(name);
   }
 
   std::vector<PartitionMap::Partition_t> jParts;

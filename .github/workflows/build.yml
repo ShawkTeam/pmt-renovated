@@ -23,7 +23,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt upgrade -y
-          sudo apt install make cmake extra-cmake-modules zip -y
+          sudo apt install make ninja cmake extra-cmake-modules zip -y
 
       - name: Setup Android NDK
         id: setup-ndk

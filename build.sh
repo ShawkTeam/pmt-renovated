@@ -29,6 +29,10 @@ checks() {
         echo "Please verify your CMake installation."
         exit 1
     fi
+    if ! which ninja &>/dev/null; then
+        echo "Please verify your Ninja installation."
+        exit 1
+    fi
 }
 
 clean() {
@@ -50,7 +54,7 @@ build() {
     for a in ${TARGET_ABI_LIST[@]}; do
         echo "Configuring for $a..."
         mkdir -p build_$a
-        cmake -B build_$a -S . $1 \
+        cmake -B build_$a -G Ninja -S . $1 \
             -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
             -DANDROID_ABI=$a \
             -DANDROID_PLATFORM=$ANDROID_PLATFORM \
@@ -59,7 +63,7 @@ build() {
 
     for a in ${TARGET_ABI_LIST[@]}; do
         echo "Building $a artifacts..."
-        cmake --build build_$a
+        cmake --build build_$a -j$(nproc)
         echo "$a build complete, artifacts: $PWD/build_$a"
     done
 }

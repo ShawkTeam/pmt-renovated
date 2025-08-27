@@ -218,6 +218,49 @@ bool basic_partition_map_builder::readDefaultDirectories() {
   return true;
 }
 
+bool basic_partition_map_builder::copyPartitionsToVector(std::vector<std::string> &vec) const {
+  if (_current_map.empty()) {
+    LOGN(MAP, ERROR) << "Current map is empty.";
+    return false;
+  }
+  vec.clear();
+  for (const auto &[name, props] : _current_map)
+    vec.push_back(name);
+  return true;
+}
+
+bool basic_partition_map_builder::copyLogicalPartitionsToVector(std::vector<std::string> &vec) const {
+  if (_current_map.empty()) {
+    LOGN(MAP, ERROR) << "Current map is empty.";
+    return false;
+  }
+  std::vector<std::string> vec2;
+  for (const auto &[name, props] : _current_map)
+    if (props.isLogical) vec2.push_back(name);
+
+  if (vec2.empty()) {
+    LOGN(MAP, ERROR) << "Cannot find logical partitions in current map.";
+    return false;
+  } else vec = vec2;
+  return true;
+}
+
+bool basic_partition_map_builder::copyPhysicalPartitionsToVector(std::vector<std::string> &vec) const {
+  if (_current_map.empty()) {
+    LOGN(MAP, ERROR) << "Current map is empty.";
+    return false;
+  }
+  std::vector<std::string> vec2;
+  for (const auto &[name, props] : _current_map)
+    if (!props.isLogical) vec2.push_back(name);
+
+  if (vec2.empty()) {
+    LOGN(MAP, ERROR) << "Cannot find physical partitions in current map.";
+    return false;
+  } else vec = vec2;
+  return true;
+}
+
 bool basic_partition_map_builder::empty() const {
   _map_build_check();
   return _current_map.empty();

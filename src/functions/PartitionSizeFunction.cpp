@@ -19,7 +19,7 @@ Copyright 2025 Yağız Zengin
 
 #define SFUN "partitionSizeFunction"
 
-std::string convertTo(const uint64_t size, const std::string &multiple) {
+static std::string convertTo(const uint64_t size, const std::string &multiple) {
   if (multiple == "KB") return std::to_string(TO_KB(size));
   if (multiple == "MB") return std::to_string(TO_MB(size));
   if (multiple == "GB") return std::to_string(TO_GB(size));
@@ -31,7 +31,10 @@ INIT(partitionSizeFunction) {
   LOGN(SFUN, INFO)
       << "Initializing variables of partition size getter function."
       << std::endl;
-  cmd = _app.add_subcommand("sizeof", "Tell size(s) of input partition list");
+  cmd = _app.add_subcommand("sizeof", "Tell size(s) of input partition list")
+      ->footer("Use get-all or getvar-all as partition name for getting "
+                 "sizes of all "
+                 "partitions.");
   cmd->add_option("partition(s)", partitions, "Partition name(s).")
       ->required()
       ->delimiter(',');
@@ -55,6 +58,13 @@ INIT(partitionSizeFunction) {
 }
 
 RUN(partitionSizeFunction) {
+  if (partitions.back() == "get-all" || partitions.back() == "getvar-all") {
+    if (!Variables->PartMap->copyPartitionsToVector(partitions))
+      throw Error("Cannot get list of all partitions! See logs for more "
+                  "information (%s)",
+                  Helper::LoggingProperties::FILE.data());
+  }
+
   for (const auto &partition : partitions) {
     if (!Variables->PartMap->hasPartition(partition))
       throw Error("Couldn't find partition: %s", partition.data());
