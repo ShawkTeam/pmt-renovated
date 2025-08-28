@@ -33,8 +33,10 @@ INIT(partitionSizeFunction) {
       << std::endl;
   cmd = _app.add_subcommand("sizeof", "Tell size(s) of input partition list")
             ->footer("Use get-all or getvar-all as partition name for getting "
-                     "sizes of all "
-                     "partitions.");
+                     "sizes of all partitions.\nUse get-logicals as partition "
+                     "name for getting sizes of logical partitions.\n"
+                     "Use get-physical as partition name for getting sizes of "
+                     "physical partitions.");
   cmd->add_option("partition(s)", partitions, "Partition name(s).")
       ->required()
       ->delimiter(',');
@@ -58,18 +60,9 @@ INIT(partitionSizeFunction) {
 }
 
 RUN(partitionSizeFunction) {
-  if (partitions.back() == "get-all" || partitions.back() == "getvar-all") {
-    if (!Variables->PartMap->copyPartitionsToVector(partitions))
-      throw Error("Cannot get list of all partitions! See logs for more "
-                  "information (%s)",
-                  Helper::LoggingProperties::FILE.data());
-  }
-
-  for (const auto &partition : partitions) {
-    if (!Variables->PartMap->hasPartition(partition))
-      throw Error("Couldn't find partition: %s", partition.data());
-
-    if (Variables->onLogical && !Variables->PartMap->isLogical(partition)) {
+  auto func = [this](std::string partition,
+                     PartitionMap::Map_t::BasicInf props) -> bool {
+    if (Variables->onLogical && !props.isLogical) {
       if (Variables->forceProcess)
         LOGN(SFUN, WARNING)
             << "Partition " << partition
@@ -86,15 +79,21 @@ RUN(partitionSizeFunction) {
     if (asMega) multiple = "MB";
     if (asGiga) multiple = "GB";
 
-    if (onlySize)
-      println(
-          "%s",
-          convertTo(Variables->PartMap->sizeOf(partition), multiple).data());
+    if (onlySize) println("%s", convertTo(props.size, multiple).data());
     else
       println("%s: %s%s", partition.data(),
-              convertTo(Variables->PartMap->sizeOf(partition), multiple).data(),
-              multiple.data());
-  }
+              convertTo(props.size, multiple).data(), multiple.data());
+
+    return true;
+  };
+
+  if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
+    Variables->PartMap->doForAllPartitions(func);
+  else if (partitions.back() == "get-logicals")
+    Variables->PartMap->doForLogicalPartitions(func);
+  else if (partitions.back() == "get-physicals")
+    Variables->PartMap->doForPhysicalPartitions(func);
+  else Variables->PartMap->doForPartitionList(partitions, func);
 
   return true;
 }

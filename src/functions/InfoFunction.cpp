@@ -30,8 +30,10 @@ INIT(infoFunction) {
                    << std::endl;
   cmd = _app.add_subcommand("info", "Tell info(s) of input partition list")
             ->footer("Use get-all or getvar-all as partition name for getting "
-                     "info's of all "
-                     "partitions.");
+                     "info's of all partitions.\nUse get-logicals as partition "
+                     "name for getting info's of logical partitions.\n"
+                     "Use get-physical as partition name for getting info's of "
+                     "physical partitions.");
   cmd->add_option("partition(s)", partitions, "Partition name(s).")
       ->required()
       ->delimiter(',');
@@ -55,19 +57,11 @@ INIT(infoFunction) {
 }
 
 RUN(infoFunction) {
-  if (partitions.back() == "get-all" || partitions.back() == "getvar-all") {
-    if (!Variables->PartMap->copyPartitionsToVector(partitions))
-      throw Error("Cannot get list of all partitions! See logs for more "
-                  "information (%s)",
-                  Helper::LoggingProperties::FILE.data());
-  }
-
   std::vector<PartitionMap::Partition_t> jParts;
-  for (const auto &partition : partitions) {
-    if (!Variables->PartMap->hasPartition(partition))
-      throw Error("Couldn't find partition: %s", partition.data());
-
-    if (Variables->onLogical && !Variables->PartMap->isLogical(partition)) {
+  auto func = [this,
+               &jParts](std::string partition,
+                        const PartitionMap::Map_t::BasicInf props) -> bool {
+    if (Variables->onLogical && !props.isLogical) {
       if (Variables->forceProcess)
         LOGN(IFUN, WARNING)
             << "Partition " << partition
@@ -79,18 +73,25 @@ RUN(infoFunction) {
     }
 
     if (jsonFormat)
-      jParts.push_back({partition,
-                        {Variables->PartMap->sizeOf(partition),
-                         Variables->PartMap->isLogical(partition)}});
+      jParts.push_back({partition, {props.size, props.isLogical}});
     else
 #ifdef __LP64__
       println("partition=%s size=%lu isLogical=%s",
 #else
       println("partition=%s size=%llu isLogical=%s",
 #endif
-              partition.data(), Variables->PartMap->sizeOf(partition),
-              Variables->PartMap->isLogical(partition) ? "true" : "false");
-  }
+              partition.data(), props.size, props.isLogical ? "true" : "false");
+
+    return true;
+  };
+
+  if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
+    Variables->PartMap->doForAllPartitions(func);
+  else if (partitions.back() == "get-logicals")
+    Variables->PartMap->doForLogicalPartitions(func);
+  else if (partitions.back() == "get-physicals")
+    Variables->PartMap->doForPhysicalPartitions(func);
+  else Variables->PartMap->doForPartitionList(partitions, func);
 
   if (jsonFormat) {
     nlohmann::json j;

@@ -55,9 +55,11 @@ static void sigHandler(const int sig) {
 
 static int write(void *cookie, const char *buf, const int size) {
   auto *real = static_cast<FILE *>(cookie);
-  if (!Variables->quietProcess)
-    return fwrite(buf, 1, static_cast<size_t>(size), real);
-  else return size;
+  if (!Variables->quietProcess) {
+    const int ret = fwrite(buf, 1, static_cast<size_t>(size), real);
+    fflush(real);
+    return ret;
+  } else return size;
 }
 
 static FILE *make_fp(FILE *real) {
@@ -68,10 +70,11 @@ auto Variables = std::make_unique<VariableTable>();
 FILE *pstdout = make_fp(stdout);
 FILE *pstderr = make_fp(stderr);
 
+static Helper::garbageCollector collector;
+
 int Main(int argc, char **argv) {
   try {
     // try-catch start
-    Helper::garbageCollector collector;
     collector.closeAfterProgress(pstdout);
     collector.closeAfterProgress(pstderr);
 
@@ -146,14 +149,14 @@ int Main(int argc, char **argv) {
              Helper::hasAdbPermissions()) ||
             FuncManager.isUsed("memoryTestFunction")))
         throw Error(
-            "Partition Manager Tool is requires super-user privileges!\n");
+            "Partition Manager Tool is requires super-user privileges!");
     }
 
     return FuncManager.handleAll() == true ? EXIT_SUCCESS : EXIT_FAILURE;
   } catch (Helper::Error &error) {
     // catch Helper::Error
 
-    fprintf(pstderr, "%s%sERROR(S) OCCURRED:%s\n%s", RED, BOLD, STYLE_RESET,
+    fprintf(pstderr, "%s%sERROR(S) OCCURRED:%s\n%s\n", RED, BOLD, STYLE_RESET,
             error.what());
     return EXIT_FAILURE;
   } catch (CLI::Error &error) {

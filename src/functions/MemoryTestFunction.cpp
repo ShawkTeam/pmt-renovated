@@ -74,15 +74,14 @@ RUN(memoryTestFunction) {
 
   const int wfd = Helper::openAndAddToCloseList(
       test, collector, O_WRONLY | O_CREAT | O_TRUNC | O_SYNC, 0644);
-  if (wfd < 0)
-    throw Error("Can't open/create test file: %s\n", strerror(errno));
+  if (wfd < 0) throw Error("Can't open/create test file: %s", strerror(errno));
 
   LOGN(MTFUN, INFO) << "Sequential write test started!" << std::endl;
   const auto startWrite = std::chrono::high_resolution_clock::now();
   ssize_t bytesWritten = 0;
   while (bytesWritten < testFileSize) {
     const ssize_t ret = write(wfd, buffer, bufferSize);
-    if (ret < 0) throw Error("Can't write to test file: %s\n", strerror(errno));
+    if (ret < 0) throw Error("Can't write to test file: %s", strerror(errno));
     bytesWritten += ret;
   }
 
@@ -101,7 +100,7 @@ RUN(memoryTestFunction) {
         (reinterpret_cast<uintptr_t>(rawBuffer) + 4096 - 1) & ~(4096 - 1));
     const int rfd =
         Helper::openAndAddToCloseList(test, collector, O_RDONLY | O_DIRECT);
-    if (rfd < 0) throw Error("Can't open test file: %s\n", strerror(errno));
+    if (rfd < 0) throw Error("Can't open test file: %s", strerror(errno));
 
     LOGN(MTFUN, INFO) << "Sequential read test started!" << std::endl;
     const auto startRead = std::chrono::high_resolution_clock::now();

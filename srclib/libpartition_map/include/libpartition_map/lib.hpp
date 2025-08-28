@@ -19,6 +19,7 @@
 
 #include <cstdint> // for uint64_t
 #include <exception>
+#include <functional>
 #include <libhelper/lib.hpp>
 #include <list>
 #include <memory>
@@ -242,6 +243,31 @@ public:
   void clear();
 
   /**
+   *   Do input function (lambda) for all partitions.
+   */
+  void doForAllPartitions(
+      const std::function<bool(std::string, Map_t::BasicInf)> &func) const;
+
+  /**
+   *   Do input function (lambda) for physical partitions.
+   */
+  void doForPhysicalPartitions(
+      const std::function<bool(std::string, Map_t::BasicInf)> &func) const;
+
+  /**
+   *   Do input function (lambda) for logical partitions.
+   */
+  void doForLogicalPartitions(
+      const std::function<bool(std::string, Map_t::BasicInf)> &func) const;
+
+  /**
+   *   Do input function (lambda) for input partition list.
+   */
+  void doForPartitionList(
+      const std::vector<std::string> &partitions,
+      const std::function<bool(std::string, Map_t::BasicInf)> &func) const;
+
+  /**
    *   The entered path is defined as the new search
    *   directory and the search is performed in the entered
    *   directory. If everything goes well, true is returned.
@@ -303,6 +329,10 @@ public:
    *   Get Map_t object reference
    */
   Map_t &operator*();
+
+  /**
+   *   Get constant Map_t object reference
+   */
   const Map_t &operator*() const;
 };
 

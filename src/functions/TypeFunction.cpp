@@ -50,8 +50,7 @@ RUN(typeFunction) {
   for (const auto &content : contents) {
     if (!Variables->PartMap->hasPartition(content) &&
         !Helper::fileIsExists(content))
-      throw Error("Couldn't find partition or image file: %s\n",
-                  content.data());
+      throw Error("Couldn't find partition or image file: %s", content.data());
 
     bool found = false;
     for (const auto &[magic, name] : magics) {
@@ -68,7 +67,7 @@ RUN(typeFunction) {
     }
 
     if (!found)
-      throw Error("Couldn't determine type of %s%s\n", content.data(),
+      throw Error("Couldn't determine type of %s%s", content.data(),
                   content == "userdata" ? " (encrypted file system?)" : "");
   }
 

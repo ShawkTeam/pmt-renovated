@@ -62,7 +62,7 @@ build() {
     done
 
     for a in ${TARGET_ABI_LIST[@]}; do
-        echo "Building $a artifacts..."
+        echo "Building $a artifacts... Using $(($(nproc) - 2)) thread."
         cmake --build build_$a -j$(($(nproc) - 2))
         echo "$a build complete, artifacts: $PWD/build_$a"
     done

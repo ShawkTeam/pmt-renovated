@@ -1,6 +1,6 @@
 # Dont'd add IDE files
 cmake-build-*
-.ide*
+.idea
 .vscode
 
 # Don't add generated headers

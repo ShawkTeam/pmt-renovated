@@ -78,7 +78,7 @@ void basic_function_manager::registerFunction(
     }
   }
   if (!_func->init(_app))
-    throw Error("Cannot init function: %s\n", _func->name());
+    throw Error("Cannot init function: %s", _func->name());
   _functions.push_back(std::move(_func));
   LOGN(PMTF, INFO) << _functions.back()->name() << " successfully registered."
                    << std::endl;
