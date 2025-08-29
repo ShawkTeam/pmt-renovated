@@ -58,9 +58,7 @@ INIT(infoFunction) {
 
 RUN(infoFunction) {
   std::vector<PartitionMap::Partition_t> jParts;
-  auto func = [this,
-               &jParts](std::string partition,
-                        const PartitionMap::Map_t::BasicInf props) -> bool {
+  auto func = [this, &jParts] COMMON_LAMBDA_PARAMS -> bool {
     if (Variables->onLogical && !props.isLogical) {
       if (Variables->forceProcess)
         LOGN(IFUN, WARNING)

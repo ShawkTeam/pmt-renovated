@@ -60,8 +60,7 @@ INIT(partitionSizeFunction) {
 }
 
 RUN(partitionSizeFunction) {
-  auto func = [this](std::string partition,
-                     PartitionMap::Map_t::BasicInf props) -> bool {
+  auto func = [this] COMMON_LAMBDA_PARAMS -> bool {
     if (Variables->onLogical && !props.isLogical) {
       if (Variables->forceProcess)
         LOGN(SFUN, WARNING)
