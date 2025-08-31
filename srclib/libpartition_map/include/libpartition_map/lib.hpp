@@ -22,12 +22,11 @@
 #include <functional>
 #include <libhelper/lib.hpp>
 #include <list>
+#include <map>
 #include <memory>
 #include <optional>
 #include <string>
 #include <string_view>
-#include <tuple>
-#include <unordered_map>
 #include <utility> // for std::pair
 
 namespace PartitionMap {
@@ -39,6 +38,14 @@ struct _entry {
     bool isLogical;
   } props;
 };
+
+struct _returnable_entry {
+  uint64_t size;
+  bool isLogical;
+};
+
+using BasicInf = _returnable_entry;
+using Info = _entry;
 
 /**
  *   The main type of the library. The Builder class is designed
@@ -53,13 +60,6 @@ private:
 public:
   _entry *_data;
   size_t _count{}, _capacity{};
-
-  struct _returnable_entry {
-    uint64_t size;
-    bool isLogical;
-  };
-
-  using BasicInf = _returnable_entry;
 
   basic_partition_map(const std::string &name, uint64_t size, bool logical);
   basic_partition_map(const basic_partition_map &other);
@@ -84,7 +84,7 @@ public:
   bool operator==(const basic_partition_map &other) const;
   bool operator!=(const basic_partition_map &other) const;
 
-  operator std::vector<std::tuple<std::string, uint64_t, bool>>() const;
+  operator std::vector<Info>() const;
   operator int() const;
 
   class iterator {
@@ -256,26 +256,26 @@ public:
    *   Do input function (lambda) for all partitions.
    */
   void doForAllPartitions(
-      const std::function<bool(std::string, Map_t::BasicInf)> &func) const;
+      const std::function<bool(std::string, BasicInf)> &func) const;
 
   /**
    *   Do input function (lambda) for physical partitions.
    */
   void doForPhysicalPartitions(
-      const std::function<bool(std::string, Map_t::BasicInf)> &func) const;
+      const std::function<bool(std::string, BasicInf)> &func) const;
 
   /**
    *   Do input function (lambda) for logical partitions.
    */
   void doForLogicalPartitions(
-      const std::function<bool(std::string, Map_t::BasicInf)> &func) const;
+      const std::function<bool(std::string, BasicInf)> &func) const;
 
   /**
    *   Do input function (lambda) for input partition list.
    */
   void doForPartitionList(
       const std::vector<std::string> &partitions,
-      const std::function<bool(std::string, Map_t::BasicInf)> &func) const;
+      const std::function<bool(std::string, BasicInf)> &func) const;
 
   /**
    *   The entered path is defined as the new search
@@ -346,10 +346,9 @@ public:
   const Map_t &operator*() const;
 
   /**
-   *   Get map contents as vector (std::tuple type).
+   *   Get map contents as vector (PartitionManager::Info type).
    */
-  [[nodiscard]]
-  operator std::vector<std::tuple<std::string, uint64_t, bool>>() const;
+  [[nodiscard]] operator std::vector<Info>() const;
 
   /**
    *   Get total partition count in map (int type).
@@ -399,9 +398,9 @@ constexpr uint64_t ELF =
 constexpr uint64_t RAW = 0x00000000;
 } // namespace AndroidMagic
 
-extern std::unordered_map<uint64_t, std::string> FileSystemMagicMap;
-extern std::unordered_map<uint64_t, std::string> AndroidMagicMap;
-extern std::unordered_map<uint64_t, std::string> MagicMap;
+extern std::map<uint64_t, std::string> FileSystemMagicMap;
+extern std::map<uint64_t, std::string> AndroidMagicMap;
+extern std::map<uint64_t, std::string> MagicMap;
 
 size_t getMagicLength(uint64_t magic);
 bool hasMagic(uint64_t magic, ssize_t buf, const std::string &path);
@@ -411,9 +410,7 @@ std::string formatMagic(uint64_t magic);
 
 #define MAP "libpartition_map"
 
-#define T_NAME 0
-#define T_TYPE 1
-#define T_SIZE 2
-#define T_VEC_DECL_TYPE std::vector<std::tuple<std::string, uint64_t, bool>>
+#define COMMON_LAMBDA_PARAMS                                                   \
+  (const std::string &partition, const PartitionMap::BasicInf props)
 
 #endif // #ifndef LIBPARTITION_MAP_LIB_HPP

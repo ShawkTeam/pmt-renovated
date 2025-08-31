@@ -18,6 +18,7 @@ Copyright 2025 Yağız Zengin
 #include <PartitionManager/PartitionManager.hpp>
 
 #define SFUN "partitionSizeFunction"
+#define FUNCTION_CLASS partitionSizeFunction
 
 static std::string convertTo(const uint64_t size, const std::string &multiple) {
   if (multiple == "KB") return std::to_string(TO_KB(size));
@@ -27,7 +28,7 @@ static std::string convertTo(const uint64_t size, const std::string &multiple) {
 }
 
 namespace PartitionManager {
-INIT(partitionSizeFunction) {
+INIT {
   LOGN(SFUN, INFO)
       << "Initializing variables of partition size getter function."
       << std::endl;
@@ -59,7 +60,7 @@ INIT(partitionSizeFunction) {
   return true;
 }
 
-RUN(partitionSizeFunction) {
+RUN {
   auto func = [this] COMMON_LAMBDA_PARAMS -> bool {
     if (Variables->onLogical && !props.isLogical) {
       if (Variables->forceProcess)
@@ -97,7 +98,7 @@ RUN(partitionSizeFunction) {
   return true;
 }
 
-IS_USED_COMMON_BODY(partitionSizeFunction)
+IS_USED_COMMON_BODY
 
-NAME(partitionSizeFunction) { return SFUN; }
+NAME { return SFUN; }
 } // namespace PartitionManager

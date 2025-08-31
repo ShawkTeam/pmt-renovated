@@ -22,10 +22,11 @@ Copyright 2025 Yağız Zengin
 #include <nlohmann/json.hpp>
 
 #define IFUN "infoFunction"
+#define FUNCTION_CLASS infoFunction
 
 namespace PartitionManager {
 
-INIT(infoFunction) {
+INIT {
   LOGN(IFUN, INFO) << "Initializing variables of info printer function."
                    << std::endl;
   cmd = _app.add_subcommand("info", "Tell info(s) of input partition list")
@@ -56,7 +57,7 @@ INIT(infoFunction) {
   return true;
 }
 
-RUN(infoFunction) {
+RUN {
   std::vector<PartitionMap::Partition_t> jParts;
   auto func = [this, &jParts] COMMON_LAMBDA_PARAMS -> bool {
     if (Variables->onLogical && !props.isLogical) {
@@ -106,7 +107,7 @@ RUN(infoFunction) {
   return true;
 }
 
-IS_USED_COMMON_BODY(infoFunction)
+IS_USED_COMMON_BODY
 
-NAME(infoFunction) { return IFUN; };
+NAME { return IFUN; };
 } // namespace PartitionManager

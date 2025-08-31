@@ -25,11 +25,11 @@
 #include <unistd.h>
 
 #define BFUN "backupFunction"
+#define FUNCTION_CLASS backupFunction
 
 namespace PartitionManager {
-RUN_ASYNC(backupFunction)(const std::string &partitionName,
-                          const std::string &outputName,
-                          const uint64_t bufferSize) {
+RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
+          const uint64_t bufferSize) {
   if (!Variables->PartMap->hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 
@@ -105,7 +105,7 @@ RUN_ASYNC(backupFunction)(const std::string &partitionName,
           true};
 }
 
-INIT(backupFunction) {
+INIT {
   LOGN(BFUN, INFO) << "Initializing variables of backup function." << std::endl;
   cmd = _app.add_subcommand("backup", "Backup partition(s) to file(s)");
   cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")
@@ -123,7 +123,7 @@ INIT(backupFunction) {
   return true;
 }
 
-RUN(backupFunction) {
+RUN {
   processCommandLine(partitions, outputNames, rawPartitions, rawOutputNames,
                      ',', true);
   if (!outputNames.empty() && partitions.size() != outputNames.size())
@@ -161,7 +161,7 @@ RUN(backupFunction) {
   return endResult;
 }
 
-IS_USED_COMMON_BODY(backupFunction)
+IS_USED_COMMON_BODY
 
-NAME(backupFunction) { return BFUN; }
+NAME { return BFUN; }
 } // namespace PartitionManager

@@ -23,11 +23,11 @@ Copyright 2025 Yağız Zengin
 #include <unistd.h>
 
 #define FFUN "flashFunction"
+#define FUNCTION_CLASS flashFunction
 
 namespace PartitionManager {
-RUN_ASYNC(flashFunction)(const std::string &partitionName,
-                         const std::string &imageName,
-                         const uint64_t bufferSize) {
+RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
+          const uint64_t bufferSize) {
   if (!Helper::fileIsExists(imageName))
     return {format("Couldn't find image file: %s", imageName.data()), false};
   if (!Variables->PartMap->hasPartition(partitionName))
@@ -92,7 +92,7 @@ RUN_ASYNC(flashFunction)(const std::string &partitionName,
           true};
 }
 
-INIT(flashFunction) {
+INIT {
   LOGN(FFUN, INFO) << "Initializing variables of flash function." << std::endl;
   cmd = _app.add_subcommand("flash", "Flash image(s) to partition(s)");
   cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")
@@ -110,7 +110,7 @@ INIT(flashFunction) {
   return true;
 }
 
-RUN(flashFunction) {
+RUN {
   processCommandLine(partitions, imageNames, rawPartitions, rawImageNames, ',',
                      true);
   if (partitions.size() != imageNames.size())
@@ -148,7 +148,7 @@ RUN(flashFunction) {
   return endResult;
 }
 
-IS_USED_COMMON_BODY(flashFunction)
+IS_USED_COMMON_BODY
 
-NAME(flashFunction) { return FFUN; }
+NAME { return FFUN; }
 } // namespace PartitionManager

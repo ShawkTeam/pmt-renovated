@@ -162,7 +162,7 @@ bool basic_partition_map::is_logical(const std::string_view name) const {
   return false;
 }
 
-basic_partition_map::_returnable_entry
+_returnable_entry
 basic_partition_map::get_all(const std::string_view name) const {
   if (const int pos = _index_of(name); name == _data[pos].name)
     return _returnable_entry{_data[pos].props.size, _data[pos].props.isLogical};
@@ -229,13 +229,12 @@ bool basic_partition_map::operator!=(const basic_partition_map &other) const {
   return !(*this == other);
 }
 
-basic_partition_map::operator std::vector<
-    std::tuple<std::string, uint64_t, bool>>() const {
-  std::vector<std::tuple<std::string, uint64_t, bool>> v;
+basic_partition_map::operator std::vector<Info>() const {
+  std::vector<Info> v;
   if (_count == 0) return {};
   for (size_t i = 0; i < _count; i++)
-    v.emplace_back(_data[i].name, _data[i].props.size,
-                   _data[i].props.isLogical);
+    v.push_back(
+        {_data[i].name, {_data[i].props.size, _data[i].props.isLogical}});
   return v;
 }
 

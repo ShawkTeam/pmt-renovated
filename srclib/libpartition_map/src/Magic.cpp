@@ -17,15 +17,15 @@
 #include <fcntl.h>
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
+#include <map>
 #include <sstream>
 #include <string>
 #include <unistd.h>
-#include <unordered_map>
 
 #include "PartitionManager/PartitionManager.hpp"
 
 namespace PartitionMap::Extras {
-std::unordered_map<uint64_t, std::string> FileSystemMagicMap = {
+std::map<uint64_t, std::string> FileSystemMagicMap = {
     {FileSystemMagic::EXTFS_FS, "EXT2/3/4"},
     {FileSystemMagic::F2FS_FS, "F2FS"},
     {FileSystemMagic::EROFS_FS, "EROFS"},
@@ -36,7 +36,7 @@ std::unordered_map<uint64_t, std::string> FileSystemMagicMap = {
     {FileSystemMagic::NTFS_FS, "NTFS"},
     {FileSystemMagic::MSDOS_FS, "MSDOS"}};
 
-std::unordered_map<uint64_t, std::string> AndroidMagicMap = {
+std::map<uint64_t, std::string> AndroidMagicMap = {
     {AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
     {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
     {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
@@ -47,7 +47,7 @@ std::unordered_map<uint64_t, std::string> AndroidMagicMap = {
     {AndroidMagic::ELF, "ELF"},
     {AndroidMagic::RAW, "Raw Data"}};
 
-std::unordered_map<uint64_t, std::string> MagicMap = {
+std::map<uint64_t, std::string> MagicMap = {
     {AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
     {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
     {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},

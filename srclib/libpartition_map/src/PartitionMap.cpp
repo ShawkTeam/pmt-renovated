@@ -288,7 +288,7 @@ bool basic_partition_map_builder::empty() const {
 }
 
 void basic_partition_map_builder::doForAllPartitions(
-    const std::function<bool(std::string, Map_t::BasicInf)> &func) const {
+    const std::function<bool(std::string, BasicInf)> &func) const {
   _map_build_check();
 
   LOGN(MAP, INFO) << "Doing input function for all partitions." << std::endl;
@@ -303,7 +303,7 @@ void basic_partition_map_builder::doForAllPartitions(
 }
 
 void basic_partition_map_builder::doForPhysicalPartitions(
-    const std::function<bool(std::string, Map_t::BasicInf)> &func) const {
+    const std::function<bool(std::string, BasicInf)> &func) const {
   _map_build_check();
 
   LOGN(MAP, INFO) << "Doing input function for physical partitions."
@@ -320,7 +320,7 @@ void basic_partition_map_builder::doForPhysicalPartitions(
 }
 
 void basic_partition_map_builder::doForLogicalPartitions(
-    const std::function<bool(std::string, Map_t::BasicInf)> &func) const {
+    const std::function<bool(std::string, BasicInf)> &func) const {
   _map_build_check();
 
   LOGN(MAP, INFO) << "Doing input function for logical partitions."
@@ -338,7 +338,7 @@ void basic_partition_map_builder::doForLogicalPartitions(
 
 void basic_partition_map_builder::doForPartitionList(
     const std::vector<std::string> &partitions,
-    const std::function<bool(std::string, Map_t::BasicInf)> &func) const {
+    const std::function<bool(std::string, BasicInf)> &func) const {
   _map_build_check();
 
   LOGN(MAP, INFO) << "Doing input function for input partition list."
@@ -388,8 +388,7 @@ const Map_t &basic_partition_map_builder::operator*() const {
   return _current_map;
 }
 
-basic_partition_map_builder::operator std::vector<
-    std::tuple<std::string, uint64_t, bool>>() const {
+basic_partition_map_builder::operator std::vector<Info>() const {
   return _current_map;
 }
 

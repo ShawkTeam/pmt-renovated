@@ -16,11 +16,13 @@
 
 #include "functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
+#include <map>
 
 #define TFUN "typeFunction"
+#define FUNCTION_CLASS typeFunction
 
 namespace PartitionManager {
-INIT(typeFunction) {
+INIT {
   LOGN(TFUN, INFO) << "Initializing variables of type function." << std::endl;
   cmd = _app.add_subcommand("type", "Get type of the partition(s) or image(s)");
   cmd->add_option("content(s)", contents, "Content(s)")
@@ -39,8 +41,8 @@ INIT(typeFunction) {
   return true;
 }
 
-RUN(typeFunction) {
-  std::unordered_map<uint64_t, std::string> magics;
+RUN {
+  std::map<uint64_t, std::string> magics;
   if (onlyCheckAndroidMagics)
     magics.merge(PartitionMap::Extras::AndroidMagicMap);
   else if (onlyCheckFileSystemMagics)
@@ -74,8 +76,8 @@ RUN(typeFunction) {
   return true;
 }
 
-IS_USED_COMMON_BODY(typeFunction)
+IS_USED_COMMON_BODY
 
-NAME(typeFunction) { return TFUN; }
+NAME { return TFUN; }
 
 } // namespace PartitionManager

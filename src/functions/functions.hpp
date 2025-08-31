@@ -21,16 +21,18 @@
 #include <utility>
 #include <vector>
 
-#define INIT(cls) bool cls::init(CLI::App &_app)
-#define RUN(cls) bool cls::run()
-#define RUN_ASYNC(cls) pair cls::runAsync
-#define IS_USED(cls) bool cls::isUsed() const
-#define IS_USED_COMMON_BODY(cls)                                               \
-  bool cls::isUsed() const { return cmd->parsed(); }
-#define NAME(cls) const char *cls::name() const
+#define INIT bool FUNCTION_CLASS::init(CLI::App &_app)
+#define RUN bool FUNCTION_CLASS::run()
+#define RUN_ASYNC pair FUNCTION_CLASS::runAsync
+#define IS_USED bool FUNCTION_CLASS::isUsed() const
+#define IS_USED_COMMON_BODY                                                    \
+  bool FUNCTION_CLASS::isUsed() const { return cmd->parsed(); }
+#define NAME const char *FUNCTION_CLASS::name() const
 
-#define COMMON_LAMBDA_PARAMS                                                   \
-  (std::string partition, const PartitionMap::Map_t::BasicInf props)
+/**
+ *   Please define FUNCTION_CLASS before using these macros!!! (INIT etc.)
+ */
+
 #define COMMON_FUNCTION_BODY()                                                 \
   CLI::App *cmd = nullptr;                                                     \
   bool init(CLI::App &_app) override;                                          \

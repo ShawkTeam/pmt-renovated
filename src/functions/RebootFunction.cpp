@@ -18,9 +18,10 @@ Copyright 2025 Yağız Zengin
 #include <PartitionManager/PartitionManager.hpp>
 
 #define RFUN "rebootFunction"
+#define FUNCTION_CLASS rebootFunction
 
 namespace PartitionManager {
-INIT(rebootFunction) {
+INIT {
   LOGN(RFUN, INFO) << "Initializing variables of reboot function." << std::endl;
   cmd = _app.add_subcommand("reboot", "Reboots device");
   cmd->add_option("rebootTarget", rebootTarget,
@@ -28,7 +29,7 @@ INIT(rebootFunction) {
   return true;
 }
 
-RUN(rebootFunction) {
+RUN {
   LOGN(RFUN, INFO) << "Rebooting device!!! (custom reboot target: "
                    << (rebootTarget.empty() ? "none" : rebootTarget)
                    << std::endl;
@@ -39,7 +40,7 @@ RUN(rebootFunction) {
   return true;
 }
 
-IS_USED_COMMON_BODY(rebootFunction)
+IS_USED_COMMON_BODY
 
-NAME(rebootFunction) { return RFUN; }
+NAME { return RFUN; }
 } // namespace PartitionManager

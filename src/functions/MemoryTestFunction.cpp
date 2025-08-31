@@ -24,10 +24,11 @@ Copyright 2025 Yağız Zengin
 #include <unistd.h>
 
 #define MTFUN "memoryTestFunction"
+#define FUNCTION_CLASS memoryTestFunction
 
 namespace PartitionManager {
 
-INIT(memoryTestFunction) {
+INIT {
   LOGN(MTFUN, INFO) << "Initializing variables of memory test function."
                     << std::endl;
   cmd = _app.add_subcommand("memtest", "Test your write/read speed of device.");
@@ -56,7 +57,7 @@ INIT(memoryTestFunction) {
   return true;
 }
 
-RUN(memoryTestFunction) {
+RUN {
   LOGN(MTFUN, INFO) << "Starting memory test on " << testPath << std::endl;
   Helper::garbageCollector collector;
   const std::string test = Helper::pathJoin(testPath, "test.bin");
@@ -121,7 +122,7 @@ RUN(memoryTestFunction) {
   return true;
 }
 
-IS_USED_COMMON_BODY(memoryTestFunction)
+IS_USED_COMMON_BODY
 
-NAME(memoryTestFunction) { return MTFUN; }
+NAME { return MTFUN; }
 } // namespace PartitionManager

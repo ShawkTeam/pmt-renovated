@@ -23,10 +23,10 @@ Copyright 2025 Yağız Zengin
 #include <unistd.h>
 
 #define EFUN "eraseFunction"
+#define FUNCTION_CLASS eraseFunction
 
 namespace PartitionManager {
-RUN_ASYNC(eraseFunction)(const std::string &partitionName,
-                         const uint64_t bufferSize) {
+RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
   if (!Variables->PartMap->hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 
@@ -87,7 +87,7 @@ RUN_ASYNC(eraseFunction)(const std::string &partitionName,
           true};
 }
 
-INIT(eraseFunction) {
+INIT {
   LOGN(EFUN, INFO) << "Initializing variables of erase function." << std::endl;
   cmd = _app.add_subcommand("erase", "Writes zero bytes to partition(s)");
   cmd->add_option("partition(s)", partitions, "Partition name(s)")
@@ -100,7 +100,7 @@ INIT(eraseFunction) {
   return true;
 }
 
-RUN(eraseFunction) {
+RUN {
   std::vector<std::future<pair>> futures;
   for (const auto &partitionName : partitions) {
     uint64_t buf = bufferSize;
@@ -127,7 +127,7 @@ RUN(eraseFunction) {
   return endResult;
 }
 
-IS_USED_COMMON_BODY(eraseFunction)
+IS_USED_COMMON_BODY
 
-NAME(eraseFunction) { return EFUN; }
+NAME { return EFUN; }
 } // namespace PartitionManager

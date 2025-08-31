@@ -14,6 +14,7 @@
    limitations under the License.
 */
 
+#include <fstream>
 #include <iostream>
 #include <libpartition_map/lib.hpp>
 #include <unistd.h>
@@ -54,10 +55,26 @@ int main() {
     for (const auto &name : *physicals)
       std::cout << "   - " << name << std::endl;
 
+    if (const std::vector<PartitionMap::Info> parts = MyMap; parts.empty())
+      throw PartitionMap::Error(
+          "operator std::vector>PartitionMap::Info>() returned empty vector");
+
+    auto func = [](const std::string &partition,
+                   const PartitionMap::BasicInf props) -> bool {
+      std::ofstream f("parts.txt");
+      f << "Partition: " << partition << ", size: " << props.size
+        << ", logical: " << props.isLogical;
+      return !f.fail();
+    };
+    MyMap.doForAllPartitions(func);
+
+    std::cout << "Total partitions count: " << (int)MyMap << std::endl;
     std::cout << "Boot: " << MyMap.getRealLinkPathOf("boot") << std::endl;
     std::cout << "Boot (realpath): " << MyMap.getRealPathOf("boot")
               << std::endl;
     std::cout << "Search dir: " << MyMap.getCurrentWorkDir() << std::endl;
+    std::cout << "Search dir test 2: " << static_cast<std::string>(MyMap)
+              << std::endl;
     std::cout << "Has partition cache? = " << MyMap.hasPartition("cache")
               << std::endl;
     std::cout << "system partition is logical? = " << MyMap.isLogical("system")
