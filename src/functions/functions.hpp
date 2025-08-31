@@ -29,7 +29,7 @@
   bool cls::isUsed() const { return cmd->parsed(); }
 #define NAME(cls) const char *cls::name() const
 
-#define COMMON_LAMBDA_PARAMS \
+#define COMMON_LAMBDA_PARAMS                                                   \
   (std::string partition, const PartitionMap::Map_t::BasicInf props)
 #define COMMON_FUNCTION_BODY()                                                 \
   CLI::App *cmd = nullptr;                                                     \

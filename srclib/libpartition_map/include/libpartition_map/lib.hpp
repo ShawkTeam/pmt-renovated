@@ -26,9 +26,9 @@
 #include <optional>
 #include <string>
 #include <string_view>
+#include <tuple>
 #include <unordered_map>
 #include <utility> // for std::pair
-#include <tuple>
 
 namespace PartitionMap {
 struct _entry {
@@ -63,7 +63,7 @@ public:
 
   basic_partition_map(const std::string &name, uint64_t size, bool logical);
   basic_partition_map(const basic_partition_map &other);
-  basic_partition_map(basic_partition_map&& other) noexcept;
+  basic_partition_map(basic_partition_map &&other) noexcept;
   basic_partition_map();
   ~basic_partition_map();
 
@@ -348,7 +348,8 @@ public:
   /**
    *   Get map contents as vector (std::tuple type).
    */
-  [[nodiscard]] operator std::vector<std::tuple<std::string, uint64_t, bool>>() const;
+  [[nodiscard]]
+  operator std::vector<std::tuple<std::string, uint64_t, bool>>() const;
 
   /**
    *   Get total partition count in map (int type).
@@ -413,7 +414,6 @@ std::string formatMagic(uint64_t magic);
 #define T_NAME 0
 #define T_TYPE 1
 #define T_SIZE 2
-#define T_VEC_DECL_TYPE \
-  std::vector<std::tuple<std::string, uint64_t, bool>>
+#define T_VEC_DECL_TYPE std::vector<std::tuple<std::string, uint64_t, bool>>
 
 #endif // #ifndef LIBPARTITION_MAP_LIB_HPP

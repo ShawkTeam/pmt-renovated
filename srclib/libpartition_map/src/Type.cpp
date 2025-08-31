@@ -116,7 +116,7 @@ basic_partition_map::basic_partition_map(const basic_partition_map &other)
   std::copy(other._data, other._data + _count, _data);
 }
 
-basic_partition_map::basic_partition_map(basic_partition_map&& other) noexcept
+basic_partition_map::basic_partition_map(basic_partition_map &&other) noexcept
     : _data(new _entry[other._capacity]), _count(other._count),
       _capacity(other._capacity) {
   std::copy(other._data, other._data + _count, _data);
@@ -229,17 +229,17 @@ bool basic_partition_map::operator!=(const basic_partition_map &other) const {
   return !(*this == other);
 }
 
-basic_partition_map::operator std::vector<std::tuple<std::string, uint64_t, bool>>() const {
+basic_partition_map::operator std::vector<
+    std::tuple<std::string, uint64_t, bool>>() const {
   std::vector<std::tuple<std::string, uint64_t, bool>> v;
   if (_count == 0) return {};
   for (size_t i = 0; i < _count; i++)
-    v.emplace_back(_data[i].name, _data[i].props.size, _data[i].props.isLogical);
+    v.emplace_back(_data[i].name, _data[i].props.size,
+                   _data[i].props.isLogical);
   return v;
 }
 
-basic_partition_map::operator int() const{
-  return static_cast<int>(_count);
-}
+basic_partition_map::operator int() const { return static_cast<int>(_count); }
 
 basic_partition_map::iterator basic_partition_map::begin() const {
   return iterator(_data);

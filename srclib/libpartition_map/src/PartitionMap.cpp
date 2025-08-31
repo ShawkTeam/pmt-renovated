@@ -87,7 +87,8 @@ void basic_partition_map_builder::_insert_logicals(Map_t &&logicals) {
       << "merging created logical partition list to this object's variable."
       << std::endl;
   _current_map.merge(logicals);
-  LOGN(MAP, INFO) << "Cleaning created logical partition because not need more." << std::endl;
+  LOGN(MAP, INFO) << "Cleaning created logical partition because not need more."
+                  << std::endl;
   logicals.clear();
 }
 
@@ -161,7 +162,8 @@ basic_partition_map_builder::basic_partition_map_builder(
   _map_builded = true;
 }
 
-basic_partition_map_builder::basic_partition_map_builder(basic_partition_map_builder&& other) noexcept {
+basic_partition_map_builder::basic_partition_map_builder(
+    basic_partition_map_builder &&other) noexcept {
   _current_map = Map_t(std::move(other._current_map));
   _workdir = std::move(other._workdir);
   _any_generating_error = other._any_generating_error;
@@ -386,17 +388,14 @@ const Map_t &basic_partition_map_builder::operator*() const {
   return _current_map;
 }
 
-basic_partition_map_builder::operator std::vector<std::tuple<std::string, uint64_t, bool>>() const {
+basic_partition_map_builder::operator std::vector<
+    std::tuple<std::string, uint64_t, bool>>() const {
   return _current_map;
 }
 
-basic_partition_map_builder::operator int() const {
-  return _current_map;
-}
+basic_partition_map_builder::operator int() const { return _current_map; }
 
-basic_partition_map_builder::operator std::string() const {
-  return _workdir;
-}
+basic_partition_map_builder::operator std::string() const { return _workdir; }
 
 std::string getLibVersion() { MKVERSION("libpartition_map"); }
 } // namespace PartitionMap

@@ -75,6 +75,7 @@ static Helper::garbageCollector collector;
 int Main(int argc, char **argv) {
   try {
     // try-catch start
+    Helper::LoggingProperties::setProgramName("pmt");
     collector.closeAfterProgress(pstdout);
     collector.closeAfterProgress(pstderr);
 
