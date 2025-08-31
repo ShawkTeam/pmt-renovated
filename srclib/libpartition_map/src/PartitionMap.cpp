@@ -87,6 +87,8 @@ void basic_partition_map_builder::_insert_logicals(Map_t &&logicals) {
       << "merging created logical partition list to this object's variable."
       << std::endl;
   _current_map.merge(logicals);
+  LOGN(MAP, INFO) << "Cleaning created logical partition because not need more." << std::endl;
+  logicals.clear();
 }
 
 void basic_partition_map_builder::_map_build_check() const {
@@ -159,6 +161,14 @@ basic_partition_map_builder::basic_partition_map_builder(
   _map_builded = true;
 }
 
+basic_partition_map_builder::basic_partition_map_builder(basic_partition_map_builder&& other) noexcept {
+  _current_map = Map_t(std::move(other._current_map));
+  _workdir = std::move(other._workdir);
+  _any_generating_error = other._any_generating_error;
+  _map_builded = other._map_builded;
+  other.clear();
+}
+
 bool basic_partition_map_builder::hasPartition(
     const std::string_view name) const {
   _map_build_check();
@@ -191,7 +201,7 @@ bool basic_partition_map_builder::readDirectory(const std::string_view path) {
     throw Error("Cannot find directory: %s. Cannot build partition map!",
                 path.data());
 
-  LOGN(MAP, INFO) << "read " << path << " successfull." << std::endl;
+  LOGN(MAP, INFO) << "read " << path << " successfully." << std::endl;
   _insert_logicals(_build_map("/dev/block/mapper", true));
   _map_builded = true;
   return true;
@@ -218,7 +228,7 @@ bool basic_partition_map_builder::readDefaultDirectories() {
     LOGN(MAP, ERROR) << "Cannot build map by any default search entry."
                      << std::endl;
 
-  LOGN(MAP, INFO) << "read default directories successfull." << std::endl;
+  LOGN(MAP, INFO) << "read default directories successfully." << std::endl;
   _insert_logicals(_build_map("/dev/block/mapper", true));
   _map_builded = true;
   return true;
@@ -374,6 +384,18 @@ Map_t &basic_partition_map_builder::operator*() { return _current_map; }
 
 const Map_t &basic_partition_map_builder::operator*() const {
   return _current_map;
+}
+
+basic_partition_map_builder::operator std::vector<std::tuple<std::string, uint64_t, bool>>() const {
+  return _current_map;
+}
+
+basic_partition_map_builder::operator int() const {
+  return _current_map;
+}
+
+basic_partition_map_builder::operator std::string() const {
+  return _workdir;
 }
 
 std::string getLibVersion() { MKVERSION("libpartition_map"); }

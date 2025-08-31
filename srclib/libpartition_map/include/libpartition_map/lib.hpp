@@ -28,6 +28,7 @@
 #include <string_view>
 #include <unordered_map>
 #include <utility> // for std::pair
+#include <tuple>
 
 namespace PartitionMap {
 struct _entry {
@@ -62,6 +63,7 @@ public:
 
   basic_partition_map(const std::string &name, uint64_t size, bool logical);
   basic_partition_map(const basic_partition_map &other);
+  basic_partition_map(basic_partition_map&& other) noexcept;
   basic_partition_map();
   ~basic_partition_map();
 
@@ -81,6 +83,9 @@ public:
 
   bool operator==(const basic_partition_map &other) const;
   bool operator!=(const basic_partition_map &other) const;
+
+  operator std::vector<std::tuple<std::string, uint64_t, bool>>() const;
+  operator int() const;
 
   class iterator {
   public:
@@ -148,6 +153,11 @@ public:
    *   A constructor with input. Need search path
    */
   explicit basic_partition_map_builder(std::string_view path);
+
+  /**
+   *   Move constructor
+   */
+  basic_partition_map_builder(basic_partition_map_builder &&other) noexcept;
 
   /**
    *   Returns the current list content in Map_t type.
@@ -334,6 +344,21 @@ public:
    *   Get constant Map_t object reference
    */
   const Map_t &operator*() const;
+
+  /**
+   *   Get map contents as vector (std::tuple type).
+   */
+  [[nodiscard]] operator std::vector<std::tuple<std::string, uint64_t, bool>>() const;
+
+  /**
+   *   Get total partition count in map (int type).
+   */
+  [[nodiscard]] operator int() const;
+
+  /**
+   *   Get current working directory.
+   */
+  [[nodiscard]] operator std::string() const;
 };
 
 using Error = Helper::Error;
@@ -384,5 +409,11 @@ std::string formatMagic(uint64_t magic);
 } // namespace PartitionMap
 
 #define MAP "libpartition_map"
+
+#define T_NAME 0
+#define T_TYPE 1
+#define T_SIZE 2
+#define T_VEC_DECL_TYPE \
+  std::vector<std::tuple<std::string, uint64_t, bool>>
 
 #endif // #ifndef LIBPARTITION_MAP_LIB_HPP
