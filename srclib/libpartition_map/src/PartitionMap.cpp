@@ -287,24 +287,30 @@ bool basic_partition_map_builder::empty() const {
   return _current_map.empty();
 }
 
-void basic_partition_map_builder::doForAllPartitions(
+bool basic_partition_map_builder::doForAllPartitions(
     const std::function<bool(std::string, BasicInf)> &func) const {
   _map_build_check();
+  bool err = false;
 
   LOGN(MAP, INFO) << "Doing input function for all partitions." << std::endl;
   for (const auto &[name, props] : _current_map) {
     if (func(name, {props.size, props.isLogical}))
       LOGN(MAP, INFO) << "Done progress for " << name << " partition."
                       << std::endl;
-    else
+    else {
+      err = true;
       LOGN(MAP, ERROR) << "Failed progress for " << name << " partition."
                        << std::endl;
+    }
   }
+
+  return err;
 }
 
-void basic_partition_map_builder::doForPhysicalPartitions(
+bool basic_partition_map_builder::doForPhysicalPartitions(
     const std::function<bool(std::string, BasicInf)> &func) const {
   _map_build_check();
+  bool err = false;
 
   LOGN(MAP, INFO) << "Doing input function for physical partitions."
                   << std::endl;
@@ -313,15 +319,20 @@ void basic_partition_map_builder::doForPhysicalPartitions(
     if (func(name, {props.size, props.isLogical}))
       LOGN(MAP, INFO) << "Done progress for " << name << " partition."
                       << std::endl;
-    else
+    else {
+      err = true;
       LOGN(MAP, ERROR) << "Failed progress for " << name << " partition."
                        << std::endl;
+    }
   }
+
+  return err;
 }
 
-void basic_partition_map_builder::doForLogicalPartitions(
+bool basic_partition_map_builder::doForLogicalPartitions(
     const std::function<bool(std::string, BasicInf)> &func) const {
   _map_build_check();
+  bool err = false;
 
   LOGN(MAP, INFO) << "Doing input function for logical partitions."
                   << std::endl;
@@ -330,26 +341,35 @@ void basic_partition_map_builder::doForLogicalPartitions(
     if (func(name, {props.size, props.isLogical}))
       LOGN(MAP, INFO) << "Done progress for " << name << " partition."
                       << std::endl;
-    else
+    else {
+      err = true;
       LOGN(MAP, ERROR) << "Failed progress for " << name << " partition."
                        << std::endl;
+    }
   }
+
+  return err;
 }
 
-void basic_partition_map_builder::doForPartitionList(
+bool basic_partition_map_builder::doForPartitionList(
     const std::vector<std::string> &partitions,
     const std::function<bool(std::string, BasicInf)> &func) const {
   _map_build_check();
+  bool err = false;
 
   LOGN(MAP, INFO) << "Doing input function for input partition list."
                   << std::endl;
   for (const auto &partition : partitions) {
     if (!hasPartition(partition))
       throw Error("Couldn't find partition: %s", partition.data());
-    if (!func(partition, {sizeOf(partition), isLogical(partition)}))
-      LOGN(MAP, ERROR) << "Failed progress for partition: " << partition
+    if (!func(partition, {sizeOf(partition), isLogical(partition)})) {
+      err = true;
+      LOGN(MAP, ERROR) << "Failed progress for " << partition << " partition."
                        << std::endl;
+    }
   }
+
+  return err;
 }
 
 uint64_t

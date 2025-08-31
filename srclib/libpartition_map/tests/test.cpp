@@ -18,6 +18,7 @@
 #include <iostream>
 #include <libpartition_map/lib.hpp>
 #include <unistd.h>
+#include <pstl/glue_execution_defs.h>
 
 int main() {
   if (getuid() != 0) return 2;
@@ -64,9 +65,11 @@ int main() {
       std::ofstream f("parts.txt");
       f << "Partition: " << partition << ", size: " << props.size
         << ", logical: " << props.isLogical;
+      f.exceptions(std::ios_base::failbit | std::ios_base::badbit);
       return !f.fail();
     };
-    MyMap.doForAllPartitions(func);
+    if (!MyMap.doForAllPartitions(func))
+      throw PartitionMap::Error("doForAllPartitions() progress failed");
 
     std::cout << "Total partitions count: " << (int)MyMap << std::endl;
     std::cout << "Boot: " << MyMap.getRealLinkPathOf("boot") << std::endl;
@@ -94,6 +97,9 @@ int main() {
     std::cout << PartitionMap::getLibVersion() << std::endl;
   } catch (PartitionMap::Error &error) {
     std::cerr << error.what() << std::endl;
+    return 1;
+  } catch (std::ios_base::failure &error) {
+    std::cerr << "fstream error: " << error.what() << std::endl;
     return 1;
   }
 

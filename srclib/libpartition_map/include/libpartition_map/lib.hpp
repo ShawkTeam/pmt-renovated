@@ -255,25 +255,25 @@ public:
   /**
    *   Do input function (lambda) for all partitions.
    */
-  void doForAllPartitions(
+  bool doForAllPartitions(
       const std::function<bool(std::string, BasicInf)> &func) const;
 
   /**
    *   Do input function (lambda) for physical partitions.
    */
-  void doForPhysicalPartitions(
+  bool doForPhysicalPartitions(
       const std::function<bool(std::string, BasicInf)> &func) const;
 
   /**
    *   Do input function (lambda) for logical partitions.
    */
-  void doForLogicalPartitions(
+  bool doForLogicalPartitions(
       const std::function<bool(std::string, BasicInf)> &func) const;
 
   /**
    *   Do input function (lambda) for input partition list.
    */
-  void doForPartitionList(
+  bool doForPartitionList(
       const std::vector<std::string> &partitions,
       const std::function<bool(std::string, BasicInf)> &func) const;
 
