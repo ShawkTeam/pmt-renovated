@@ -50,11 +50,10 @@ int main(int argc, char **argv) {
               << std::endl;
 
     if (!Helper::writeFile("file.txt", "hello world"))
-      throw Helper::Error("Cannor write \"hello world\" in 'file.txt'");
+      throw Helper::Error("Cannot write \"hello world\" in 'file.txt'");
     else std::cout << "file.txt writed." << std::endl;
 
-    auto content = Helper::readFile("file.txt");
-    if (!content) throw Helper::Error("Cannot read 'file.txt'");
+    if (const auto content = Helper::readFile("file.txt");!content) throw Helper::Error("Cannot read 'file.txt'");
     else std::cout << "'file.txt': " << *content << std::endl;
 
     std::cout << "Making directory 'dir2': " << std::boolalpha
@@ -78,8 +77,7 @@ int main(int argc, char **argv) {
     std::cout << "Read link of 'file2lnk.txt': "
               << Helper::readSymlink(test_path("file2lnk.txt")) << std::endl;
 
-    auto sha256 = Helper::sha256Of(test_path("file2.txt"));
-    if (!sha256) throw Helper::Error("Cannot get sha256 of 'file2.txt'");
+    if (const auto sha256 = Helper::sha256Of(test_path("file2.txt"));!sha256) throw Helper::Error("Cannot get sha256 of 'file2.txt'");
     else std::cout << "SHA256 of 'file2.txt': " << *sha256 << std::endl;
 
     std::cout << "'file2.txt' and 'file2lnk.txt' same? (SHA256): "
@@ -95,7 +93,7 @@ int main(int argc, char **argv) {
               << Helper::runCommand("ls") << std::endl;
     std::cout << "Spawn confirm propt..." << std::endl;
 
-    bool p = Helper::confirmPropt("Please answer");
+    const bool p = Helper::confirmPropt("Please answer");
     std::cout << "Result of confirm propt: " << std::boolalpha << p
               << std::endl;
 

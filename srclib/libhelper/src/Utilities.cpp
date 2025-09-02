@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#ifdef __ANDROID__
 // From system/core/libcutils/android_reboot.cpp android16-s2-release
 int android_reboot(const unsigned cmd, int /*flags*/, const char *arg) {
   int ret;
@@ -63,6 +64,7 @@ int android_reboot(const unsigned cmd, int /*flags*/, const char *arg) {
   free(prop_value);
   return ret;
 }
+#endif
 
 namespace Helper {
 namespace LoggingProperties {
@@ -203,6 +205,13 @@ FILE *openAndAddToCloseList(const std::string_view &path,
   return fp;
 }
 
+DIR *openAndAddToCloseList(const std::string_view &path, garbageCollector &collector) {
+  DIR *dp = opendir(path.data());
+  collector.closeAfterProgress(dp);
+  return dp;
+}
+
+#ifdef __ANDROID__
 std::string getProperty(const std::string_view prop) {
   char val[PROP_VALUE_MAX];
   const int x = __system_property_get(prop.data(), val);
@@ -220,6 +229,7 @@ bool reboot(const std::string_view arg) {
 
   return android_reboot(cmd, 0, arg.empty() ? nullptr : arg.data()) != -1;
 }
+#endif
 
 uint64_t getRandomOffset(const uint64_t size, const uint64_t bufferSize) {
   if (size <= bufferSize) return 0;

@@ -151,8 +151,9 @@ bool eraseDirectoryRecursive(const std::string_view directory) {
   LOGN(HELPER, INFO) << "erase recursive requested: " << directory << std::endl;
   struct stat buf{};
   dirent *entry;
+  garbageCollector collector;
 
-  DIR *dir = opendir(directory.data());
+  DIR *dir = openAndAddToCloseList(directory.data(), collector);
   if (dir == nullptr) return false;
 
   while ((entry = readdir(dir)) != nullptr) {
@@ -164,25 +165,18 @@ bool eraseDirectoryRecursive(const std::string_view directory) {
     snprintf(fullpath, sizeof(fullpath), "%s/%s", directory.data(),
              entry->d_name);
 
-    if (lstat(fullpath, &buf) == -1) {
-      closedir(dir);
+    if (lstat(fullpath, &buf) == -1)
       return false;
-    }
 
     if (S_ISDIR(buf.st_mode)) {
-      if (!eraseDirectoryRecursive(fullpath)) {
-        closedir(dir);
-        return false;
-      }
+      if (!eraseDirectoryRecursive(fullpath)) return false;
+    } else if (S_ISREG(buf.st_mode)) {
+      if (!eraseEntry(fullpath)) return false;
     } else {
-      if (unlink(fullpath) == -1) {
-        closedir(dir);
-        return false;
-      }
+      if (unlink(fullpath) == -1) return false;
     }
   }
 
-  closedir(dir);
   if (rmdir(directory.data()) == -1) return false;
 
   LOGN(HELPER, INFO) << "\"" << directory << "\" successfully erased."
@@ -203,10 +197,10 @@ std::string readSymlink(const std::string_view entry) {
   return target;
 }
 
-size_t fileSize(const std::string_view file) {
+int64_t fileSize(const std::string_view file) {
   LOGN(HELPER, INFO) << "get file size request: " << file << std::endl;
   struct stat st{};
-  if (stat(file.data(), &st) != 0) return false;
-  return static_cast<size_t>(st.st_size);
+  if (stat(file.data(), &st) != 0) return -1;
+  return st.st_size;
 }
 } // namespace Helper

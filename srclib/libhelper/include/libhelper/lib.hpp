@@ -24,6 +24,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <dirent.h>
 
 #ifndef ONLY_HELPER_MACROS
 
@@ -80,6 +81,7 @@ private:
   std::vector<char *> _ptrs_c;
   std::vector<uint8_t *> _ptrs_u;
   std::vector<FILE *> _fps;
+  std::vector<DIR *> _dps;
   std::vector<int> _fds;
   std::vector<std::string> _files;
 
@@ -90,6 +92,7 @@ public:
   void delAfterProgress(uint8_t *&_ptr);
   void delFileAfterProgress(const std::string &path);
   void closeAfterProgress(FILE *&_fp);
+  void closeAfterProgress(DIR *&_dp);
   void closeAfterProgress(int _fd);
 };
 
@@ -106,7 +109,7 @@ void setLoggingState(int state); // Disable/enable logging
 void reset();
 } // namespace LoggingProperties
 
-// Checkers
+// Checkers - don't throw Helper::Error
 bool hasSuperUser();
 bool hasAdbPermissions();
 bool isExists(std::string_view entry);
@@ -133,7 +136,7 @@ bool eraseEntry(std::string_view entry);
 bool eraseDirectoryRecursive(std::string_view directory);
 
 // Getters
-size_t fileSize(std::string_view file);
+int64_t fileSize(std::string_view file);
 std::string readSymlink(std::string_view entry);
 
 // SHA-256
@@ -155,9 +158,11 @@ std::string pathBasename(std::string_view entry);
 std::string pathDirname(std::string_view entry);
 uint64_t getRandomOffset(uint64_t size, uint64_t bufferSize);
 
+#ifdef __ANDROID__
 // Android
 std::string getProperty(std::string_view prop);
 bool reboot(std::string_view arg);
+#endif
 
 // Library-specif
 std::string getLibVersion();
@@ -170,6 +175,9 @@ std::string getLibVersion();
 [[nodiscard]] FILE *openAndAddToCloseList(const std::string_view &path,
                                           garbageCollector &collector,
                                           const char *mode);
+[[nodiscard]] DIR *openAndAddToCloseList(const std::string_view &path,
+                                          garbageCollector &collector);
+
 } // namespace Helper
 
 #endif // #ifndef ONLY_HELPER_MACROS

@@ -18,7 +18,6 @@
 #include <iostream>
 #include <libpartition_map/lib.hpp>
 #include <unistd.h>
-#include <pstl/glue_execution_defs.h>
 
 int main() {
   if (getuid() != 0) return 2;
