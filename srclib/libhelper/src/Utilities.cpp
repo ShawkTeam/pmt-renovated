@@ -128,7 +128,7 @@ std::string currentDate() {
     return std::string(std::to_string(date->tm_mday) + "/" +
                        std::to_string(date->tm_mon + 1) + "/" +
                        std::to_string(date->tm_year + 1900));
-  return "--/--/----";
+  return {};
 }
 
 std::string currentTime() {
@@ -138,10 +138,10 @@ std::string currentTime() {
     return std::string(std::to_string(date->tm_hour) + ":" +
                        std::to_string(date->tm_min) + ":" +
                        std::to_string(date->tm_sec));
-  return "--:--:--";
+  return {};
 }
 
-std::string runCommandWithOutput(const std::string_view cmd) {
+std::pair<std::string, int> runCommandWithOutput(const std::string_view cmd) {
   LOGN(HELPER, INFO) << "run command and catch out request: " << cmd
                      << std::endl;
 
@@ -156,7 +156,9 @@ std::string runCommandWithOutput(const std::string_view cmd) {
   while (fgets(buffer, sizeof(buffer), pipe_holder.get()) != nullptr)
     output += buffer;
 
-  return output;
+  FILE* raw = pipe_holder.release();
+  const int status = pclose(raw);
+  return {output, (WIFEXITED(status) ? WEXITSTATUS(status) : -1)};
 }
 
 std::string pathJoin(std::string base, std::string relative) {

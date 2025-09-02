@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
     std::cout << "Current date: " << Helper::currentDate() << std::endl;
     std::cout << "Current time: " << Helper::currentTime() << std::endl;
     std::cout << "Output of 'ls' command: "
-              << Helper::runCommandWithOutput("ls") << std::endl;
+              << Helper::runCommandWithOutput("ls").first << std::endl;
     std::cout << "Basename of " << test_path("file2.txt") << ": "
               << Helper::pathBasename(test_path("file2.txt")) << std::endl;
     std::cout << "Dirname of " << test_path("file2.txt") << ": "

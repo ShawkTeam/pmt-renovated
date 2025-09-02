@@ -109,72 +109,259 @@ void setLoggingState(int state); // Disable/enable logging
 void reset();
 } // namespace LoggingProperties
 
-// Checkers - don't throw Helper::Error
+// -------------------------------
+// Checkers - not throws Helper::Error
+// -------------------------------
+
+/**
+ * It is checked whether the user ID used is equivalent to AID_ROOT.
+ * See include/private/android_filesystem_config.h
+ */
 bool hasSuperUser();
+
+/**
+ * It is checked whether the user ID used is equivalent to AID_SHELL.
+ * See include/private/android_filesystem_config.h
+ */
 bool hasAdbPermissions();
+
+/**
+ * Checks whether the file/directory exists.
+ */
 bool isExists(std::string_view entry);
+
+/**
+ * Checks whether the file exists.
+ */
 bool fileIsExists(std::string_view file);
+
+/**
+ * Checks whether the directory exists.
+ */
 bool directoryIsExists(std::string_view directory);
+
+/**
+ * Checks whether the link (symbolic or hard) exists.
+ */
 bool linkIsExists(std::string_view entry);
+
+/**
+ * Checks if the entry is a symbolic link.
+ */
 bool isLink(std::string_view entry);
+
+/**
+ * Checks if the entry is a symbolic link.
+ */
 bool isSymbolicLink(std::string_view entry);
+
+/**
+ * Checks if the entry is a hard link.
+ */
 bool isHardLink(std::string_view entry);
+
+/**
+ * Checks whether entry1 is linked to entry2.
+ */
 bool areLinked(std::string_view entry1, std::string_view entry2);
 
-// File I/O
+// -------------------------------
+// File I/O - not throws Helper::Error
+// -------------------------------
+
+/**
+ * Writes given text into file.
+ * If file does not exist, it is automatically created.
+ * Returns true on success.
+ */
 bool writeFile(std::string_view file, std::string_view text);
+
+/**
+ * Reads file content into string.
+ * On success returns file content.
+ * On error returns std::nullopt.
+ */
 std::optional<std::string> readFile(std::string_view file);
 
+// -------------------------------
 // Creators
+// -------------------------------
+
+/**
+ * Create directory.
+ */
 bool makeDirectory(std::string_view path);
+
+/**
+ * Create recursive directory.
+ */
 bool makeRecursiveDirectory(std::string_view paths);
+
+/**
+ * Create file.
+ */
 bool createFile(std::string_view path);
+
+/**
+ * Symlink entry1 to entry2.
+ */
 bool createSymlink(std::string_view entry1, std::string_view entry2);
 
-// Removers
+// -------------------------------
+// Removers - not throws Helper::Error
+// -------------------------------
+
+/**
+ * Remove file or empty directory.
+ */
 bool eraseEntry(std::string_view entry);
+
+/**
+ * Remove directory and all directory contents recursively.
+ */
 bool eraseDirectoryRecursive(std::string_view directory);
 
-// Getters
+// -------------------------------
+// Getters - not throws Helper::Error
+// -------------------------------
+
+/**
+ * Get file size.
+ */
 int64_t fileSize(std::string_view file);
+
+/**
+ * Read symlinks.
+ */
 std::string readSymlink(std::string_view entry);
 
+// -------------------------------
 // SHA-256
+// -------------------------------
+
+/**
+ * Compare SHA-256 values SHA-256 of files.
+ * Throws Helper::Error on error occurred.
+ */
 bool sha256Compare(std::string_view file1, std::string_view file2);
+
+/**
+ * Get SHA-256 of file.
+ * Throws Helper::Error on error occurred.
+ */
 std::optional<std::string> sha256Of(std::string_view path);
 
-// Utilities
+// -------------------------------
+// Utilities - not throws Helper::Error
+// -------------------------------
+
+/**
+ * Copy file to dest.
+ */
 bool copyFile(std::string_view file, std::string_view dest);
+
+/**
+ * Run shell command.
+ */
 bool runCommand(std::string_view cmd);
+
+/**
+ * Shows message and asks for y/N from user.
+ */
 bool confirmPropt(std::string_view message);
+
+/**
+ * Change file permissions.
+ */
 bool changeMode(std::string_view file, mode_t mode);
+
+/**
+ * Change file owner (user ID and group ID).
+ */
 bool changeOwner(std::string_view file, uid_t uid, gid_t gid);
+
+/**
+ * Get current working directory as string.
+ * Returns empty string on error.
+ */
 std::string currentWorkingDirectory();
+
+/**
+ * Get current date as string (format: YYYY-MM-DD).
+ * Returns empty string on error.
+ */
 std::string currentDate();
+
+/**
+ * Get current time as string (format: HH:MM:SS).
+ * Returns empty string on error.
+ */
 std::string currentTime();
-std::string runCommandWithOutput(std::string_view cmd);
+
+/**
+ * Run shell command return output as string.
+ * Returns std::pair<std::string, int>.
+ */
+std::pair<std::string, int> runCommandWithOutput(std::string_view cmd);
+
+/**
+ * Joins base path with relative path and returns result.
+ */
 std::string pathJoin(std::string base, std::string relative);
+
+/**
+ * Get the filename part of given path.
+ */
 std::string pathBasename(std::string_view entry);
+
+/**
+ * Get the directory part of given path.
+ */
 std::string pathDirname(std::string_view entry);
+
+/**
+ * Get random offset depending on size and bufferSize.
+ */
 uint64_t getRandomOffset(uint64_t size, uint64_t bufferSize);
 
+// -------------------------------
+// Android - not throws Helper::Error
+// -------------------------------
 #ifdef __ANDROID__
-// Android
+/**
+ * Get input property as string.
+ */
 std::string getProperty(std::string_view prop);
+
+/**
+ * Reboot device to input mode.
+ */
 bool reboot(std::string_view arg);
 #endif
 
-// Library-specif
+/**
+ * Get libhelper library version string.
+ */
 std::string getLibVersion();
 
-// Open input path with flags and add to integrity list. And return file
-// descriptor
+/**
+ * Open input path with flags and add to integrity list.
+ * And returns file descriptor.
+ */
 [[nodiscard]] int openAndAddToCloseList(const std::string_view &path,
                                         garbageCollector &collector, int flags,
                                         mode_t mode = 0000);
+/**
+ * Open input path with flags and add to integrity list.
+ * And returns file pointer.
+ */
 [[nodiscard]] FILE *openAndAddToCloseList(const std::string_view &path,
                                           garbageCollector &collector,
                                           const char *mode);
+/**
+ * Open input directory and add to integrity list.
+ * And returns directory pointer.
+ */
 [[nodiscard]] DIR *openAndAddToCloseList(const std::string_view &path,
                                           garbageCollector &collector);
 
@@ -234,6 +421,9 @@ std::string getLibVersion();
 #define LOG(level)                                                             \
   Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),      \
                  Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+#define LOGF(file, level)                                                      \
+  Helper::Logger(level, __func__, file,                                        \
+                 Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
 #define LOGN(name, level)                                                      \
   Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),      \
                  name, __FILE__, __LINE__)
@@ -244,6 +434,10 @@ std::string getLibVersion();
   if (condition)                                                               \
   Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),      \
                  Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+#define LOGF_IF(file, level, condition)                                        \
+  if (condition)                                                               \
+  Helper::Logger(level, __func__, file,                                        \
+                Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
 #define LOGN_IF(name, level, condition)                                        \
   if (condition)                                                               \
   Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),      \
