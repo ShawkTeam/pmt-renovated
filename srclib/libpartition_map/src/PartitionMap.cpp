@@ -177,6 +177,14 @@ bool basic_partition_map_builder::hasPartition(
   return _current_map.find(name);
 }
 
+bool basic_partition_map_builder::hasLogicalPartitions() const {
+  _map_build_check();
+  for (const auto &[name, props] : _current_map)
+    if (props.isLogical) return true;
+
+  return false;
+}
+
 bool basic_partition_map_builder::isLogical(const std::string_view name) const {
   _map_build_check();
   return _current_map.is_logical(name);

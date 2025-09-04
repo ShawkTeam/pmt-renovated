@@ -224,6 +224,11 @@ public:
   [[nodiscard]] bool hasPartition(std::string_view name) const;
 
   /**
+   *   Returns true if the device has dynamic partitions, false otherwise.
+   */
+  [[nodiscard]] bool hasLogicalPartitions() const;
+
+  /**
    *   Returns the bool type status of whether the
    *   entered partition name is marked as logical in the
    *   created list. Alternatively, the current partition

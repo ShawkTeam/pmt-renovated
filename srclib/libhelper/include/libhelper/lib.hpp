@@ -18,13 +18,13 @@
 #define LIBHELPER_LIB_HPP
 
 #include <cstdint>
+#include <dirent.h>
 #include <exception>
 #include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <dirent.h>
 
 #ifndef ONLY_HELPER_MACROS
 
@@ -363,7 +363,7 @@ std::string getLibVersion();
  * And returns directory pointer.
  */
 [[nodiscard]] DIR *openAndAddToCloseList(const std::string_view &path,
-                                          garbageCollector &collector);
+                                         garbageCollector &collector);
 
 } // namespace Helper
 
@@ -437,7 +437,7 @@ std::string getLibVersion();
 #define LOGF_IF(file, level, condition)                                        \
   if (condition)                                                               \
   Helper::Logger(level, __func__, file,                                        \
-                Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+                 Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
 #define LOGN_IF(name, level, condition)                                        \
   if (condition)                                                               \
   Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),      \

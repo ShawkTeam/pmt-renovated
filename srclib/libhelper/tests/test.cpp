@@ -53,7 +53,8 @@ int main(int argc, char **argv) {
       throw Helper::Error("Cannot write \"hello world\" in 'file.txt'");
     else std::cout << "file.txt writed." << std::endl;
 
-    if (const auto content = Helper::readFile("file.txt");!content) throw Helper::Error("Cannot read 'file.txt'");
+    if (const auto content = Helper::readFile("file.txt"); !content)
+      throw Helper::Error("Cannot read 'file.txt'");
     else std::cout << "'file.txt': " << *content << std::endl;
 
     std::cout << "Making directory 'dir2': " << std::boolalpha
@@ -77,7 +78,8 @@ int main(int argc, char **argv) {
     std::cout << "Read link of 'file2lnk.txt': "
               << Helper::readSymlink(test_path("file2lnk.txt")) << std::endl;
 
-    if (const auto sha256 = Helper::sha256Of(test_path("file2.txt"));!sha256) throw Helper::Error("Cannot get sha256 of 'file2.txt'");
+    if (const auto sha256 = Helper::sha256Of(test_path("file2.txt")); !sha256)
+      throw Helper::Error("Cannot get sha256 of 'file2.txt'");
     else std::cout << "SHA256 of 'file2.txt': " << *sha256 << std::endl;
 
     std::cout << "'file2.txt' and 'file2lnk.txt' same? (SHA256): "

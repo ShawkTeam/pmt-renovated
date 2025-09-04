@@ -156,7 +156,7 @@ std::pair<std::string, int> runCommandWithOutput(const std::string_view cmd) {
   while (fgets(buffer, sizeof(buffer), pipe_holder.get()) != nullptr)
     output += buffer;
 
-  FILE* raw = pipe_holder.release();
+  FILE *raw = pipe_holder.release();
   const int status = pclose(raw);
   return {output, (WIFEXITED(status) ? WEXITSTATUS(status) : -1)};
 }
@@ -207,7 +207,8 @@ FILE *openAndAddToCloseList(const std::string_view &path,
   return fp;
 }
 
-DIR *openAndAddToCloseList(const std::string_view &path, garbageCollector &collector) {
+DIR *openAndAddToCloseList(const std::string_view &path,
+                           garbageCollector &collector) {
   DIR *dp = opendir(path.data());
   collector.closeAfterProgress(dp);
   return dp;

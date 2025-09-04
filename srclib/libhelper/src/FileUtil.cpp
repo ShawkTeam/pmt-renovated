@@ -165,8 +165,7 @@ bool eraseDirectoryRecursive(const std::string_view directory) {
     snprintf(fullpath, sizeof(fullpath), "%s/%s", directory.data(),
              entry->d_name);
 
-    if (lstat(fullpath, &buf) == -1)
-      return false;
+    if (lstat(fullpath, &buf) == -1) return false;
 
     if (S_ISDIR(buf.st_mode)) {
       if (!eraseDirectoryRecursive(fullpath)) return false;
