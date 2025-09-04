@@ -75,7 +75,7 @@ static Helper::garbageCollector collector;
 int Main(int argc, char **argv) {
   try {
     // try-catch start
-    Helper::LoggingProperties::setProgramName("pmt");
+    Helper::LoggingProperties::setProgramName(argv[0]);
     collector.closeAfterProgress(pstdout);
     collector.closeAfterProgress(pstderr);
 
@@ -144,6 +144,11 @@ int Main(int argc, char **argv) {
       throw Error("No default search entries were found. Specify a search "
                   "directory with -S "
                   "(--search-path)");
+
+    if (Variables->onLogical) {
+      if (!Variables->PartMap->hasLogicalPartitions())
+        throw Error("This device doesn't contains logical partitions. But you used -l (--logical) flag.");
+    }
 
     if (!Helper::hasSuperUser()) {
       if (!((FuncManager.isUsed("rebootFunction") &&
