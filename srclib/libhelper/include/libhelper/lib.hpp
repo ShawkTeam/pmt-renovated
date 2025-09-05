@@ -371,7 +371,7 @@ std::string getLibVersion();
 
 #define HELPER "libhelper"
 
-#define KB(x) (x * 1024)     // KB(8) = 8192 (8 * 1024)
+#define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)
 #define MB(x) (KB(x) * 1024) // MB(4) = 4194304 (KB(4) * 1024)
 #define GB(x) (MB(x) * 1024) // GB(1) = 1073741824 (MB(1) * 1024)
 

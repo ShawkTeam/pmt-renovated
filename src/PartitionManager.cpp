@@ -55,7 +55,7 @@ static void sigHandler(const int sig) {
 
 static int write(void *cookie, const char *buf, const int size) {
   auto *real = static_cast<FILE *>(cookie);
-  if (!Variables->quietProcess) {
+  if (!VARS.quietProcess) {
     const int ret = fwrite(buf, 1, static_cast<size_t>(size), real);
     fflush(real);
     return ret;
@@ -98,7 +98,7 @@ int Main(int argc, char **argv) {
                    "Apache 2.0 license\nReport "
                    "bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
     AppMain
-        .add_option("-S,--search-path", Variables->searchPath,
+        .add_option("-S,--search-path", VARS.searchPath,
                     "Set partition search path")
         ->check([&](const std::string &val) {
           if (val.find("/block") == std::string::npos)
@@ -107,17 +107,17 @@ int Main(int argc, char **argv) {
                 "'block' in input path!");
           return std::string();
         });
-    AppMain.add_option("-L,--log-file", Variables->logFile, "Set log file");
-    AppMain.add_flag("-f,--force", Variables->forceProcess,
+    AppMain.add_option("-L,--log-file", VARS.logFile, "Set log file");
+    AppMain.add_flag("-f,--force", VARS.forceProcess,
                      "Force process to be processed");
-    AppMain.add_flag("-l,--logical", Variables->onLogical,
+    AppMain.add_flag("-l,--logical", VARS.onLogical,
                      "Specify that the target partition is dynamic");
-    AppMain.add_flag("-q,--quiet", Variables->quietProcess, "Quiet process");
-    AppMain.add_flag("-V,--verbose", Variables->verboseMode,
+    AppMain.add_flag("-q,--quiet", VARS.quietProcess, "Quiet process");
+    AppMain.add_flag("-V,--verbose", VARS.verboseMode,
                      "Detailed information is written on the screen while the "
                      "transaction is "
                      "being carried out");
-    AppMain.add_flag("-v,--version", Variables->viewVersion,
+    AppMain.add_flag("-v,--version", VARS.viewVersion,
                      "Print version and exit");
 
     REGISTER_FUNCTION(backupFunction);
@@ -132,22 +132,22 @@ int Main(int argc, char **argv) {
 
     CLI11_PARSE(AppMain, argc, argv);
 
-    if (Variables->verboseMode) Helper::LoggingProperties::setPrinting(YES);
-    if (Variables->viewVersion) {
+    if (VARS.verboseMode) Helper::LoggingProperties::setPrinting(YES);
+    if (VARS.viewVersion) {
       println("%s", getAppVersion().data());
       return EXIT_SUCCESS;
     }
-    if (!Variables->searchPath.empty())
-      (*Variables->PartMap)(Variables->searchPath);
+    if (!VARS.searchPath.empty()) (PART_MAP)(VARS.searchPath);
 
-    if (!Variables->PartMap && Variables->searchPath.empty())
+    if (!VARS.PartMap && VARS.searchPath.empty())
       throw Error("No default search entries were found. Specify a search "
                   "directory with -S "
                   "(--search-path)");
 
-    if (Variables->onLogical) {
-      if (!Variables->PartMap->hasLogicalPartitions())
-        throw Error("This device doesn't contains logical partitions. But you used -l (--logical) flag.");
+    if (VARS.onLogical) {
+      if (!PART_MAP.hasLogicalPartitions())
+        throw Error("This device doesn't contains logical partitions. But you "
+                    "used -l (--logical) flag.");
     }
 
     if (!Helper::hasSuperUser()) {

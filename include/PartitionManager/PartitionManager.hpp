@@ -28,6 +28,11 @@
 #define PMTE "pmt"
 #define PMTF "libpmt-function-manager"
 
+// Quick access to variables.
+#define VARS (*Variables)
+// Quick access to partition map.
+#define PART_MAP (*(*Variables).PartMap)
+
 namespace PartitionManager {
 // All function classes must inherit from this class.
 class basic_function {

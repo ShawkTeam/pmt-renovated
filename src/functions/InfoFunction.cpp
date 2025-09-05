@@ -60,8 +60,8 @@ INIT {
 RUN {
   std::vector<PartitionMap::Partition_t> jParts;
   auto func = [this, &jParts] COMMON_LAMBDA_PARAMS -> bool {
-    if (Variables->onLogical && !props.isLogical) {
-      if (Variables->forceProcess)
+    if (VARS.onLogical && !props.isLogical) {
+      if (VARS.forceProcess)
         LOGN(IFUN, WARNING)
             << "Partition " << partition
             << " is exists but not logical. Ignoring (from --force, -f)."
@@ -85,12 +85,12 @@ RUN {
   };
 
   if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
-    Variables->PartMap->doForAllPartitions(func);
+    PART_MAP.doForAllPartitions(func);
   else if (partitions.back() == "get-logicals")
-    Variables->PartMap->doForLogicalPartitions(func);
+    PART_MAP.doForLogicalPartitions(func);
   else if (partitions.back() == "get-physicals")
-    Variables->PartMap->doForPhysicalPartitions(func);
-  else Variables->PartMap->doForPartitionList(partitions, func);
+    PART_MAP.doForPhysicalPartitions(func);
+  else PART_MAP.doForPartitionList(partitions, func);
 
   if (jsonFormat) {
     nlohmann::json j;

@@ -58,6 +58,11 @@ INIT {
 }
 
 RUN {
+  if (testFileSize > GB(2) && !VARS.forceProcess)
+    throw Error(
+        "File size is more than 2GB! Sizes over 2GB may not give accurate "
+        "results in the write test. Use -f (--force) for skip this error.");
+
   LOGN(MTFUN, INFO) << "Starting memory test on " << testPath << std::endl;
   Helper::garbageCollector collector;
   const std::string test = Helper::pathJoin(testPath, "test.bin");

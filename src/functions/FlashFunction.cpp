@@ -27,12 +27,12 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
-          const uint64_t bufferSize) {
+          const uint64_t bufferSize, const bool deleteAfterProgress) {
   if (!Helper::fileIsExists(imageName))
     return {format("Couldn't find image file: %s", imageName.data()), false};
-  if (!Variables->PartMap->hasPartition(partitionName))
+  if (!PART_MAP.hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
-  if (Helper::fileSize(imageName) > Variables->PartMap->sizeOf(partitionName))
+  if (Helper::fileSize(imageName) > PART_MAP.sizeOf(partitionName))
     return {format("%s is larger than %s partition size!", imageName.data(),
                    partitionName.data()),
             false};
@@ -40,8 +40,8 @@ RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
   LOGN(FFUN, INFO) << "flashing " << imageName << " to " << partitionName
                    << std::endl;
 
-  if (Variables->onLogical && !Variables->PartMap->isLogical(partitionName)) {
-    if (Variables->forceProcess)
+  if (VARS.onLogical && !PART_MAP.isLogical(partitionName)) {
+    if (VARS.forceProcess)
       LOGN(FFUN, WARNING)
           << "Partition " << partitionName
           << " is exists but not logical. Ignoring (from --force, -f)."
@@ -65,8 +65,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
             false};
 
   const int pfd = Helper::openAndAddToCloseList(
-      Variables->PartMap->getRealPathOf(partitionName), collector,
-      O_RDWR | O_TRUNC);
+      PART_MAP.getRealPathOf(partitionName), collector, O_RDWR | O_TRUNC);
   if (pfd < 0)
     return {format("Can't open partition: %s: %s", partitionName.data(),
                    strerror(errno)),
@@ -85,6 +84,13 @@ RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
       return {format("Can't write partition to output file %s: %s",
                      imageName.data(), strerror(errno)),
               false};
+  }
+
+  if (deleteAfterProgress) {
+    LOGN(FFUN, INFO) << "Deleting flash file: " << imageName << std::endl;
+    if (!Helper::eraseEntry(imageName) && !VARS.quietProcess)
+      WARNING(
+          std::string("Cannot erase flash file: " + imageName + "\n").data());
   }
 
   return {format("%s is successfully wrote to %s partition", imageName.data(),
@@ -106,6 +112,9 @@ INIT {
       ->default_val("4KB");
   cmd->add_option("-I,--image-directory", imageDirectory,
                   "Directory to find image(s) and flash to partition(s)");
+  cmd->add_flag("-d,--delete", deleteAfterProgress,
+                "Delete flash file(s) after progress.")
+      ->default_val(false);
 
   return true;
 }
@@ -127,7 +136,8 @@ RUN {
 
     setupBufferSize(buf, imageNames[i]);
     futures.push_back(std::async(std::launch::async, runAsync, partitions[i],
-                                 imageNames[i], bufferSize));
+                                 imageNames[i], bufferSize,
+                                 deleteAfterProgress));
     LOGN(FFUN, INFO) << "Created thread for flashing image to " << partitions[i]
                      << std::endl;
   }

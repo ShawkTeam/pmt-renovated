@@ -30,14 +30,14 @@
 namespace PartitionManager {
 RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
           const uint64_t bufferSize) {
-  if (!Variables->PartMap->hasPartition(partitionName))
+  if (!PART_MAP.hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 
   LOGN(BFUN, INFO) << "back upping " << partitionName << " as " << outputName
                    << std::endl;
 
-  if (Variables->onLogical && !Variables->PartMap->isLogical(partitionName)) {
-    if (Variables->forceProcess)
+  if (VARS.onLogical && !PART_MAP.isLogical(partitionName)) {
+    if (VARS.forceProcess)
       LOGN(BFUN, WARNING)
           << "Partition " << partitionName
           << " is exists but not logical. Ignoring (from --force, -f)."
@@ -49,7 +49,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
           false};
   }
 
-  if (Helper::fileIsExists(outputName) && !Variables->forceProcess)
+  if (Helper::fileIsExists(outputName) && !VARS.forceProcess)
     return {format("%s is exists. Remove it, or use --force (-f) flag.",
                    outputName.data()),
             false};
@@ -61,7 +61,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
   Helper::garbageCollector collector;
 
   const int pfd = Helper::openAndAddToCloseList(
-      Variables->PartMap->getRealPathOf(partitionName), collector, O_RDONLY);
+      PART_MAP.getRealPathOf(partitionName), collector, O_RDONLY);
   if (pfd < 0)
     return {format("Can't open partition: %s: %s", partitionName.data(),
                    strerror(errno)),

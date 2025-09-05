@@ -27,11 +27,11 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
-  if (!Variables->PartMap->hasPartition(partitionName))
+  if (!PART_MAP.hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 
-  if (Variables->onLogical && !Variables->PartMap->isLogical(partitionName)) {
-    if (Variables->forceProcess)
+  if (VARS.onLogical && !PART_MAP.isLogical(partitionName)) {
+    if (VARS.forceProcess)
       LOGN(EFUN, WARNING)
           << "Partition " << partitionName
           << " is exists but not logical. Ignoring (from --force, -f)."
@@ -49,13 +49,13 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
   Helper::garbageCollector collector;
 
   const int pfd = Helper::openAndAddToCloseList(
-      Variables->PartMap->getRealPathOf(partitionName), collector, O_WRONLY);
+      PART_MAP.getRealPathOf(partitionName), collector, O_WRONLY);
   if (pfd < 0)
     return {format("Can't open partition: %s: %s", partitionName.data(),
                    strerror(errno)),
             false};
 
-  if (!Variables->forceProcess)
+  if (!VARS.forceProcess)
     Helper::confirmPropt(
         "Are you sure you want to continue? This could render your device "
         "unusable! Do not continue if you "
@@ -68,7 +68,7 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
   memset(buffer, 0x00, bufferSize);
 
   ssize_t bytesWritten = 0;
-  const uint64_t partitionSize = Variables->PartMap->sizeOf(partitionName);
+  const uint64_t partitionSize = PART_MAP.sizeOf(partitionName);
 
   while (bytesWritten < partitionSize) {
     size_t toWrite = sizeof(buffer);

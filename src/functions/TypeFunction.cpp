@@ -50,8 +50,7 @@ RUN {
   else magics.merge(PartitionMap::Extras::MagicMap);
 
   for (const auto &content : contents) {
-    if (!Variables->PartMap->hasPartition(content) &&
-        !Helper::fileIsExists(content))
+    if (!PART_MAP.hasPartition(content) && !Helper::fileIsExists(content))
       throw Error("Couldn't find partition or image file: %s", content.data());
 
     bool found = false;
@@ -60,7 +59,7 @@ RUN {
               magic, static_cast<ssize_t>(bufferSize),
               Helper::fileIsExists(content)
                   ? content
-                  : Variables->PartMap->getRealPathOf(content))) {
+                  : PART_MAP.getRealPathOf(content))) {
         println("%s contains %s magic (%s)", content.data(), name.data(),
                 PartitionMap::Extras::formatMagic(magic).data());
         found = true;

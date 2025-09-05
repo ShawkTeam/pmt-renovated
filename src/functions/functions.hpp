@@ -62,11 +62,13 @@ private:
   std::vector<std::string> partitions, imageNames;
   std::string rawPartitions, rawImageNames, imageDirectory;
   uint64_t bufferSize = 0;
+  bool deleteAfterProgress = false;
 
 public:
   COMMON_FUNCTION_BODY();
   static pair runAsync(const std::string &partitionName,
-                       const std::string &imageName, uint64_t bufferSize);
+                       const std::string &imageName, uint64_t bufferSize,
+                       bool deleteAfterProgress);
 };
 
 // Eraser function (writes zero bytes to partition)

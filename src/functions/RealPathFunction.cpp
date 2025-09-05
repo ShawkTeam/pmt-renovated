@@ -35,11 +35,11 @@ INIT {
 
 RUN {
   for (const auto &partition : partitions) {
-    if (!Variables->PartMap->hasPartition(partition))
+    if (!PART_MAP.hasPartition(partition))
       throw Error("Couldn't find partition: %s", partition.data());
 
-    if (Variables->onLogical && !Variables->PartMap->isLogical(partition)) {
-      if (Variables->forceProcess)
+    if (VARS.onLogical && !PART_MAP.isLogical(partition)) {
+      if (VARS.forceProcess)
         LOGN(RPFUN, WARNING)
             << "Partition " << partition
             << " is exists but not logical. Ignoring (from --force, -f)."
@@ -50,8 +50,8 @@ RUN {
     }
 
     if (realLinkPath)
-      println("%s", Variables->PartMap->getRealLinkPathOf(partition).data());
-    else println("%s", Variables->PartMap->getRealPathOf(partition).data());
+      println("%s", PART_MAP.getRealLinkPathOf(partition).data());
+    else println("%s", PART_MAP.getRealPathOf(partition).data());
   }
 
   return true;

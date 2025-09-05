@@ -40,12 +40,11 @@ std::vector<std::string> splitIfHasDelim(const std::string &s, const char delim,
 }
 
 void setupBufferSize(uint64_t &size, const std::string &entry) {
-  if (Variables->PartMap->hasPartition(entry) &&
-      Variables->PartMap->sizeOf(entry) % size != 0) {
+  if (PART_MAP.hasPartition(entry) && PART_MAP.sizeOf(entry) % size != 0) {
     println("%sWARNING%s: Specified buffer size is invalid for %s! Using "
             "different buffer size for %s.",
             YELLOW, STYLE_RESET, entry.data(), entry.data());
-    size = Variables->PartMap->sizeOf(entry) % 4096 == 0 ? 4096 : 1;
+    size = PART_MAP.sizeOf(entry) % 4096 == 0 ? 4096 : 1;
   } else if (Helper::fileIsExists(entry)) {
     if (Helper::fileSize(entry) % size != 0) {
       println("%sWARNING%s: Specified buffer size is invalid for %s! using "
