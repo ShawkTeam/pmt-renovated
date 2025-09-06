@@ -87,7 +87,6 @@ int Main(int argc, char **argv) {
 
     signal(SIGINT, sigHandler);
     signal(SIGABRT, sigHandler);
-    signal(EXIT_FAILURE, sigHandler);
 
     CLI::App AppMain{"Partition Manager Tool"};
     FunctionManager FuncManager;
