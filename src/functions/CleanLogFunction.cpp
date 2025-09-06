@@ -17,31 +17,25 @@ Copyright 2025 Yağız Zengin
 #include "functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
 
-#define RFUN "rebootFunction"
-#define FUNCTION_CLASS rebootFunction
+#define CFUN "cleanLogFunction"
+#define FUNCTION_CLASS cleanLogFunction
 
 namespace PartitionManager {
 INIT {
-  LOGN(RFUN, INFO) << "Initializing variables of reboot function." << std::endl;
-  flags = {FunctionFlags::NO_MAP_CHECK, FunctionFlags::ADB_SUFFICIENT};
-  cmd = _app.add_subcommand("reboot", "Reboots device");
-  cmd->add_option("rebootTarget", rebootTarget,
-                  "Reboot target (default: normal)");
+  LOGN(CFUN, INFO) << "Initializing variables of clean log function." << std::endl;
+  flags = {FunctionFlags::NO_MAP_CHECK, FunctionFlags::NO_SU};
+  cmd = _app.add_subcommand("clean-logs", "Clean PMT logs.");
   return true;
 }
 
 RUN {
-  LOGN(RFUN, INFO) << "Rebooting device!!! (custom reboot target: "
-                   << (rebootTarget.empty() ? "none" : rebootTarget)
-                   << std::endl;
-
-  if (Helper::reboot(rebootTarget)) println("Reboot command was sent");
-  else throw Error("Cannot reboot device");
-
-  return true;
+  LOGN(CFUN, INFO) << "Removing log file: " << VARS.logFile << std::endl;
+  Helper::LoggingProperties::setLoggingState(YES); // eraseEntry writes log!
+  return Helper::eraseEntry(VARS.logFile);
 }
 
 IS_USED_COMMON_BODY
 
-NAME { return RFUN; }
+NAME { return CFUN; }
+
 } // namespace PartitionManager

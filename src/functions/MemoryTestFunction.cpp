@@ -31,6 +31,7 @@ namespace PartitionManager {
 INIT {
   LOGN(MTFUN, INFO) << "Initializing variables of memory test function."
                     << std::endl;
+  flags = {FunctionFlags::NO_MAP_CHECK, FunctionFlags::ADB_SUFFICIENT};
   cmd = _app.add_subcommand("memtest", "Test your write/read speed of device.");
   cmd->add_option("testDirectory", testPath, "Path to test directory")
       ->default_val("/data/local/tmp")

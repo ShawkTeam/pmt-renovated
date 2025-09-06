@@ -19,6 +19,7 @@ set(PMT_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/PartitionManager.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Main.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/BackupFunction.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/functions/CleanLogFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/EraseFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/FlashFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/InfoFunction.cpp
@@ -30,7 +31,8 @@ set(PMT_SOURCES
 )
 
 # Add pmt
-add_executable(pmt ${PMT_SOURCES})
+add_executable(pmt ${PMT_SOURCES}
+        functions/CleanLogFunction.cpp)
 add_executable(pmt_static ${PMT_SOURCES})
 
 # Set linker options

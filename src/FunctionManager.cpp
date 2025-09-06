@@ -20,6 +20,7 @@
 #include <string>
 #include <unordered_set>
 #include <vector>
+#include <algorithm>
 
 namespace PartitionManager {
 std::vector<std::string> splitIfHasDelim(const std::string &s, const char delim,
@@ -87,6 +88,18 @@ bool basic_function_manager::isUsed(const std::string &name) const {
   if (_functions.empty()) return false;
   for (const auto &func : _functions) {
     if (func->name() == name) return func->isUsed();
+  }
+  return false;
+}
+
+bool basic_function_manager::hasFlagOnUsedFunction(const int flag) const {
+  for (const auto &func : _functions) {
+    if (func->isUsed()) {
+      std::for_each(func->flags.begin(), func->flags.end(), [&](const int x) {
+        LOGN(PMTF, INFO) << "Used flag " << x << " on " << func->name() << std::endl;
+      });
+      return std::find(func->flags.begin(), func->flags.end(), flag) != func->flags.end();
+    }
   }
   return false;
 }

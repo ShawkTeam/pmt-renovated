@@ -47,14 +47,13 @@ __attribute__((constructor)) void init() {
 }
 
 static void sigHandler(const int sig) {
-  // Even if only SIGINT is to be captured for now, this is still a more
-  // appropriate code
-  if (sig == SIGINT) println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
+  if (sig == SIGINT)  println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
+  if (sig == SIGABRT) println("\n%sAborted.%s", RED, STYLE_RESET);
   exit(sig);
 }
 
 static int write(void *cookie, const char *buf, const int size) {
-  auto *real = static_cast<FILE *>(cookie);
+  auto *real = static_cast<FILE*>(cookie);
   if (!VARS.quietProcess) {
     const int ret = fwrite(buf, 1, static_cast<size_t>(size), real);
     fflush(real);
@@ -87,6 +86,8 @@ int Main(int argc, char **argv) {
     }
 
     signal(SIGINT, sigHandler);
+    signal(SIGABRT, sigHandler);
+    signal(EXIT_FAILURE, sigHandler);
 
     CLI::App AppMain{"Partition Manager Tool"};
     FunctionManager FuncManager;
@@ -121,6 +122,7 @@ int Main(int argc, char **argv) {
                      "Print version and exit");
 
     REGISTER_FUNCTION(backupFunction);
+    REGISTER_FUNCTION(cleanLogFunction);
     REGISTER_FUNCTION(flashFunction);
     REGISTER_FUNCTION(eraseFunction);
     REGISTER_FUNCTION(partitionSizeFunction);
@@ -137,25 +139,35 @@ int Main(int argc, char **argv) {
       println("%s", getAppVersion().data());
       return EXIT_SUCCESS;
     }
-    if (!VARS.searchPath.empty()) (PART_MAP)(VARS.searchPath);
 
-    if (!VARS.PartMap && VARS.searchPath.empty())
-      throw Error("No default search entries were found. Specify a search "
-                  "directory with -S "
-                  "(--search-path)");
+    if (FuncManager.hasFlagOnUsedFunction(NO_MAP_CHECK)) {
+      if (!VARS.searchPath.empty())
+        WARNING("-S (--search-path) flag is ignored. Because, don't needed "
+                "partition map by your used function.\n");
+      if (VARS.onLogical)
+        WARNING("-l (--logical) flag ignored. Because, partition type don't "
+                "needed by your used function.\n");
+    } else {
+      if (!VARS.searchPath.empty()) (PART_MAP)(VARS.searchPath);
+      if (!VARS.PartMap && VARS.searchPath.empty())
+        throw Error("No default search entries were found. Specify a search "
+                    "directory with -S "
+                    "(--search-path)");
 
-    if (VARS.onLogical) {
-      if (!PART_MAP.hasLogicalPartitions())
-        throw Error("This device doesn't contains logical partitions. But you "
-                    "used -l (--logical) flag.");
+      if (VARS.onLogical) {
+        if (!PART_MAP.hasLogicalPartitions())
+          throw Error(
+              "This device doesn't contains logical partitions. But you "
+              "used -l (--logical) flag.");
+      }
     }
 
-    if (!Helper::hasSuperUser()) {
-      if (!((FuncManager.isUsed("rebootFunction") &&
-             Helper::hasAdbPermissions()) ||
-            FuncManager.isUsed("memoryTestFunction")))
+    if (!Helper::hasSuperUser() && !FuncManager.hasFlagOnUsedFunction(NO_SU)) {
+      if (!(FuncManager.hasFlagOnUsedFunction(ADB_SUFFICIENT) &&
+          Helper::hasAdbPermissions())) {
         throw Error(
-            "Partition Manager Tool is requires super-user privileges!");
+            "This function is requires super-user privileges!");
+      }
     }
 
     return FuncManager.handleAll() == true ? EXIT_SUCCESS : EXIT_FAILURE;

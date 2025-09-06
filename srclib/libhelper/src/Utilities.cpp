@@ -32,6 +32,7 @@
 #include <string>
 #include <string_view>
 #include <sys/_system_properties.h>
+#include <cutils/android_reboot.h>
 #include <sys/stat.h>
 #include <unistd.h>
 

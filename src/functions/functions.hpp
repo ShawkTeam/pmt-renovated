@@ -142,6 +142,11 @@ public:
   COMMON_FUNCTION_BODY();
 };
 
+class cleanLogFunction final : public FunctionBase {
+public:
+  COMMON_FUNCTION_BODY();
+};
+
 } // namespace PartitionManager
 
 #endif // #ifndef FUNCTIONS_HPP

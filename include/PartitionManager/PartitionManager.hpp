@@ -34,10 +34,17 @@
 #define PART_MAP (*(*Variables).PartMap)
 
 namespace PartitionManager {
+enum basic_function_flags {
+  NO_SU = 1,
+  NO_MAP_CHECK = 2,
+  ADB_SUFFICIENT = 3,
+};
+
 // All function classes must inherit from this class.
 class basic_function {
 public:
   CLI::App *cmd = nullptr;
+  std::vector<int> flags = {};
 
   virtual bool init(CLI::App &_app) = 0;
   virtual bool run() = 0;
@@ -56,6 +63,7 @@ private:
 public:
   void registerFunction(std::unique_ptr<basic_function> _func, CLI::App &_app);
 
+  [[nodiscard]] bool hasFlagOnUsedFunction(int flag) const;
   [[nodiscard]] bool isUsed(const std::string &name) const;
   [[nodiscard]] bool handleAll() const;
 };
@@ -76,6 +84,7 @@ public:
 
 using FunctionBase = basic_function;
 using FunctionManager = basic_function_manager;
+using FunctionFlags = basic_function_flags;
 using VariableTable = basic_variables;
 using Error = Helper::Error;
 
