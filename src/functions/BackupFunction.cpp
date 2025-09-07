@@ -33,7 +33,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
   if (!PART_MAP.hasPartition(partitionName))
     return {format("Couldn't find partition: %s", partitionName.data()), false};
 
-  LOGN(BFUN, INFO) << "back upping " << partitionName << " as " << outputName
+  LOGN(BFUN, INFO) << "Back upping " << partitionName << " as " << outputName
                    << std::endl;
 
   if (VARS.onLogical && !PART_MAP.isLogical(partitionName)) {
@@ -68,7 +68,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
             false};
 
   const int ffd = Helper::openAndAddToCloseList(
-      outputName, collector, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+      outputName, collector, O_WRONLY | O_CREAT | O_TRUNC);
   if (ffd < 0)
     return {format("Can't create/open output file %s: %s", outputName.data(),
                    strerror(errno)),

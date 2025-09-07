@@ -133,7 +133,7 @@ int Main(int argc, char **argv) {
 
     CLI11_PARSE(AppMain, argc, argv);
 
-    if (VARS.verboseMode) Helper::LoggingProperties::setPrinting(YES);
+    if (VARS.verboseMode) Helper::LoggingProperties::setPrinting<YES>();
     if (VARS.viewVersion) {
       println("%s", getAppVersion().data());
       return EXIT_SUCCESS;

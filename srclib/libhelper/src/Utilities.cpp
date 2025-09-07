@@ -85,16 +85,6 @@ void set(std::string_view file, std::string_view name) {
 
 void setProgramName(const std::string_view name) { NAME = name; }
 void setLogFile(const std::string_view file) { FILE = file; }
-
-void setPrinting(const int state) {
-  if (state == 1 || state == 0) PRINT = state;
-  else PRINT = NO;
-}
-
-void setLoggingState(const int state) {
-  if (state == 1 || state == 0) DISABLE = state;
-  else DISABLE = NO;
-}
 } // namespace LoggingProperties
 
 bool runCommand(const std::string_view cmd) {

@@ -25,6 +25,15 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <functional>
+
+#define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)
+#define MB(x) (KB(x) * 1024) // MB(4) = 4194304 (KB(4) * 1024)
+#define GB(x) (MB(x) * 1024) // GB(1) = 1073741824 (MB(1) * 1024)
+
+#define TO_KB(x) (x / 1024)        // TO_KB(1024) = 1
+#define TO_MB(x) (TO_KB(x) / 1024) // TO_MB(2048) (2048 / 1024)
+#define TO_GB(x) (TO_MB(x) / 1024) // TO_GB(1048576) (TO_MB(1048576) / 1024)
 
 #ifndef ONLY_HELPER_MACROS
 
@@ -78,8 +87,7 @@ public:
 // Close file descriptors and delete allocated array memory
 class garbageCollector {
 private:
-  std::vector<char *> _ptrs_c;
-  std::vector<uint8_t *> _ptrs_u;
+  std::vector<std::function<void()>> _cleaners;
   std::vector<FILE *> _fps;
   std::vector<DIR *> _dps;
   std::vector<int> _fds;
@@ -88,11 +96,14 @@ private:
 public:
   ~garbageCollector();
 
-  void delAfterProgress(char *&_ptr);
-  void delAfterProgress(uint8_t *&_ptr);
-  void delFileAfterProgress(const std::string &path);
-  void closeAfterProgress(FILE *&_fp);
-  void closeAfterProgress(DIR *&_dp);
+  template <typename T>
+  void delAfterProgress(T *_ptr) {
+      _cleaners.push_back([_ptr] { delete[] _ptr; });
+  }
+
+  void delFileAfterProgress(const std::string &_path);
+  void closeAfterProgress(FILE *_fp);
+  void closeAfterProgress(DIR *_dp);
   void closeAfterProgress(int _fd);
 };
 
@@ -103,8 +114,17 @@ extern bool PRINT, DISABLE;
 void set(std::string_view name, std::string_view file);
 void setProgramName(std::string_view name);
 void setLogFile(std::string_view file);
-void setPrinting(int state);
-void setLoggingState(int state); // Disable/enable logging
+
+template <int state>
+void setPrinting() {
+  if (state == 1 || state == 0) PRINT = state;
+  else PRINT = NO;
+}
+template <int state>
+void setLoggingState() {
+  if (state == 1 || state == 0) DISABLE = state;
+  else DISABLE = NO;
+}
 
 void reset();
 } // namespace LoggingProperties
@@ -329,6 +349,17 @@ uint64_t getRandomOffset(uint64_t size, uint64_t bufferSize);
  */
 std::string convertTo(uint64_t size, const std::string &multiple);
 
+/**
+ * Convert input size to input multiple
+ */
+template <uint64_t size>
+std::string convertTo(const std::string &multiple) {
+  if (multiple == "KB") return std::to_string(TO_KB(size));
+  if (multiple == "MB") return std::to_string(TO_MB(size));
+  if (multiple == "GB") return std::to_string(TO_GB(size));
+  return std::to_string(size);
+}
+
 // -------------------------------
 // Android - not throws Helper::Error
 // -------------------------------
@@ -375,14 +406,6 @@ std::string getLibVersion();
 #endif // #ifndef ONLY_HELPER_MACROS
 
 #define HELPER "libhelper"
-
-#define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)
-#define MB(x) (KB(x) * 1024) // MB(4) = 4194304 (KB(4) * 1024)
-#define GB(x) (MB(x) * 1024) // GB(1) = 1073741824 (MB(1) * 1024)
-
-#define TO_KB(x) (x / 1024)        // TO_KB(1024) = 1
-#define TO_MB(x) (TO_KB(x) / 1024) // TO_MB(2048) (2048 / 1024)
-#define TO_GB(x) (TO_MB(x) / 1024) // TO_GB(1048576) (TO_MB(1048576) / 1024)
 
 #define STYLE_RESET "\033[0m"
 #define BOLD "\033[1m"

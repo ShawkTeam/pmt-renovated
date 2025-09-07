@@ -30,7 +30,7 @@ INIT {
 
 RUN {
   LOGN(CFUN, INFO) << "Removing log file: " << VARS.logFile << std::endl;
-  Helper::LoggingProperties::setLoggingState(YES); // eraseEntry writes log!
+  Helper::LoggingProperties::setLoggingState<YES>(); // eraseEntry writes log!
   return Helper::eraseEntry(VARS.logFile);
 }
 

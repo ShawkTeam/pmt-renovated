@@ -136,7 +136,7 @@ basic_partition_map_builder::basic_partition_map_builder() {
     LOGN(MAP, ERROR) << "Cannot build map by any default search entry."
                      << std::endl;
 
-  LOGN(MAP, INFO) << "default constructor successfully ended work."
+  LOGN(MAP, INFO) << "default constructor ended work."
                   << std::endl;
   _insert_logicals(_build_map("/dev/block/mapper", true));
   _map_builded = true;

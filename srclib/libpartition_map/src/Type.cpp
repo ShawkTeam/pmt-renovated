@@ -185,7 +185,7 @@ std::string basic_partition_map::find_(const std::string &name) const {
 size_t basic_partition_map::size() const { return _count; }
 
 bool basic_partition_map::empty() const {
-  return _count > 0;
+  return _count == 0;
 }
 
 void basic_partition_map::clear() {

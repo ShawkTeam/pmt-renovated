@@ -21,6 +21,7 @@
 #include <cstring>
 #include <dirent.h>
 #include <exception>
+#include <functional>
 #include <fcntl.h>
 #include <libgen.h>
 #include <libhelper/lib.hpp>
@@ -96,10 +97,8 @@ Logger &Logger::operator<<(std::ostream &(*msg)(std::ostream &)) {
 }
 
 garbageCollector::~garbageCollector() {
-  for (const auto &ptr : _ptrs_c)
-    delete[] ptr;
-  for (const auto &ptr : _ptrs_u)
-    delete[] ptr;
+  for (auto &ptr_func : _cleaners)
+    ptr_func();
   for (const auto &fd : _fds)
     close(fd);
   for (const auto &fp : _fps)
@@ -110,18 +109,12 @@ garbageCollector::~garbageCollector() {
     eraseEntry(file);
 }
 
-void garbageCollector::delAfterProgress(char *&_ptr) {
-  _ptrs_c.push_back(_ptr);
-}
-void garbageCollector::delAfterProgress(uint8_t *&_ptr) {
-  _ptrs_u.push_back(_ptr);
-}
-void garbageCollector::delFileAfterProgress(const std::string &path) {
-  _files.push_back(path);
+void garbageCollector::delFileAfterProgress(const std::string &_path) {
+  _files.push_back(_path);
 }
 void garbageCollector::closeAfterProgress(const int _fd) {
   _fds.push_back(_fd);
 }
-void garbageCollector::closeAfterProgress(FILE *&_fp) { _fps.push_back(_fp); }
-void garbageCollector::closeAfterProgress(DIR *&_dp) { _dps.push_back(_dp); }
+void garbageCollector::closeAfterProgress(FILE *_fp) { _fps.push_back(_fp); }
+void garbageCollector::closeAfterProgress(DIR *_dp) { _dps.push_back(_dp); }
 } // namespace Helper
