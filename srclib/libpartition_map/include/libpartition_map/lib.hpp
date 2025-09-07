@@ -84,6 +84,9 @@ public:
   bool operator==(const basic_partition_map &other) const;
   bool operator!=(const basic_partition_map &other) const;
 
+  Info operator[](int index) const;
+  BasicInf operator[](const std::string_view& name) const;
+
   operator std::vector<Info>() const;
   operator int() const;
 
@@ -349,6 +352,16 @@ public:
    *   Get constant Map_t object reference
    */
   const Map_t &operator*() const;
+
+  /**
+   *  Get Info structure with given index
+   */
+  Info operator[](int index) const;
+
+  /**
+   *  Get BasicInfo structure with given index
+   */
+  BasicInf operator[](const std::string_view& name) const;
 
   /**
    *   Get map contents as vector (PartitionManager::Info type).

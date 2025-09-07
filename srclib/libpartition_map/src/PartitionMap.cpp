@@ -416,6 +416,14 @@ const Map_t &basic_partition_map_builder::operator*() const {
   return _current_map;
 }
 
+Info basic_partition_map_builder::operator[](const int index) const {
+  return _current_map[index];
+}
+
+BasicInf basic_partition_map_builder::operator[](const std::string_view& name) const {
+  return _current_map[name];
+}
+
 basic_partition_map_builder::operator std::vector<Info>() const {
   return _current_map;
 }

@@ -229,6 +229,20 @@ bool basic_partition_map::operator!=(const basic_partition_map &other) const {
   return !(*this == other);
 }
 
+Info basic_partition_map::operator[](const int index) const {
+  if (_count == 0 || index >= _count) return {};
+  return _data[index];
+}
+
+BasicInf basic_partition_map::operator[](const std::string_view& name) const {
+  if (_count == 0) return {};
+
+  if (const int i = _index_of(name); name == _data[i].name)
+    return {_data[i].props.size, _data[i].props.isLogical};
+
+  return {};
+}
+
 basic_partition_map::operator std::vector<Info>() const {
   std::vector<Info> v;
   if (_count == 0) return {};
