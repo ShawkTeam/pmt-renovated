@@ -241,5 +241,12 @@ uint64_t getRandomOffset(const uint64_t size, const uint64_t bufferSize) {
   return rand() % maxOffset;
 }
 
+std::string convertTo(const uint64_t size, const std::string &multiple) {
+  if (multiple == "KB") return std::to_string(TO_KB(size));
+  if (multiple == "MB") return std::to_string(TO_MB(size));
+  if (multiple == "GB") return std::to_string(TO_GB(size));
+  return std::to_string(size);
+}
+
 std::string getLibVersion() { MKVERSION("libhelper"); }
 } // namespace Helper

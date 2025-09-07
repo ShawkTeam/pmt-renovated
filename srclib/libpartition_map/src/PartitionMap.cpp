@@ -370,7 +370,7 @@ bool basic_partition_map_builder::doForPartitionList(
   for (const auto &partition : partitions) {
     if (!hasPartition(partition))
       throw Error("Couldn't find partition: %s", partition.data());
-    if (!func(partition, {sizeOf(partition), isLogical(partition)})) {
+    if (!func(partition, _current_map[partition])) {
       err = true;
       LOGN(MAP, ERROR) << "Failed progress for " << partition << " partition."
                        << std::endl;

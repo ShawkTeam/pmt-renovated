@@ -324,6 +324,11 @@ std::string pathDirname(std::string_view entry);
  */
 uint64_t getRandomOffset(uint64_t size, uint64_t bufferSize);
 
+/**
+ * Convert input size to input multiple
+ */
+std::string convertTo(uint64_t size, const std::string &multiple);
+
 // -------------------------------
 // Android - not throws Helper::Error
 // -------------------------------

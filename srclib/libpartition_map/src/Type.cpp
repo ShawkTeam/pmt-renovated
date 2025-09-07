@@ -185,8 +185,7 @@ std::string basic_partition_map::find_(const std::string &name) const {
 size_t basic_partition_map::size() const { return _count; }
 
 bool basic_partition_map::empty() const {
-  if (_count > 0) return false;
-  return true;
+  return _count > 0;
 }
 
 void basic_partition_map::clear() {
@@ -227,6 +226,14 @@ bool basic_partition_map::operator==(const basic_partition_map &other) const {
 
 bool basic_partition_map::operator!=(const basic_partition_map &other) const {
   return !(*this == other);
+}
+
+basic_partition_map::operator bool() const{
+  return _count > 0;
+}
+
+bool basic_partition_map::operator!() const{
+  return _count == 0;
 }
 
 Info basic_partition_map::operator[](const int index) const {

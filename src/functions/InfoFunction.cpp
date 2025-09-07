@@ -42,6 +42,18 @@ INIT {
                 "Print info(s) as JSON body. The body of each partition will "
                 "be written separately")
       ->default_val(false);
+  cmd->add_flag("--as-byte", asByte,
+                "View sizes as byte.")
+      ->default_val(true);
+  cmd->add_flag("--as-kilobyte", asKiloBytes,
+                "View sizes as kilobyte.")
+      ->default_val(false);
+  cmd->add_flag("--as-megabyte", asMega,
+                "View sizes as megabyte.")
+      ->default_val(false);
+  cmd->add_flag("--as-gigabyte", asGiga,
+                "View sizes as gigabyte.")
+      ->default_val(false);
   cmd->add_option("--json-partition-name", jNamePartition,
                   "Specify partition name element for JSON body")
       ->default_val("name");
@@ -59,7 +71,13 @@ INIT {
 
 RUN {
   std::vector<PartitionMap::Partition_t> jParts;
-  auto func = [this, &jParts] COMMON_LAMBDA_PARAMS -> bool {
+  std::string multiple;
+  if (asByte) multiple = "B";
+  if (asKiloBytes) multiple = "KB";
+  if (asMega) multiple = "MB";
+  if (asGiga) multiple = "GB";
+
+  auto func = [this, &jParts, &multiple] COMMON_LAMBDA_PARAMS -> bool {
     if (VARS.onLogical && !props.isLogical) {
       if (VARS.forceProcess)
         LOGN(IFUN, WARNING)
@@ -72,14 +90,10 @@ RUN {
     }
 
     if (jsonFormat)
-      jParts.push_back({partition, {props.size, props.isLogical}});
+      jParts.push_back({partition, {std::stoull(Helper::convertTo(props.size, multiple)), props.isLogical}});
     else
-#ifdef __LP64__
-      println("partition=%s size=%lu isLogical=%s",
-#else
-      println("partition=%s size=%llu isLogical=%s",
-#endif
-              partition.data(), props.size, props.isLogical ? "true" : "false");
+      println("partition=%s size=%s isLogical=%s",
+              partition.data(), Helper::convertTo(props.size, multiple).data(), props.isLogical ? "true" : "false");
 
     return true;
   };
@@ -94,6 +108,7 @@ RUN {
 
   if (jsonFormat) {
     nlohmann::json j;
+    j["multipleType"] = multiple;
     j["partitions"] = nlohmann::json::array();
     for (const auto &[name, props] : jParts) {
       j["partitions"].push_back({{jNamePartition, name},

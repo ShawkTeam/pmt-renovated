@@ -20,13 +20,6 @@ Copyright 2025 Yağız Zengin
 #define SFUN "partitionSizeFunction"
 #define FUNCTION_CLASS partitionSizeFunction
 
-static std::string convertTo(const uint64_t size, const std::string &multiple) {
-  if (multiple == "KB") return std::to_string(TO_KB(size));
-  if (multiple == "MB") return std::to_string(TO_MB(size));
-  if (multiple == "GB") return std::to_string(TO_GB(size));
-  return std::to_string(size);
-}
-
 namespace PartitionManager {
 INIT {
   LOGN(SFUN, INFO)
@@ -79,10 +72,10 @@ RUN {
     if (asMega) multiple = "MB";
     if (asGiga) multiple = "GB";
 
-    if (onlySize) println("%s", convertTo(props.size, multiple).data());
+    if (onlySize) println("%s", Helper::convertTo(props.size, multiple).data());
     else
       println("%s: %s%s", partition.data(),
-              convertTo(props.size, multiple).data(), multiple.data());
+              Helper::convertTo(props.size, multiple).data(), multiple.data());
 
     return true;
   };

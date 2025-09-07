@@ -83,6 +83,8 @@ public:
 
   bool operator==(const basic_partition_map &other) const;
   bool operator!=(const basic_partition_map &other) const;
+  bool operator!() const;
+  explicit operator bool() const;
 
   Info operator[](int index) const;
   BasicInf operator[](const std::string_view& name) const;

@@ -99,7 +99,8 @@ private:
   std::vector<std::string> partitions;
   std::string jNamePartition, jNameSize, jNameLogical;
   int jIndentSize = 2;
-  bool jsonFormat = false;
+  bool jsonFormat = false, asByte = true, asKiloBytes = false, asMega = false,
+       asGiga = false;
 
 public:
   COMMON_FUNCTION_BODY();
