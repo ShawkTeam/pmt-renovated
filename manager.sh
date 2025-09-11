@@ -15,7 +15,7 @@
 #
 
 THIS="$(basename $0)"
-RELEASE="20250911"
+RELEASE="20250821"
 
 echo() { command echo "[$THIS]: $@"; }
 
