@@ -87,7 +87,7 @@ public:
   explicit operator bool() const;
 
   Info operator[](int index) const;
-  BasicInf operator[](const std::string_view& name) const;
+  BasicInf operator[](const std::string_view &name) const;
 
   operator std::vector<Info>() const;
   operator int() const;
@@ -363,7 +363,7 @@ public:
   /**
    *  Get BasicInfo structure with given index
    */
-  BasicInf operator[](const std::string_view& name) const;
+  BasicInf operator[](const std::string_view &name) const;
 
   /**
    *   Get map contents as vector (PartitionManager::Info type).

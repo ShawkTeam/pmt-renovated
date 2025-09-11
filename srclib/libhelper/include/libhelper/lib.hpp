@@ -20,12 +20,12 @@
 #include <cstdint>
 #include <dirent.h>
 #include <exception>
+#include <functional>
 #include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
 #include <vector>
-#include <functional>
 
 #define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)
 #define MB(x) (KB(x) * 1024) // MB(4) = 4194304 (KB(4) * 1024)
@@ -96,9 +96,8 @@ private:
 public:
   ~garbageCollector();
 
-  template <typename T>
-  void delAfterProgress(T *_ptr) {
-      _cleaners.push_back([_ptr] { delete[] _ptr; });
+  template <typename T> void delAfterProgress(T *_ptr) {
+    _cleaners.push_back([_ptr] { delete[] _ptr; });
   }
 
   void delFileAfterProgress(const std::string &_path);
@@ -115,13 +114,11 @@ void set(std::string_view name, std::string_view file);
 void setProgramName(std::string_view name);
 void setLogFile(std::string_view file);
 
-template <int state>
-void setPrinting() {
+template <int state> void setPrinting() {
   if (state == 1 || state == 0) PRINT = state;
   else PRINT = NO;
 }
-template <int state>
-void setLoggingState() {
+template <int state> void setLoggingState() {
   if (state == 1 || state == 0) DISABLE = state;
   else DISABLE = NO;
 }
@@ -352,8 +349,7 @@ std::string convertTo(uint64_t size, const std::string &multiple);
 /**
  * Convert input size to input multiple
  */
-template <uint64_t size>
-std::string convertTo(const std::string &multiple) {
+template <uint64_t size> std::string convertTo(const std::string &multiple) {
   if (multiple == "KB") return std::to_string(TO_KB(size));
   if (multiple == "MB") return std::to_string(TO_MB(size));
   if (multiple == "GB") return std::to_string(TO_GB(size));

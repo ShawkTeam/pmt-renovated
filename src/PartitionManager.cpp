@@ -47,13 +47,13 @@ __attribute__((constructor)) void init() {
 }
 
 static void sigHandler(const int sig) {
-  if (sig == SIGINT)  println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
+  if (sig == SIGINT) println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
   if (sig == SIGABRT) println("\n%sAborted.%s", RED, STYLE_RESET);
   exit(sig);
 }
 
 static int write(void *cookie, const char *buf, const int size) {
-  auto *real = static_cast<FILE*>(cookie);
+  auto *real = static_cast<FILE *>(cookie);
   if (!VARS.quietProcess) {
     const int ret = fwrite(buf, 1, static_cast<size_t>(size), real);
     fflush(real);
@@ -163,9 +163,8 @@ int Main(int argc, char **argv) {
 
     if (!Helper::hasSuperUser() && !FuncManager.hasFlagOnUsedFunction(NO_SU)) {
       if (!(FuncManager.hasFlagOnUsedFunction(ADB_SUFFICIENT) &&
-          Helper::hasAdbPermissions())) {
-        throw Error(
-            "This function is requires super-user privileges!");
+            Helper::hasAdbPermissions())) {
+        throw Error("This function is requires super-user privileges!");
       }
     }
 

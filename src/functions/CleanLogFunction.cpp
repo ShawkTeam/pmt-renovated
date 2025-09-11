@@ -22,7 +22,8 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 INIT {
-  LOGN(CFUN, INFO) << "Initializing variables of clean log function." << std::endl;
+  LOGN(CFUN, INFO) << "Initializing variables of clean log function."
+                   << std::endl;
   flags = {FunctionFlags::NO_MAP_CHECK, FunctionFlags::NO_SU};
   cmd = _app.add_subcommand("clean-logs", "Clean PMT logs.");
   return true;

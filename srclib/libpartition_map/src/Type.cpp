@@ -184,9 +184,7 @@ std::string basic_partition_map::find_(const std::string &name) const {
 
 size_t basic_partition_map::size() const { return _count; }
 
-bool basic_partition_map::empty() const {
-  return _count == 0;
-}
+bool basic_partition_map::empty() const { return _count == 0; }
 
 void basic_partition_map::clear() {
   LOGN(MAP, INFO) << "map clean requested. Cleaning..." << std::endl;
@@ -228,20 +226,16 @@ bool basic_partition_map::operator!=(const basic_partition_map &other) const {
   return !(*this == other);
 }
 
-basic_partition_map::operator bool() const{
-  return _count > 0;
-}
+basic_partition_map::operator bool() const { return _count > 0; }
 
-bool basic_partition_map::operator!() const{
-  return _count == 0;
-}
+bool basic_partition_map::operator!() const { return _count == 0; }
 
 Info basic_partition_map::operator[](const int index) const {
   if (_count == 0 || index >= _count) return {};
   return _data[index];
 }
 
-BasicInf basic_partition_map::operator[](const std::string_view& name) const {
+BasicInf basic_partition_map::operator[](const std::string_view &name) const {
   if (_count == 0) return {};
 
   if (const int i = _index_of(name); name == _data[i].name)

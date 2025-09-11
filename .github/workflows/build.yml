@@ -49,6 +49,9 @@ jobs:
           zip pmt-static-armeabi-v7a.zip pmt_static
           echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV 
           echo "BUILD=${{ github.workspace }}/pmt" >> $GITHUB_ENV
+          cd ..
+          echo -e "Read [Wiki - About Release Types](https://github.com/ShawkTeam/pmt-renovated/wiki/About-Release-Types) for getting more information.\n\n### Changes\n" > release.txt
+          git log --since="2025-08-21" --pretty=format:" * %ad | [%s](https://github.com/ShawkTeam/pmt-renovated/commit/%H)" --date=short | sed 's/ -.*//' | grep -v cleanup >> release.txt
         working-directory: ${{ github.workspace }}
 
       - name: Upload To GitHub Releases
@@ -60,4 +63,4 @@ jobs:
             ${{ env.BUILD }}/build_armeabi-v7a/*.zip
           name: Partition Manager Tool Release ${{ env.BUILD_DATE }}
           tag_name: ${{ env.BUILD_DATE }}
-          body: "Read [Wiki - About Release Types](https://github.com/ShawkTeam/pmt-renovated/wiki/About-Release-Types) for getting more information."
+          body_path: ${{ env.BUILD }}/release.txt

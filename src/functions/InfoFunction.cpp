@@ -42,17 +42,12 @@ INIT {
                 "Print info(s) as JSON body. The body of each partition will "
                 "be written separately")
       ->default_val(false);
-  cmd->add_flag("--as-byte", asByte,
-                "View sizes as byte.")
-      ->default_val(true);
-  cmd->add_flag("--as-kilobyte", asKiloBytes,
-                "View sizes as kilobyte.")
+  cmd->add_flag("--as-byte", asByte, "View sizes as byte.")->default_val(true);
+  cmd->add_flag("--as-kilobyte", asKiloBytes, "View sizes as kilobyte.")
       ->default_val(false);
-  cmd->add_flag("--as-megabyte", asMega,
-                "View sizes as megabyte.")
+  cmd->add_flag("--as-megabyte", asMega, "View sizes as megabyte.")
       ->default_val(false);
-  cmd->add_flag("--as-gigabyte", asGiga,
-                "View sizes as gigabyte.")
+  cmd->add_flag("--as-gigabyte", asGiga, "View sizes as gigabyte.")
       ->default_val(false);
   cmd->add_option("--json-partition-name", jNamePartition,
                   "Specify partition name element for JSON body")
@@ -90,10 +85,13 @@ RUN {
     }
 
     if (jsonFormat)
-      jParts.push_back({partition, {std::stoull(Helper::convertTo(props.size, multiple)), props.isLogical}});
+      jParts.push_back({partition,
+                        {std::stoull(Helper::convertTo(props.size, multiple)),
+                         props.isLogical}});
     else
-      println("partition=%s size=%s isLogical=%s",
-              partition.data(), Helper::convertTo(props.size, multiple).data(), props.isLogical ? "true" : "false");
+      println("partition=%s size=%s isLogical=%s", partition.data(),
+              Helper::convertTo(props.size, multiple).data(),
+              props.isLogical ? "true" : "false");
 
     return true;
   };

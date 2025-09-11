@@ -25,6 +25,7 @@
 #else
 #include <sys/system_properties.h>
 #endif
+#include <cutils/android_reboot.h>
 #include <iostream>
 #include <libgen.h>
 #include <libhelper/lib.hpp>
@@ -32,7 +33,6 @@
 #include <string>
 #include <string_view>
 #include <sys/_system_properties.h>
-#include <cutils/android_reboot.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
