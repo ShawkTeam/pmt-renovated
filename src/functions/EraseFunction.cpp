@@ -17,7 +17,6 @@ Copyright 2025 Yağız Zengin
 #include "functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
 #include <cerrno>
-#include <cstdlib>
 #include <fcntl.h>
 #include <future>
 #include <unistd.h>
@@ -28,7 +27,7 @@ Copyright 2025 Yağız Zengin
 namespace PartitionManager {
 RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
   if (!PART_MAP.hasPartition(partitionName))
-    return {format("Couldn't find partition: %s", partitionName.data()), false};
+    return {Helper::format("Couldn't find partition: %s", partitionName.data()), false};
 
   if (VARS.onLogical && !PART_MAP.isLogical(partitionName)) {
     if (VARS.forceProcess)
@@ -38,7 +37,7 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
           << std::endl;
     else
       return {
-          format("Used --logical (-l) flag but is not logical partition: %s",
+          Helper::format("Used --logical (-l) flag but is not logical partition: %s",
                  partitionName.data()),
           false};
   }
@@ -51,15 +50,17 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
   const int pfd = Helper::openAndAddToCloseList(
       PART_MAP.getRealPathOf(partitionName), collector, O_WRONLY);
   if (pfd < 0)
-    return {format("Can't open partition: %s: %s", partitionName.data(),
+    return {Helper::format("Can't open partition: %s: %s", partitionName.data(),
                    strerror(errno)),
             false};
 
-  if (!VARS.forceProcess)
-    Helper::confirmPropt(
+  if (!VARS.forceProcess) {
+    if (!Helper::confirmPropt(
         "Are you sure you want to continue? This could render your device "
         "unusable! Do not continue if you "
-        "do not know what you are doing!");
+        "do not know what you are doing!"))
+      throw Error("Operation canceled.");
+  }
 
   LOGN(EFUN, INFO) << "Writing zero bytes to partition: " << partitionName
                    << std::endl;
@@ -76,13 +77,13 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
       toWrite = partitionSize - bytesWritten;
 
     if (const ssize_t result = write(pfd, buffer, toWrite); result == -1)
-      return {format("Can't write zero bytes to partition: %s: %s",
+      return {Helper::format("Can't write zero bytes to partition: %s: %s",
                      partitionName.data(), strerror(errno)),
               false};
     else bytesWritten += result;
   }
 
-  return {format("Successfully wrote zero bytes to the %s partition\n",
+  return {Helper::format("Successfully wrote zero bytes to the %s partition",
                  partitionName.data()),
           true};
 }

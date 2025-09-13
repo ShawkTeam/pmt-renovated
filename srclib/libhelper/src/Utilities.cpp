@@ -35,6 +35,7 @@
 #include <sys/_system_properties.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <cstdarg>
 
 #ifdef __ANDROID__
 // From system/core/libcutils/android_reboot.cpp android16-s2-release
@@ -228,14 +229,31 @@ bool reboot(const std::string_view arg) {
 uint64_t getRandomOffset(const uint64_t size, const uint64_t bufferSize) {
   if (size <= bufferSize) return 0;
   const uint64_t maxOffset = size - bufferSize;
+  srand(time(nullptr));
   return rand() % maxOffset;
 }
 
-std::string convertTo(const uint64_t size, const std::string &multiple) {
-  if (multiple == "KB") return std::to_string(TO_KB(size));
-  if (multiple == "MB") return std::to_string(TO_MB(size));
-  if (multiple == "GB") return std::to_string(TO_GB(size));
-  return std::to_string(size);
+int convertTo(const uint64_t size, const sizeCastTypes type) {
+  if (type == KB) return TO_KB(size);
+  if (type == MB) return TO_MB(size);
+  if (type == GB) return TO_GB(size);
+  return static_cast<int>(size);
+}
+
+std::string multipleToString(const sizeCastTypes type) {
+  if (type == KB) return "KB";
+  if (type == MB) return "MB";
+  if (type == GB) return "GB";
+  return "B";
+}
+
+std::string format(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  char str[1024];
+  vsnprintf(str, sizeof(str), format, args);
+  va_end(args);
+  return str;
 }
 
 std::string getLibVersion() { MKVERSION("libhelper"); }

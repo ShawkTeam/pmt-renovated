@@ -66,11 +66,11 @@ INIT {
 
 RUN {
   std::vector<PartitionMap::Partition_t> jParts;
-  std::string multiple;
-  if (asByte) multiple = "B";
-  if (asKiloBytes) multiple = "KB";
-  if (asMega) multiple = "MB";
-  if (asGiga) multiple = "GB";
+  sizeCastTypes multiple;
+  if (asByte) multiple = B;
+  if (asKiloBytes) multiple = KB;
+  if (asMega) multiple = MB;
+  if (asGiga) multiple = GB;
 
   auto func = [this, &jParts, &multiple] COMMON_LAMBDA_PARAMS -> bool {
     if (VARS.onLogical && !props.isLogical) {
@@ -86,11 +86,11 @@ RUN {
 
     if (jsonFormat)
       jParts.push_back({partition,
-                        {std::stoull(Helper::convertTo(props.size, multiple)),
+                        {static_cast<uint64_t>(Helper::convertTo(props.size, multiple)),
                          props.isLogical}});
     else
-      println("partition=%s size=%s isLogical=%s", partition.data(),
-              Helper::convertTo(props.size, multiple).data(),
+      println("partition=%s size=%d isLogical=%s", partition.data(),
+              Helper::convertTo(props.size, multiple),
               props.isLogical ? "true" : "false");
 
     return true;
@@ -106,7 +106,7 @@ RUN {
 
   if (jsonFormat) {
     nlohmann::json j;
-    j["multipleType"] = multiple;
+    j["multipleType"] = Helper::multipleToString(multiple);
     j["partitions"] = nlohmann::json::array();
     for (const auto &[name, props] : jParts) {
       j["partitions"].push_back({{jNamePartition, name},

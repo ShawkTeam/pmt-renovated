@@ -42,7 +42,7 @@ INIT {
       ->default_val(false);
   cmd->add_flag("--as-megabyte", asMega,
                 "Tell input size of partition list as megabyte.")
-      ->default_val(false);
+      ->default_val(true);
   cmd->add_flag("--as-gigabyte", asGiga,
                 "Tell input size of partition list as gigabyte.")
       ->default_val(false);
@@ -54,7 +54,13 @@ INIT {
 }
 
 RUN {
-  auto func = [this] COMMON_LAMBDA_PARAMS -> bool {
+  sizeCastTypes multiple = {};
+  if (asByte) multiple = B;
+  if (asKiloBytes) multiple = KB;
+  if (asMega) multiple = MB;
+  if (asGiga) multiple = GB;
+
+  auto func = [this, &multiple] COMMON_LAMBDA_PARAMS -> bool {
     if (VARS.onLogical && !props.isLogical) {
       if (VARS.forceProcess)
         LOGN(SFUN, WARNING)
@@ -66,16 +72,10 @@ RUN {
                     partition.data());
     }
 
-    std::string multiple = "MB";
-    if (asByte) multiple = "B";
-    if (asKiloBytes) multiple = "KB";
-    if (asMega) multiple = "MB";
-    if (asGiga) multiple = "GB";
-
-    if (onlySize) println("%s", Helper::convertTo(props.size, multiple).data());
+    if (onlySize) println("%d", Helper::convertTo(props.size, multiple));
     else
-      println("%s: %s%s", partition.data(),
-              Helper::convertTo(props.size, multiple).data(), multiple.data());
+      println("%s: %d%s", partition.data(),
+              Helper::convertTo(props.size, multiple), Helper::multipleToString(multiple).data());
 
     return true;
   };

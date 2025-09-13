@@ -31,7 +31,7 @@ namespace PartitionManager {
 RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
           const uint64_t bufferSize) {
   if (!PART_MAP.hasPartition(partitionName))
-    return {format("Couldn't find partition: %s", partitionName.data()), false};
+    return {Helper::format("Couldn't find partition: %s", partitionName.data()), false};
 
   LOGN(BFUN, INFO) << "Back upping " << partitionName << " as " << outputName
                    << std::endl;
@@ -44,13 +44,13 @@ RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
           << std::endl;
     else
       return {
-          format("Used --logical (-l) flag but is not logical partition: %s",
+          Helper::format("Used --logical (-l) flag but is not logical partition: %s",
                  partitionName.data()),
           false};
   }
 
   if (Helper::fileIsExists(outputName) && !VARS.forceProcess)
-    return {format("%s is exists. Remove it, or use --force (-f) flag.",
+    return {Helper::format("%s is exists. Remove it, or use --force (-f) flag.",
                    outputName.data()),
             false};
 
@@ -63,14 +63,14 @@ RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
   const int pfd = Helper::openAndAddToCloseList(
       PART_MAP.getRealPathOf(partitionName), collector, O_RDONLY);
   if (pfd < 0)
-    return {format("Can't open partition: %s: %s", partitionName.data(),
+    return {Helper::format("Can't open partition: %s: %s", partitionName.data(),
                    strerror(errno)),
             false};
 
   const int ffd = Helper::openAndAddToCloseList(
       outputName, collector, O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (ffd < 0)
-    return {format("Can't create/open output file %s: %s", outputName.data(),
+    return {Helper::format("Can't create/open output file %s: %s", outputName.data(),
                    strerror(errno)),
             false};
 
@@ -84,7 +84,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
   while ((bytesRead = read(pfd, buffer, bufferSize)) > 0) {
     if (const ssize_t bytesWritten = write(ffd, buffer, bytesRead);
         bytesWritten != bytesRead)
-      return {format("Can't write partition to output file %s: %s",
+      return {Helper::format("Can't write partition to output file %s: %s",
                      outputName.data(), strerror(errno)),
               false};
   }
@@ -100,7 +100,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
                         << ". Access problems maybe occur in non-root mode"
                         << std::endl;
 
-  return {format("%s partition successfully back upped to %s",
+  return {Helper::format("%s partition successfully back upped to %s",
                  partitionName.data(), outputName.data()),
           true};
 }

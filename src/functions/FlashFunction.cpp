@@ -29,11 +29,11 @@ namespace PartitionManager {
 RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
           const uint64_t bufferSize, const bool deleteAfterProgress) {
   if (!Helper::fileIsExists(imageName))
-    return {format("Couldn't find image file: %s", imageName.data()), false};
+    return {Helper::format("Couldn't find image file: %s", imageName.data()), false};
   if (!PART_MAP.hasPartition(partitionName))
-    return {format("Couldn't find partition: %s", partitionName.data()), false};
+    return {Helper::format("Couldn't find partition: %s", partitionName.data()), false};
   if (Helper::fileSize(imageName) > PART_MAP.sizeOf(partitionName))
-    return {format("%s is larger than %s partition size!", imageName.data(),
+    return {Helper::format("%s is larger than %s partition size!", imageName.data(),
                    partitionName.data()),
             false};
 
@@ -48,7 +48,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
           << std::endl;
     else
       return {
-          format("Used --logical (-l) flag but is not logical partition: %s",
+          Helper::format("Used --logical (-l) flag but is not logical partition: %s",
                  partitionName.data()),
           false};
   }
@@ -60,14 +60,14 @@ RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
 
   const int ffd = Helper::openAndAddToCloseList(imageName, collector, O_RDONLY);
   if (ffd < 0)
-    return {format("Can't open image file %s: %s", imageName.data(),
+    return {Helper::format("Can't open image file %s: %s", imageName.data(),
                    strerror(errno)),
             false};
 
   const int pfd = Helper::openAndAddToCloseList(
       PART_MAP.getRealPathOf(partitionName), collector, O_RDWR | O_TRUNC);
   if (pfd < 0)
-    return {format("Can't open partition: %s: %s", partitionName.data(),
+    return {Helper::format("Can't open partition: %s: %s", partitionName.data(),
                    strerror(errno)),
             false};
 
@@ -81,7 +81,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
   while ((bytesRead = read(ffd, buffer, bufferSize)) > 0) {
     if (const ssize_t bytesWritten = write(pfd, buffer, bytesRead);
         bytesWritten != bytesRead)
-      return {format("Can't write partition to output file %s: %s",
+      return {Helper::format("Can't write partition to output file %s: %s",
                      imageName.data(), strerror(errno)),
               false};
   }
@@ -93,7 +93,7 @@ RUN_ASYNC(const std::string &partitionName, const std::string &imageName,
           std::string("Cannot erase flash file: " + imageName + "\n").data());
   }
 
-  return {format("%s is successfully wrote to %s partition", imageName.data(),
+  return {Helper::format("%s is successfully wrote to %s partition", imageName.data(),
                  partitionName.data()),
           true};
 }

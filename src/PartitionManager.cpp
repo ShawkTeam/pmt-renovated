@@ -199,15 +199,6 @@ void println(const char *format, ...) {
   va_end(args);
 }
 
-std::string format(const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  char str[1024];
-  vsnprintf(str, sizeof(str), format, args);
-  va_end(args);
-  return str;
-}
-
 std::string getLibVersion() { MKVERSION(PMT); }
 
 std::string getAppVersion() { MKVERSION(PMTE); }

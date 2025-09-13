@@ -44,6 +44,13 @@ enum LogLevels {
   ABORT = static_cast<int>('A')
 };
 
+enum sizeCastTypes {
+  B = static_cast<int>('B'),
+  KB = static_cast<int>('K'),
+  MB = static_cast<int>('M'),
+  GB = static_cast<int>('G')
+};
+
 constexpr mode_t DEFAULT_FILE_PERMS = 0644;
 constexpr mode_t DEFAULT_EXTENDED_FILE_PERMS = 0755;
 constexpr mode_t DEFAULT_DIR_PERMS = 0755;
@@ -342,18 +349,29 @@ std::string pathDirname(std::string_view entry);
 uint64_t getRandomOffset(uint64_t size, uint64_t bufferSize);
 
 /**
- * Convert input size to input multiple
+ * Convert input size to input multiple.
  */
-std::string convertTo(uint64_t size, const std::string &multiple);
+int convertTo(uint64_t size, sizeCastTypes type);
+
+/**
+ * Convert input multiple variable to string.
+ */
+std::string multipleToString(sizeCastTypes type);
+
+/**
+ * Format it input and return as std::string.
+ */
+__attribute__((format(printf, 1, 2))) std::string format(const char *format,
+                                                         ...);
 
 /**
  * Convert input size to input multiple
  */
-template <uint64_t size> std::string convertTo(const std::string &multiple) {
-  if (multiple == "KB") return std::to_string(TO_KB(size));
-  if (multiple == "MB") return std::to_string(TO_MB(size));
-  if (multiple == "GB") return std::to_string(TO_GB(size));
-  return std::to_string(size);
+template <uint64_t size> int convertTo(const sizeCastTypes type) {
+  if (type == KB) return TO_KB(size);
+  if (type == MB) return TO_MB(size);
+  if (type == GB) return TO_GB(size);
+  return static_cast<int>(size);
 }
 
 // -------------------------------
@@ -361,12 +379,12 @@ template <uint64_t size> std::string convertTo(const std::string &multiple) {
 // -------------------------------
 #ifdef __ANDROID__
 /**
- * Get input property as string.
+ * Get input property as string (for Android).
  */
 std::string getProperty(std::string_view prop);
 
 /**
- * Reboot device to input mode.
+ * Reboot device to input mode (for Android).
  */
 bool reboot(std::string_view arg);
 #endif

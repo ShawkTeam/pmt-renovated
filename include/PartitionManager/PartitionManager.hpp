@@ -31,7 +31,7 @@
 // Quick access to variables.
 #define VARS (*Variables)
 // Quick access to partition map.
-#define PART_MAP (*(*Variables).PartMap)
+#define PART_MAP (*VARS.PartMap)
 
 namespace PartitionManager {
 enum basic_function_flags {
@@ -96,10 +96,6 @@ int Main(int argc, char **argv);
 // Print messages if not using quiet mode
 __attribute__((format(printf, 1, 2))) void print(const char *format, ...);
 __attribute__((format(printf, 1, 2))) void println(const char *format, ...);
-
-// Format it input and return as std::string
-__attribute__((format(printf, 1, 2))) std::string format(const char *format,
-                                                         ...);
 
 // If there is a delimiter in the string, CLI::detail::split returns; if not, an
 // empty vector is returned. And checks duplicate arguments.
