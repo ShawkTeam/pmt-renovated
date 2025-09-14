@@ -85,9 +85,10 @@ RUN {
     }
 
     if (jsonFormat)
-      jParts.push_back({partition,
-                        {static_cast<uint64_t>(Helper::convertTo(props.size, multiple)),
-                         props.isLogical}});
+      jParts.push_back(
+          {partition,
+           {static_cast<uint64_t>(Helper::convertTo(props.size, multiple)),
+            props.isLogical}});
     else
       println("partition=%s size=%d isLogical=%s", partition.data(),
               Helper::convertTo(props.size, multiple),

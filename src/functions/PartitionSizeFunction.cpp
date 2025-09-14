@@ -75,7 +75,8 @@ RUN {
     if (onlySize) println("%d", Helper::convertTo(props.size, multiple));
     else
       println("%s: %d%s", partition.data(),
-              Helper::convertTo(props.size, multiple), Helper::multipleToString(multiple).data());
+              Helper::convertTo(props.size, multiple),
+              Helper::multipleToString(multiple).data());
 
     return true;
   };

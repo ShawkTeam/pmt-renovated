@@ -27,7 +27,8 @@ Copyright 2025 Yağız Zengin
 namespace PartitionManager {
 RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
   if (!PART_MAP.hasPartition(partitionName))
-    return {Helper::format("Couldn't find partition: %s", partitionName.data()), false};
+    return {Helper::format("Couldn't find partition: %s", partitionName.data()),
+            false};
 
   if (VARS.onLogical && !PART_MAP.isLogical(partitionName)) {
     if (VARS.forceProcess)
@@ -36,10 +37,10 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
           << " is exists but not logical. Ignoring (from --force, -f)."
           << std::endl;
     else
-      return {
-          Helper::format("Used --logical (-l) flag but is not logical partition: %s",
-                 partitionName.data()),
-          false};
+      return {Helper::format(
+                  "Used --logical (-l) flag but is not logical partition: %s",
+                  partitionName.data()),
+              false};
   }
 
   LOGN(EFUN, INFO) << "Using buffer size: " << bufferSize;
@@ -51,14 +52,14 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
       PART_MAP.getRealPathOf(partitionName), collector, O_WRONLY);
   if (pfd < 0)
     return {Helper::format("Can't open partition: %s: %s", partitionName.data(),
-                   strerror(errno)),
+                           strerror(errno)),
             false};
 
   if (!VARS.forceProcess) {
     if (!Helper::confirmPropt(
-        "Are you sure you want to continue? This could render your device "
-        "unusable! Do not continue if you "
-        "do not know what you are doing!"))
+            "Are you sure you want to continue? This could render your device "
+            "unusable! Do not continue if you "
+            "do not know what you are doing!"))
       throw Error("Operation canceled.");
   }
 
@@ -78,13 +79,13 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
 
     if (const ssize_t result = write(pfd, buffer, toWrite); result == -1)
       return {Helper::format("Can't write zero bytes to partition: %s: %s",
-                     partitionName.data(), strerror(errno)),
+                             partitionName.data(), strerror(errno)),
               false};
     else bytesWritten += result;
   }
 
   return {Helper::format("Successfully wrote zero bytes to the %s partition",
-                 partitionName.data()),
+                         partitionName.data()),
           true};
 }
 

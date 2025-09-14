@@ -28,7 +28,11 @@
 
 namespace PartitionManager {
 
-// Usage: REGISTER_FUNCTION(FUNCTION_CLASS);
+/**
+ * Register functions. Uses ready 'FuncManager' variable.
+ *
+ * Usage: REGISTER_FUNCTION(FUNCTION_CLASS);
+ */
 #define REGISTER_FUNCTION(cls)                                                 \
   FuncManager.registerFunction(std::make_unique<cls>(), AppMain)
 
@@ -78,15 +82,28 @@ int Main(int argc, char **argv) {
     collector.closeAfterProgress(pstdout);
     collector.closeAfterProgress(pstderr);
 
+    signal(SIGINT, sigHandler);
+    signal(SIGABRT, sigHandler);
+
+    if (!isatty(fileno(stdin))) {
+      char buf[128];
+      while (fgets(buf, sizeof(buf), stdin) != nullptr) {
+        buf[strcspn(buf, "\n")] = 0;
+        const char *token = strtok(buf, " \t");
+        while (token != nullptr) {
+          argv[argc] = strdup(token);
+          argc++;
+          token = strtok(nullptr, " \t");
+        }
+      }
+    }
+
     if (argc < 2) {
       println(
           "Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.",
           argv[0]);
       return EXIT_FAILURE;
     }
-
-    signal(SIGINT, sigHandler);
-    signal(SIGABRT, sigHandler);
 
     CLI::App AppMain{"Partition Manager Tool"};
     FunctionManager FuncManager;

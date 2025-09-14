@@ -25,6 +25,7 @@
 #else
 #include <sys/system_properties.h>
 #endif
+#include <cstdarg>
 #include <cutils/android_reboot.h>
 #include <iostream>
 #include <libgen.h>
@@ -35,7 +36,6 @@
 #include <sys/_system_properties.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <cstdarg>
 
 #ifdef __ANDROID__
 // From system/core/libcutils/android_reboot.cpp android16-s2-release
