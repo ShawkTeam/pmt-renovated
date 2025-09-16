@@ -71,11 +71,9 @@ RUN {
   LOGN(MTFUN, INFO) << "Generating random data for testing" << std::endl;
   auto *buffer = new (std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
-  std::mt19937 rng(std::random_device{}());
-  std::uniform_int_distribution dist(0, 255);
 
   for (size_t i = 0; i < bufferSize; i++)
-    buffer[i] = static_cast<char>(dist(rng));
+    buffer[i] = static_cast<char>(Helper::Random<1024>::getNumber());
 
   collector.delFileAfterProgress(test);
 

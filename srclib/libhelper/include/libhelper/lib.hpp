@@ -22,6 +22,8 @@
 #include <exception>
 #include <functional>
 #include <optional>
+#include <random>
+#include <set>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -111,6 +113,48 @@ public:
   void closeAfterProgress(FILE *_fp);
   void closeAfterProgress(DIR *_dp);
   void closeAfterProgress(int _fd);
+};
+
+template <int max = 100, int start = 0, int count = 10, int d = 0>
+class Random {
+  static_assert(max > start, "max is larger than start");
+  static_assert(count > 1, "count is larger than 1");
+  static_assert(count <= max - start, "count is greater than max-start");
+
+public:
+  static std::set<int> get() {
+    std::set<int> set;
+    std::random_device rd;
+    std::mt19937 gen(rd());
+
+    if constexpr (d > 0) {
+      std::uniform_int_distribution<> dist(0, (max - start - 1) / d);
+      while (set.size() < count)
+        set.insert(start + dist(gen) * d);
+    } else {
+      std::uniform_int_distribution<> dist(start, max - 1);
+      while (set.size() < count)
+        set.insert(dist(gen));
+    }
+
+    return set;
+  }
+
+  static int getNumber() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    int ret;
+
+    if constexpr (d > 0) {
+      std::uniform_int_distribution<> dist(0, (max - start - 1) / d);
+      ret = start + dist(gen) * d;
+    } else {
+      std::uniform_int_distribution<> dist(start, max - 1); // max exclusive
+      ret = dist(gen);
+    }
+
+    return ret;
+  }
 };
 
 namespace LoggingProperties {
