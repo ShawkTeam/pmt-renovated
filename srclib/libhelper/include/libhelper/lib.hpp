@@ -17,7 +17,6 @@
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 
-#include <any>
 #include <cstdint>
 #include <dirent.h>
 #include <exception>
@@ -172,12 +171,6 @@ private:
       d = data;
     }
   }
-
-  struct _any {
-    std::any first;
-    std::any second;
-    std::any third;
-  };
 
 public:
   struct Data {
