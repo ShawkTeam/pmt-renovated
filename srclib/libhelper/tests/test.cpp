@@ -28,7 +28,7 @@ std::string test_path(const char *file) {
 
 int main(int argc, char **argv) {
   if (argc < 2) return 2;
-  else TEST_DIR = argv[1];
+  TEST_DIR = argv[1];
 
   try {
     std::cout << "Has super user?; " << std::boolalpha << Helper::hasSuperUser()
@@ -118,6 +118,19 @@ int main(int argc, char **argv) {
               << std::endl;
     std::cout << "pathJoin() test 4: " << Helper::pathJoin("mydir", "/dir2")
               << std::endl;
+
+    Helper::PureTuple<int, std::string, bool> values = {
+        {1, "hi", true}, {2, "im", true}, {3, "helper", false}};
+
+    values.insert(std::make_tuple(0, "hi", false));
+    values.insert(2, "im", true);
+    values.insert(3, "helper", true);
+    values.pop({3, "helper", true});
+    values.pop_back();
+
+    std::cout << "pure tuple test: " << std::boolalpha
+              << static_cast<bool>(values.at(0)) << std::endl;
+    std::cout << std::boolalpha << values << std::endl;
 
     std::cout << Helper::getLibVersion() << std::endl;
 

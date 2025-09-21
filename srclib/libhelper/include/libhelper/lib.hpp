@@ -17,6 +17,7 @@
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 
+#include <any>
 #include <cstdint>
 #include <dirent.h>
 #include <exception>
@@ -154,6 +155,348 @@ public:
     }
 
     return ret;
+  }
+};
+
+template <typename _Type1, typename _Type2, typename _Type3> class PureTuple {
+private:
+  void expand_if_needed() {
+    if (count == capacity) {
+      capacity *= 2;
+      Data *data = new Data[capacity];
+
+      for (size_t i = 0; i < count; i++)
+        data[i] = d[i];
+
+      delete[] d;
+      d = data;
+    }
+  }
+
+  struct _any {
+    std::any first;
+    std::any second;
+    std::any third;
+  };
+
+public:
+  struct Data {
+    _Type1 first;
+    _Type2 second;
+    _Type3 third;
+
+    friend std::ostream &operator<<(std::ostream &os,
+                                    const Data &data) noexcept {
+      os << "(" << data.first << ", " << data.second << ", " << data.third
+         << ")";
+      return os;
+    }
+
+    bool
+    operator==(const std::tuple<_Type1, _Type2, _Type3> &t) const noexcept {
+      return first == std::get<0>(t) && second == std::get<1>(t) &&
+             third == std::get<2>(t);
+    }
+
+    bool operator==(const Data &other) const noexcept {
+      return first == other.first && second == other.second &&
+             third == other.third;
+    }
+
+    bool operator!=(const Data &other) const noexcept {
+      return !(*this == other);
+    }
+
+    explicit operator bool() const noexcept {
+      return first != _Type1{} || second != _Type2{} || third != _Type3{};
+    }
+
+    bool operator!() const noexcept { return !bool{*this}; }
+
+    void operator()(const std::tuple<_Type1, _Type2, _Type3> &t) {
+      first = std::get<0>(t);
+      second = std::get<1>(t);
+      third = std::get<2>(t);
+    }
+
+    Data &operator=(const std::tuple<_Type1, _Type2, _Type3> &t) {
+      first = std::get<0>(t);
+      second = std::get<1>(t);
+      third = std::get<2>(t);
+      return *this;
+    }
+  };
+
+  Data *d = nullptr;
+  size_t capacity{}, count{};
+
+  PureTuple() : d(new Data[20]), capacity(20), count(0) {}
+  ~PureTuple() { delete[] d; }
+
+  PureTuple(std::initializer_list<Data> val)
+      : d(new Data[20]), capacity(20), count(0) {
+    for (const auto &v : val)
+      insert(v);
+  }
+  PureTuple(PureTuple &other)
+      : d(new Data[other.capacity]), capacity(other.capacity),
+        count(other.count) {
+    std::copy(other.d, other.d + count, d);
+  }
+  PureTuple(PureTuple &&other) noexcept
+      : d(new Data[other.capacity]), capacity(other.capacity),
+        count(other.count) {
+    std::copy(other.d, other.d + count, d);
+    other.clear();
+  }
+
+  class iterator {
+  private:
+    Data *it;
+
+  public:
+    using iterator_category = std::random_access_iterator_tag;
+    using value_type = Data;
+    using difference_type = std::ptrdiff_t;
+    using pointer = Data *;
+    using reference = Data &;
+
+    explicit iterator(Data *ptr) : it(ptr) {}
+
+    pointer operator->() const { return it; }
+    reference operator*() { return *it; }
+
+    iterator &operator++() {
+      ++it;
+      return *this;
+    }
+    iterator operator++(int) {
+      iterator tmp = *this;
+      ++(*this);
+      return tmp;
+    }
+    iterator &operator--() {
+      --it;
+      return *this;
+    }
+    iterator operator--(int) {
+      iterator tmp = *this;
+      --(*this);
+      return tmp;
+    }
+
+    iterator &operator+=(difference_type n) {
+      it += n;
+      return *this;
+    }
+    iterator operator+(difference_type n) const { return iterator(it + n); }
+    iterator &operator-=(difference_type n) {
+      it -= n;
+      return *this;
+    }
+    iterator operator-(difference_type n) const { return iterator(it - n); }
+    difference_type operator-(const iterator &other) const {
+      return it - other.it;
+    }
+
+    reference operator[](difference_type n) const { return it[n]; }
+
+    bool operator<(const iterator &other) const { return it < other.it; }
+    bool operator>(const iterator &other) const { return it > other.it; }
+    bool operator<=(const iterator &other) const { return it <= other.it; }
+    bool operator>=(const iterator &other) const { return it >= other.it; }
+
+    bool operator!=(const iterator &other) const { return it != other.it; }
+    bool operator==(const iterator &other) const { return it == other.it; }
+  };
+
+  bool find(const Data &data) const noexcept {
+    for (size_t i = 0; i < count; i++)
+      if (data == d[i]) return true;
+
+    return false;
+  }
+
+  template <typename T = std::tuple<_Type1, _Type2, _Type3>>
+  std::enable_if_t<std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>, bool>
+  find(const std::tuple<_Type1, _Type2, _Type3> &t) const noexcept {
+    for (size_t i = 0; i < count; i++)
+      if (d[i] == t) return true;
+
+    return false;
+  }
+
+  bool find(const _Type1 &val, const _Type2 &val2,
+            const _Type3 &val3) const noexcept {
+    for (size_t i = 0; i < count; i++)
+      if (d[i] == std::make_tuple(val, val2, val3)) return true;
+
+    return false;
+  }
+
+  void insert(const Data &val) noexcept {
+    expand_if_needed();
+    if (!find(val)) d[count++] = val;
+  }
+
+  template <typename T = std::tuple<_Type1, _Type2, _Type3>>
+  std::enable_if_t<std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>, void>
+  insert(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
+    expand_if_needed();
+    if (!find(t))
+      d[count++] = Data{std::get<0>(t), std::get<1>(t), std::get<2>(t)};
+  }
+
+  void insert(const _Type1 &val, const _Type2 &val2,
+              const _Type3 &val3) noexcept {
+    expand_if_needed();
+    if (!find(val, val2, val3)) d[count++] = Data{val, val2, val3};
+  }
+
+  void merge(const PureTuple &other) noexcept {
+    for (const auto &v : other)
+      insert(v);
+  }
+
+  void pop_back() noexcept {
+    if (count > 0) --count;
+  }
+
+  void pop(const Data &data) noexcept {
+    for (size_t i = 0; i < count; i++) {
+      if (d[i] == data) {
+        for (size_t j = i; j < count - 1; j++)
+          d[j] = d[j + 1];
+        --count;
+        break;
+      }
+    }
+  }
+
+  void pop(const size_t i) noexcept {
+    if (i >= count) return;
+    for (size_t x = 0; x < count; x++) {
+      if (i == x) {
+        for (size_t j = i; j < count - 1; j++)
+          d[j] = d[j + 1];
+        --count;
+        break;
+      }
+    }
+  }
+
+  void pop(const _Type1 &val, const _Type2 &val2, const _Type3 &val3) noexcept {
+    for (size_t i = 0; i < count; i++) {
+      if (d[i] == std::make_tuple(val, val2, val3)) {
+        for (size_t j = i; j < count - 1; j++)
+          d[j] = d[j + 1];
+        --count;
+        break;
+      }
+    }
+  }
+
+  template <typename T = std::tuple<_Type1, _Type2, _Type3>>
+  std::enable_if_t<std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>, void>
+  pop(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
+    for (size_t i = 0; i < count; i++) {
+      if (d[i] == t) {
+        for (size_t j = i; j < count - 1; j++)
+          d[j] = d[j + 1];
+        --count;
+        break;
+      }
+    }
+  }
+
+  void clear() noexcept {
+    delete[] d;
+    count = 0;
+    capacity = 20;
+    d = new Data[capacity];
+  }
+
+  Data back() const noexcept { return (count > 0) ? d[count - 1] : Data{}; }
+  Data top() const noexcept { return (count > 0) ? d[0] : Data{}; }
+
+  Data at(size_t i) const noexcept {
+    if (i >= count) return Data{};
+    return d[i];
+  }
+
+  void foreach (std::function<void(_Type1, _Type2, _Type3)> func) {
+    for (size_t i = 0; i < count; i++)
+      func(d[i].first, d[i].second, d[i].third);
+  }
+
+  void foreach (std::function<void(std::tuple<_Type1, _Type2, _Type3>)> func) {
+    for (size_t i = 0; i < count; i++)
+      func(std::make_tuple(d[i].first, d[i].second, d[i].third));
+  }
+
+  [[nodiscard]] size_t size() const noexcept { return count; }
+  [[nodiscard]] bool empty() const noexcept { return count == 0; }
+
+  iterator begin() const noexcept { return iterator(d); }
+  iterator end() const noexcept { return iterator(d + count); }
+
+  explicit operator bool() const noexcept { return count > 0; }
+  bool operator!() const noexcept { return count == 0; }
+
+  bool operator==(const PureTuple &other) const noexcept {
+    if (this->count != other.count || this->capacity != other.capacity)
+      return false;
+
+    for (size_t i = 0; i < this->count; i++)
+      if (d[i] != other.d[i]) return false;
+
+    return true;
+  }
+  bool operator!=(const PureTuple &other) const noexcept {
+    return !(*this == other);
+  }
+
+  Data operator[](size_t i) const noexcept {
+    if (i >= count) return Data{};
+    return d[i];
+  }
+  explicit operator int() const noexcept { return count; }
+
+  PureTuple &operator=(const PureTuple &other) {
+    if (this != &other) {
+      delete[] d;
+
+      capacity = other.capacity;
+      count = other.count;
+      d = new Data[capacity];
+
+      std::copy(other.d, other.d + count, d);
+    }
+
+    return *this;
+  }
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const PureTuple &tuple) noexcept {
+    os << "[";
+    for (size_t i = 0; i < tuple.count; i++) {
+      os << tuple.d[i];
+      if (i + 1 < tuple.count) os << ", ";
+    }
+
+    os << "]";
+    return os;
+  }
+
+  friend PureTuple &operator>>(const std::tuple<_Type1, _Type2, _Type3> &t,
+                               PureTuple &tuple) noexcept {
+    tuple.insert(t);
+    return tuple;
+  }
+
+  PureTuple &operator<<(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
+    insert(t);
+    return *this;
   }
 };
 
