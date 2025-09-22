@@ -130,7 +130,10 @@ int main(int argc, char **argv) {
 
     std::cout << "pure tuple test: " << std::boolalpha
               << static_cast<bool>(values.at(0)) << std::endl;
-    std::cout << std::boolalpha << values << std::endl;
+    for (const auto &[x, y, z] : values) {
+      std::cout << std::boolalpha << "(" << x << ", " << y << ", " << z << ")"
+                << std::endl;
+    }
 
     std::cout << Helper::getLibVersion() << std::endl;
 
