@@ -214,6 +214,7 @@ public:
   };
 
   Data *tuple_data = nullptr;
+  Data tuple_data_type = { _Type1{}, _Type2{}, _Type3{}};
   size_t capacity{}, count{};
 
   PureTuple() : tuple_data(new Data[20]), capacity(20), count(0) {}
@@ -856,7 +857,7 @@ std::string getLibVersion();
 #define MKVERSION(name)                                                        \
   char vinfo[512];                                                             \
   sprintf(vinfo,                                                               \
-          "%s 1.2.0\nBuildType: Release\nCompiler: clang\n"                    \
+          "%s 1.3.0\nCompiler: clang\n"                    \
           "BuildFlags: -Wall;-Werror;-Wno-deprecated-declarations;-Os",        \
           name);                                                               \
   return std::string(vinfo)

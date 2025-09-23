@@ -47,6 +47,7 @@ basic_variables::basic_variables()
 }
 
 __attribute__((constructor)) void init() {
+  Helper::LoggingProperties::setProgramName(PMTE);
   Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log");
 }
 

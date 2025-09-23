@@ -120,11 +120,11 @@ int main(int argc, char **argv) {
               << std::endl;
 
     Helper::PureTuple<int, std::string, bool> values = {
-        {1, "hi", true}, {2, "im", true}, {3, "helper", false}};
+      {1, "hi", true}, {2, "im", true}, {3, "helper", false}};
 
     values.insert(std::make_tuple(0, "hi", false));
     values.insert(2, "im", true);
-    values.insert(3, "helper", true);
+    values.insert({3, "helper", true});
     values.pop({3, "helper", true});
     values.pop_back();
 
@@ -141,7 +141,7 @@ int main(int argc, char **argv) {
     LOG(WARNING) << "Warning message" << std::endl;
     LOG(ERROR) << "Error message" << std::endl;
     LOG(ABORT) << "Abort message" << std::endl;
-  } catch (Helper::Error &err) {
+  } catch (std::exception &err) {
     std::cout << err.what() << std::endl;
     return 1;
   }
