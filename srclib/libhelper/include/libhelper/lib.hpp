@@ -60,17 +60,29 @@ constexpr int YES = 1;
 constexpr int NO = 0;
 
 namespace Helper {
+// Throwable error class
+class Error final : public std::exception {
+private:
+  std::string _message;
+  std::ostringstream _oss;
+
+public:
+  __attribute__((format(printf, 2, 3))) explicit Error(const char *format, ...);
+
+  [[nodiscard]] const char *what() const noexcept override;
+};
+
 // Logging
 class Logger final {
 private:
   LogLevels _level;
   std::ostringstream _oss;
-  const char *_funcname, *_logFile, *_program_name, *_file;
+  const char *_function_name, *_logFile, *_program_name, *_file;
   int _line;
 
 public:
   Logger(LogLevels level, const char *func, const char *file, const char *name,
-         const char *sfile, int line);
+         const char *source_file, int line);
 
   ~Logger();
 
@@ -80,17 +92,6 @@ public:
   }
 
   Logger &operator<<(std::ostream &(*msg)(std::ostream &));
-};
-
-// Throwable error class
-class Error final : public std::exception {
-private:
-  std::string _message;
-
-public:
-  __attribute__((format(printf, 2, 3))) explicit Error(const char *format, ...);
-
-  [[nodiscard]] const char *what() const noexcept override;
 };
 
 // Close file descriptors and delete allocated array memory
@@ -214,7 +215,7 @@ public:
   };
 
   Data *tuple_data = nullptr;
-  Data tuple_data_type = { _Type1{}, _Type2{}, _Type3{}};
+  Data tuple_data_type = {_Type1{}, _Type2{}, _Type3{}};
   size_t capacity{}, count{};
 
   PureTuple() : tuple_data(new Data[20]), capacity(20), count(0) {}
@@ -857,7 +858,7 @@ std::string getLibVersion();
 #define MKVERSION(name)                                                        \
   char vinfo[512];                                                             \
   sprintf(vinfo,                                                               \
-          "%s 1.3.0\nCompiler: clang\n"                    \
+          "%s 1.3.0\nCompiler: clang\n"                                        \
           "BuildFlags: -Wall;-Werror;-Wno-deprecated-declarations;-Os",        \
           name);                                                               \
   return std::string(vinfo)

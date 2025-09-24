@@ -42,9 +42,9 @@ Error::Error(const char *format, ...) {
 const char *Error::what() const noexcept { return _message.data(); }
 
 Logger::Logger(const LogLevels level, const char *func, const char *file,
-               const char *name, const char *sfile, const int line)
-    : _level(level), _funcname(func), _logFile(file), _program_name(name),
-      _file(sfile), _line(line) {}
+               const char *name, const char *source_file, const int line)
+    : _level(level), _function_name(func), _logFile(file), _program_name(name),
+      _file(source_file), _line(line) {}
 
 Logger::~Logger() {
   if (LoggingProperties::DISABLE) return;
@@ -52,7 +52,7 @@ Logger::~Logger() {
   snprintf(str, sizeof(str), "<%c> [ <prog %s> <on %s:%d> %s %s] %s(): %s",
            static_cast<char>(_level), _program_name,
            basename(const_cast<char *>(_file)), _line, currentDate().data(),
-           currentTime().data(), _funcname, _oss.str().data());
+           currentTime().data(), _function_name, _oss.str().data());
 
   if (!isExists(_logFile)) {
     if (const int fd =

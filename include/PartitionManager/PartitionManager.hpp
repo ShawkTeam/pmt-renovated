@@ -82,8 +82,7 @@ public:
 };
 
 // A class for function management.
-template <class _Type>
-class basic_manager {
+template <class _Type> class basic_manager {
 private:
   std::vector<std::unique_ptr<_Type>> _functions;
 
@@ -127,8 +126,7 @@ public:
   }
 
   [[nodiscard]] bool handleAll() const {
-    LOGN(PMTF, INFO) << "running caught commands in command-line."
-                   << std::endl;
+    LOGN(PMTF, INFO) << "running caught commands in command-line." << std::endl;
     for (const auto &func : _functions) {
       if (func->isUsed()) {
         LOGN(PMTF, INFO) << func->name()

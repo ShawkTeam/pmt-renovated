@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
               << std::endl;
 
     Helper::PureTuple<int, std::string, bool> values = {
-      {1, "hi", true}, {2, "im", true}, {3, "helper", false}};
+        {1, "hi", true}, {2, "im", true}, {3, "helper", false}};
 
     values.insert(std::make_tuple(0, "hi", false));
     values.insert(2, "im", true);
