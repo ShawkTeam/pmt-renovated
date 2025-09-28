@@ -480,6 +480,81 @@ public:
   }
 };
 
+// Provides a capsule structure to store variable references and values.
+template <typename _Type> class Capsule {
+public:
+  _Type &value;
+
+  // The value to be stored is taken as a reference as an argument
+  explicit Capsule(_Type &value) noexcept : value(value) {}
+
+  // Set the value.
+  void set(const _Type &_value) noexcept { this->value = _value; }
+  void set(_Type &_value) noexcept { this->value = _value; }
+
+  // Get reference of the value.
+  _Type &get() noexcept { return this->value; }
+  const _Type &get() const noexcept { return this->value; }
+
+  // You can get the reference of the stored value in the input type (casting is
+  // required).
+  operator _Type &() noexcept { return this->value; }
+  operator const _Type &() const noexcept { return this->value; }
+  explicit operator _Type *() noexcept { return &this->value; }
+
+  // The value of another capsule is taken.
+  Capsule &operator=(const Capsule &other) noexcept {
+    this->value = other.value;
+    return *this;
+  }
+
+  // Assign another value.
+  Capsule &operator=(const _Type &_value) noexcept {
+    this->value = _value;
+    return *this;
+  }
+
+  // Check if this capsule and another capsule hold the same data.
+  bool operator==(const Capsule &other) const noexcept {
+    return this->value == other.value;
+  }
+
+  // Check if this capsule value and another capsule value hold the same data.
+  bool operator==(const _Type &_value) const noexcept {
+    return this->value == _value;
+  }
+
+  // Check that this capsule and another capsule do not hold the same data.
+  bool operator!=(const Capsule &other) const noexcept {
+    return !(*this == other);
+  }
+
+  // Check that this capsule value and another capsule value do not hold the
+  // same data.
+  bool operator!=(const _Type &_value) const noexcept {
+    return !(*this == _value);
+  }
+
+  // Check if the current held value is actually empty.
+  explicit operator bool() const noexcept { return this->value != _Type{}; }
+
+  // Check that the current held value is actually empty.
+  bool operator!() const noexcept { return this->value == _Type{}; }
+
+  // Change the value with the input operator.
+  friend Capsule &operator>>(const _Type &_value, Capsule &_capsule) noexcept {
+    _capsule.value = _value;
+    return _capsule;
+  }
+
+  // Get the reference of the value held.
+  _Type &operator()() noexcept { return value; }
+  const _Type &operator()() const noexcept { return value; }
+
+  // Set the value.
+  void operator()(const _Type &_value) noexcept { this->value = _value; }
+};
+
 namespace LoggingProperties {
 extern std::string_view FILE, NAME;
 extern bool PRINT, DISABLE;

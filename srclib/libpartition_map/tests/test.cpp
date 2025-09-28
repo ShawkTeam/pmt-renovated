@@ -55,9 +55,11 @@ int main() {
     for (const auto &name : *physicals)
       std::cout << "   - " << name << std::endl;
 
-    if (const std::vector<PartitionMap::Info> parts = MyMap; parts.empty())
+    if (const std::vector<PartitionMap::Info> parts =
+            static_cast<std::vector<PartitionMap::Info>>(MyMap);
+        parts.empty())
       throw PartitionMap::Error(
-          "operator std::vector>PartitionMap::Info>() returned empty vector");
+          "operator std::vector<PartitionMap::Info>() returned empty vector");
 
     auto func = [](const std::string &partition,
                    const PartitionMap::BasicInf props) -> bool {

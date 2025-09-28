@@ -89,8 +89,8 @@ public:
   Info operator[](int index) const;
   BasicInf operator[](const std::string_view &name) const;
 
-  operator std::vector<Info>() const;
-  operator int() const;
+  explicit operator std::vector<Info>() const;
+  explicit operator int() const;
 
   class iterator {
   public:
@@ -166,7 +166,6 @@ public:
 
   /**
    *   Returns the current list content in Map_t type.
-   *   If no list is created, returns std::nullopt.
    */
   [[nodiscard]] Map_t getAll() const;
 
@@ -368,17 +367,17 @@ public:
   /**
    *   Get map contents as vector (PartitionManager::Info type).
    */
-  [[nodiscard]] operator std::vector<Info>() const;
+  [[nodiscard]] explicit operator std::vector<Info>() const;
 
   /**
    *   Get total partition count in map (int type).
    */
-  [[nodiscard]] operator int() const;
+  [[nodiscard]] explicit operator int() const;
 
   /**
    *   Get current working directory.
    */
-  [[nodiscard]] operator std::string() const;
+  [[nodiscard]] explicit operator std::string() const;
 };
 
 using Error = Helper::Error;

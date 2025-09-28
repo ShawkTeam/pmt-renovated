@@ -425,10 +425,12 @@ basic_partition_map_builder::operator[](const std::string_view &name) const {
 }
 
 basic_partition_map_builder::operator std::vector<Info>() const {
-  return _current_map;
+  return static_cast<std::vector<Info>>(_current_map);
 }
 
-basic_partition_map_builder::operator int() const { return _current_map; }
+basic_partition_map_builder::operator int() const {
+  return static_cast<int>(_current_map);
+}
 
 basic_partition_map_builder::operator std::string() const { return _workdir; }
 
