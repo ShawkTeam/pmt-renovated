@@ -35,7 +35,7 @@ RUN {
                    << (rebootTarget.empty() ? "none" : rebootTarget)
                    << std::endl;
 
-  if (Helper::reboot(rebootTarget)) println("Reboot command was sent");
+  if (Helper::androidReboot(rebootTarget)) println("Reboot command was sent");
   else throw Error("Cannot reboot device");
 
   return true;

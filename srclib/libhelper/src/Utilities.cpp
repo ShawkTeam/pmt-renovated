@@ -213,7 +213,7 @@ std::string getProperty(const std::string_view prop) {
   return x > 0 ? val : "ERROR";
 }
 
-bool reboot(const std::string_view arg) {
+bool androidReboot(const std::string_view arg) {
   LOGN(HELPER, INFO) << "reboot request sent!!!" << std::endl;
 
   unsigned cmd = ANDROID_RB_RESTART2;

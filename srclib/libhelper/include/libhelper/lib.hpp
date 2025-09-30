@@ -481,7 +481,7 @@ public:
 };
 
 // Provides a capsule structure to store variable references and values.
-template <typename _Type> class Capsule {
+template <typename _Type> class Capsule : public garbageCollector {
 public:
   _Type &value;
 
@@ -828,7 +828,7 @@ std::string getProperty(std::string_view prop);
 /**
  * Reboot device to input mode (for Android).
  */
-bool reboot(std::string_view arg);
+bool androidReboot(std::string_view arg);
 #endif
 
 /**
