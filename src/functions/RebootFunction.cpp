@@ -14,8 +14,9 @@ Copyright 2025 Yağız Zengin
    limitations under the License.
 */
 
-#include "functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
+
+#include "functions.hpp"
 
 #define RFUN "rebootFunction"
 #define FUNCTION_CLASS rebootFunction
@@ -25,18 +26,18 @@ INIT {
   LOGN(RFUN, INFO) << "Initializing variables of reboot function." << std::endl;
   flags = {FunctionFlags::NO_MAP_CHECK, FunctionFlags::ADB_SUFFICIENT};
   cmd = _app.add_subcommand("reboot", "Reboots device");
-  cmd->add_option("rebootTarget", rebootTarget,
-                  "Reboot target (default: normal)");
+  cmd->add_option("rebootTarget", rebootTarget, "Reboot target (default: normal)");
   return true;
 }
 
 RUN {
   LOGN(RFUN, INFO) << "Rebooting device!!! (custom reboot target: "
-                   << (rebootTarget.empty() ? "none" : rebootTarget)
-                   << std::endl;
+                   << (rebootTarget.empty() ? "none" : rebootTarget) << std::endl;
 
-  if (Helper::androidReboot(rebootTarget)) println("Reboot command was sent");
-  else throw Error("Cannot reboot device");
+  if (Helper::androidReboot(rebootTarget))
+    OUT.println("Reboot command was sent");
+  else
+    throw Error("Cannot reboot device");
 
   return true;
 }

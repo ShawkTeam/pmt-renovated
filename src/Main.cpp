@@ -17,6 +17,6 @@
 #include <PartitionManager/PartitionManager.hpp>
 
 int main(int argc, char **argv) {
-  // Call integrated main function in library
+  // Call integrated main function in core
   return PartitionManager::Main(argc, argv);
 }

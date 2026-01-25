@@ -1,5 +1,5 @@
 #
-#  Copyright 2025 Yağız Zengin
+#  Copyright 2026 Yağız Zengin
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -14,80 +14,63 @@
 #  limitations under the License.
 #
 
-THIS="$(basename $0)"
+THIS="$(basename "$0")"
 RELEASE="20250821"
 
-echo() { command echo "[$THIS]: $@"; }
+echo() { command echo "[$THIS]: $*"; }
+error() { echo "$*"; exit 1; }
 
-checks()
-{
-	if ! curl "https://github.com" &>/dev/null; then
-		echo "No internet connection!"
-		exit 1
-	fi
+checks() {
+	curl "https://github.com" &>/dev/null || error "No internet connection!"
 
 	echo "Updating repositories and checking required packages..."
 	pkg update &>/dev/null
-	[ ! -f $PREFIX/bin/unzip ] && pkg install -y unzip
-  [ ! -f $PREFIX/bin/wget ] && pkg install -y wget
+	[ ! -f "$PREFIX/bin/unzip" ] && pkg install -y unzip
+  [ ! -f "$PREFIX/bin/wget" ] && pkg install -y wget
 }
 
-select_variant()
-{
+select_variant() {
 	LINK=""; ARCH=""; VARIANT=""
 
 	if getprop ro.product.cpu.abi | grep "arm64-v8a" &>/dev/null; then ARCH="arm64-v8a"
 	else ARCH="armeabi-v7a"
 	fi
-  if grep "static" <<< $1 &>/dev/null; then VARIANT="static-"; fi
+  if grep "static" <<< "$1" &>/dev/null; then VARIANT="static-"; fi
 
 	LINK="https://github.com/ShawkTeam/pmt-renovated/releases/download/${RELEASE}/pmt-${VARIANT}${ARCH}.zip"
 }
 
-download()
-{
+download() {
 	echo "Downloading pmt-${VARIANT}${ARCH}.zip (${RELEASE})"
-	if ! wget -O $PREFIX/tmp/pmt.zip "${LINK}" &>/dev/null; then
-		echo "Download failed! LINK=${LINK}"
-		rm $PREFIX/tmp/*.zip
-		exit 1
+	if ! wget -O "$PREFIX/tmp/pmt.zip" "${LINK}" &>/dev/null; then
+		rm "$PREFIX/tmp/*.zip"
+		error "Download failed! LINK=${LINK}"
 	fi
 
 	echo "Extracting..."
-	if ! unzip -o -d $PREFIX/tmp $PREFIX/tmp/pmt.zip &>/dev/null; then
-		echo "Extraction failed!"
-		exit 1
-	fi
+	unzip -o -d "$PREFIX/tmp" "$PREFIX/tmp/pmt.zip" &>/dev/null || error "Extraction failed!"
 }
 
-setup()
-{
-	[ -f $PREFIX/tmp/pmt_static ] && mv $PREFIX/tmp/pmt_static $PREFIX/tmp/pmt
+setup() {
+	[ -f "$PREFIX/tmp/pmt_static" ] && mv "$PREFIX/tmp/pmt_static" "$PREFIX/tmp/pmt"
 	set -e
-	install -t $PREFIX/bin $PREFIX/tmp/pmt
-	if [ -f $PREFIX/tmp/libhelper.so ]; then
-		install -t $PREFIX/lib $(find $PREFIX/tmp -name "lib*.so")
-		install -t $PREFIX/lib $(find $PREFIX/tmp -name "lib*.a")
+	install -t "$PREFIX/bin" "$PREFIX/tmp/pmt"
+	if [ -f "$PREFIX/tmp/libhelper.so" ]; then
+	  find "$PREFIX/tmp" -name "lib*.so" -name "lib*.a" -exec install -t "$PREFIX/lib" {} \;
 	fi
 	echo "Installed successfully. Try running 'pmt' command."
 }
 
-uninstall()
-{
-	rm -f $PREFIX/bin/pmt $PREFIX/lib/libhelper* $PREFIX/lib/libpartition_map* &>/dev/null
+uninstall() {
+	rm -f "$PREFIX/bin/pmt" "$PREFIX"/lib/libhelper* "$PREFIX"/lib/libpartition_map* &>/dev/null
 }
 
-is_installed()
-{
-	if /system/bin/which pmt &>/dev/null; then
-		echo "PMT is already installed."
-		exit 1
-	fi
+is_installed() {
+	/system/bin/which pmt &>/dev/null || error "PMT is already installed."
 }
 
-cleanup()
-{
-	rm -f $PREFIX/tmp/pmt* $PREFIX/tmp/lib* $PREFIX/tmp/*.zip &>/dev/null
+cleanup() {
+	rm -f "$PREFIX"/tmp/pmt* "$PREFIX"/tmp/lib* "$PREFIX"/tmp/*.zip &>/dev/null
 }
 
 if [ $# -eq 0 ]; then
@@ -95,16 +78,14 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-if ! basename -a ${PREFIX}/bin/* | grep "termux" &>/dev/null; then
-	echo "This script only for termux!"
-	exit 1
-fi
+basename -a "${PREFIX}"/bin/* | grep "termux" &>/dev/null \
+  || error "This script only for termux!"
 
 case $1 in
     "install")
     	is_installed
     	checks
-    	select_variant $(grep "static" <<< $2 &>/dev/null && command echo static)
+    	select_variant "$(grep "static" <<< "$2" &>/dev/null && command echo static)"
 			download
 			setup
     ;;
@@ -114,7 +95,7 @@ case $1 in
     "reinstall")
     	uninstall
     	checks
-      select_variant $(grep "static" <<< $2 &>/dev/null && command echo static)
+      select_variant "$(grep "static" <<< "$2" &>/dev/null && command echo static)"
       download
       setup
     ;;

@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 Yağız Zengin
+   Copyright 2026 Yağız Zengin
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -27,7 +27,8 @@ std::string test_path(const char *file) {
 }
 
 int main(int argc, char **argv) {
-  if (argc < 2) return 2;
+  if (argc < 2)
+    return 2;
   TEST_DIR = argv[1];
 
   try {
@@ -46,31 +47,29 @@ int main(int argc, char **argv) {
     std::cout << "'linkdir' is hardlink?; " << std::boolalpha
               << Helper::isHardLink(test_path("linkdir")) << std::endl;
     std::cout << "'linkdir' is symlink to 'dir'?; " << std::boolalpha
-              << Helper::areLinked(test_path("linkdir"), test_path("dir"))
-              << std::endl;
+              << Helper::areLinked(test_path("linkdir"), test_path("dir")) << std::endl;
 
     if (!Helper::writeFile("file.txt", "hello world"))
       throw Helper::Error("Cannot write \"hello world\" in 'file.txt'");
-    else std::cout << "file.txt writed." << std::endl;
+    else
+      std::cout << "file.txt writed." << std::endl;
 
     if (const auto content = Helper::readFile("file.txt"); !content)
       throw Helper::Error("Cannot read 'file.txt'");
-    else std::cout << "'file.txt': " << *content << std::endl;
+    else
+      std::cout << "'file.txt': " << *content << std::endl;
 
     std::cout << "Making directory 'dir2': " << std::boolalpha
               << Helper::makeDirectory(test_path("dir2")) << std::endl;
     std::cout << "Making recursive directories 'dir3/x/y': " << std::boolalpha
-              << Helper::makeRecursiveDirectory(test_path("dir3/x/y"))
-              << std::endl;
+              << Helper::makeRecursiveDirectory(test_path("dir3/x/y")) << std::endl;
     std::cout << "Create 'file2.txt': " << std::boolalpha
               << Helper::createFile(test_path("file2.txt")) << std::endl;
-    std::cout << "Create symlink 'file2.txt' to 'file2lnk.txt': "
-              << std::boolalpha
-              << Helper::createSymlink(test_path("file2.txt"),
-                                       test_path("file2lnk.txt"))
+    std::cout << "Create symlink 'file2.txt' to 'file2lnk.txt': " << std::boolalpha
+              << Helper::createSymlink(test_path("file2.txt"), test_path("file2lnk.txt"))
               << std::endl;
-    std::cout << "Size of 'file2.txt': "
-              << Helper::fileSize(test_path("file2.txt")) << std::endl;
+    std::cout << "Size of 'file2.txt': " << Helper::fileSize(test_path("file2.txt"))
+              << std::endl;
     std::cout << "Erasing 'file.txt': " << std::boolalpha
               << Helper::eraseEntry(test_path("file.txt")) << std::endl;
     std::cout << "Erasing 'dir2': " << std::boolalpha
@@ -80,44 +79,37 @@ int main(int argc, char **argv) {
 
     if (const auto sha256 = Helper::sha256Of(test_path("file2.txt")); !sha256)
       throw Helper::Error("Cannot get sha256 of 'file2.txt'");
-    else std::cout << "SHA256 of 'file2.txt': " << *sha256 << std::endl;
+    else
+      std::cout << "SHA256 of 'file2.txt': " << *sha256 << std::endl;
 
-    std::cout << "'file2.txt' and 'file2lnk.txt' same? (SHA256): "
-              << std::boolalpha
-              << Helper::sha256Compare(test_path("file2.txt"),
-                                       test_path("file2lnk.txt"))
+    std::cout << "'file2.txt' and 'file2lnk.txt' same? (SHA256): " << std::boolalpha
+              << Helper::sha256Compare(test_path("file2.txt"), test_path("file2lnk.txt"))
               << std::endl;
     std::cout << "Copy 'file2.txt' as 'file2cpy.txt': " << std::boolalpha
-              << Helper::copyFile(test_path("file2.txt"),
-                                  test_path("file2cpy.txt"))
+              << Helper::copyFile(test_path("file2.txt"), test_path("file2cpy.txt"))
               << std::endl;
-    std::cout << "Run command: 'ls': " << std::boolalpha
-              << Helper::runCommand("ls") << std::endl;
+    std::cout << "Run command: 'ls': " << std::boolalpha << Helper::runCommand("ls")
+              << std::endl;
     std::cout << "Spawn confirm propt..." << std::endl;
 
     const bool p = Helper::confirmPropt("Please answer");
-    std::cout << "Result of confirm propt: " << std::boolalpha << p
-              << std::endl;
+    std::cout << "Result of confirm propt: " << std::boolalpha << p << std::endl;
 
-    std::cout << "Working directory: " << Helper::currentWorkingDirectory()
-              << std::endl;
+    std::cout << "Working directory: " << Helper::currentWorkingDirectory() << std::endl;
     std::cout << "Current date: " << Helper::currentDate() << std::endl;
     std::cout << "Current time: " << Helper::currentTime() << std::endl;
-    std::cout << "Output of 'ls' command: "
-              << Helper::runCommandWithOutput("ls").first << std::endl;
+    std::cout << "Output of 'ls' command: " << Helper::runCommandWithOutput("ls").first
+              << std::endl;
     std::cout << "Basename of " << test_path("file2.txt") << ": "
               << Helper::pathBasename(test_path("file2.txt")) << std::endl;
     std::cout << "Dirname of " << test_path("file2.txt") << ": "
               << Helper::pathDirname(test_path("file2.txt")) << std::endl;
 
-    std::cout << "pathJoin() test 1: " << Helper::pathJoin("mydir", "dir2")
-              << std::endl;
-    std::cout << "pathJoin() test 2: " << Helper::pathJoin("mydir/", "dir2")
-              << std::endl;
+    std::cout << "pathJoin() test 1: " << Helper::pathJoin("mydir", "dir2") << std::endl;
+    std::cout << "pathJoin() test 2: " << Helper::pathJoin("mydir/", "dir2") << std::endl;
     std::cout << "pathJoin() test 3: " << Helper::pathJoin("mydir/", "/dir2")
               << std::endl;
-    std::cout << "pathJoin() test 4: " << Helper::pathJoin("mydir", "/dir2")
-              << std::endl;
+    std::cout << "pathJoin() test 4: " << Helper::pathJoin("mydir", "/dir2") << std::endl;
 
     Helper::PureTuple<int, std::string, bool> values = {
         {1, "hi", true}, {2, "im", true}, {3, "helper", false}};
@@ -128,8 +120,8 @@ int main(int argc, char **argv) {
     values.pop({3, "helper", true});
     values.pop_back();
 
-    std::cout << "pure tuple test: " << std::boolalpha
-              << static_cast<bool>(values.at(0)) << std::endl;
+    std::cout << "pure tuple test: " << std::boolalpha << static_cast<bool>(values.at(0))
+              << std::endl;
     for (const auto &[x, y, z] : values) {
       std::cout << std::boolalpha << "(" << x << ", " << y << ", " << z << ")"
                 << std::endl;

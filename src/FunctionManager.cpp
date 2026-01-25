@@ -14,24 +14,28 @@
    limitations under the License.
 */
 
-#include <PartitionManager/PartitionManager.hpp>
-#include <algorithm>
 #include <fcntl.h>
+
+#include <PartitionManager/PartitionManager.hpp>
+#include <cstdarg>
 #include <memory>
 #include <string>
 #include <unordered_set>
 #include <vector>
 
+#include "functions/functions.hpp"
+
 namespace PartitionManager {
 std::vector<std::string> splitIfHasDelim(const std::string &s, const char delim,
                                          const bool checkForBadUsage) {
-  if (s.find(delim) == std::string::npos) return {};
+  if (s.find(delim) == std::string::npos)
+    return {};
   auto vec = CLI::detail::split(s, delim);
 
   if (checkForBadUsage) {
     std::unordered_set<std::string> set;
     for (const auto &str : vec) {
-      if (set.find(str) != set.end())
+      if (set.contains(str))
         throw CLI::ValidationError("Duplicate element in your inputs!");
       set.insert(str);
     }
@@ -41,29 +45,49 @@ std::vector<std::string> splitIfHasDelim(const std::string &s, const char delim,
 }
 
 void setupBufferSize(uint64_t &size, const std::string &entry) {
-  if (PART_MAP.hasPartition(entry) && PART_MAP.sizeOf(entry) % size != 0) {
-    println("%sWARNING%s: Specified buffer size is invalid for %s! Using "
-            "different buffer size for %s.",
-            YELLOW, STYLE_RESET, entry.data(), entry.data());
-    size = PART_MAP.sizeOf(entry) % 4096 == 0 ? 4096 : 1;
+  if (PARTS.hasPartition(entry) && PARTS.sizeOf(entry) % size != 0) {
+    OUT.println("%sWARNING%s: Specified buffer size is invalid for %s! Using "
+                "different buffer size for %s.",
+                YELLOW, STYLE_RESET, entry.data(), entry.data());
+    size = PARTS.sizeOf(entry) % 4096 == 0 ? 4096 : 1;
   } else if (Helper::fileIsExists(entry)) {
     if (Helper::fileSize(entry) % size != 0) {
-      println("%sWARNING%s: Specified buffer size is invalid for %s! using "
-              "different buffer size for %s.",
-              YELLOW, STYLE_RESET, entry.data(), entry.data());
+      OUT.println("%sWARNING%s: Specified buffer size is invalid for %s! using "
+                  "different buffer size for %s.",
+                  YELLOW, STYLE_RESET, entry.data(), entry.data());
       size = Helper::fileSize(entry) % 4096 == 0 ? 4096 : 1;
     }
   }
 }
 
-void processCommandLine(std::vector<std::string> &vec1,
-                        std::vector<std::string> &vec2, const std::string &s1,
-                        const std::string &s2, const char delim,
+void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2,
+                        const std::string &s1, const std::string &s2, const char delim,
                         const bool checkForBadUsage) {
   vec1 = splitIfHasDelim(s1, delim, checkForBadUsage);
   vec2 = splitIfHasDelim(s2, delim, checkForBadUsage);
 
-  if (vec1.empty() && !s1.empty()) vec1.push_back(s1);
-  if (vec2.empty() && !s2.empty()) vec2.push_back(s2);
+  if (vec1.empty() && !s1.empty())
+    vec1.push_back(s1);
+  if (vec2.empty() && !s2.empty())
+    vec2.push_back(s2);
 }
+
+pair PairError(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  char str[1024];
+  vsnprintf(str, sizeof(str), format, args);
+  va_end(args);
+  return pair{str, false};
+}
+
+pair PairSuccess(const char *format, ...) {
+  va_list args;
+  va_start(args, format);
+  char str[1024];
+  vsnprintf(str, sizeof(str), format, args);
+  va_end(args);
+  return pair{str, true};
+}
+
 } // namespace PartitionManager

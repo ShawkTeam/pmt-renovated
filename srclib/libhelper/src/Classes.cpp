@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 Yağız Zengin
+   Copyright 2026 Yağız Zengin
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,28 +14,41 @@
    limitations under the License.
 */
 
+#include <dirent.h>
+#include <fcntl.h>
+#include <libgen.h>
+#include <unistd.h>
+
 #include <cerrno>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <dirent.h>
 #include <exception>
-#include <fcntl.h>
+#include <fstream>
 #include <functional>
-#include <libgen.h>
+#include <iomanip>
+#include <iostream>
 #include <libhelper/lib.hpp>
 #include <sstream>
-#include <unistd.h>
 
 namespace Helper {
 Error::Error(const char *format, ...) {
-  char buf[1024];
   va_list args;
+
   va_start(args, format);
-  vsnprintf(buf, sizeof(buf), format, args);
+  int size = vsnprintf(nullptr, 0, format, args);
   va_end(args);
-  _message = std::string(buf);
+
+  if (size > 0) {
+    std::vector<char> buf(size + 1);
+    va_start(args, format);
+    vsnprintf(buf.data(), buf.size(), format, args);
+    va_end(args);
+
+    _message = std::string(buf.data());
+  }
+
   LOGN(HELPER, ERROR) << _message << std::endl;
 }
 
@@ -47,19 +60,18 @@ Logger::Logger(const LogLevels level, const char *func, const char *file,
       _file(source_file), _line(line) {}
 
 Logger::~Logger() {
-  if (LoggingProperties::DISABLE) return;
-  char str[1024];
-  snprintf(str, sizeof(str), "<%c> [ <prog %s> <on %s:%d> %s %s] %s(): %s",
-           static_cast<char>(_level), _program_name,
-           basename(const_cast<char *>(_file)), _line, currentDate().data(),
-           currentTime().data(), _function_name, _oss.str().data());
+  if (LoggingProperties::DISABLE)
+    return;
+
+  std::ostringstream oss;
+  oss << "<" << static_cast<char>(_level) << "> [ "
+      << "<prog " << _program_name << "> "
+      << "<on " << pathBasename(_file) << ":" << _line << "> " << currentDate() << " "
+      << currentTime() << "] " << _function_name << "(): " << _oss.str() << std::endl;
+  std::string logLine = oss.str();
 
   if (!isExists(_logFile)) {
-    if (const int fd =
-            open(_logFile, O_WRONLY | O_CREAT, DEFAULT_EXTENDED_FILE_PERMS);
-        fd != -1)
-      close(fd);
-    else {
+    if (std::ofstream tempFile(_logFile, std::ios::out); !tempFile) {
 #ifdef ANDROID_BUILD
       LoggingProperties::setLogFile("/tmp/last_pmt_logs.log")
 #else
@@ -76,19 +88,18 @@ Logger::~Logger() {
     }
   }
 
-  if (FILE *fp = fopen(_logFile, "a"); fp != nullptr) {
-    fprintf(fp, "%s", str);
-    fclose(fp);
+  if (std::ofstream fileStream(_logFile, std::ios::app); fileStream) {
+    fileStream << logLine;
   } else {
     LoggingProperties::setLogFile("last_logs.log");
-    LOGN(HELPER, INFO)
-        << "Cannot write logs to log file: " << _logFile << ": "
-        << strerror(errno)
-        << " Logging file setting up as: last_logs.log (this file)."
-        << std::endl;
+    LOGN(HELPER, INFO) << "Cannot write logs to log file: " << _logFile << ": "
+                       << strerror(errno)
+                       << " Logging file setting up as: last_logs.log (this file)."
+                       << std::endl;
   }
 
-  if (LoggingProperties::PRINT) printf("%s", str);
+  if (LoggingProperties::PRINT)
+    std::cout << logLine;
 }
 
 Logger &Logger::operator<<(std::ostream &(*msg)(std::ostream &)) {
@@ -112,9 +123,31 @@ garbageCollector::~garbageCollector() {
 void garbageCollector::delFileAfterProgress(const std::string &_path) {
   _files.push_back(_path);
 }
-void garbageCollector::closeAfterProgress(const int _fd) {
-  _fds.push_back(_fd);
-}
+void garbageCollector::closeAfterProgress(const int _fd) { _fds.push_back(_fd); }
 void garbageCollector::closeAfterProgress(FILE *_fp) { _fps.push_back(_fp); }
 void garbageCollector::closeAfterProgress(DIR *_dp) { _dps.push_back(_dp); }
+
+SilenceStdout::SilenceStdout() { silenceAgain(); }
+
+SilenceStdout::~SilenceStdout() {
+  if (saved_stdout != -1 && dev_null != -1)
+    stop();
+}
+
+void SilenceStdout::stop() {
+  fflush(stdout);
+  dup2(saved_stdout, STDOUT_FILENO);
+  close(saved_stdout);
+  close(dev_null);
+  saved_stdout = -1;
+  dev_null = -1;
+}
+
+void SilenceStdout::silenceAgain() {
+  fflush(stdout);
+  saved_stdout = dup(STDOUT_FILENO);
+  dev_null = open("/dev/null", O_WRONLY);
+  dup2(dev_null, STDOUT_FILENO);
+}
+
 } // namespace Helper

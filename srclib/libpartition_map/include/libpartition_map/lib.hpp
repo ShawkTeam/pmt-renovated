@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 Yağız Zengin
+   Copyright 2026 Yağız Zengin
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,381 +17,238 @@
 #ifndef LIBPARTITION_MAP_LIB_HPP
 #define LIBPARTITION_MAP_LIB_HPP
 
-#include <cstdint> // for uint64_t
-#include <exception>
+#include <filesystem>
 #include <functional>
+#include <gpt.h>
 #include <libhelper/lib.hpp>
-#include <list>
 #include <map>
 #include <memory>
-#include <optional>
 #include <string>
-#include <string_view>
-#include <utility> // for std::pair
+#include <tuple>
+#include <unordered_set>
+#include <utility>
+#include <vector>
 
 namespace PartitionMap {
-struct _entry {
-  std::string name;
 
-  struct {
-    uint64_t size;
-    bool isLogical;
-  } props;
-};
+enum SizeUnit : int { BYTE = 1, KiB = 2, MiB = 3, GiB = 4 };
 
-struct _returnable_entry {
-  uint64_t size;
-  bool isLogical;
-};
-
-using BasicInf = _returnable_entry;
-using Info = _entry;
-
-/**
- *   The main type of the library. The Builder class is designed
- *   to be easily manipulated and modified only on this class.
- */
-class basic_partition_map {
+class Partition_t {
 private:
-  void _resize_map();
-
-  [[nodiscard]] int _index_of(std::string_view name) const;
+  std::filesystem::path diskPath; // The disk path to which the partition
+                                  // belongs (like /dev/block/sdc).
+  uint32_t index = 0;             // The actual index of the partition within the table.
+  GPTPart gptPart;                // Complete data for the partition.
 
 public:
-  _entry *_data;
-  size_t _count{}, _capacity{};
-
-  basic_partition_map(const std::string &name, uint64_t size, bool logical);
-  basic_partition_map(const basic_partition_map &other);
-  basic_partition_map(basic_partition_map &&other) noexcept;
-  basic_partition_map();
-  ~basic_partition_map();
-
-  bool insert(const std::string &name, uint64_t size, bool logical);
-  void merge(const basic_partition_map &map);
-  void clear();
-
-  [[nodiscard]] uint64_t get_size(std::string_view name) const;
-  [[nodiscard]] bool is_logical(std::string_view name) const;
-  [[nodiscard]] _returnable_entry get_all(std::string_view name) const;
-  [[nodiscard]] bool find(std::string_view name) const;
-  [[nodiscard]] std::string find_(const std::string &name) const;
-  [[nodiscard]] size_t size() const;
-  [[nodiscard]] bool empty() const;
-
-  basic_partition_map &operator=(const basic_partition_map &map);
-
-  bool operator==(const basic_partition_map &other) const;
-  bool operator!=(const basic_partition_map &other) const;
-  bool operator!() const;
-  explicit operator bool() const;
-
-  Info operator[](int index) const;
-  BasicInf operator[](const std::string_view &name) const;
-
-  explicit operator std::vector<Info>() const;
-  explicit operator int() const;
-
-  class iterator {
-  public:
-    _entry *ptr;
-
-    explicit iterator(_entry *p);
-
-    auto operator*() const
-        -> std::pair<std::string &, decltype(_entry::props) &>;
-    _entry *operator->() const;
-    iterator &operator++();
-    iterator operator++(int);
-    bool operator!=(const iterator &other) const;
-    bool operator==(const iterator &other) const;
+  struct BasicData {
+    GPTPart gptPart;
+    uint32_t index;
+    std::filesystem::path diskPath;
   };
 
-  class constant_iterator {
-  public:
-    const _entry *ptr;
+  Partition_t() : gptPart(GPTPart()) {}
+  Partition_t(const Partition_t &other) = default;
+  explicit Partition_t(const BasicData &input)
+      : diskPath(input.diskPath), index(input.index), gptPart(input.gptPart) {}
 
-    explicit constant_iterator(const _entry *p);
+  GPTPart getGPTPart();     // Get copy of GPTPart data.
+  GPTPart *getGPTPartRef(); // Get reference of GPTPart data.
 
-    auto operator*() const
-        -> std::pair<const std::string &, const decltype(_entry::props) &>;
-    const _entry *operator->() const;
-    constant_iterator &operator++();
-    constant_iterator operator++(int);
-    bool operator!=(const constant_iterator &other) const;
-    bool operator==(const constant_iterator &other) const;
-  };
+  std::filesystem::path getPath() const; // Get partition path (like /dev/block/sdc4 or
+                                         // /dev/block/mmcblk0p3).
+  std::filesystem::path getDiskPath() const; // Get diskPath variable.
+  std::filesystem::path getPathByName();     // Get partition path by name (like
+                                             // /dev/block/by-name/system).
 
-  /* for-each support */
-  [[nodiscard]] iterator begin() const;
-  [[nodiscard]] iterator end() const;
-  [[nodiscard]] constant_iterator cbegin() const;
-  [[nodiscard]] constant_iterator cend() const;
-};
+  std::string getName();           // Get partition name.
+  std::string getDiskName() const; // Get disk name.
+  std::string getFormattedSizeString(
+      SizeUnit size_unit,
+      bool no_type = false) const; // Get partition size as formatted string
+                                   // (like 4096B, 4KiB, 128MiB, 2.5GiB).
 
-using Partition_t = _entry;
-using Map_t = basic_partition_map;
+  uint32_t getIndex() const;                          // Get partition index in GPT table.
+  uint64_t getSize(uint32_t sectorSize = 4096) const; // Get partition size in bytes.
+  uint64_t getStartByte(uint32_t sectorSize = 4096) const; // Starting byte address.
+  uint64_t getEndByte(uint32_t sectorSize = 4096) const;   // Ending byte address.
 
-class basic_partition_map_builder final {
+  void set(const BasicData &data);           // Set GPTPart object, index and disk path.
+  void setIndex(uint32_t new_index);         // Set partition index.
+  void setDiskPath(const std::string &path); // Set disk path.
+  void setGptPart(const GPTPart &otherGptPart); // Sset GPTPart object.
+
+  bool isDynamic() const; // Checks whether the partition is dynamic or not.
+  bool empty();           // Checks whether the partition info is empty or not.
+
+  bool operator==(const Partition_t &other) const; // p1 == p2
+  bool operator==(const GUIDData &other) const;    // p1 == guid
+  bool operator!=(const Partition_t &other) const; // p1 != p2
+  bool operator!=(const GUIDData &other) const;    // p1 != guid
+  explicit operator bool();                        // p (equals !empty())
+  bool operator!();                                // !p (equals empty())
+
+  Partition_t &operator=(const Partition_t &other) = default; // p1 = p2
+  friend std::ostream &operator<<(std::ostream &os,
+                                  Partition_t &other); // std::cout << p1
+}; // class Partition_t
+
+class LogicalPartition_t {
 private:
-  Map_t _current_map;
-  std::string _workdir;
-  bool _any_generating_error, _map_builded;
-
-  Map_t _build_map(std::string_view path, bool logical = false);
-
-  void _insert_logicals(Map_t &&logicals);
-  void _map_build_check() const;
-
-  [[nodiscard]] static bool _is_real_block_dir(std::string_view path);
-  [[nodiscard]] uint64_t _get_size(const std::string &path);
+  std::filesystem::path partitionPath;
 
 public:
-  /**
-   *   By default, it searches the directories in the
-   *   defaultEntryList in PartitionMap.cpp in order and
-   *   uses the directory it finds.
-   */
-  basic_partition_map_builder();
+  class Extra {
+  public:
+    static bool isReallyLogical(const std::filesystem::path &path);
+  };
 
-  /**
-   *   A constructor with input. Need search path
-   */
-  explicit basic_partition_map_builder(std::string_view path);
+  LogicalPartition_t() = default;
 
-  /**
-   *   Move constructor
-   */
-  basic_partition_map_builder(basic_partition_map_builder &&other) noexcept;
+  LogicalPartition_t(const LogicalPartition_t &other)
+      : partitionPath(other.partitionPath) {
+    if (!Extra::isReallyLogical(partitionPath))
+      throw std::invalid_argument("Invalid partition path! It's not logical partition!");
+  }
+  explicit LogicalPartition_t(std::filesystem::path path)
+      : partitionPath(std::move(path)) {
+    if (!Extra::isReallyLogical(partitionPath))
+      throw std::invalid_argument("Invalid partition path! It's not logical partition!");
+  }
 
-  /**
-   *   Returns the current list content in Map_t type.
-   */
-  [[nodiscard]] Map_t getAll() const;
+  std::filesystem::path
+  getPath() const; // Get partition path (like /dev/block/mapper/system).
+  std::filesystem::path
+  getAbsolutePath() const; // Get partition path (like /dev/block/dm-3).
 
-  /**
-   *   Returns information of a specific partition in
-   *   Map_temp_t type. If the partition is not in the
-   *   currently created list, returns std::nullopt.
-   */
-  [[nodiscard]] std::optional<std::pair<uint64_t, bool>>
-  get(std::string_view name) const;
+  std::string getName() const; // Get partition name.
 
-  /**
-   *   If there is a logical partition(s) in the created
-   *   list, it returns a list of type std::list (containing
-   *   data of type std::string). If there is no logical
-   *   partition in the created list, it returns std::nullopt.
-   */
-  [[nodiscard]] std::optional<std::list<std::string>>
-  getLogicalPartitionList() const;
+  uint64_t getSize() const; // Get partition size in bytes.
 
-  /**
-   *   The physical partitions in the created list are
-   *   returned as std::list type. If there is no content
-   *   due to any problem, returns std::nullopt.
-   */
-  [[nodiscard]] std::optional<std::list<std::string>>
-  getPhysicalPartitionList() const;
+  bool empty() const; // Checks whether the partition info is empty or not.
 
-  /**
-   *   The partitions in the created list are returned as std::list
-   *   If there is no content due to any problem, returns std::nullopt
-   */
-  [[nodiscard]] std::optional<std::list<std::string>> getPartitionList() const;
+  void setPartitionPath(const std::filesystem::path &path); // Set partition path.
 
-  /**
-   *   Returns the full link path of the entered partition
-   *   name in the current search directory as std::string.
-   *   If the partition is not in the list, an empty
-   *   std::string is returned.
-   */
-  [[nodiscard]] std::string getRealLinkPathOf(std::string_view name) const;
+  bool operator==(const LogicalPartition_t &other) const; // lp1 == lp2
+  bool operator!=(const LogicalPartition_t &other) const; // lp1 != lp2
+  explicit operator bool() const;                         // lp (equals to !empty())
+  bool operator!() const;                                 // !lp (equlas to empty())
 
-  /**
-   *   Returns the actual path of the partition as
-   *   std::string. Like /dev/block/sda5
-   */
-  [[nodiscard]] std::string getRealPathOf(std::string_view name) const;
+  LogicalPartition_t &operator=(const LogicalPartition_t &other) = default; // lp1 = lp2
+};
 
-  /**
-   *   If it exists, the path to the search string is
-   *   returned as std::string. If it does not exist,
-   *   an empty std::string is returned.
-   */
-  [[nodiscard]] std::string getCurrentWorkDir() const;
+class Builder {
+private:
+  std::vector<Partition_t> partitions;
+  std::vector<LogicalPartition_t> logicalPartitions;
+  std::map<std::filesystem::path, std::shared_ptr<GPTData>> gptDataCollection;
+  std::unordered_set<std::string> diskNames;
 
-  /**
-   *   Returns whether the entered partition name is in the
-   *   created partition list as a bool.
-   */
-  [[nodiscard]] bool hasPartition(std::string_view name) const;
+  bool buildAutoOnDiskChanges, isUFS;
+  std::string seek;
 
-  /**
-   *   Returns true if the device has dynamic partitions, false otherwise.
-   */
-  [[nodiscard]] bool hasLogicalPartitions() const;
+  void scan();
+  void scanLogicalPartitions();
+  void findDiskPaths();
 
-  /**
-   *   Returns the bool type status of whether the
-   *   entered partition name is marked as logical in the
-   *   created list. Alternatively, the current partition
-   *   information can be retrieved with the get() function
-   *   and checked for logicality.
-   */
-  [[nodiscard]] bool isLogical(std::string_view name) const;
+public:
+  Builder() : buildAutoOnDiskChanges(true), isUFS(false) {
+    findDiskPaths();
+    scan();
+    scanLogicalPartitions();
+  }
 
-  /**
-   *   Copy partition list to vec, current vec contents are cleaned
-   */
-  bool copyPartitionsToVector(std::vector<std::string> &vec) const;
+  std::vector<Partition_t>
+  getPartitions() const; // Get partitions (std::vector<Partition_t> partitions).
+  std::vector<Partition_t>
+  getPartitionsByDisk(const std::string &name) const; // Get partitions of disk by name.
+  std::vector<LogicalPartition_t>
+  getLogicalPartitions() const; // Get logical partitions (logicalPartitions).
 
-  /**
-   *   Copy logical partition list to vec, current vec contents are cleaned
-   */
-  bool copyLogicalPartitionsToVector(std::vector<std::string> &vec) const;
+  std::unordered_set<std::string> getDiskNames() const; // Get disk names (diskNames).
+  std::unordered_set<std::filesystem::path>
+  getDiskPaths() const; // Get disk paths (form gptDataCollection).
 
-  /**
-   *   Copy physical partition list to vec, current vec contents are cleaned
-   */
-  bool copyPhysicalPartitionsToVector(std::vector<std::string> &vec) const;
+  const std::map<std::filesystem::path, std::shared_ptr<GPTData>> &
+  getAllGPTData() const; // Get gptDataCollection.
 
-  /**
-   *   The created list and the current search index name are cleared.
-   */
-  void clear();
+  const std::shared_ptr<GPTData> &
+  getGPTDataOf(const std::string &name) const; // Get gpt data of disk by name.
 
-  /**
-   *   Do input function (lambda) for all partitions.
-   */
-  bool doForAllPartitions(
-      const std::function<bool(std::string, BasicInf)> &func) const;
+  std::vector<std::pair<std::string, uint64_t>>
+  getDataOfLogicalPartitions() const; // Get logical partition information.
 
-  /**
-   *   Do input function (lambda) for physical partitions.
-   */
-  bool doForPhysicalPartitions(
-      const std::function<bool(std::string, BasicInf)> &func) const;
+  std::vector<std::tuple<std::string, uint64_t, bool>>
+  getDataOfPartitions(); // Get information about partitions.
+  std::vector<std::tuple<std::string, uint64_t, bool>> getDataOfPartitionsByDisk(
+      const std::string &name); // Get information about partitions by disk name.
 
-  /**
-   *   Do input function (lambda) for logical partitions.
-   */
-  bool doForLogicalPartitions(
-      const std::function<bool(std::string, BasicInf)> &func) const;
+  std::string getSeek() const; // Get the disk name that the [uint32_t] operator will use.
 
-  /**
-   *   Do input function (lambda) for input partition list.
-   */
-  bool doForPartitionList(
-      const std::vector<std::string> &partitions,
-      const std::function<bool(std::string, BasicInf)> &func) const;
+  bool
+  hasPartition(const std::string &name); // Check <name> partition is existing or not.
+  bool hasLogicalPartition(const std::string &name)
+      const; // Check <name> logical partition is existing or not.
+  bool
+  hasDisk(const std::string &name) const; // Check <name> disk name is existing or not.
+  bool isUsesUFS() const;                 // Get the device uses UFS or not.
+  bool isHasSuperPartition() const;       // Get any disk has super partition or not.
+  bool isLogical(const std::string &name) const; // Check <name> is logical partition or
+                                                 // not. Same as hasLogicalPartition().
+  bool empty() const;          // Checks partitions, logicalPartitions and
+                               // gptDataCollection is empty or not.
+  bool diskNamesEmpty() const; // Checks diskNames is empty or not.
+  bool valid();                // Validate GPTData collection integrity. Checks with
+                               // GPTData::Verify() and GPTData::CheckHeaderValidity().
+  bool foreachPartitions(const std::function<bool(Partition_t &)>
+                             &function); // For-each input function for partition list.
+  bool foreachLogicalPartitions(
+      const std::function<bool(LogicalPartition_t &)>
+          &function); // For-each input function for logical partition list.
+  bool foreachGptData(const std::function<bool(const std::filesystem::path &,
+                                               std::shared_ptr<GPTData> &)>
+                          &function); // For-each input function for gpt data collection.
 
-  /**
-   *   The entered path is defined as the new search
-   *   directory and the search is performed in the entered
-   *   directory. If everything goes well, true is returned.
-   */
-  bool readDirectory(std::string_view path);
+  void reScan(bool auto_toggle = false);    // Rescan disks.
+  void addDisk(const std::string &name);    // Add disk.
+  void removeDisk(const std::string &name); // Remove disk.
+  void setSeek(const std::string &name);    // Set the disk name that the
+                                            // [uint32_t] operator will use.
 
-  /**
-   *   Reads default /dev entries and builds map.
-   */
-  bool readDefaultDirectories();
+  void setDisks(
+      std::unordered_set<std::string> names); // Set disks. By names (like sda, sdc, sdg).
+  void setGPTDataOf(const std::string &name,
+                    std::shared_ptr<GPTData> data); // Set GPTData of <name> disk.
+  void setAutoScanOnDiskChanges(bool state);        // Set auto scanning as <state>.
+  void clear(); // Cleanup data (excepts auto scan state and seek name).
+  void reset(); // Cleanup (clear()) and reset variables.
 
-  /**
-   *   Whether the current list is empty or not is returned
-   *   as bool type. If there is content in the list, true
-   *   is returned, otherwise false is returned.
-   */
-  [[nodiscard]] bool empty() const;
+  class Extra {
+  public:
+    static bool isReallyDisk(const std::string &name);
+  };
 
-  /**
-   *   If it exists, the size of the partition with the
-   *   entered name is returned as uint64_t type.
-   *   If it does not exist, 0 is returned.
-   */
-  [[nodiscard]] uint64_t sizeOf(std::string_view name) const;
+  bool operator==(const Builder &other); // pd1 == pd2
+  bool operator!=(const Builder &other); // pd1 != pd2
+  explicit operator bool();              // if (pd) { ... } (equals to valid())
+  bool operator!();                      // if (!pd) { ... } (equals to !valid())
 
-  /**
-   *   If the content lists of the two created objects are
-   *   the same (checked only according to the partition
-   *   names), true is returned, otherwise false is returned
-   */
-  friend bool operator==(const basic_partition_map_builder &lhs,
-                         const basic_partition_map_builder &rhs);
+  const std::shared_ptr<GPTData> &
+  operator[](const std::string &name) const; // std::shared_ptr<GPTData> data = pd["sda"]
+  GPTPart operator[](uint32_t index);        // GPTPart part = pd[2]
 
-  /**
-   *   The opposite logic of the == operator.
-   */
-  friend bool operator!=(const basic_partition_map_builder &lhs,
-                         const basic_partition_map_builder &rhs);
-
-  /**
-   *   You can check whether the object was created
-   *   successfully. If the problem did not occur, true is
-   *   returned, if it did, false is returned.
-   */
-  explicit operator bool() const;
-
-  /**
-   *   Returns true if the object creation failed (i.e., there's a problem),
-   *   and false if the object is correctly created.
-   */
-  bool operator!() const;
-
-  /**
-   *   Build map with input path. Implementation of readDirectory().
-   */
-  bool operator()(std::string_view path);
-
-  /**
-   *   Get Map_t object reference
-   */
-  Map_t &operator*();
-
-  /**
-   *   Get constant Map_t object reference
-   */
-  const Map_t &operator*() const;
-
-  /**
-   *  Get Info structure with given index
-   */
-  Info operator[](int index) const;
-
-  /**
-   *  Get BasicInfo structure with given index
-   */
-  BasicInf operator[](const std::string_view &name) const;
-
-  /**
-   *   Get map contents as vector (PartitionManager::Info type).
-   */
-  [[nodiscard]] explicit operator std::vector<Info>() const;
-
-  /**
-   *   Get total partition count in map (int type).
-   */
-  [[nodiscard]] explicit operator int() const;
-
-  /**
-   *   Get current working directory.
-   */
-  [[nodiscard]] explicit operator std::string() const;
+  Builder &operator=(const Builder &other) = default; // pd2 = pd1
 };
 
 using Error = Helper::Error;
 
-/**
- *   To get the version information of libpartition_map
- *   library. It is returned as std::string type.
- */
+constexpr int NAME = 0;
+constexpr int SIZE = 1;
+constexpr int DYNAMIC = 2;
+
 std::string getLibVersion();
 
-using BuildMap = basic_partition_map_builder;
-using Map = basic_partition_map_builder;
-
-namespace Extras {
+namespace Extra {
 namespace FileSystemMagic {
 constexpr uint64_t EXTFS_FS = 0xEF53;
 constexpr uint64_t F2FS_FS = 0xF2F52010;
@@ -410,26 +267,26 @@ constexpr uint64_t VBOOT_IMAGE = 0x544F4F4252444E56;
 constexpr uint64_t LK_IMAGE = 0x00006B6C;
 constexpr uint64_t DTBO_IMAGE = 0x1EABB7D7;
 constexpr uint64_t VBMETA_IMAGE = 0x425641;
-constexpr uint64_t SUPER_IMAGE = 0x7265797573;
+constexpr uint64_t SUPER_IMAGE = 0x61446C67;
 constexpr uint64_t SPARSE_IMAGE = 0x3AFF26ED;
-constexpr uint64_t ELF =
-    0x464C457F; // It makes more sense than between file systems
+constexpr uint64_t ELF = 0x464C457F;
 constexpr uint64_t RAW = 0x00000000;
 } // namespace AndroidMagic
 
-extern std::map<uint64_t, std::string> FileSystemMagicMap;
-extern std::map<uint64_t, std::string> AndroidMagicMap;
-extern std::map<uint64_t, std::string> MagicMap;
+extern std::map<uint64_t, std::string> FileSystemMagics;
+extern std::map<uint64_t, std::string> AndroidMagics;
+extern std::map<uint64_t, std::string> Magics;
 
 size_t getMagicLength(uint64_t magic);
 bool hasMagic(uint64_t magic, ssize_t buf, const std::string &path);
 std::string formatMagic(uint64_t magic);
-} // namespace Extras
+} // namespace Extra
 } // namespace PartitionMap
 
-#define MAP "libpartition_map"
-
-#define COMMON_LAMBDA_PARAMS                                                   \
-  (const std::string &partition, const PartitionMap::BasicInf props)
+#define FOREACH_PARTITIONS_LAMBDA_PARAMETERS (PartitionMap::Partition_t & partition)
+#define FOREACH_LOGICAL_PARTITIONS_LAMBDA_PARAMETERS                                     \
+  (PartitionMap::LogicalPartition_t & lpartition)
+#define FOREACH_GPT_DATA_LAMBDA_PARAMETERS                                               \
+  (const std::filesystem::path &, std::shared_ptr<GPTData> &)
 
 #endif // #ifndef LIBPARTITION_MAP_LIB_HPP

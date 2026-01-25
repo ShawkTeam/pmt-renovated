@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 #
-#  Copyright 2025 Yağız Zengin
+#  Copyright 2026 Yağız Zengin
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -15,29 +15,25 @@
 #  limitations under the License.
 #
 
-THIS="$(basename $0)"
+THIS="$(basename "$0")"
 TARGET_ABI_LIST=("arm64-v8a" "armeabi-v7a")
 
-echo() { command echo "[$THIS]: $@"; }
+echo() { command echo "[$THIS]: $*"; }
 
 checks() {
     if [ -z "$ANDROID_NDK" ]; then
         echo "Please set ANDROID_NDK variable as your NDK path."
         exit 1
     fi
-    if ! which cmake &>/dev/null; then
-        echo "Please verify your CMake installation."
-        exit 1
-    fi
-    if ! which ninja &>/dev/null; then
-        echo "Please verify your Ninja installation."
+    if ! which cmake &>/dev/null || ! which ninja &>/dev/null; then
+        echo "Please verify your CMake and Ninja installation."
         exit 1
     fi
 }
 
 clean() {
     echo "Cleaning workspace."
-    for a in ${TARGET_ABI_LIST[@]}; do rm -rf build_$a; done
+    for a in "${TARGET_ABI_LIST[@]}"; do rm -rf "build_$a"; done
     rm -rf include/generated \
         srclib/libhelper/tests/dir \
         srclib/libhelper/tests/linkdir \
@@ -47,23 +43,23 @@ clean() {
 build() {
     set -e
     command echo -e "BUILD INFO:
-    ARCHS: ${TARGET_ABI_LIST[@]}
+    ARCHS: ${TARGET_ABI_LIST[*]}
     ANDROID_PLATFORM: $ANDROID_PLATFORM
     ANDROID_TOOLCHAIN_FILE: $ANDROID_NDK/build/cmake/android.toolchain.cmake\n"
 
-    for a in ${TARGET_ABI_LIST[@]}; do
+    for a in "${TARGET_ABI_LIST[@]}"; do
         echo "Configuring for $a..."
-        mkdir -p build_$a
-        cmake -B build_$a -G Ninja -S . $1 \
-            -DCMAKE_TOOLCHAIN_FILE=$ANDROID_NDK/build/cmake/android.toolchain.cmake \
-            -DANDROID_ABI=$a \
-            -DANDROID_PLATFORM=$ANDROID_PLATFORM \
+        mkdir -p "build_$a"
+        cmake -B "build_$a" -G Ninja -S . "$@" \
+            -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI="$a" \
+            -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
             -DANDROID_STL=c++_static
     done
 
-    for a in ${TARGET_ABI_LIST[@]}; do
+    for a in "${TARGET_ABI_LIST[@]}"; do
         echo "Building $a artifacts... Using $(($(nproc) - 2)) thread."
-        cmake --build build_$a -j$(($(nproc) - 2))
+        cmake --build "build_$a" -j$(($(nproc) - 2))
         echo "$a build complete, artifacts: $PWD/build_$a"
     done
 }
@@ -73,13 +69,13 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-[ -z $ANDROID_PLATFORM ] && ANDROID_PLATFORM="android-21"
+[ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-28"
 checks
 
 case $1 in
-    "build")   build $2;;
+    "build")   shift; build "$@";;
     "clean")   clean ;;
-    "rebuild") clean; build $2;;
+    "rebuild") clean; shift; build "$@";;
     *)
         command echo "$0: Unknown argument: $1"
         exit 1 ;;

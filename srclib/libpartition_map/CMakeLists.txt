@@ -1,5 +1,5 @@
 #
-#  Copyright 2025 Yağız Zengin
+#  Copyright 2026 Yağız Zengin
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -16,27 +16,42 @@
 
 # Sources
 set(LIBPARTITION_MAP_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Getters.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Magic.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/PartitionMap.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Type.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/Builder.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/LogicalPartition.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/Magic.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/src/Partition.cpp
 )
 
 # Add targets
-add_library(partition_map_shared SHARED ${LIBPARTITION_MAP_SOURCES})
-add_library(partition_map_static STATIC ${LIBPARTITION_MAP_SOURCES})
+add_library(libpartition_map_shared SHARED ${LIBPARTITION_MAP_SOURCES})
+add_library(libpartition_map_static STATIC ${LIBPARTITION_MAP_SOURCES})
+add_executable(libpartition_map_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)
 
 # Set appropriate output names
-set_target_properties(partition_map_shared PROPERTIES OUTPUT_NAME "partition_map")
-set_target_properties(partition_map_static PROPERTIES OUTPUT_NAME "partition_map")
+set_target_properties(libpartition_map_shared PROPERTIES OUTPUT_NAME "partition_map")
+set_target_properties(libpartition_map_static PROPERTIES OUTPUT_NAME "partition_map")
 
-# Set linker flags
-target_link_options(partition_map_shared PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
-target_link_libraries(partition_map_shared PRIVATE helper_shared)
+# Set linker flags and define required libraries
+target_link_options(libpartition_map_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
+target_link_options(libpartition_map_shared PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
+target_link_libraries(libpartition_map_shared PRIVATE libhelper_shared libgptf_shared libext2_uuid_shared)
+target_link_libraries(libpartition_map_static PRIVATE libhelper_static libgptf_static libext2_uuid_static)
+target_link_libraries(libpartition_map_test PRIVATE libpartition_map_static libhelper_static libgptf_static libext2_uuid_static)
 
-# Build libpartition_map_test if CMAKE_BUILD_TYPE is not release
-if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Release")
-	add_executable(libpartition_map_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)
-	target_link_libraries(libpartition_map_test PRIVATE partition_map_shared PRIVATE helper_shared)
-	target_link_options(libpartition_map_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
+# Add libpartition_map to include directories
+target_include_directories(libpartition_map_shared PUBLIC include)
+target_include_directories(libpartition_map_static PUBLIC include)
+
+# Set compiler flags
+target_compile_definitions(libpartition_map_shared PRIVATE _FILE_OFFSET_BITS=64)
+target_compile_definitions(libpartition_map_static PRIVATE _FILE_OFFSET_BITS=64)
+target_compile_definitions(libpartition_map_test PRIVATE _FILE_OFFSET_BITS=64)
+
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	target_link_options(libpartition_map_shared PRIVATE -fsanitize=address)
+	target_link_options(libpartition_map_static PRIVATE -fsanitize=address)
+	target_link_options(libpartition_map_test PRIVATE -fsanitize=address)
+	target_compile_options(libpartition_map_shared PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
+	target_compile_options(libpartition_map_static PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
+	target_compile_options(libpartition_map_test PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
 endif()

@@ -25,7 +25,7 @@
 #define RUN bool FUNCTION_CLASS::run()
 #define RUN_ASYNC pair FUNCTION_CLASS::runAsync
 #define IS_USED bool FUNCTION_CLASS::isUsed() const
-#define IS_USED_COMMON_BODY                                                    \
+#define IS_USED_COMMON_BODY                                                              \
   bool FUNCTION_CLASS::isUsed() const { return cmd->parsed(); }
 #define NAME const char *FUNCTION_CLASS::name() const
 
@@ -33,15 +33,18 @@
  *   Please define FUNCTION_CLASS before using these macros!!! (INIT etc.)
  */
 
-#define COMMON_FUNCTION_BODY()                                                 \
-  CLI::App *cmd = nullptr;                                                     \
-  bool init(CLI::App &_app) override;                                          \
-  bool run() override;                                                         \
-  [[nodiscard]] bool isUsed() const override;                                  \
+#define COMMON_FUNCTION_BODY()                                                           \
+  CLI::App *cmd = nullptr;                                                               \
+  bool init(CLI::App &_app) override;                                                    \
+  bool run() override;                                                                   \
+  [[nodiscard]] bool isUsed() const override;                                            \
   [[nodiscard]] const char *name() const override
 
 namespace PartitionManager {
 using pair = std::pair<std::string, bool>;
+
+__attribute__((format(printf, 1, 2))) pair PairError(const char *format, ...);
+__attribute__((format(printf, 1, 2))) pair PairSuccess(const char *format, ...);
 
 // Back-up function
 class backupFunction final : public FunctionBase {
@@ -52,8 +55,8 @@ private:
 
 public:
   COMMON_FUNCTION_BODY();
-  static pair runAsync(const std::string &partitionName,
-                       const std::string &outputName, uint64_t bufferSize);
+  static pair runAsync(const std::string &partitionName, const std::string &outputName,
+                       uint64_t bufferSize);
 };
 
 // Image flasher function
@@ -66,9 +69,8 @@ private:
 
 public:
   COMMON_FUNCTION_BODY();
-  static pair runAsync(const std::string &partitionName,
-                       const std::string &imageName, uint64_t bufferSize,
-                       bool deleteAfterProgress);
+  static pair runAsync(const std::string &partitionName, const std::string &imageName,
+                       uint64_t bufferSize, bool deleteAfterProgress);
 };
 
 // Eraser function (writes zero bytes to partition)

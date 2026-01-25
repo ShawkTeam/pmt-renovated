@@ -18,27 +18,46 @@
 #define LIBPMT_LIB_HPP
 
 #include <CLI/CLI11.hpp>
+#include <format>
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
 #include <memory>
 #include <string>
 #include <vector>
 
-#define PMT "libpmt"
+#define PMT "pmt-core"
 #define PMTE "pmt"
-#define PMTF "libpmt-function-manager"
+#define PMTF "pmt-core--function-manager"
 
 // Quick access to variables.
 #define VARS (*Variables)
+
 // Quick access to partition map.
-#define PART_MAP (*VARS.PartMap)
+#define PART_TABLES (*VARS.partitionTables)
+
+#define OUT out
+
+class OutUtil final {
+private:
+  Helper::garbageCollector collector;
+
+public:
+  FILE *standart = nullptr, *error = nullptr;
+
+  OutUtil(); // Default constructor
+
+  __printflike(2, 3) void print(const char *format, ...) const;
+  __printflike(2, 3) void println(const char *format, ...) const;
+
+  [[nodiscard]] FILE *getStandartPointer() const;
+  [[nodiscard]] FILE *getErrorPointer() const;
+
+  static FILE *makeFilePointer(FILE *real);
+  static int writer(void *cookie, const char *buf, int size);
+};
 
 namespace PartitionManager {
 int Main(int argc, char **argv);
-
-// Print messages if not using quiet mode
-__attribute__((format(printf, 1, 2))) void print(const char *format, ...);
-__attribute__((format(printf, 1, 2))) void println(const char *format, ...);
 
 // If there is a delimiter in the string, CLI::detail::split returns; if not, an
 // empty vector is returned. And checks duplicate arguments.
@@ -47,9 +66,8 @@ std::vector<std::string> splitIfHasDelim(const std::string &s, char delim,
 
 // Process vectors with input strings. Use for [flag(s)]-[other flag(s)]
 // situations
-void processCommandLine(std::vector<std::string> &vec1,
-                        std::vector<std::string> &vec2, const std::string &s1,
-                        const std::string &s2, char delim,
+void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2,
+                        const std::string &s1, const std::string &s2, char delim,
                         bool checkForBadUsage = false);
 
 // Setting ups buffer size
@@ -59,6 +77,8 @@ std::string getLibVersion();
 
 std::string getAppVersion(); // Not Android app version (an Android app is
                              // planned!), tells pmt version.
+
+inline OutUtil out;
 
 enum basic_function_flags {
   NO_SU = 1,
@@ -82,17 +102,17 @@ public:
 };
 
 // A class for function management.
-template <class _Type> class basic_manager {
+template <class Type> class basic_manager {
 private:
-  std::vector<std::unique_ptr<_Type>> _functions;
+  std::vector<std::unique_ptr<Type>> _functions;
 
 public:
-  void registerFunction(std::unique_ptr<_Type> _func, CLI::App &_app) {
+  void registerFunction(std::unique_ptr<Type> _func, CLI::App &_app) {
     LOGN(PMTF, INFO) << "registering: " << _func->name() << std::endl;
     for (const auto &f : _functions) {
       if (std::string(_func->name()) == std::string(f->name())) {
-        LOGN(PMTF, INFO) << "Is already registered: " << _func->name()
-                         << ". Skipping." << std::endl;
+        LOGN(PMTF, INFO) << "Is already registered: " << _func->name() << ". Skipping."
+                         << std::endl;
         return;
       }
     }
@@ -107,8 +127,7 @@ public:
     for (const auto &func : _functions) {
       if (func->isUsed()) {
         std::for_each(func->flags.begin(), func->flags.end(), [&](const int x) {
-          LOGN(PMTF, INFO) << "Used flag " << x << " on " << func->name()
-                           << std::endl;
+          LOGN(PMTF, INFO) << "Used flag " << x << " on " << func->name() << std::endl;
         });
         return std::find(func->flags.begin(), func->flags.end(), flag) !=
                func->flags.end();
@@ -118,9 +137,11 @@ public:
   }
 
   [[nodiscard]] bool isUsed(const std::string &name) const {
-    if (_functions.empty()) return false;
+    if (_functions.empty())
+      return false;
     for (const auto &func : _functions) {
-      if (func->name() == name) return func->isUsed();
+      if (func->name() == name)
+        return func->isUsed();
     }
     return false;
   }
@@ -129,16 +150,14 @@ public:
     LOGN(PMTF, INFO) << "running caught commands in command-line." << std::endl;
     for (const auto &func : _functions) {
       if (func->isUsed()) {
-        LOGN(PMTF, INFO) << func->name()
-                         << " is calling because used in command-line."
+        LOGN(PMTF, INFO) << func->name() << " is calling because used in command-line."
                          << std::endl;
         return func->run();
       }
     }
 
-    LOGN(PMTF, INFO) << "not found any used function from command-line."
-                     << std::endl;
-    println("Target progress is not specified. Specify a progress.");
+    LOGN(PMTF, INFO) << "not found any used function from command-line." << std::endl;
+    OUT.println("Target progress is not specified. Specify a progress.");
     return false;
   }
 };
@@ -147,7 +166,7 @@ class basic_variables final {
 public:
   basic_variables();
 
-  std::unique_ptr<PartitionMap::BuildMap> PartMap;
+  std::unique_ptr<PartitionMap::Builder> partitionTables;
 
   std::string searchPath, logFile;
   bool onLogical;
@@ -164,7 +183,6 @@ using VariableTable = basic_variables;
 using Error = Helper::Error;
 
 extern std::unique_ptr<VariableTable> Variables;
-extern FILE *pstdout, *pstderr;
 } // namespace PartitionManager
 
 #endif // #ifndef LIBPMT_LIB_HPP

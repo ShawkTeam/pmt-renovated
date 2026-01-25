@@ -14,17 +14,17 @@ Copyright 2025 Yağız Zengin
    limitations under the License.
 */
 
-#include "functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
+
+#include "functions.hpp"
 
 #define CFUN "cleanLogFunction"
 #define FUNCTION_CLASS cleanLogFunction
 
 namespace PartitionManager {
 INIT {
-  LOGN(CFUN, INFO) << "Initializing variables of clean log function."
-                   << std::endl;
-  flags = {FunctionFlags::NO_MAP_CHECK, FunctionFlags::NO_SU};
+  LOGN(CFUN, INFO) << "Initializing variables of clean log function." << std::endl;
+  flags = {NO_MAP_CHECK, NO_SU};
   cmd = _app.add_subcommand("clean-logs", "Clean PMT logs.");
   return true;
 }

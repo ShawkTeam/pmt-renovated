@@ -1,15 +1,8 @@
-# Dont'd add IDE files
+# Dont'd add IDE-generated temporary files
 cmake-build-*
-.idea
-.vscode
 
 # Don't add generated headers
 include/generated
 
-# Dont't add build directories
+# Dont't add temporary build directories
 build_*
-
-# Don't add generated objects and libs
-*.o
-*.so
-*.a

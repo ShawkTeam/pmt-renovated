@@ -14,14 +14,16 @@ Copyright 2025 Yağız Zengin
    limitations under the License.
 */
 
-#include "functions.hpp"
+#include <fcntl.h>
+#include <unistd.h>
+
 #include <PartitionManager/PartitionManager.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
-#include <fcntl.h>
 #include <random>
-#include <unistd.h>
+
+#include "functions.hpp"
 
 #define MTFUN "memoryTestFunction"
 #define FUNCTION_CLASS memoryTestFunction
@@ -29,8 +31,7 @@ Copyright 2025 Yağız Zengin
 namespace PartitionManager {
 
 INIT {
-  LOGN(MTFUN, INFO) << "Initializing variables of memory test function."
-                    << std::endl;
+  LOGN(MTFUN, INFO) << "Initializing variables of memory test function." << std::endl;
   flags = {FunctionFlags::NO_MAP_CHECK, FunctionFlags::ADB_SUFFICIENT};
   cmd = _app.add_subcommand("memtest", "Test your write/read speed of device.");
   cmd->add_option("testDirectory", testPath, "Path to test directory")
@@ -51,8 +52,7 @@ INIT {
   cmd->add_option("-s,--file-size", testFileSize, "File size of test file")
       ->transform(CLI::AsSizeValue(false))
       ->default_val("1GB");
-  cmd->add_flag("--no-read-test", doNotReadTest,
-                "Don't read test data from disk")
+  cmd->add_flag("--no-read-test", doNotReadTest, "Don't read test data from disk")
       ->default_val(false);
 
   return true;
@@ -60,9 +60,8 @@ INIT {
 
 RUN {
   if (testFileSize > GB(2) && !VARS.forceProcess)
-    throw Error(
-        "File size is more than 2GB! Sizes over 2GB may not give accurate "
-        "results in the write test. Use -f (--force) for skip this error.");
+    throw Error("File size is more than 2GB! Sizes over 2GB may not give accurate "
+                "results in the write test. Use -f (--force) for skip this error.");
 
   LOGN(MTFUN, INFO) << "Starting memory test on " << testPath << std::endl;
   Helper::garbageCollector collector;
@@ -79,23 +78,24 @@ RUN {
 
   const int wfd = Helper::openAndAddToCloseList(
       test, collector, O_WRONLY | O_CREAT | O_TRUNC | O_SYNC, 0644);
-  if (wfd < 0) throw Error("Can't open/create test file: %s", strerror(errno));
+  if (wfd < 0)
+    throw Error("Can't open/create test file: %s", strerror(errno));
 
   LOGN(MTFUN, INFO) << "Sequential write test started!" << std::endl;
   const auto startWrite = std::chrono::high_resolution_clock::now();
   ssize_t bytesWritten = 0;
   while (bytesWritten < testFileSize) {
     const ssize_t ret = write(wfd, buffer, bufferSize);
-    if (ret < 0) throw Error("Can't write to test file: %s", strerror(errno));
+    if (ret < 0)
+      throw Error("Can't write to test file: %s", strerror(errno));
     bytesWritten += ret;
   }
 
   const auto endWrite = std::chrono::high_resolution_clock::now();
 
-  const double writeTime =
-      std::chrono::duration<double>(endWrite - startWrite).count();
-  println("Sequential write speed: %3.f MB/s",
-          (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / writeTime);
+  const double writeTime = std::chrono::duration<double>(endWrite - startWrite).count();
+  OUT.println("Sequential write speed: %3.f MB/s",
+              (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / writeTime);
   LOGN(MTFUN, INFO) << "Sequential write test done!" << std::endl;
 
   if (!doNotReadTest) {
@@ -103,9 +103,9 @@ RUN {
     collector.delAfterProgress(rawBuffer);
     auto *bufferRead = reinterpret_cast<char *>(
         (reinterpret_cast<uintptr_t>(rawBuffer) + 4096 - 1) & ~(4096 - 1));
-    const int rfd =
-        Helper::openAndAddToCloseList(test, collector, O_RDONLY | O_DIRECT);
-    if (rfd < 0) throw Error("Can't open test file: %s", strerror(errno));
+    const int rfd = Helper::openAndAddToCloseList(test, collector, O_RDONLY | O_DIRECT);
+    if (rfd < 0)
+      throw Error("Can't open test file: %s", strerror(errno));
 
     LOGN(MTFUN, INFO) << "Sequential read test started!" << std::endl;
     const auto startRead = std::chrono::high_resolution_clock::now();
@@ -116,10 +116,9 @@ RUN {
     }
     const auto endRead = std::chrono::high_resolution_clock::now();
 
-    const double read_time =
-        std::chrono::duration<double>(endRead - startRead).count();
-    println("Sequential read speed: %3.f MB/s",
-            (static_cast<double>(total) / (1024.0 * 1024.0)) / read_time);
+    const double read_time = std::chrono::duration<double>(endRead - startRead).count();
+    OUT.println("Sequential read speed: %3.f MB/s",
+                (static_cast<double>(total) / (1024.0 * 1024.0)) / read_time);
     LOGN(MTFUN, INFO) << "Sequential read test done!" << std::endl;
   }
 

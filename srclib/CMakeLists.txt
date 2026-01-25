@@ -1,5 +1,5 @@
 #
-#  Copyright 2025 Yağız Zengin
+#  Copyright 2026 Yağız Zengin
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -17,4 +17,3 @@
 # Add libraries
 add_subdirectory(libhelper)
 add_subdirectory(libpartition_map)
-

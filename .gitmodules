@@ -1,0 +1,8 @@
+[submodule "external/gptfdisk"]
+	path = external/gptfdisk
+	url = https://android.googlesource.com/platform/external/gptfdisk
+	branch = main
+[submodule "external/e2fsprogs"]
+	path = external/e2fsprogs
+	url = https://android.googlesource.com/platform/external/e2fsprogs
+	branch = main

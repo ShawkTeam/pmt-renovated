@@ -14,9 +14,10 @@
    limitations under the License.
 */
 
-#include "functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
 #include <map>
+
+#include "functions.hpp"
 
 #define TFUN "typeFunction"
 #define FUNCTION_CLASS typeFunction
@@ -25,11 +26,8 @@ namespace PartitionManager {
 INIT {
   LOGN(TFUN, INFO) << "Initializing variables of type function." << std::endl;
   cmd = _app.add_subcommand("type", "Get type of the partition(s) or image(s)");
-  cmd->add_option("content(s)", contents, "Content(s)")
-      ->required()
-      ->delimiter(',');
-  cmd->add_option("-b,--buffer-size", bufferSize,
-                  "Buffer size for max seek depth")
+  cmd->add_option("content(s)", contents, "Content(s)")->required()->delimiter(',');
+  cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for max seek depth")
       ->transform(CLI::AsSizeValue(false))
       ->default_val("4KB");
   cmd->add_flag("--only-check-android-magics", onlyCheckAndroidMagics,
@@ -47,21 +45,20 @@ RUN {
     magics.merge(PartitionMap::Extras::AndroidMagicMap);
   else if (onlyCheckFileSystemMagics)
     magics.merge(PartitionMap::Extras::FileSystemMagicMap);
-  else magics.merge(PartitionMap::Extras::MagicMap);
+  else
+    magics.merge(PartitionMap::Extras::MagicMap);
 
   for (const auto &content : contents) {
-    if (!PART_MAP.hasPartition(content) && !Helper::fileIsExists(content))
+    if (!PARTS.hasPartition(content) && !Helper::fileIsExists(content))
       throw Error("Couldn't find partition or image file: %s", content.data());
 
     bool found = false;
     for (const auto &[magic, name] : magics) {
       if (PartitionMap::Extras::hasMagic(
               magic, static_cast<ssize_t>(bufferSize),
-              Helper::fileIsExists(content)
-                  ? content
-                  : PART_MAP.getRealPathOf(content))) {
-        println("%s contains %s magic (%s)", content.data(), name.data(),
-                PartitionMap::Extras::formatMagic(magic).data());
+              Helper::fileIsExists(content) ? content : PARTS.getRealPathOf(content))) {
+        OUT.println("%s contains %s magic (%s)", content.data(), name.data(),
+                    PartitionMap::Extras::formatMagic(magic).data());
         found = true;
         break;
       }

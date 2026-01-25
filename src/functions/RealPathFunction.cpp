@@ -14,16 +14,16 @@
    limitations under the License.
 */
 
-#include "functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
+
+#include "functions.hpp"
 
 #define RPFUN "realPathFunction"
 #define FUNCTION_CLASS realPathFunction
 
 namespace PartitionManager {
 INIT {
-  LOGN(RPFUN, INFO) << "Initializing variables of real path function."
-                    << std::endl;
+  LOGN(RPFUN, INFO) << "Initializing variables of real path function." << std::endl;
   cmd = _app.add_subcommand("real-path", "Tell real paths of partition(s)");
   cmd->add_option("partition(s)", partitions, "Partition name(s)")
       ->required()
@@ -35,23 +35,23 @@ INIT {
 
 RUN {
   for (const auto &partition : partitions) {
-    if (!PART_MAP.hasPartition(partition))
+    if (!PARTS.hasPartition(partition))
       throw Error("Couldn't find partition: %s", partition.data());
 
-    if (VARS.onLogical && !PART_MAP.isLogical(partition)) {
+    if (VARS.onLogical && !PARTS.isLogical(partition)) {
       if (VARS.forceProcess)
-        LOGN(RPFUN, WARNING)
-            << "Partition " << partition
-            << " is exists but not logical. Ignoring (from --force, -f)."
-            << std::endl;
+        LOGN(RPFUN, WARNING) << "Partition " << partition
+                             << " is exists but not logical. Ignoring (from --force, -f)."
+                             << std::endl;
       else
         throw Error("Used --logical (-l) flag but is not logical partition: %s",
                     partition.data());
     }
 
     if (realLinkPath)
-      println("%s", PART_MAP.getRealLinkPathOf(partition).data());
-    else println("%s", PART_MAP.getRealPathOf(partition).data());
+      OUT.println("%s", PARTS.getRealLinkPathOf(partition).data());
+    else
+      OUT.println("%s", PARTS.getRealPathOf(partition).data());
   }
 
   return true;

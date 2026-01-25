@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 Yağız Zengin
+   Copyright 2026 Yağız Zengin
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -14,93 +14,113 @@
    limitations under the License.
 */
 
+#include <algorithm>
 #include <fstream>
 #include <iostream>
 #include <libpartition_map/lib.hpp>
 #include <unistd.h>
 
 int main() {
-  if (getuid() != 0) return 2;
+  if (!Helper::hasSuperUser())
+    return 2; // Check root access.
 
   try {
-    PartitionMap::BuildMap MyMap;
-    if (!MyMap) {
-      MyMap.readDirectory("/dev/block/by-name");
-      if (!MyMap) throw PartitionMap::Error("Cannot generate object!");
+    PartitionMap::Builder partitions;
+
+    if (!partitions.valid() && !partitions)
+      throw Helper::Error("Tables not valid (UNEXPECTED?)");
+
+    if (partitions.empty())
+      throw Helper::Error("Class is empty (UNEXPECTED)");
+
+    PartitionMap::Builder partitions2 = partitions;
+    if (partitions2 == partitions)
+      std::cout << "partitions2 and partitions is same" << std::endl;
+    else
+      throw Helper::Error("partitions2 and partitions are different (UNEXPECTED)");
+
+    partitions2.clear();
+
+    auto data = partitions.hasDisk("mmcblk0") ? partitions["mmcblk0"] : partitions["sda"];
+    if (data->GetNumParts() == 0)
+      throw Helper::Error("Can't find mmcblk0 or sda (UNEXPECTED?)");
+
+    if (GPTPart part = partitions[0]; !part.IsUsed())
+      std::cerr << "WARNING: (GPTPart part = partitions[2]) check failed "
+                   "(part.IsUsed() returned false)"
+                << std::endl;
+
+    auto partition_list = partitions.getPartitions();
+    std::cout << "Listing partitions (data is getted from getPartitions()):" << std::endl;
+    for (auto &part : partition_list)
+      std::cout << std::setw(16) << part.getName() << std::endl;
+
+    auto partitions_of_disk = partitions.getPartitionsByDisk("mmcblk0");
+    if (partitions_of_disk.empty())
+      partitions_of_disk = partitions.getPartitionsByDisk("sda");
+    std::cout << "Listing partitions of table (data is getted from "
+                 "getPartitionsByDisk()):"
+              << std::endl;
+    for (auto &part : partitions_of_disk)
+      std::cout << std::setw(16) << part.getName() << std::endl;
+
+    auto logical_partitions = partitions.getLogicalPartitions();
+    std::cout << "Listing logical partitions:" << std::endl;
+    for (auto &part : logical_partitions)
+      std::cout << std::setw(10) << part.getName() << std::endl;
+
+    auto readed_gpt_data_collection = partitions.getAllGPTData();
+    std::cout << "Listing readed gpt data paths:" << std::endl;
+    std::ranges::for_each(readed_gpt_data_collection,
+                          [](const auto &info) { std::cout << " " << info.first; });
+    std::cout << std::endl;
+
+    auto data2 = partitions.hasDisk("mmcblk0") ? partitions.getGPTDataOf("mmcblk0")
+                                               : partitions.getGPTDataOf("sda");
+    if (data2->GetNumParts() == 0)
+      throw Helper::Error("Can't get gpt data of mmcblk0 or sda (UNEXPECTED?)");
+
+    if (auto logical_partition_data = partitions.getDataOfLogicalPartitions();
+        logical_partition_data.empty())
+      std::cerr << "WARNING: Can't get data of logical partitions" << std::endl;
+
+    if (auto partition_data = partitions.getDataOfPartitions(); partition_data.empty())
+      std::cerr << "WARNING: Can't get data of partitions" << std::endl;
+
+    if (auto partition_data2 = partitions.getDataOfPartitionsByDisk("mmcblk0");
+        partition_data2.empty()) {
+      partition_data2 = partitions.getDataOfPartitionsByDisk("sda");
+      if (partition_data2.empty())
+        std::cerr << "WARNING: Can't get data of partitions (with "
+                     "getDataOfPartititonsByDisk())"
+                  << std::endl;
     }
 
-    const auto map = MyMap.getAll();
-    if (map.empty()) throw PartitionMap::Error("getAll() empty");
-    for (const auto &[name, props] : map) {
-      std::cout << "Partition: " << name << ", size: " << props.size
-                << ", logical: " << props.isLogical << std::endl;
-    }
+    std::cout << "Seek: " << partitions.getSeek() << std::endl;
 
-    const auto boot = MyMap.get("boot");
-    if (!boot) throw PartitionMap::Error("get(\"boot\") returned nullopt");
-    std::cout << "Name: boot" << ", size: " << boot->first
-              << ", logical: " << boot->second << std::endl;
-
-    const auto logicals = MyMap.getLogicalPartitionList();
-    if (!logicals)
-      throw PartitionMap::Error("getLogicalPartitionList() returned nullopt");
-    std::cout << "Logical partitions: " << std::endl;
-    for (const auto &name : *logicals)
-      std::cout << "   - " << name << std::endl;
-
-    const auto physicals = MyMap.getPhysicalPartitionList();
-    if (!physicals)
-      throw PartitionMap::Error("getPhysicalPartitionList() returned nullopt");
-    std::cout << "Physical partitions: " << std::endl;
-    for (const auto &name : *physicals)
-      std::cout << "   - " << name << std::endl;
-
-    if (const std::vector<PartitionMap::Info> parts =
-            static_cast<std::vector<PartitionMap::Info>>(MyMap);
-        parts.empty())
-      throw PartitionMap::Error(
-          "operator std::vector<PartitionMap::Info>() returned empty vector");
-
-    auto func = [](const std::string &partition,
-                   const PartitionMap::BasicInf props) -> bool {
-      std::ofstream f("parts.txt");
-      f << "Partition: " << partition << ", size: " << props.size
-        << ", logical: " << props.isLogical;
-      f.exceptions(std::ios_base::failbit | std::ios_base::badbit);
-      return !f.fail();
-    };
-    if (!MyMap.doForAllPartitions(func))
-      throw PartitionMap::Error("doForAllPartitions() progress failed");
-
-    std::cout << "Total partitions count: " << (int)MyMap << std::endl;
-    std::cout << "Boot: " << MyMap.getRealLinkPathOf("boot") << std::endl;
-    std::cout << "Boot (realpath): " << MyMap.getRealPathOf("boot")
+    std::cout << "Boot partition is exists?: " << std::boolalpha
+              << partitions.hasPartition("boot") << std::endl;
+    std::cout << "System (logical) partition is exists?: " << std::boolalpha
+              << partitions.hasLogicalPartition("system") << std::endl;
+    std::cout << "mmcblk0, sda tables is exists?: " << std::boolalpha
+              << partitions.hasDisk("mmcblk0") << ", " << partitions.hasDisk("sda")
               << std::endl;
-    std::cout << "Search dir: " << MyMap.getCurrentWorkDir() << std::endl;
-    std::cout << "Search dir test 2: " << static_cast<std::string>(MyMap)
-              << std::endl;
-    std::cout << "Has partition cache? = " << MyMap.hasPartition("cache")
-              << std::endl;
-    std::cout << "system partition is logical? = " << MyMap.isLogical("system")
-              << std::endl;
-    std::cout << "Size of system partition: " << MyMap.sizeOf("system")
-              << std::endl;
+    std::cout << "Has super partition?: " << std::boolalpha
+              << partitions.isHasSuperPartition() << std::endl;
+    std::cout << "System partition is logical?: " << std::boolalpha
+              << partitions.isLogical("system") << std::endl;
+    std::cout << "Disk names are empty?: " << std::boolalpha
+              << partitions.diskNamesEmpty() << std::endl;
 
-    MyMap.clear();
-    if (!MyMap.empty()) throw PartitionMap::Error("map cleaned but check fail");
+    partitions.reScan();
+    if (partitions.empty())
+      throw Helper::Error("Class was empty after reScan() (UNEXPECTED)");
 
-    MyMap.readDirectory("/dev/block/by-name");
-    PartitionMap::BuildMap MyMap2;
-
-    if (MyMap == MyMap2) std::cout << "map1 = map2" << std::endl;
-    if (MyMap != MyMap2) std::cout << "map1 != map2" << std::endl;
-
-    std::cout << PartitionMap::getLibVersion() << std::endl;
-  } catch (PartitionMap::Error &error) {
+    partitions.clear();
+    if (!partitions.empty())
+      throw Helper::Error("Class was not empty after clear() (UNEXPECTED)");
+  } catch (std::exception &error) {
     std::cerr << error.what() << std::endl;
-    return 1;
-  } catch (std::ios_base::failure &error) {
-    std::cerr << "fstream error: " << error.what() << std::endl;
     return 1;
   }
 

@@ -14,17 +14,18 @@
    limitations under the License.
 */
 
-#include "functions/functions.hpp"
 #include <PartitionManager/PartitionManager.hpp>
 #include <csignal>
-#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
+
+#include "functions/functions.hpp"
 #ifndef ANDROID_BUILD
 #include <generated/buildInfo.hpp>
 #endif
-#include <string>
 #include <unistd.h>
+
+#include <string>
 
 namespace PartitionManager {
 
@@ -33,13 +34,12 @@ namespace PartitionManager {
  *
  * Usage: REGISTER_FUNCTION(FUNCTION_CLASS);
  */
-#define REGISTER_FUNCTION(cls)                                                 \
+#define REGISTER_FUNCTION(cls)                                                           \
   FuncManager.registerFunction(std::make_unique<cls>(), AppMain)
 
 basic_variables::basic_variables()
-    : logFile(Helper::LoggingProperties::FILE), onLogical(false),
-      quietProcess(false), verboseMode(false), viewVersion(false),
-      forceProcess(false) {
+    : logFile(Helper::LoggingProperties::FILE), onLogical(false), quietProcess(false),
+      verboseMode(false), viewVersion(false), forceProcess(false) {
   try {
     PartMap = std::make_unique<PartitionMap::BuildMap>();
   } catch (std::exception &) {
@@ -52,36 +52,19 @@ __attribute__((constructor)) void init() {
 }
 
 static void sigHandler(const int sig) {
-  if (sig == SIGINT) println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
-  if (sig == SIGABRT) println("\n%sAborted.%s", RED, STYLE_RESET);
+  if (sig == SIGINT)
+    OUT.println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
+  if (sig == SIGABRT)
+    OUT.println("\n%sAborted.%s", RED, STYLE_RESET);
   exit(sig);
 }
 
-static int write(void *cookie, const char *buf, const int size) {
-  auto *real = static_cast<FILE *>(cookie);
-  if (!VARS.quietProcess) {
-    const int ret = fwrite(buf, 1, static_cast<size_t>(size), real);
-    fflush(real);
-    return ret;
-  } else return size;
-}
-
-static FILE *make_fp(FILE *real) {
-  return funopen(real, nullptr, write, nullptr, nullptr);
-}
-
 auto Variables = std::make_unique<VariableTable>();
-FILE *pstdout = make_fp(stdout);
-FILE *pstderr = make_fp(stderr);
-
-static Helper::garbageCollector collector;
 
 int Main(int argc, char **argv) {
   try {
     // try-catch start
     Helper::LoggingProperties::setProgramName(argv[0]);
-    collector.closeAfterProgress(pstdout);
-    collector.closeAfterProgress(pstderr);
 
     signal(SIGINT, sigHandler);
     signal(SIGABRT, sigHandler);
@@ -100,9 +83,8 @@ int Main(int argc, char **argv) {
     }
 
     if (argc < 2) {
-      println(
-          "Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.",
-          argv[0]);
+      OUT.println("Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.",
+                  argv[0]);
       return EXIT_FAILURE;
     }
 
@@ -115,28 +97,23 @@ int Main(int argc, char **argv) {
                    "This project licensed under "
                    "Apache 2.0 license\nReport "
                    "bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
-    AppMain
-        .add_option("-S,--search-path", VARS.searchPath,
-                    "Set partition search path")
+    AppMain.add_option("-S,--search-path", VARS.searchPath, "Set partition search path")
         ->check([&](const std::string &val) {
           if (val.find("/block") == std::string::npos)
-            return std::string(
-                "Partition search path is unexpected! Couldn't find "
-                "'block' in input path!");
+            return std::string("Partition search path is unexpected! Couldn't find "
+                               "'block' in input path!");
           return std::string();
         });
     AppMain.add_option("-L,--log-file", VARS.logFile, "Set log file");
-    AppMain.add_flag("-f,--force", VARS.forceProcess,
-                     "Force process to be processed");
+    AppMain.add_flag("-f,--force", VARS.forceProcess, "Force process to be processed");
     AppMain.add_flag("-l,--logical", VARS.onLogical,
-                     "Specify that the target partition is dynamic");
+                     "Specify that the target partition is logical");
     AppMain.add_flag("-q,--quiet", VARS.quietProcess, "Quiet process");
     AppMain.add_flag("-V,--verbose", VARS.verboseMode,
                      "Detailed information is written on the screen while the "
                      "transaction is "
                      "being carried out");
-    AppMain.add_flag("-v,--version", VARS.viewVersion,
-                     "Print version and exit");
+    AppMain.add_flag("-v,--version", VARS.viewVersion, "Print version and exit");
 
     REGISTER_FUNCTION(backupFunction);
     REGISTER_FUNCTION(cleanLogFunction);
@@ -151,9 +128,10 @@ int Main(int argc, char **argv) {
 
     CLI11_PARSE(AppMain, argc, argv);
 
-    if (VARS.verboseMode) Helper::LoggingProperties::setPrinting<YES>();
+    if (VARS.verboseMode)
+      Helper::LoggingProperties::setPrinting<YES>();
     if (VARS.viewVersion) {
-      println("%s", getAppVersion().data());
+      OUT.println("%s", getAppVersion().data());
       return EXIT_SUCCESS;
     }
 
@@ -165,17 +143,17 @@ int Main(int argc, char **argv) {
         WARNING("-l (--logical) flag ignored. Because, partition type don't "
                 "needed by your used function.\n");
     } else {
-      if (!VARS.searchPath.empty()) (PART_MAP)(VARS.searchPath);
+      if (!VARS.searchPath.empty())
+        (PARTS)(VARS.searchPath);
       if (!VARS.PartMap && VARS.searchPath.empty())
         throw Error("No default search entries were found. Specify a search "
                     "directory with -S "
                     "(--search-path)");
 
       if (VARS.onLogical) {
-        if (!PART_MAP.hasLogicalPartitions())
-          throw Error(
-              "This device doesn't contains logical partitions. But you "
-              "used -l (--logical) flag.");
+        if (!PARTS.hasLogicalPartitions())
+          throw Error("This device doesn't contains logical partitions. But you "
+                      "used -l (--logical) flag.");
       }
     }
 
@@ -190,31 +168,16 @@ int Main(int argc, char **argv) {
   } catch (Helper::Error &error) {
     // catch Helper::Error
 
-    fprintf(pstderr, "%s%sERROR(S) OCCURRED:%s\n%s\n", RED, BOLD, STYLE_RESET,
+    fprintf(OUT.error, "%s%sERROR(S) OCCURRED:%s\n%s\n", RED, BOLD, STYLE_RESET,
             error.what());
     return EXIT_FAILURE;
   } catch (CLI::Error &error) {
     // catch CLI::Error
 
-    fprintf(stderr, "%s: %s%sFLAG PARSE ERROR:%s %s\n", argv[0], RED, BOLD,
-            STYLE_RESET, error.what());
+    fprintf(stderr, "%s: %s%sFLAG PARSE ERROR:%s %s\n", argv[0], RED, BOLD, STYLE_RESET,
+            error.what());
     return EXIT_FAILURE;
   } // try-catch block end
-}
-
-void print(const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  vfprintf(pstdout, format, args);
-  va_end(args);
-}
-
-void println(const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  vfprintf(pstdout, format, args);
-  print("\n");
-  va_end(args);
 }
 
 std::string getLibVersion() { MKVERSION(PMT); }

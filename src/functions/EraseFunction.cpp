@@ -14,33 +14,31 @@ Copyright 2025 Yağız Zengin
    limitations under the License.
 */
 
-#include "functions.hpp"
+#include <fcntl.h>
+#include <unistd.h>
+
 #include <PartitionManager/PartitionManager.hpp>
 #include <cerrno>
-#include <fcntl.h>
 #include <future>
-#include <unistd.h>
+
+#include "functions.hpp"
 
 #define EFUN "eraseFunction"
 #define FUNCTION_CLASS eraseFunction
 
 namespace PartitionManager {
 RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
-  if (!PART_MAP.hasPartition(partitionName))
-    return {Helper::format("Couldn't find partition: %s", partitionName.data()),
-            false};
+  if (!PARTS.hasPartition(partitionName))
+    return PairError("Couldn't find partition: %s", partitionName.data());
 
-  if (VARS.onLogical && !PART_MAP.isLogical(partitionName)) {
+  if (VARS.onLogical && !PARTS.isLogical(partitionName)) {
     if (VARS.forceProcess)
-      LOGN(EFUN, WARNING)
-          << "Partition " << partitionName
-          << " is exists but not logical. Ignoring (from --force, -f)."
-          << std::endl;
+      LOGN(EFUN, WARNING) << "Partition " << partitionName
+                          << " is exists but not logical. Ignoring (from --force, -f)."
+                          << std::endl;
     else
-      return {Helper::format(
-                  "Used --logical (-l) flag but is not logical partition: %s",
-                  partitionName.data()),
-              false};
+      return PairError("Used --logical (-l) flag but is not logical partition: %s",
+                       partitionName.data());
   }
 
   LOGN(EFUN, INFO) << "Using buffer size: " << bufferSize;
@@ -48,12 +46,11 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
   // Automatically close file descriptors and delete allocated memories (arrays)
   Helper::garbageCollector collector;
 
-  const int pfd = Helper::openAndAddToCloseList(
-      PART_MAP.getRealPathOf(partitionName), collector, O_WRONLY);
+  const int pfd = Helper::openAndAddToCloseList(PARTS.getRealPathOf(partitionName),
+                                                collector, O_WRONLY);
   if (pfd < 0)
-    return {Helper::format("Can't open partition: %s: %s", partitionName.data(),
-                           strerror(errno)),
-            false};
+    return PairError("Can't open partition: %s: %s", partitionName.data(),
+                     strerror(errno));
 
   if (!VARS.forceProcess) {
     if (!Helper::confirmPropt(
@@ -63,14 +60,13 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
       throw Error("Operation canceled.");
   }
 
-  LOGN(EFUN, INFO) << "Writing zero bytes to partition: " << partitionName
-                   << std::endl;
+  LOGN(EFUN, INFO) << "Writing zero bytes to partition: " << partitionName << std::endl;
   auto *buffer = new (std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
   memset(buffer, 0x00, bufferSize);
 
   ssize_t bytesWritten = 0;
-  const uint64_t partitionSize = PART_MAP.sizeOf(partitionName);
+  const uint64_t partitionSize = PARTS.sizeOf(partitionName);
 
   while (bytesWritten < partitionSize) {
     size_t toWrite = sizeof(buffer);
@@ -78,15 +74,14 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
       toWrite = partitionSize - bytesWritten;
 
     if (const ssize_t result = write(pfd, buffer, toWrite); result == -1)
-      return {Helper::format("Can't write zero bytes to partition: %s: %s",
-                             partitionName.data(), strerror(errno)),
-              false};
-    else bytesWritten += result;
+      return PairError("Can't write zero bytes to partition: %s: %s",
+                       partitionName.data(), strerror(errno));
+    else
+      bytesWritten += result;
   }
 
-  return {Helper::format("Successfully wrote zero bytes to the %s partition",
-                         partitionName.data()),
-          true};
+  return PairSuccess("Successfully wrote zero bytes to the %s partition",
+                     partitionName.data());
 }
 
 INIT {
@@ -107,10 +102,9 @@ RUN {
   for (const auto &partitionName : partitions) {
     uint64_t buf = bufferSize;
     setupBufferSize(buf, partitionName);
-    futures.push_back(
-        std::async(std::launch::async, runAsync, partitionName, buf));
-    LOGN(EFUN, INFO) << "Created thread for writing zero bytes to "
-                     << partitionName << std::endl;
+    futures.push_back(std::async(std::launch::async, runAsync, partitionName, buf));
+    LOGN(EFUN, INFO) << "Created thread for writing zero bytes to " << partitionName
+                     << std::endl;
   }
 
   std::string end;
@@ -120,10 +114,12 @@ RUN {
     if (!snd) {
       end += fst + '\n';
       endResult = false;
-    } else println("%s", fst.c_str());
+    } else
+      OUT.println("%s", fst.c_str());
   }
 
-  if (!endResult) throw Error("%s", end.c_str());
+  if (!endResult)
+    throw Error("%s", end.c_str());
 
   LOGN(EFUN, INFO) << "Operation successfully completed." << std::endl;
   return endResult;

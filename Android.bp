@@ -1,5 +1,5 @@
 //
-//   Copyright 2025 Yağız Zengin
+//   Copyright 2026 Yağız Zengin
 //
 //   Licensed under the Apache License, Version 2.0 (the "License");
 //   you may not use this file except in compliance with the License.
@@ -56,15 +56,24 @@ filegroup {
     ],
 }
 
+// Add genrule for generating buildInfo.hpp
+genrule {
+    name: "buildInfoHpp_gen",
+    tools: ["android_genrule.sh"],
+    out: ["include/generated/buildInfo.hpp"],
+    cmd: "mkdir -p $$(dirname $(out)) || true; cmake --version | head -n 1 | cut -d' ' -f 3 > .cmake_version && $(location android_genrule.sh) > $(out)",
+}
+
 // Default configurations of pmt
 cc_defaults {
     name: "pmt_defaults",
     recovery_available: true,
+    generated_headers : ["buildInfoHpp_gen"],
+    export_generated_headers : ["buildInfoHpp_gen"],
     cflags: [
         "-Wall",
         "-Werror",
         "-Wno-deprecated-declarations",
-        "-Os",
         "-fexceptions",
         "-DANDROID_BUILD",
     ],
@@ -83,19 +92,26 @@ cc_defaults {
 }
 
 // libhelper library target
-cc_library_shared {
+cc_library {
     name: "libhelper",
     defaults: ["pmt_defaults"],
     srcs: [":libhelper_srcs"],
 }
 
 // libpartition_map library target
-cc_library_shared {
+cc_library {
     name: "libpartition_map",
     defaults: ["pmt_defaults"],
     srcs: [":libpartition_map_srcs"],
-    shared_libs: ["libhelper"],
-    static_libs: ["libc++fs"],
+    shared_libs: [
+        "libhelper",
+        "libext2_uuid",
+    ],
+    static_libs: [
+        "libc++fs",
+        "libgptf",
+    ],
+    cflags: ["-D_FILE_OFFSET_BITS=64"],
 }
 
 // pmt executable target

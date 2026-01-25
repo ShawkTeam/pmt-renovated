@@ -14,7 +14,7 @@
 #  limitations under the License.
 #
 
-# Generate build info (version.hpp.in)
+# Generate build info (buildInfo.hpp.in)
 function(generateBuildInfo BUILD_FLAGS)
 	string(TIMESTAMP BUILD_DATE "%Y-%m-%d")
 	string(TIMESTAMP BUILD_TIME "%H:%M:%S")
@@ -22,6 +22,9 @@ function(generateBuildInfo BUILD_FLAGS)
 	execute_process(COMMAND bash -c "mkdir -p ${CMAKE_SOURCE_DIR}/include/generated &>/dev/null")
 	execute_process(COMMAND bash -c "${CMAKE_CXX_COMPILER} --version | head -n 1"
 		OUTPUT_VARIABLE COMPILER_VERSION_STRING
+		OUTPUT_STRIP_TRAILING_WHITESPACE)
+	execute_process(COMMAND bash -c "if which git &>/dev/null; then git rev-parse --short HEAD; else echo xxxxxxx; fi"
+		OUTPUT_VARIABLE COMMIT_ID
 		OUTPUT_STRIP_TRAILING_WHITESPACE)
 
 	configure_file(${CMAKE_SOURCE_DIR}/include/buildInfo.hpp.in ${CMAKE_SOURCE_DIR}/include/generated/buildInfo.hpp @ONLY)

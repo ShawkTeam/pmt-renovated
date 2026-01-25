@@ -14,12 +14,14 @@ Copyright 2025 Yağız Zengin
    limitations under the License.
 */
 
-#include "functions.hpp"
+#include <fcntl.h>
+
 #include <PartitionManager/PartitionManager.hpp>
 #include <cerrno>
 #include <cstdlib>
-#include <fcntl.h>
 #include <nlohmann/json.hpp>
+
+#include "functions.hpp"
 
 #define IFUN "infoFunction"
 #define FUNCTION_CLASS infoFunction
@@ -27,8 +29,7 @@ Copyright 2025 Yağız Zengin
 namespace PartitionManager {
 
 INIT {
-  LOGN(IFUN, INFO) << "Initializing variables of info printer function."
-                   << std::endl;
+  LOGN(IFUN, INFO) << "Initializing variables of info printer function." << std::endl;
   cmd = _app.add_subcommand("info", "Tell info(s) of input partition list")
             ->footer("Use get-all or getvar-all as partition name for getting "
                      "info's of all partitions.\nUse get-logicals as partition "
@@ -45,10 +46,8 @@ INIT {
   cmd->add_flag("--as-byte", asByte, "View sizes as byte.")->default_val(true);
   cmd->add_flag("--as-kilobyte", asKiloBytes, "View sizes as kilobyte.")
       ->default_val(false);
-  cmd->add_flag("--as-megabyte", asMega, "View sizes as megabyte.")
-      ->default_val(false);
-  cmd->add_flag("--as-gigabyte", asGiga, "View sizes as gigabyte.")
-      ->default_val(false);
+  cmd->add_flag("--as-megabyte", asMega, "View sizes as megabyte.")->default_val(false);
+  cmd->add_flag("--as-gigabyte", asGiga, "View sizes as gigabyte.")->default_val(false);
   cmd->add_option("--json-partition-name", jNamePartition,
                   "Specify partition name element for JSON body")
       ->default_val("name");
@@ -67,43 +66,46 @@ INIT {
 RUN {
   std::vector<PartitionMap::Partition_t> jParts;
   sizeCastTypes multiple;
-  if (asByte) multiple = B;
-  if (asKiloBytes) multiple = KB;
-  if (asMega) multiple = MB;
-  if (asGiga) multiple = GB;
+  if (asByte)
+    multiple = B;
+  if (asKiloBytes)
+    multiple = KB;
+  if (asMega)
+    multiple = MB;
+  if (asGiga)
+    multiple = GB;
 
   auto func = [this, &jParts, &multiple] COMMON_LAMBDA_PARAMS -> bool {
     if (VARS.onLogical && !props.isLogical) {
       if (VARS.forceProcess)
-        LOGN(IFUN, WARNING)
-            << "Partition " << partition
-            << " is exists but not logical. Ignoring (from --force, -f)."
-            << std::endl;
+        LOGN(IFUN, WARNING) << "Partition " << partition
+                            << " is exists but not logical. Ignoring (from --force, -f)."
+                            << std::endl;
       else
         throw Error("Used --logical (-l) flag but is not logical partition: %s",
                     partition.data());
     }
 
     if (jsonFormat)
-      jParts.push_back(
-          {partition,
-           {static_cast<uint64_t>(Helper::convertTo(props.size, multiple)),
-            props.isLogical}});
+      jParts.push_back({partition,
+                        {static_cast<uint64_t>(Helper::convertTo(props.size, multiple)),
+                         props.isLogical}});
     else
-      println("partition=%s size=%d isLogical=%s", partition.data(),
-              Helper::convertTo(props.size, multiple),
-              props.isLogical ? "true" : "false");
+      OUT.println("partition=%s size=%d isLogical=%s", partition.data(),
+                  Helper::convertTo(props.size, multiple),
+                  props.isLogical ? "true" : "false");
 
     return true;
   };
 
   if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
-    PART_MAP.doForAllPartitions(func);
+    PARTS.doForAllPartitions(func);
   else if (partitions.back() == "get-logicals")
-    PART_MAP.doForLogicalPartitions(func);
+    PARTS.doForLogicalPartitions(func);
   else if (partitions.back() == "get-physicals")
-    PART_MAP.doForPhysicalPartitions(func);
-  else PART_MAP.doForPartitionList(partitions, func);
+    PARTS.doForPhysicalPartitions(func);
+  else
+    PARTS.doForPartitionList(partitions, func);
 
   if (jsonFormat) {
     nlohmann::json j;
@@ -115,7 +117,7 @@ RUN {
                                  {jNameLogical, props.isLogical}});
     }
 
-    println("%s", j.dump(jIndentSize).data());
+    OUT.println("%s", j.dump(jIndentSize).data());
   }
 
   return true;

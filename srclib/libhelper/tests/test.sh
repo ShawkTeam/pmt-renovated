@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 #
-#  Copyright 2025 Yağız Zengin
+#  Copyright 2026 Yağız Zengin
 #
 #  Licensed under the Apache License, Version 2.0 (the "License");
 #  you may not use this file except in compliance with the License.
@@ -17,7 +17,7 @@
 
 set -e
 
-if [ -z $1 ]; then echo "$0: Provide test path!"; exit 1; fi
-if [ ! -d "$1/dir" ]; then mkdir $1/dir; fi
+if [ -z "$1" ]; then echo "$0: Provide test path!"; exit 1; fi
+if [ ! -d "$1/dir" ]; then mkdir "$1"/dir; fi
 touch "$1/file.txt"
-ln -s $1/dir $1/linkdir &>/dev/null
+ln -s "$1"/dir "$1"/linkdir &>/dev/null

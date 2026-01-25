@@ -14,10 +14,12 @@
 #  limitations under the License.
 #
 
+# Sources
 set(PMT_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/FunctionManager.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/PartitionManager.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/Main.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Out.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/BackupFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/CleanLogFunction.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/functions/EraseFunction.cpp
@@ -31,12 +33,18 @@ set(PMT_SOURCES
 )
 
 # Add pmt
-add_executable(pmt ${PMT_SOURCES}
-        functions/CleanLogFunction.cpp)
+add_executable(pmt ${PMT_SOURCES})
 add_executable(pmt_static ${PMT_SOURCES})
 
 # Set linker options
-target_link_libraries(pmt PRIVATE helper_shared PRIVATE partition_map_shared)
-target_link_libraries(pmt_static PRIVATE helper_static PRIVATE partition_map_static)
+target_link_libraries(pmt PRIVATE libhelper_shared libpartition_map_shared libgptf_shared libext2_uuid_shared)
+target_link_libraries(pmt_static PRIVATE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static)
 target_link_options(pmt PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
 target_link_options(pmt_static PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
+
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+	target_link_options(pmt PRIVATE -fsanitize=address)
+	target_link_options(pmt_static PRIVATE -fsanitize=address)
+	target_compile_options(pmt PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
+	target_compile_options(pmt_static PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
+endif()

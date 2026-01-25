@@ -1,5 +1,5 @@
 /*
-   Copyright 2025 Yağız Zengin
+   Copyright 2026 Yağız Zengin
 
    Licensed under the Apache License, Version 2.0 (the "License");
    you may not use this file except in compliance with the License.
@@ -17,8 +17,9 @@
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 
-#include <cstdint>
 #include <dirent.h>
+
+#include <cstdint>
 #include <exception>
 #include <functional>
 #include <optional>
@@ -30,8 +31,8 @@
 #include <vector>
 
 #define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)
-#define MB(x) (KB(x) * 1024) // MB(4) = 4194304 (KB(4) * 1024)
-#define GB(x) (MB(x) * 1024) // GB(1) = 1073741824 (MB(1) * 1024)
+#define MB(x) (KB(x) * 1024)                    // MB(4) = 4194304 (KB(4) * 1024)
+#define GB(x) (MB(x) * 1024)                    // GB(1) = 1073741824 (MB(1) * 1024)
 
 #define TO_KB(x) (x / 1024)        // TO_KB(1024) = 1
 #define TO_MB(x) (TO_KB(x) / 1024) // TO_MB(2048) (2048 / 1024)
@@ -67,7 +68,7 @@ private:
   std::ostringstream _oss;
 
 public:
-  __attribute__((format(printf, 2, 3))) explicit Error(const char *format, ...);
+  __printflike(2, 3) explicit Error(const char *format, ...);
 
   [[nodiscard]] const char *what() const noexcept override;
 };
@@ -116,8 +117,7 @@ public:
   void closeAfterProgress(int _fd);
 };
 
-template <int max = 100, int start = 0, int count = 10, int d = 0>
-class Random {
+template <int max = 100, int start = 0, int count = 10, int d = 0> class Random {
   static_assert(max > start, "max is larger than start");
   static_assert(count > 1, "count is larger than 1");
   static_assert(count <= max - start, "count is greater than max-start");
@@ -179,20 +179,16 @@ public:
     _Type2 second;
     _Type3 third;
 
-    bool
-    operator==(const std::tuple<_Type1, _Type2, _Type3> &t) const noexcept {
+    bool operator==(const std::tuple<_Type1, _Type2, _Type3> &t) const noexcept {
       return first == std::get<0>(t) && second == std::get<1>(t) &&
              third == std::get<2>(t);
     }
 
     bool operator==(const Data &other) const noexcept {
-      return first == other.first && second == other.second &&
-             third == other.third;
+      return first == other.first && second == other.second && third == other.third;
     }
 
-    bool operator!=(const Data &other) const noexcept {
-      return !(*this == other);
-    }
+    bool operator!=(const Data &other) const noexcept { return !(*this == other); }
 
     explicit operator bool() const noexcept {
       return first != _Type1{} || second != _Type2{} || third != _Type3{};
@@ -283,9 +279,7 @@ public:
       return *this;
     }
     iterator operator-(difference_type n) const { return iterator(it - n); }
-    difference_type operator-(const iterator &other) const {
-      return it - other.it;
-    }
+    difference_type operator-(const iterator &other) const { return it - other.it; }
 
     reference operator[](difference_type n) const { return it[n]; }
 
@@ -300,7 +294,8 @@ public:
 
   bool find(const Data &data) const noexcept {
     for (size_t i = 0; i < count; i++)
-      if (data == tuple_data[i]) return true;
+      if (data == tuple_data[i])
+        return true;
 
     return false;
   }
@@ -309,22 +304,24 @@ public:
   std::enable_if_t<std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>, bool>
   find(const std::tuple<_Type1, _Type2, _Type3> &t) const noexcept {
     for (size_t i = 0; i < count; i++)
-      if (tuple_data[i] == t) return true;
+      if (tuple_data[i] == t)
+        return true;
 
     return false;
   }
 
-  bool find(const _Type1 &val, const _Type2 &val2,
-            const _Type3 &val3) const noexcept {
+  bool find(const _Type1 &val, const _Type2 &val2, const _Type3 &val3) const noexcept {
     for (size_t i = 0; i < count; i++)
-      if (tuple_data[i] == std::make_tuple(val, val2, val3)) return true;
+      if (tuple_data[i] == std::make_tuple(val, val2, val3))
+        return true;
 
     return false;
   }
 
   void insert(const Data &val) noexcept {
     expand_if_needed();
-    if (!find(val)) tuple_data[count++] = val;
+    if (!find(val))
+      tuple_data[count++] = val;
   }
 
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
@@ -332,14 +329,13 @@ public:
   insert(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
     expand_if_needed();
     if (!find(t))
-      tuple_data[count++] =
-          Data{std::get<0>(t), std::get<1>(t), std::get<2>(t)};
+      tuple_data[count++] = Data{std::get<0>(t), std::get<1>(t), std::get<2>(t)};
   }
 
-  void insert(const _Type1 &val, const _Type2 &val2,
-              const _Type3 &val3) noexcept {
+  void insert(const _Type1 &val, const _Type2 &val2, const _Type3 &val3) noexcept {
     expand_if_needed();
-    if (!find(val, val2, val3)) tuple_data[count++] = Data{val, val2, val3};
+    if (!find(val, val2, val3))
+      tuple_data[count++] = Data{val, val2, val3};
   }
 
   void merge(const PureTuple &other) noexcept {
@@ -348,7 +344,8 @@ public:
   }
 
   void pop_back() noexcept {
-    if (count > 0) --count;
+    if (count > 0)
+      --count;
   }
 
   void pop(const Data &data) noexcept {
@@ -363,7 +360,8 @@ public:
   }
 
   void pop(const size_t i) noexcept {
-    if (i >= count) return;
+    if (i >= count)
+      return;
     for (size_t x = 0; x < count; x++) {
       if (i == x) {
         for (size_t j = i; j < count - 1; j++)
@@ -405,13 +403,12 @@ public:
     tuple_data = new Data[capacity];
   }
 
-  Data back() const noexcept {
-    return (count > 0) ? tuple_data[count - 1] : Data{};
-  }
+  Data back() const noexcept { return (count > 0) ? tuple_data[count - 1] : Data{}; }
   Data top() const noexcept { return (count > 0) ? tuple_data[0] : Data{}; }
 
   Data at(size_t i) const noexcept {
-    if (i >= count) return Data{};
+    if (i >= count)
+      return Data{};
     return tuple_data[i];
   }
 
@@ -440,16 +437,16 @@ public:
       return false;
 
     for (size_t i = 0; i < this->count; i++)
-      if (tuple_data[i] != other.tuple_data[i]) return false;
+      if (tuple_data[i] != other.tuple_data[i])
+        return false;
 
     return true;
   }
-  bool operator!=(const PureTuple &other) const noexcept {
-    return !(*this == other);
-  }
+  bool operator!=(const PureTuple &other) const noexcept { return !(*this == other); }
 
   Data operator[](size_t i) const noexcept {
-    if (i >= count) return Data{};
+    if (i >= count)
+      return Data{};
     return tuple_data[i];
   }
   explicit operator int() const noexcept { return count; }
@@ -520,20 +517,14 @@ public:
   }
 
   // Check if this capsule value and another capsule value hold the same data.
-  bool operator==(const _Type &_value) const noexcept {
-    return this->value == _value;
-  }
+  bool operator==(const _Type &_value) const noexcept { return this->value == _value; }
 
   // Check that this capsule and another capsule do not hold the same data.
-  bool operator!=(const Capsule &other) const noexcept {
-    return !(*this == other);
-  }
+  bool operator!=(const Capsule &other) const noexcept { return !(*this == other); }
 
   // Check that this capsule value and another capsule value do not hold the
   // same data.
-  bool operator!=(const _Type &_value) const noexcept {
-    return !(*this == _value);
-  }
+  bool operator!=(const _Type &_value) const noexcept { return !(*this == _value); }
 
   // Check if the current held value is actually empty.
   explicit operator bool() const noexcept { return this->value != _Type{}; }
@@ -555,6 +546,18 @@ public:
   void operator()(const _Type &_value) noexcept { this->value = _value; }
 };
 
+class SilenceStdout {
+  int saved_stdout = -1;
+  int dev_null = -1;
+
+public:
+  SilenceStdout();
+  ~SilenceStdout();
+
+  void stop();
+  void silenceAgain();
+};
+
 namespace LoggingProperties {
 extern std::string_view FILE, NAME;
 extern bool PRINT, DISABLE;
@@ -564,12 +567,16 @@ void setProgramName(std::string_view name);
 void setLogFile(std::string_view file);
 
 template <int state> void setPrinting() {
-  if (state == 1 || state == 0) PRINT = state;
-  else PRINT = NO;
+  if (state == 1 || state == 0)
+    PRINT = state;
+  else
+    PRINT = NO;
 }
 template <int state> void setLoggingState() {
-  if (state == 1 || state == 0) DISABLE = state;
-  else DISABLE = NO;
+  if (state == 1 || state == 0)
+    DISABLE = state;
+  else
+    DISABLE = NO;
 }
 
 void reset();
@@ -803,16 +810,18 @@ std::string multipleToString(sizeCastTypes type);
 /**
  * Format it input and return as std::string.
  */
-__attribute__((format(printf, 1, 2))) std::string format(const char *format,
-                                                         ...);
+__attribute__((format(printf, 1, 2))) std::string format(const char *format, ...);
 
 /**
  * Convert input size to input multiple
  */
 template <uint64_t size> int convertTo(const sizeCastTypes type) {
-  if (type == KB) return TO_KB(size);
-  if (type == MB) return TO_MB(size);
-  if (type == GB) return TO_GB(size);
+  if (type == KB)
+    return TO_KB(size);
+  if (type == MB)
+    return TO_MB(size);
+  if (type == GB)
+    return TO_GB(size);
   return static_cast<int>(size);
 }
 
@@ -848,8 +857,7 @@ std::string getLibVersion();
  * And returns file pointer.
  */
 [[nodiscard]] FILE *openAndAddToCloseList(const std::string_view &path,
-                                          garbageCollector &collector,
-                                          const char *mode);
+                                          garbageCollector &collector, const char *mode);
 /**
  * Open input directory and add to integrity list.
  * And returns directory pointer.
@@ -879,73 +887,61 @@ std::string getLibVersion();
 
 #ifndef NO_C_TYPE_HANDLERS
 // ABORT(message), ex: ABORT("memory error!\n")
-#define ABORT(msg)                                                             \
-  do {                                                                         \
-    fprintf(stderr, "%s%sCRITICAL ERROR%s: %s\nAborting...\n", BOLD, RED,      \
-            STYLE_RESET, msg);                                                 \
-    abort();                                                                   \
+#define ABORT(msg)                                                                       \
+  do {                                                                                   \
+    fprintf(stderr, "%s%sCRITICAL ERROR%s: %s\nAborting...\n", BOLD, RED, STYLE_RESET,   \
+            msg);                                                                        \
+    abort();                                                                             \
   } while (0)
 
 // ERROR(message, exit), ex: ERROR("an error occured.\n", 1)
-#define ERROR(msg, code)                                                       \
-  do {                                                                         \
-    fprintf(stderr, "%s%sERROR%s: %s", BOLD, RED, STYLE_RESET, msg);           \
-    exit(code);                                                                \
+#define ERROR(msg, code)                                                                 \
+  do {                                                                                   \
+    fprintf(stderr, "%s%sERROR%s: %s", BOLD, RED, STYLE_RESET, msg);                     \
+    exit(code);                                                                          \
   } while (0)
 
 // WARNING(message), ex: WARNING("using default setting.\n")
-#define WARNING(msg)                                                           \
-  fprintf(stderr, "%s%sWARNING%s: %s", BOLD, YELLOW, STYLE_RESET, msg);
+#define WARNING(msg) fprintf(stderr, "%s%sWARNING%s: %s", BOLD, YELLOW, STYLE_RESET, msg);
 
 // INFO(message), ex: INFO("operation ended.\n")
-#define INFO(msg)                                                              \
-  fprintf(stdout, "%s%sINFO%s: %s", BOLD, GREEN, STYLE_RESET, msg);
+#define INFO(msg) fprintf(stdout, "%s%sINFO%s: %s", BOLD, GREEN, STYLE_RESET, msg);
 #endif // #ifndef NO_C_TYPE_HANDLERS
 
-#define LOG(level)                                                             \
-  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),      \
+#define LOG(level)                                                                       \
+  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),                \
                  Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
-#define LOGF(file, level)                                                      \
-  Helper::Logger(level, __func__, file,                                        \
-                 Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
-#define LOGN(name, level)                                                      \
-  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),      \
-                 name, __FILE__, __LINE__)
-#define LOGNF(name, file, level)                                               \
-  Helper::Logger(level, file, name, __FILE__, __LINE__)
+#define LOGF(file, level)                                                                \
+  Helper::Logger(level, __func__, file, Helper::LoggingProperties::NAME.data(),          \
+                 __FILE__, __LINE__)
+#define LOGN(name, level)                                                                \
+  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), name,          \
+                 __FILE__, __LINE__)
+#define LOGNF(name, file, level) Helper::Logger(level, file, name, __FILE__, __LINE__)
 
-#define LOG_IF(level, condition)                                               \
-  if (condition)                                                               \
-  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),      \
+#define LOG_IF(level, condition)                                                         \
+  if (condition)                                                                         \
+  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),                \
                  Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
-#define LOGF_IF(file, level, condition)                                        \
-  if (condition)                                                               \
-  Helper::Logger(level, __func__, file,                                        \
-                 Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
-#define LOGN_IF(name, level, condition)                                        \
-  if (condition)                                                               \
-  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(),      \
-                 name, __FILE__, __LINE__)
-#define LOGNF_IF(name, file, level, condition)                                 \
-  if (condition) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
+#define LOGF_IF(file, level, condition)                                                  \
+  if (condition)                                                                         \
+  Helper::Logger(level, __func__, file, Helper::LoggingProperties::NAME.data(),          \
+                 __FILE__, __LINE__)
+#define LOGN_IF(name, level, condition)                                                  \
+  if (condition)                                                                         \
+  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), name,          \
+                 __FILE__, __LINE__)
+#define LOGNF_IF(name, file, level, condition)                                           \
+  if (condition)                                                                         \
+  Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
-#ifdef ANDROID_BUILD
-#define MKVERSION(name)                                                        \
-  char vinfo[512];                                                             \
-  sprintf(vinfo,                                                               \
-          "%s 1.3.0\nCompiler: clang\n"                                        \
-          "BuildFlags: -Wall;-Werror;-Wno-deprecated-declarations;-Os",        \
-          name);                                                               \
+#define MKVERSION(name)                                                                  \
+  char vinfo[512];                                                                       \
+  sprintf(vinfo,                                                                         \
+          "%s %s-%s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: "         \
+          "%s\nBuildFlags: %s",                                                          \
+          name, BUILD_VERSION, COMMIT_ID, BUILD_DATE, BUILD_TIME, BUILD_TYPE,            \
+          BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS);                     \
   return std::string(vinfo)
-#else
-#define MKVERSION(name)                                                        \
-  char vinfo[512];                                                             \
-  sprintf(vinfo,                                                               \
-          "%s %s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: "  \
-          "%s\nBuildFlags: %s",                                                \
-          name, BUILD_VERSION, BUILD_DATE, BUILD_TIME, BUILD_TYPE,             \
-          BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION, BUILD_FLAGS);           \
-  return std::string(vinfo)
-#endif
 
 #endif // #ifndef LIBHELPER_LIB_HPP

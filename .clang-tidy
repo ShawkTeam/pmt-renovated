@@ -1,0 +1,25 @@
+---
+Checks:          'clang-diagnostic-*,
+                  clang-analyzer-*,
+                  -bugrone-unused-return-value,
+                  -bugprone-reserved-identifier,
+                  -modernize-use-nodiscard'
+WarningsAsErrors: ''
+HeaderFileExtensions:
+  - ''
+  - h
+  - hh
+  - hpp
+  - hxx
+ImplementationFileExtensions:
+  - c
+  - cc
+  - cpp
+  - cxx
+HeaderFilterRegex: ''
+ExcludeHeaderFilterRegex: ''
+FormatStyle:     none
+CheckOptions:    {}
+SystemHeaders:   false
+...
+

@@ -14,8 +14,8 @@
    limitations under the License.
 */
 
-#ifndef VERSION_HPP
-#define VERSION_HPP
+#ifndef BUILD_INFO_HPP
+#define BUILD_INFO_HPP
 
 // General build info
 #define BUILD_VERSION			"@PROJECT_VERSION@"
@@ -25,5 +25,6 @@
 #define BUILD_FLAGS				"@BUILD_FLAGS@"
 #define BUILD_CMAKE_VERSION		"@CMAKE_VERSION@"
 #define BUILD_COMPILER_VERSION	"@COMPILER_VERSION_STRING@"
+#define COMMIT_ID               "@COMMIT_ID@"
 
-#endif // #ifndef VERSION_HPP
+#endif // #ifndef BUILD_INFO_HPP
