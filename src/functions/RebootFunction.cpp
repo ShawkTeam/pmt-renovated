@@ -31,8 +31,8 @@ INIT {
 }
 
 RUN {
-  LOGN(RFUN, INFO) << "Rebooting device!!! (custom reboot target: "
-                   << (rebootTarget.empty() ? "none" : rebootTarget) << std::endl;
+  LOGN(RFUN, INFO) << "Rebooting device!!! (custom reboot target: " << (rebootTarget.empty() ? "none" : rebootTarget)
+                   << std::endl;
 
   if (Helper::androidReboot(rebootTarget))
     OUT.println("Reboot command was sent");

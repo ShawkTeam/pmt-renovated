@@ -34,12 +34,11 @@ namespace PartitionManager {
  *
  * Usage: REGISTER_FUNCTION(FUNCTION_CLASS);
  */
-#define REGISTER_FUNCTION(cls)                                                           \
-  FuncManager.registerFunction(std::make_unique<cls>(), AppMain)
+#define REGISTER_FUNCTION(cls) FuncManager.registerFunction(std::make_unique<cls>(), AppMain)
 
 basic_variables::basic_variables()
-    : logFile(Helper::LoggingProperties::FILE), onLogical(false), quietProcess(false),
-      verboseMode(false), viewVersion(false), forceProcess(false) {
+    : logFile(Helper::LoggingProperties::FILE), onLogical(false), quietProcess(false), verboseMode(false),
+      viewVersion(false), forceProcess(false) {
   try {
     PartMap = std::make_unique<PartitionMap::BuildMap>();
   } catch (std::exception &) {
@@ -52,10 +51,8 @@ __attribute__((constructor)) void init() {
 }
 
 static void sigHandler(const int sig) {
-  if (sig == SIGINT)
-    OUT.println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
-  if (sig == SIGABRT)
-    OUT.println("\n%sAborted.%s", RED, STYLE_RESET);
+  if (sig == SIGINT) OUT.println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
+  if (sig == SIGABRT) OUT.println("\n%sAborted.%s", RED, STYLE_RESET);
   exit(sig);
 }
 
@@ -83,8 +80,7 @@ int Main(int argc, char **argv) {
     }
 
     if (argc < 2) {
-      OUT.println("Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.",
-                  argv[0]);
+      OUT.println("Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.", argv[0]);
       return EXIT_FAILURE;
     }
 
@@ -106,8 +102,7 @@ int Main(int argc, char **argv) {
         });
     AppMain.add_option("-L,--log-file", VARS.logFile, "Set log file");
     AppMain.add_flag("-f,--force", VARS.forceProcess, "Force process to be processed");
-    AppMain.add_flag("-l,--logical", VARS.onLogical,
-                     "Specify that the target partition is logical");
+    AppMain.add_flag("-l,--logical", VARS.onLogical, "Specify that the target partition is logical");
     AppMain.add_flag("-q,--quiet", VARS.quietProcess, "Quiet process");
     AppMain.add_flag("-V,--verbose", VARS.verboseMode,
                      "Detailed information is written on the screen while the "
@@ -128,8 +123,7 @@ int Main(int argc, char **argv) {
 
     CLI11_PARSE(AppMain, argc, argv);
 
-    if (VARS.verboseMode)
-      Helper::LoggingProperties::setPrinting<YES>();
+    if (VARS.verboseMode) Helper::LoggingProperties::setPrinting<YES>();
     if (VARS.viewVersion) {
       OUT.println("%s", getAppVersion().data());
       return EXIT_SUCCESS;
@@ -143,8 +137,7 @@ int Main(int argc, char **argv) {
         WARNING("-l (--logical) flag ignored. Because, partition type don't "
                 "needed by your used function.\n");
     } else {
-      if (!VARS.searchPath.empty())
-        (PARTS)(VARS.searchPath);
+      if (!VARS.searchPath.empty()) (PARTS)(VARS.searchPath);
       if (!VARS.PartMap && VARS.searchPath.empty())
         throw Error("No default search entries were found. Specify a search "
                     "directory with -S "
@@ -158,8 +151,7 @@ int Main(int argc, char **argv) {
     }
 
     if (!Helper::hasSuperUser() && !FuncManager.hasFlagOnUsedFunction(NO_SU)) {
-      if (!(FuncManager.hasFlagOnUsedFunction(ADB_SUFFICIENT) &&
-            Helper::hasAdbPermissions())) {
+      if (!(FuncManager.hasFlagOnUsedFunction(ADB_SUFFICIENT) && Helper::hasAdbPermissions())) {
         throw Error("This function is requires super-user privileges!");
       }
     }
@@ -168,14 +160,12 @@ int Main(int argc, char **argv) {
   } catch (Helper::Error &error) {
     // catch Helper::Error
 
-    fprintf(OUT.error, "%s%sERROR(S) OCCURRED:%s\n%s\n", RED, BOLD, STYLE_RESET,
-            error.what());
+    fprintf(OUT.error, "%s%sERROR(S) OCCURRED:%s\n%s\n", RED, BOLD, STYLE_RESET, error.what());
     return EXIT_FAILURE;
   } catch (CLI::Error &error) {
     // catch CLI::Error
 
-    fprintf(stderr, "%s: %s%sFLAG PARSE ERROR:%s %s\n", argv[0], RED, BOLD, STYLE_RESET,
-            error.what());
+    fprintf(stderr, "%s: %s%sFLAG PARSE ERROR:%s %s\n", argv[0], RED, BOLD, STYLE_RESET, error.what());
     return EXIT_FAILURE;
   } // try-catch block end
 }

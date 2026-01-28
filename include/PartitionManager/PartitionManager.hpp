@@ -61,14 +61,12 @@ int Main(int argc, char **argv);
 
 // If there is a delimiter in the string, CLI::detail::split returns; if not, an
 // empty vector is returned. And checks duplicate arguments.
-std::vector<std::string> splitIfHasDelim(const std::string &s, char delim,
-                                         bool checkForBadUsage = false);
+std::vector<std::string> splitIfHasDelim(const std::string &s, char delim, bool checkForBadUsage = false);
 
 // Process vectors with input strings. Use for [flag(s)]-[other flag(s)]
 // situations
-void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2,
-                        const std::string &s1, const std::string &s2, char delim,
-                        bool checkForBadUsage = false);
+void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2, const std::string &s1,
+                        const std::string &s2, char delim, bool checkForBadUsage = false);
 
 // Setting ups buffer size
 void setupBufferSize(uint64_t &size, const std::string &entry);
@@ -111,16 +109,13 @@ public:
     LOGN(PMTF, INFO) << "registering: " << _func->name() << std::endl;
     for (const auto &f : _functions) {
       if (std::string(_func->name()) == std::string(f->name())) {
-        LOGN(PMTF, INFO) << "Is already registered: " << _func->name() << ". Skipping."
-                         << std::endl;
+        LOGN(PMTF, INFO) << "Is already registered: " << _func->name() << ". Skipping." << std::endl;
         return;
       }
     }
-    if (!_func->init(_app))
-      throw Helper::Error("Cannot init: %s", _func->name());
+    if (!_func->init(_app)) throw Helper::Error("Cannot init: %s", _func->name());
     _functions.push_back(std::move(_func));
-    LOGN(PMTF, INFO) << _functions.back()->name() << " successfully registered."
-                     << std::endl;
+    LOGN(PMTF, INFO) << _functions.back()->name() << " successfully registered." << std::endl;
   }
 
   [[nodiscard]] bool hasFlagOnUsedFunction(int flag) const {
@@ -129,19 +124,16 @@ public:
         std::for_each(func->flags.begin(), func->flags.end(), [&](const int x) {
           LOGN(PMTF, INFO) << "Used flag " << x << " on " << func->name() << std::endl;
         });
-        return std::find(func->flags.begin(), func->flags.end(), flag) !=
-               func->flags.end();
+        return std::find(func->flags.begin(), func->flags.end(), flag) != func->flags.end();
       }
     }
     return false;
   }
 
   [[nodiscard]] bool isUsed(const std::string &name) const {
-    if (_functions.empty())
-      return false;
+    if (_functions.empty()) return false;
     for (const auto &func : _functions) {
-      if (func->name() == name)
-        return func->isUsed();
+      if (func->name() == name) return func->isUsed();
     }
     return false;
   }
@@ -150,8 +142,7 @@ public:
     LOGN(PMTF, INFO) << "running caught commands in command-line." << std::endl;
     for (const auto &func : _functions) {
       if (func->isUsed()) {
-        LOGN(PMTF, INFO) << func->name() << " is calling because used in command-line."
-                         << std::endl;
+        LOGN(PMTF, INFO) << func->name() << " is calling because used in command-line." << std::endl;
         return func->run();
       }
     }

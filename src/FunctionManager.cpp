@@ -26,17 +26,14 @@
 #include "functions/functions.hpp"
 
 namespace PartitionManager {
-std::vector<std::string> splitIfHasDelim(const std::string &s, const char delim,
-                                         const bool checkForBadUsage) {
-  if (s.find(delim) == std::string::npos)
-    return {};
+std::vector<std::string> splitIfHasDelim(const std::string &s, const char delim, const bool checkForBadUsage) {
+  if (s.find(delim) == std::string::npos) return {};
   auto vec = CLI::detail::split(s, delim);
 
   if (checkForBadUsage) {
     std::unordered_set<std::string> set;
     for (const auto &str : vec) {
-      if (set.contains(str))
-        throw CLI::ValidationError("Duplicate element in your inputs!");
+      if (set.contains(str)) throw CLI::ValidationError("Duplicate element in your inputs!");
       set.insert(str);
     }
   }
@@ -60,16 +57,13 @@ void setupBufferSize(uint64_t &size, const std::string &entry) {
   }
 }
 
-void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2,
-                        const std::string &s1, const std::string &s2, const char delim,
-                        const bool checkForBadUsage) {
+void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2, const std::string &s1,
+                        const std::string &s2, const char delim, const bool checkForBadUsage) {
   vec1 = splitIfHasDelim(s1, delim, checkForBadUsage);
   vec2 = splitIfHasDelim(s2, delim, checkForBadUsage);
 
-  if (vec1.empty() && !s1.empty())
-    vec1.push_back(s1);
-  if (vec2.empty() && !s2.empty())
-    vec2.push_back(s2);
+  if (vec1.empty() && !s1.empty()) vec1.push_back(s1);
+  if (vec2.empty() && !s2.empty()) vec2.push_back(s2);
 }
 
 pair PairError(const char *format, ...) {

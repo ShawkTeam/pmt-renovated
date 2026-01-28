@@ -32,54 +32,50 @@ std::map<uint64_t, std::string> FileSystemMagicMap = {
     {FileSystemMagic::FAT32_FS, "FAT32"},    {FileSystemMagic::NTFS_FS, "NTFS"},
     {FileSystemMagic::MSDOS_FS, "MSDOS"}};
 
-std::map<uint64_t, std::string> AndroidMagicMap = {
-    {AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
-    {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
-    {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
-    {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
-    {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
-    {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
-    {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
-    {AndroidMagic::ELF, "ELF"},
-    {AndroidMagic::RAW, "Raw Data"}};
+std::map<uint64_t, std::string> AndroidMagicMap = {{AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
+                                                   {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
+                                                   {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
+                                                   {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
+                                                   {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
+                                                   {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
+                                                   {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
+                                                   {AndroidMagic::ELF, "ELF"},
+                                                   {AndroidMagic::RAW, "Raw Data"}};
 
-std::map<uint64_t, std::string> MagicMap = {
-    {AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
-    {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
-    {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
-    {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
-    {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
-    {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
-    {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
-    {AndroidMagic::ELF, "ELF"},
-    {AndroidMagic::RAW, "Raw Data"},
-    {FileSystemMagic::EXTFS_FS, "EXT2/3/4"},
-    {FileSystemMagic::F2FS_FS, "F2FS"},
-    {FileSystemMagic::EROFS_FS, "EROFS"},
-    {FileSystemMagic::EXFAT_FS, "exFAT"},
-    {FileSystemMagic::FAT12_FS, "FAT12"},
-    {FileSystemMagic::FAT16_FS, "FAT16"},
-    {FileSystemMagic::FAT32_FS, "FAT32"},
-    {FileSystemMagic::NTFS_FS, "NTFS"},
-    {FileSystemMagic::MSDOS_FS, "MSDOS"}};
+std::map<uint64_t, std::string> MagicMap = {{AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
+                                            {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
+                                            {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
+                                            {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
+                                            {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
+                                            {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
+                                            {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
+                                            {AndroidMagic::ELF, "ELF"},
+                                            {AndroidMagic::RAW, "Raw Data"},
+                                            {FileSystemMagic::EXTFS_FS, "EXT2/3/4"},
+                                            {FileSystemMagic::F2FS_FS, "F2FS"},
+                                            {FileSystemMagic::EROFS_FS, "EROFS"},
+                                            {FileSystemMagic::EXFAT_FS, "exFAT"},
+                                            {FileSystemMagic::FAT12_FS, "FAT12"},
+                                            {FileSystemMagic::FAT16_FS, "FAT16"},
+                                            {FileSystemMagic::FAT32_FS, "FAT32"},
+                                            {FileSystemMagic::NTFS_FS, "NTFS"},
+                                            {FileSystemMagic::MSDOS_FS, "MSDOS"}};
 
 size_t getMagicLength(const uint64_t magic) {
   size_t length = 0;
   for (int i = 0; i < 8; i++) {
-    if ((magic >> (8 * i)) & 0xFF)
-      length = i + 1;
+    if ((magic >> (8 * i)) & 0xFF) length = i + 1;
   }
   return length;
 }
 
 bool hasMagic(const uint64_t magic, const ssize_t buf, const std::string &path) {
-  LOGI << "Checking magic of " << path << " with using " << buf
-       << " byte buffer size (has magic 0x" << std::hex << magic << "?)" << std::endl;
+  LOGI << "Checking magic of " << path << " with using " << buf << " byte buffer size (has magic 0x" << std::hex
+       << magic << "?)" << std::endl;
   Helper::garbageCollector collector;
 
   const int fd = Helper::openAndAddToCloseList(path, collector, O_RDONLY);
-  if (fd < 0)
-    return false;
+  if (fd < 0) return false;
   if (buf < 1) {
     LOGE << "Buffer size is older than 1" << std::endl;
     return false;
@@ -89,12 +85,10 @@ bool hasMagic(const uint64_t magic, const ssize_t buf, const std::string &path) 
   collector.delAfterProgress(buffer);
 
   const ssize_t bytesRead = read(fd, buffer, buf);
-  if (bytesRead < 0)
-    return false;
+  if (bytesRead < 0) return false;
 
   const size_t magicLength = getMagicLength(magic);
-  if (magicLength == 0)
-    return false;
+  if (magicLength == 0) return false;
 
   for (size_t i = 0; i <= bytesRead - magicLength; i++) {
     uint64_t value = 0;

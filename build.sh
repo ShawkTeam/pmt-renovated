@@ -69,7 +69,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-[ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-28"
+[ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-24"
 checks
 
 case $1 in

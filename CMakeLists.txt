@@ -26,8 +26,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # Set compiler flags
 add_compile_options(-Werror -Wno-deprecated-declarations)
 if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	# add_compile_options(-gdwarf-5 -fsanitize=address -fno-stack-protector)
-	# add_link_options(-fsanitize=address)
 	add_compile_options(-O3)
 	add_link_options(-s)
 endif()

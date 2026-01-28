@@ -49,37 +49,36 @@ public:
 
   Partition_t() : gptPart(GPTPart()) {}
   Partition_t(const Partition_t &other) = default;
-  explicit Partition_t(const BasicData &input)
-      : diskPath(input.diskPath), index(input.index), gptPart(input.gptPart) {}
+  explicit Partition_t(const BasicData &input) : diskPath(input.diskPath), index(input.index), gptPart(input.gptPart) {}
 
   GPTPart getGPTPart();     // Get copy of GPTPart data.
   GPTPart *getGPTPartRef(); // Get reference of GPTPart data.
 
-  std::filesystem::path getPath() const; // Get partition path (like /dev/block/sdc4 or
-                                         // /dev/block/mmcblk0p3).
+  std::filesystem::path getPath() const;     // Get partition path (like /dev/block/sdc4)
   std::filesystem::path getDiskPath() const; // Get diskPath variable.
-  std::filesystem::path getPathByName();     // Get partition path by name (like
-                                             // /dev/block/by-name/system).
+  std::filesystem::path getPathByName();     // Get partition path by name.
 
   std::string getName();           // Get partition name.
   std::string getDiskName() const; // Get disk name.
-  std::string getFormattedSizeString(
-      SizeUnit size_unit,
-      bool no_type = false) const; // Get partition size as formatted string
-                                   // (like 4096B, 4KiB, 128MiB, 2.5GiB).
+  std::string getFormattedSizeString(SizeUnit size_unit,
+                                     bool no_type = false) const; // Get partition size as formatted string.
 
-  uint32_t getIndex() const;                          // Get partition index in GPT table.
-  uint64_t getSize(uint32_t sectorSize = 4096) const; // Get partition size in bytes.
+  std::string getGUIDAsString() const; // Get partition GUID as string.
+
+  uint32_t getIndex() const;                               // Get partition index in GPT table.
+  uint64_t getSize(uint32_t sectorSize = 4096) const;      // Get partition size in bytes.
   uint64_t getStartByte(uint32_t sectorSize = 4096) const; // Starting byte address.
   uint64_t getEndByte(uint32_t sectorSize = 4096) const;   // Ending byte address.
 
-  void set(const BasicData &data);           // Set GPTPart object, index and disk path.
-  void setIndex(uint32_t new_index);         // Set partition index.
-  void setDiskPath(const std::string &path); // Set disk path.
+  GUIDData getGUID() const; // Get partition GUID.
+
+  void set(const BasicData &data);              // Set GPTPart object, index and disk path.
+  void setIndex(uint32_t new_index);            // Set partition index.
+  void setDiskPath(const std::string &path);    // Set disk path.
   void setGptPart(const GPTPart &otherGptPart); // Sset GPTPart object.
 
-  bool isDynamic() const; // Checks whether the partition is dynamic or not.
-  bool empty();           // Checks whether the partition info is empty or not.
+  bool isSuperPartition() const; // Checks whether the partition is dynamic or not.
+  bool empty();                  // Checks whether the partition info is empty or not.
 
   bool operator==(const Partition_t &other) const; // p1 == p2
   bool operator==(const GUIDData &other) const;    // p1 == guid
@@ -105,21 +104,17 @@ public:
 
   LogicalPartition_t() = default;
 
-  LogicalPartition_t(const LogicalPartition_t &other)
-      : partitionPath(other.partitionPath) {
+  LogicalPartition_t(const LogicalPartition_t &other) : partitionPath(other.partitionPath) {
     if (!Extra::isReallyLogical(partitionPath))
       throw std::invalid_argument("Invalid partition path! It's not logical partition!");
   }
-  explicit LogicalPartition_t(std::filesystem::path path)
-      : partitionPath(std::move(path)) {
+  explicit LogicalPartition_t(std::filesystem::path path) : partitionPath(std::move(path)) {
     if (!Extra::isReallyLogical(partitionPath))
       throw std::invalid_argument("Invalid partition path! It's not logical partition!");
   }
 
-  std::filesystem::path
-  getPath() const; // Get partition path (like /dev/block/mapper/system).
-  std::filesystem::path
-  getAbsolutePath() const; // Get partition path (like /dev/block/dm-3).
+  std::filesystem::path getPath() const;         // Get partition path (like /dev/block/mapper/system).
+  std::filesystem::path getAbsolutePath() const; // Get partition path (like /dev/block/dm-3).
 
   std::string getName() const; // Get partition name.
 
@@ -158,53 +153,42 @@ public:
     scanLogicalPartitions();
   }
 
-  std::vector<Partition_t>
-  getPartitions() const; // Get partitions (std::vector<Partition_t> partitions).
-  std::vector<Partition_t>
-  getPartitionsByDisk(const std::string &name) const; // Get partitions of disk by name.
-  std::vector<LogicalPartition_t>
-  getLogicalPartitions() const; // Get logical partitions (logicalPartitions).
+  std::vector<Partition_t> getPartitions() const; // Get partitions (std::vector<Partition_t> partitions).
+  std::vector<Partition_t> getPartitionsByDisk(const std::string &name) const; // Get partitions of disk by name.
+  std::vector<LogicalPartition_t> getLogicalPartitions() const; // Get logical partitions (logicalPartitions).
 
-  std::unordered_set<std::string> getDiskNames() const; // Get disk names (diskNames).
-  std::unordered_set<std::filesystem::path>
-  getDiskPaths() const; // Get disk paths (form gptDataCollection).
+  std::unordered_set<std::string> getDiskNames() const;           // Get disk names (diskNames).
+  std::unordered_set<std::filesystem::path> getDiskPaths() const; // Get disk paths (form gptDataCollection).
 
-  const std::map<std::filesystem::path, std::shared_ptr<GPTData>> &
-  getAllGPTData() const; // Get gptDataCollection.
+  const std::map<std::filesystem::path, std::shared_ptr<GPTData>> &getAllGPTData() const; // Get gptDataCollection.
 
-  const std::shared_ptr<GPTData> &
-  getGPTDataOf(const std::string &name) const; // Get gpt data of disk by name.
+  const std::shared_ptr<GPTData> &getGPTDataOf(const std::string &name) const; // Get gpt data of disk by name.
 
   std::vector<std::pair<std::string, uint64_t>>
   getDataOfLogicalPartitions() const; // Get logical partition information.
 
+  std::vector<std::tuple<std::string, uint64_t, bool>> getDataOfPartitions(); // Get information about partitions.
   std::vector<std::tuple<std::string, uint64_t, bool>>
-  getDataOfPartitions(); // Get information about partitions.
-  std::vector<std::tuple<std::string, uint64_t, bool>> getDataOfPartitionsByDisk(
-      const std::string &name); // Get information about partitions by disk name.
+  getDataOfPartitionsByDisk(const std::string &name); // Get information about partitions by disk name.
 
   std::string getSeek() const; // Get the disk name that the [uint32_t] operator will use.
 
+  bool hasPartition(const std::string &name);              // Check <name> partition is existing or not.
+  bool hasLogicalPartition(const std::string &name) const; // Check <name> logical partition is existing or not.
+  bool hasDisk(const std::string &name) const;             // Check <name> disk name is existing or not.
+  bool isUsesUFS() const;                                  // Get the device uses UFS or not.
+  bool isHasSuperPartition() const;                        // Get any disk has super partition or not.
+  bool isLogical(const std::string &name) const;           // Check <name> is logical partition or
+                                                           // not. Same as hasLogicalPartition().
+  bool empty() const;                                      // Checks partitions, logicalPartitions and
+                                                           // gptDataCollection is empty or not.
+  bool diskNamesEmpty() const;                             // Checks diskNames is empty or not.
+  bool valid();                                            // Validate GPTData collection integrity. Checks with
+                                                           // GPTData::Verify() and GPTData::CheckHeaderValidity().
   bool
-  hasPartition(const std::string &name); // Check <name> partition is existing or not.
-  bool hasLogicalPartition(const std::string &name)
-      const; // Check <name> logical partition is existing or not.
-  bool
-  hasDisk(const std::string &name) const; // Check <name> disk name is existing or not.
-  bool isUsesUFS() const;                 // Get the device uses UFS or not.
-  bool isHasSuperPartition() const;       // Get any disk has super partition or not.
-  bool isLogical(const std::string &name) const; // Check <name> is logical partition or
-                                                 // not. Same as hasLogicalPartition().
-  bool empty() const;          // Checks partitions, logicalPartitions and
-                               // gptDataCollection is empty or not.
-  bool diskNamesEmpty() const; // Checks diskNames is empty or not.
-  bool valid();                // Validate GPTData collection integrity. Checks with
-                               // GPTData::Verify() and GPTData::CheckHeaderValidity().
-  bool foreachPartitions(const std::function<bool(Partition_t &)>
-                             &function); // For-each input function for partition list.
+  foreachPartitions(const std::function<bool(Partition_t &)> &function); // For-each input function for partition list.
   bool foreachLogicalPartitions(
-      const std::function<bool(LogicalPartition_t &)>
-          &function); // For-each input function for logical partition list.
+      const std::function<bool(LogicalPartition_t &)> &function); // For-each input function for logical partition list.
   bool foreachGptData(const std::function<bool(const std::filesystem::path &,
                                                std::shared_ptr<GPTData> &)>
                           &function); // For-each input function for gpt data collection.
@@ -215,13 +199,12 @@ public:
   void setSeek(const std::string &name);    // Set the disk name that the
                                             // [uint32_t] operator will use.
 
-  void setDisks(
-      std::unordered_set<std::string> names); // Set disks. By names (like sda, sdc, sdg).
+  void setDisks(std::unordered_set<std::string> names); // Set disks. By names (like sda, sdc, sdg).
   void setGPTDataOf(const std::string &name,
                     std::shared_ptr<GPTData> data); // Set GPTData of <name> disk.
   void setAutoScanOnDiskChanges(bool state);        // Set auto scanning as <state>.
-  void clear(); // Cleanup data (excepts auto scan state and seek name).
-  void reset(); // Cleanup (clear()) and reset variables.
+  void clear();                                     // Cleanup data (excepts auto scan state and seek name).
+  void reset();                                     // Cleanup (clear()) and reset variables.
 
   class Extra {
   public:
@@ -284,9 +267,7 @@ std::string formatMagic(uint64_t magic);
 } // namespace PartitionMap
 
 #define FOREACH_PARTITIONS_LAMBDA_PARAMETERS (PartitionMap::Partition_t & partition)
-#define FOREACH_LOGICAL_PARTITIONS_LAMBDA_PARAMETERS                                     \
-  (PartitionMap::LogicalPartition_t & lpartition)
-#define FOREACH_GPT_DATA_LAMBDA_PARAMETERS                                               \
-  (const std::filesystem::path &, std::shared_ptr<GPTData> &)
+#define FOREACH_LOGICAL_PARTITIONS_LAMBDA_PARAMETERS (PartitionMap::LogicalPartition_t & lpartition)
+#define FOREACH_GPT_DATA_LAMBDA_PARAMETERS (const std::filesystem::path &path, std::shared_ptr<GPTData> &gptData)
 
 #endif // #ifndef LIBPARTITION_MAP_LIB_HPP

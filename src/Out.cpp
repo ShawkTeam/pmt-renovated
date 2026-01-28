@@ -45,9 +45,7 @@ void OutUtil::println(const char *format, ...) const {
 FILE *OutUtil::getStandartPointer() const { return standart; }
 FILE *OutUtil::getErrorPointer() const { return error; }
 
-FILE *OutUtil::makeFilePointer(FILE *real) {
-  return funopen(real, nullptr, writer, nullptr, nullptr);
-}
+FILE *OutUtil::makeFilePointer(FILE *real) { return funopen(real, nullptr, writer, nullptr, nullptr); }
 
 int OutUtil::writer(void *cookie, const char *buf, const int size) {
   auto *real = static_cast<FILE *>(cookie);

@@ -33,9 +33,7 @@ std::filesystem::path LogicalPartition_t::getAbsolutePath() const {
   return std::filesystem::read_symlink(partitionPath);
 }
 
-std::string LogicalPartition_t::getName() const {
-  return partitionPath.filename().string();
-}
+std::string LogicalPartition_t::getName() const { return partitionPath.filename().string(); }
 
 uint64_t LogicalPartition_t::getSize() const {
   std::filesystem::path p = std::filesystem::read_symlink(partitionPath);
@@ -43,16 +41,15 @@ uint64_t LogicalPartition_t::getSize() const {
   int fd = Helper::openAndAddToCloseList(p.string(), collector, O_RDONLY);
 
   if (fd < 0) {
-    LOGE << "Cannot open partition file path: " << std::quoted(partitionPath.string())
-         << ": " << strerror(errno) << std::endl;
+    LOGE << "Cannot open partition file path: " << std::quoted(partitionPath.string()) << ": " << strerror(errno)
+         << std::endl;
     return 0;
   }
 
   uint64_t size = 0;
   if (ioctl(fd, static_cast<unsigned int>(BLKGETSIZE64), &size) != 0) {
-    LOGN(MAP, ERROR) << "ioctl(BLKGETSIZE64) failed for "
-                     << std::quoted(partitionPath.string()) << ": " << strerror(errno)
-                     << std::endl;
+    LOGN(MAP, ERROR) << "ioctl(BLKGETSIZE64) failed for " << std::quoted(partitionPath.string()) << ": "
+                     << strerror(errno) << std::endl;
     return 0;
   }
 
@@ -61,9 +58,7 @@ uint64_t LogicalPartition_t::getSize() const {
 
 bool LogicalPartition_t::empty() const { return partitionPath.empty(); }
 
-void LogicalPartition_t::setPartitionPath(const std::filesystem::path &path) {
-  partitionPath = path;
-}
+void LogicalPartition_t::setPartitionPath(const std::filesystem::path &path) { partitionPath = path; }
 
 bool LogicalPartition_t::operator==(const LogicalPartition_t &other) const {
   return partitionPath == other.partitionPath;

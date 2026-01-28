@@ -23,26 +23,18 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 INIT {
-  LOGN(SFUN, INFO) << "Initializing variables of partition size getter function."
-                   << std::endl;
+  LOGN(SFUN, INFO) << "Initializing variables of partition size getter function." << std::endl;
   cmd = _app.add_subcommand("sizeof", "Tell size(s) of input partition list")
             ->footer("Use get-all or getvar-all as partition name for getting "
                      "sizes of all partitions.\nUse get-logicals as partition "
                      "name for getting sizes of logical partitions.\n"
                      "Use get-physical as partition name for getting sizes of "
                      "physical partitions.");
-  cmd->add_option("partition(s)", partitions, "Partition name(s).")
-      ->required()
-      ->delimiter(',');
-  cmd->add_flag("--as-byte", asByte, "Tell input size of partition list as byte.")
-      ->default_val(false);
-  cmd->add_flag("--as-kilobyte", asKiloBytes,
-                "Tell input size of partition list as kilobyte.")
-      ->default_val(false);
-  cmd->add_flag("--as-megabyte", asMega, "Tell input size of partition list as megabyte.")
-      ->default_val(true);
-  cmd->add_flag("--as-gigabyte", asGiga, "Tell input size of partition list as gigabyte.")
-      ->default_val(false);
+  cmd->add_option("partition(s)", partitions, "Partition name(s).")->required()->delimiter(',');
+  cmd->add_flag("--as-byte", asByte, "Tell input size of partition list as byte.")->default_val(false);
+  cmd->add_flag("--as-kilobyte", asKiloBytes, "Tell input size of partition list as kilobyte.")->default_val(false);
+  cmd->add_flag("--as-megabyte", asMega, "Tell input size of partition list as megabyte.")->default_val(true);
+  cmd->add_flag("--as-gigabyte", asGiga, "Tell input size of partition list as gigabyte.")->default_val(false);
   cmd->add_flag("--only-size", onlySize,
                 "Tell input size of partition list as not printing multiple "
                 "and partition name.")
@@ -52,24 +44,18 @@ INIT {
 
 RUN {
   sizeCastTypes multiple = {};
-  if (asByte)
-    multiple = B;
-  if (asKiloBytes)
-    multiple = KB;
-  if (asMega)
-    multiple = MB;
-  if (asGiga)
-    multiple = GB;
+  if (asByte) multiple = B;
+  if (asKiloBytes) multiple = KB;
+  if (asMega) multiple = MB;
+  if (asGiga) multiple = GB;
 
   auto func = [this, &multiple] COMMON_LAMBDA_PARAMS -> bool {
     if (VARS.onLogical && !props.isLogical) {
       if (VARS.forceProcess)
-        LOGN(SFUN, WARNING) << "Partition " << partition
-                            << " is exists but not logical. Ignoring (from --force, -f)."
+        LOGN(SFUN, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
                             << std::endl;
       else
-        throw Error("Used --logical (-l) flag but is not logical partition: %s",
-                    partition.data());
+        throw Error("Used --logical (-l) flag but is not logical partition: %s", partition.data());
     }
 
     if (onlySize)

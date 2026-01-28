@@ -54,20 +54,18 @@ Error::Error(const char *format, ...) {
 
 const char *Error::what() const noexcept { return _message.data(); }
 
-Logger::Logger(const LogLevels level, const char *func, const char *file,
-               const char *name, const char *source_file, const int line)
-    : _level(level), _function_name(func), _logFile(file), _program_name(name),
-      _file(source_file), _line(line) {}
+Logger::Logger(const LogLevels level, const char *func, const char *file, const char *name, const char *source_file,
+               const int line)
+    : _level(level), _function_name(func), _logFile(file), _program_name(name), _file(source_file), _line(line) {}
 
 Logger::~Logger() {
-  if (LoggingProperties::DISABLE)
-    return;
+  if (LoggingProperties::DISABLE) return;
 
   std::ostringstream oss;
   oss << "<" << static_cast<char>(_level) << "> [ "
       << "<prog " << _program_name << "> "
-      << "<on " << pathBasename(_file) << ":" << _line << "> " << currentDate() << " "
-      << currentTime() << "] " << _function_name << "(): " << _oss.str() << std::endl;
+      << "<on " << pathBasename(_file) << ":" << _line << "> " << currentDate() << " " << currentTime() << "] "
+      << _function_name << "(): " << _oss.str() << std::endl;
   std::string logLine = oss.str();
 
   if (!isExists(_logFile)) {
@@ -92,14 +90,11 @@ Logger::~Logger() {
     fileStream << logLine;
   } else {
     LoggingProperties::setLogFile("last_logs.log");
-    LOGN(HELPER, INFO) << "Cannot write logs to log file: " << _logFile << ": "
-                       << strerror(errno)
-                       << " Logging file setting up as: last_logs.log (this file)."
-                       << std::endl;
+    LOGN(HELPER, INFO) << "Cannot write logs to log file: " << _logFile << ": " << strerror(errno)
+                       << " Logging file setting up as: last_logs.log (this file)." << std::endl;
   }
 
-  if (LoggingProperties::PRINT)
-    std::cout << logLine;
+  if (LoggingProperties::PRINT) std::cout << logLine;
 }
 
 Logger &Logger::operator<<(std::ostream &(*msg)(std::ostream &)) {
@@ -120,9 +115,7 @@ garbageCollector::~garbageCollector() {
     eraseEntry(file);
 }
 
-void garbageCollector::delFileAfterProgress(const std::string &_path) {
-  _files.push_back(_path);
-}
+void garbageCollector::delFileAfterProgress(const std::string &_path) { _files.push_back(_path); }
 void garbageCollector::closeAfterProgress(const int _fd) { _fds.push_back(_fd); }
 void garbageCollector::closeAfterProgress(FILE *_fp) { _fps.push_back(_fp); }
 void garbageCollector::closeAfterProgress(DIR *_dp) { _dps.push_back(_dp); }
@@ -130,8 +123,7 @@ void garbageCollector::closeAfterProgress(DIR *_dp) { _dps.push_back(_dp); }
 SilenceStdout::SilenceStdout() { silenceAgain(); }
 
 SilenceStdout::~SilenceStdout() {
-  if (saved_stdout != -1 && dev_null != -1)
-    stop();
+  if (saved_stdout != -1 && dev_null != -1) stop();
 }
 
 void SilenceStdout::stop() {

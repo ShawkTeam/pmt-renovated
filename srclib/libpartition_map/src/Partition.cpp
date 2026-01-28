@@ -26,15 +26,18 @@ GPTPart *Partition_t::getGPTPartRef() { return &gptPart; }
 
 std::filesystem::path Partition_t::getPath() const {
   std::string suffix = (isdigit(diskPath.string().back())) ? "p" : "";
-  std::filesystem::path path(diskPath);
-  path /= suffix;
-  return path.string() + std::to_string(index + 1);
+  std::string path = diskPath.string() + suffix;
+  return path + std::to_string(index + 1);
 }
 
 std::filesystem::path Partition_t::getDiskPath() const { return diskPath; }
 
 std::filesystem::path Partition_t::getPathByName() {
-  return "/dev/block/by-name/" + gptPart.GetDescription();
+  std::filesystem::path result = "/dev/block/by-name";
+  result /= gptPart.GetDescription();
+
+  if (!std::filesystem::exists("/dev/block/by-name") || std::filesystem::read_symlink(result) != getPath()) return {};
+  return result;
 }
 
 std::string Partition_t::getName() { return gptPart.GetDescription(); }
@@ -42,7 +45,7 @@ std::string Partition_t::getName() { return gptPart.GetDescription(); }
 std::string Partition_t::getDiskName() const { return diskPath.filename(); }
 
 std::string Partition_t::getFormattedSizeString(SizeUnit size_unit, bool no_type) const {
-  uint32_t size = getSize();
+  uint64_t size = getSize();
   switch (size_unit) {
     case BYTE:
       return no_type ? std::to_string(size) : std::to_string(size) + "B";
@@ -57,19 +60,17 @@ std::string Partition_t::getFormattedSizeString(SizeUnit size_unit, bool no_type
   return no_type ? std::to_string(size) : std::to_string(size) + "B";
 }
 
+std::string Partition_t::getGUIDAsString() const { return gptPart.GetUniqueGUID().AsString(); }
+
 uint32_t Partition_t::getIndex() const { return index; }
 
-uint64_t Partition_t::getSize(uint32_t sectorSize) const {
-  return gptPart.GetLengthLBA() * sectorSize;
-}
+uint64_t Partition_t::getSize(uint32_t sectorSize) const { return gptPart.GetLengthLBA() * sectorSize; }
 
-uint64_t Partition_t::getStartByte(uint32_t sectorSize) const {
-  return gptPart.GetFirstLBA() * sectorSize;
-}
+uint64_t Partition_t::getStartByte(uint32_t sectorSize) const { return gptPart.GetFirstLBA() * sectorSize; }
 
-uint64_t Partition_t::getEndByte(uint32_t sectorSize) const {
-  return (gptPart.GetLastLBA() + 1) * sectorSize;
-}
+uint64_t Partition_t::getEndByte(uint32_t sectorSize) const { return (gptPart.GetLastLBA() + 1) * sectorSize; }
+
+GUIDData Partition_t::getGUID() const { return gptPart.GetUniqueGUID(); }
 
 void Partition_t::set(const BasicData &data) {
   gptPart = data.gptPart;
@@ -83,20 +84,15 @@ void Partition_t::setDiskPath(const std::string &path) { diskPath = path; }
 
 void Partition_t::setGptPart(const GPTPart &otherGptPart) { gptPart = otherGptPart; }
 
-bool Partition_t::isDynamic() const {
-  return Extra::hasMagic(Extra::AndroidMagic::SUPER_IMAGE, 8192, getPath());
-}
+bool Partition_t::isSuperPartition() const { return getGUID() == GUIDData("89A12DE1-5E41-4CB3-8B4C-B1441EB5DA38"); }
 
 bool Partition_t::empty() { return !gptPart.IsUsed() && diskPath.empty(); }
 
 bool Partition_t::operator==(const Partition_t &other) const {
-  return diskPath == other.diskPath && index == other.index &&
-         gptPart.GetUniqueGUID() == other.gptPart.GetUniqueGUID();
+  return diskPath == other.diskPath && index == other.index && gptPart.GetUniqueGUID() == other.gptPart.GetUniqueGUID();
 }
 
-bool Partition_t::operator==(const GUIDData &other) const {
-  return gptPart.GetUniqueGUID() == other;
-}
+bool Partition_t::operator==(const GUIDData &other) const { return gptPart.GetUniqueGUID() == other; }
 
 bool Partition_t::operator!=(const Partition_t &other) const { return !(*this == other); }
 

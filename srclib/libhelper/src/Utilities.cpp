@@ -61,15 +61,13 @@ int android_reboot(const unsigned cmd, int /*flags*/, const char *arg) {
     default:;
   }
 
-  if (!restart_cmd)
-    return -1;
+  if (!restart_cmd) return -1;
   if (arg && arg[0])
     ret = asprintf(&prop_value, "%s,%s", restart_cmd, arg);
   else
     ret = asprintf(&prop_value, "%s", restart_cmd);
 
-  if (ret < 0)
-    return -1;
+  if (ret < 0) return -1;
   ret = __system_property_set(ANDROID_RB_PROPERTY, prop_value);
   free(prop_value);
   return ret;
@@ -88,10 +86,8 @@ void reset() {
 }
 
 void set(std::string_view file, std::string_view name) {
-  if (file.data() != nullptr)
-    FILE = file;
-  if (name.data() != nullptr)
-    NAME = name;
+  if (file.data() != nullptr) FILE = file;
+  if (name.data() != nullptr) NAME = name;
 }
 
 void setProgramName(const std::string_view name) { NAME = name; }
@@ -110,10 +106,8 @@ bool confirmPropt(const std::string_view message) {
   printf("%s [ y / n ]: ", message.data());
   std::cin >> p;
 
-  if (p == 'y' || p == 'Y')
-    return true;
-  if (p == 'n' || p == 'N')
-    return false;
+  if (p == 'y' || p == 'Y') return true;
+  if (p == 'n' || p == 'N') return false;
 
   printf("Unexpected answer: '%c'. Try again.\n", p);
   return confirmPropt(message);
@@ -121,8 +115,7 @@ bool confirmPropt(const std::string_view message) {
 
 std::string currentWorkingDirectory() {
   char cwd[1024];
-  if (getcwd(cwd, sizeof(cwd)) == nullptr)
-    return {};
+  if (getcwd(cwd, sizeof(cwd)) == nullptr) return {};
   return cwd;
 }
 
@@ -130,8 +123,7 @@ std::string currentDate() {
   const time_t t = time(nullptr);
 
   if (const tm *date = localtime(&t))
-    return std::string(std::to_string(date->tm_mday) + "/" +
-                       std::to_string(date->tm_mon + 1) + "/" +
+    return std::string(std::to_string(date->tm_mday) + "/" + std::to_string(date->tm_mon + 1) + "/" +
                        std::to_string(date->tm_year + 1900));
   return {};
 }
@@ -140,8 +132,8 @@ std::string currentTime() {
   const time_t t = time(nullptr);
 
   if (const tm *date = localtime(&t))
-    return std::string(std::to_string(date->tm_hour) + ":" +
-                       std::to_string(date->tm_min) + ":" + std::to_string(date->tm_sec));
+    return std::string(std::to_string(date->tm_hour) + ":" + std::to_string(date->tm_min) + ":" +
+                       std::to_string(date->tm_sec));
   return {};
 }
 
@@ -149,8 +141,7 @@ std::pair<std::string, int> runCommandWithOutput(const std::string_view cmd) {
   LOGN(HELPER, INFO) << "run command and catch out request: " << cmd << std::endl;
 
   FILE *pipe = popen(cmd.data(), "r");
-  if (!pipe)
-    return {};
+  if (!pipe) return {};
 
   std::unique_ptr<FILE, decltype(&pclose)> pipe_holder(pipe, pclose);
 
@@ -166,10 +157,8 @@ std::pair<std::string, int> runCommandWithOutput(const std::string_view cmd) {
 }
 
 std::string pathJoin(std::string base, std::string relative) {
-  if (base.back() != '/')
-    base += '/';
-  if (relative[0] == '/')
-    relative.erase(0, 1);
+  if (base.back() != '/') base += '/';
+  if (relative[0] == '/') relative.erase(0, 1);
   base += relative;
   return base;
 }
@@ -185,26 +174,23 @@ std::string pathDirname(const std::string_view entry) {
 }
 
 bool changeMode(const std::string_view file, const mode_t mode) {
-  LOGN(HELPER, INFO) << "change mode request: " << file << ". As mode: " << mode
-                     << std::endl;
+  LOGN(HELPER, INFO) << "change mode request: " << file << ". As mode: " << mode << std::endl;
   return chmod(file.data(), mode) == 0;
 }
 
 bool changeOwner(const std::string_view file, const uid_t uid, const gid_t gid) {
-  LOGN(HELPER, INFO) << "change owner request: " << file << ". As owner:group: " << uid
-                     << ":" << gid << std::endl;
+  LOGN(HELPER, INFO) << "change owner request: " << file << ". As owner:group: " << uid << ":" << gid << std::endl;
   return chown(file.data(), uid, gid) == 0;
 }
 
-int openAndAddToCloseList(const std::string_view &path, garbageCollector &collector,
-                          const int flags, const mode_t mode) {
+int openAndAddToCloseList(const std::string_view &path, garbageCollector &collector, const int flags,
+                          const mode_t mode) {
   const int fd = mode == 0 ? open(path.data(), flags) : open(path.data(), flags, mode);
   collector.closeAfterProgress(fd);
   return fd;
 }
 
-FILE *openAndAddToCloseList(const std::string_view &path, garbageCollector &collector,
-                            const char *mode) {
+FILE *openAndAddToCloseList(const std::string_view &path, garbageCollector &collector, const char *mode) {
   FILE *fp = fopen(path.data(), mode);
   collector.closeAfterProgress(fp);
   return fp;
@@ -228,8 +214,7 @@ bool androidReboot(const std::string_view arg) {
 
   unsigned cmd = ANDROID_RB_RESTART2;
   if (const std::string prop = getProperty("ro.build.version.sdk"); prop != "ERROR") {
-    if (std::stoi(prop) < 26)
-      cmd = ANDROID_RB_RESTART;
+    if (std::stoi(prop) < 26) cmd = ANDROID_RB_RESTART;
   }
 
   return android_reboot(cmd, 0, arg.empty() ? nullptr : arg.data()) != -1;
@@ -237,30 +222,23 @@ bool androidReboot(const std::string_view arg) {
 #endif
 
 uint64_t getRandomOffset(const uint64_t size, const uint64_t bufferSize) {
-  if (size <= bufferSize)
-    return 0;
+  if (size <= bufferSize) return 0;
   const uint64_t maxOffset = size - bufferSize;
   srand(time(nullptr));
   return rand() % maxOffset;
 }
 
 int convertTo(const uint64_t size, const sizeCastTypes type) {
-  if (type == KB)
-    return TO_KB(size);
-  if (type == MB)
-    return TO_MB(size);
-  if (type == GB)
-    return TO_GB(size);
+  if (type == KB) return TO_KB(size);
+  if (type == MB) return TO_MB(size);
+  if (type == GB) return TO_GB(size);
   return static_cast<int>(size);
 }
 
 std::string multipleToString(const sizeCastTypes type) {
-  if (type == KB)
-    return "KB";
-  if (type == MB)
-    return "MB";
-  if (type == GB)
-    return "GB";
+  if (type == KB) return "KB";
+  if (type == MB) return "MB";
+  if (type == GB) return "GB";
   return "B";
 }
 
