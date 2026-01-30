@@ -3,7 +3,7 @@ cmake-build-release/
 external/
 include/nlohmann/
 include/CLI/
-include/libhelper/include/cutils/
-include/libhelper/include/private/
+srclib/libhelper/include/cutils/
+srclib/libhelper/include/private/
 include/generated/
 include/picosha2.h
