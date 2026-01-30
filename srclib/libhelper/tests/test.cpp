@@ -33,16 +33,13 @@ int main(int argc, char **argv) {
   try {
     std::cout << "Has super user?; " << std::boolalpha << Helper::hasSuperUser() << std::endl;
     std::cout << "file.txt is exists?; " << std::boolalpha << Helper::isExists(test_path("file.txt")) << std::endl;
-    std::cout << "'file.txt' file is exists?; " << std::boolalpha << Helper::fileIsExists(test_path("file"))
-              << std::endl;
-    std::cout << "'dir' directory is exists?; " << std::boolalpha << Helper::directoryIsExists(test_path("dir"))
-              << std::endl;
+    std::cout << "'file.txt' file is exists?; " << std::boolalpha << Helper::fileIsExists(test_path("file")) << std::endl;
+    std::cout << "'dir' directory is exists?; " << std::boolalpha << Helper::directoryIsExists(test_path("dir")) << std::endl;
     std::cout << "'linkdir' is link?; " << std::boolalpha << Helper::isLink(test_path("linkdir")) << std::endl;
-    std::cout << "'linkdir' is symlink?; " << std::boolalpha << Helper::isSymbolicLink(test_path("linkdir"))
-              << std::endl;
+    std::cout << "'linkdir' is symlink?; " << std::boolalpha << Helper::isSymbolicLink(test_path("linkdir")) << std::endl;
     std::cout << "'linkdir' is hardlink?; " << std::boolalpha << Helper::isHardLink(test_path("linkdir")) << std::endl;
-    std::cout << "'linkdir' is symlink to 'dir'?; " << std::boolalpha
-              << Helper::areLinked(test_path("linkdir"), test_path("dir")) << std::endl;
+    std::cout << "'linkdir' is symlink to 'dir'?; " << std::boolalpha << Helper::areLinked(test_path("linkdir"), test_path("dir"))
+              << std::endl;
 
     if (!Helper::writeFile("file.txt", "hello world"))
       throw Helper::Error("Cannot write \"hello world\" in 'file.txt'");
@@ -55,8 +52,8 @@ int main(int argc, char **argv) {
       std::cout << "'file.txt': " << *content << std::endl;
 
     std::cout << "Making directory 'dir2': " << std::boolalpha << Helper::makeDirectory(test_path("dir2")) << std::endl;
-    std::cout << "Making recursive directories 'dir3/x/y': " << std::boolalpha
-              << Helper::makeRecursiveDirectory(test_path("dir3/x/y")) << std::endl;
+    std::cout << "Making recursive directories 'dir3/x/y': " << std::boolalpha << Helper::makeRecursiveDirectory(test_path("dir3/x/y"))
+              << std::endl;
     std::cout << "Create 'file2.txt': " << std::boolalpha << Helper::createFile(test_path("file2.txt")) << std::endl;
     std::cout << "Create symlink 'file2.txt' to 'file2lnk.txt': " << std::boolalpha
               << Helper::createSymlink(test_path("file2.txt"), test_path("file2lnk.txt")) << std::endl;
@@ -84,10 +81,8 @@ int main(int argc, char **argv) {
     std::cout << "Current date: " << Helper::currentDate() << std::endl;
     std::cout << "Current time: " << Helper::currentTime() << std::endl;
     std::cout << "Output of 'ls' command: " << Helper::runCommandWithOutput("ls").first << std::endl;
-    std::cout << "Basename of " << test_path("file2.txt") << ": " << Helper::pathBasename(test_path("file2.txt"))
-              << std::endl;
-    std::cout << "Dirname of " << test_path("file2.txt") << ": " << Helper::pathDirname(test_path("file2.txt"))
-              << std::endl;
+    std::cout << "Basename of " << test_path("file2.txt") << ": " << Helper::pathBasename(test_path("file2.txt")) << std::endl;
+    std::cout << "Dirname of " << test_path("file2.txt") << ": " << Helper::pathDirname(test_path("file2.txt")) << std::endl;
 
     std::cout << "pathJoin() test 1: " << Helper::pathJoin("mydir", "dir2") << std::endl;
     std::cout << "pathJoin() test 2: " << Helper::pathJoin("mydir/", "dir2") << std::endl;

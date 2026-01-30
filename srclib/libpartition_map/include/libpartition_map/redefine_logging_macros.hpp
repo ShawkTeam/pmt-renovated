@@ -24,8 +24,7 @@
 #undef LOG
 #define LOG(level) Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), MAP, __FILE__, __LINE__)
 #define LOGI Helper::Logger(LogLevels::INFO, __func__, Helper::LoggingProperties::FILE.data(), MAP, __FILE__, __LINE__)
-#define LOGW                                                                                                           \
-  Helper::Logger(LogLevels::WARNING, __func__, Helper::LoggingProperties::FILE.data(), MAP, __FILE__, __LINE__)
+#define LOGW Helper::Logger(LogLevels::WARNING, __func__, Helper::LoggingProperties::FILE.data(), MAP, __FILE__, __LINE__)
 #define LOGE Helper::Logger(LogLevels::ERROR, __func__, Helper::LoggingProperties::FILE.data(), MAP, __FILE__, __LINE__)
 #define LOGA Helper::Logger(LogLevels::ABORT, __func__, Helper::LoggingProperties::FILE.data(), MAP, __FILE__, __LINE__)
 

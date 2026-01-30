@@ -14,11 +14,11 @@
    limitations under the License.
 */
 
-#include <fcntl.h>
-
 #include <PartitionManager/PartitionManager.hpp>
 #include <cstdarg>
+#include <fcntl.h>
 #include <memory>
+#include <ranges>
 #include <string>
 #include <unordered_set>
 #include <vector>
@@ -41,24 +41,28 @@ std::vector<std::string> splitIfHasDelim(const std::string &s, const char delim,
   return vec;
 }
 
-void setupBufferSize(uint64_t &size, const std::string &entry) {
-  if (PARTS.hasPartition(entry) && PARTS.sizeOf(entry) % size != 0) {
-    OUT.println("%sWARNING%s: Specified buffer size is invalid for %s! Using "
-                "different buffer size for %s.",
-                YELLOW, STYLE_RESET, entry.data(), entry.data());
-    size = PARTS.sizeOf(entry) % 4096 == 0 ? 4096 : 1;
+void setupBufferSize(uint64_t &size, const std::filesystem::path &entry) {
+  if (PART_TABLES.hasPartition(entry.filename())) {
+    const uint64_t psize = PART_TABLES.partition(entry.filename().string()).getSize();
+
+    if (psize % size != 0) {
+      OUT.println("%sWARNING%s: Specified buffer size is invalid for %s! Using "
+                  "different buffer size for %s.",
+                  YELLOW, STYLE_RESET, entry.string().c_str(), entry.string().c_str());
+      size = psize % 4096 == 0 ? 4096 : 1;
+    }
   } else if (Helper::fileIsExists(entry)) {
     if (Helper::fileSize(entry) % size != 0) {
       OUT.println("%sWARNING%s: Specified buffer size is invalid for %s! using "
                   "different buffer size for %s.",
-                  YELLOW, STYLE_RESET, entry.data(), entry.data());
+                  YELLOW, STYLE_RESET, entry.string().c_str(), entry.string().c_str());
       size = Helper::fileSize(entry) % 4096 == 0 ? 4096 : 1;
     }
   }
 }
 
-void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2, const std::string &s1,
-                        const std::string &s2, const char delim, const bool checkForBadUsage) {
+void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2, const std::string &s1, const std::string &s2,
+                        const char delim, const bool checkForBadUsage) {
   vec1 = splitIfHasDelim(s1, delim, checkForBadUsage);
   vec2 = splitIfHasDelim(s2, delim, checkForBadUsage);
 

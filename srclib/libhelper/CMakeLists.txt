@@ -33,7 +33,7 @@ target_link_options(libhelper_shared PRIVATE "LINKER:-rpath,/data/data/com.termu
 target_link_options(libhelper_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
 target_link_libraries(libhelper_test PRIVATE libhelper_static)
 
-# Set appropriate output names
+# Set appropriate output names and compiler flags
 set_target_properties(libhelper_shared PROPERTIES OUTPUT_NAME "helper")
 set_target_properties(libhelper_static PROPERTIES OUTPUT_NAME "helper")
 

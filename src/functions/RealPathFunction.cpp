@@ -26,26 +26,26 @@ INIT {
   LOGN(RPFUN, INFO) << "Initializing variables of real path function." << std::endl;
   cmd = _app.add_subcommand("real-path", "Tell real paths of partition(s)");
   cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
-  cmd->add_flag("--real-link-path", realLinkPath, "Print real link path(s)")->default_val(false);
+  cmd->add_flag("--by-name", byName, "Print by-name path(s)")->default_val(false);
   return true;
 }
 
 RUN {
   for (const auto &partition : partitions) {
-    if (!PARTS.hasPartition(partition)) throw Error("Couldn't find partition: %s", partition.data());
+    if (!PART_TABLES.hasPartition(partition)) throw Error("Couldn't find partition: %s", partition.data());
 
-    if (VARS.onLogical && !PARTS.isLogical(partition)) {
+    auto &part = PART_TABLES.partitionWithDupCheck(partition, VARS.noWorkOnUsed);
+    if (VARS.onLogical && !part.isLogicalPartition()) {
       if (VARS.forceProcess)
-        LOGN(RPFUN, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
-                             << std::endl;
+        LOGN(RPFUN, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
       else
         throw Error("Used --logical (-l) flag but is not logical partition: %s", partition.data());
     }
 
-    if (realLinkPath)
-      OUT.println("%s", PARTS.getRealLinkPathOf(partition).data());
+    if (byName)
+      OUT.println("%s", part.getPathByName().c_str());
     else
-      OUT.println("%s", PARTS.getRealPathOf(partition).data());
+      OUT.println("%s", part.getAbsolutePath().c_str());
   }
 
   return true;

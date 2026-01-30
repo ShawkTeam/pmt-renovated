@@ -17,9 +17,8 @@
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 
+#include <__filesystem/path.h>
 #include <dirent.h>
-
-#include <cstdint>
 #include <exception>
 #include <functional>
 #include <optional>
@@ -29,6 +28,7 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <concepts>
 
 #define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)
 #define MB(x) (KB(x) * 1024)                    // MB(4) = 4194304 (KB(4) * 1024)
@@ -47,12 +47,7 @@ enum LogLevels {
   ABORT = static_cast<int>('A')
 };
 
-enum sizeCastTypes {
-  B = static_cast<int>('B'),
-  KB = static_cast<int>('K'),
-  MB = static_cast<int>('M'),
-  GB = static_cast<int>('G')
-};
+enum sizeCastTypes { B = static_cast<int>('B'), KB = static_cast<int>('K'), MB = static_cast<int>('M'), GB = static_cast<int>('G') };
 
 constexpr mode_t DEFAULT_FILE_PERMS = 0644;
 constexpr mode_t DEFAULT_EXTENDED_FILE_PERMS = 0755;
@@ -94,23 +89,76 @@ public:
   Logger &operator<<(std::ostream &(*msg)(std::ostream &));
 };
 
-// Close file descriptors and delete allocated array memory
+template <typename T>
+struct CleanupTraits {
+  static void cleanup(T* ptr) {
+    delete ptr;
+  }
+};
+
+template <typename T>
+struct CleanupTraits<T[]> {
+  static void cleanup(T* ptr) {
+    delete[] ptr;
+  }
+};
+
+template <>
+struct CleanupTraits<FILE> {
+  static void cleanup(FILE* fp) {
+    if (fp) fclose(fp);
+  }
+};
+
+template <>
+struct CleanupTraits<DIR> {
+  static void cleanup(DIR* dp) {
+    if (dp) closedir(dp);
+  }
+};
+
+template <typename T>
+concept Deletable =
+  !std::is_void_v<T> &&
+  !std::is_array_v<T> &&
+  requires(T* p) {
+  CleanupTraits<T>::cleanup(p);
+  };
+
+template <typename T>
+concept ArrayDeletable =
+  !std::is_void_v<T> &&
+  requires(T* p) {
+  CleanupTraits<T[]>::cleanup(p);
+  };
+
 class garbageCollector {
-private:
-  std::vector<std::function<void()>> _cleaners;
-  std::vector<FILE *> _fps;
-  std::vector<DIR *> _dps;
-  std::vector<int> _fds;
-  std::vector<std::string> _files;
+  std::vector<std::function<void()>> __cleaners;
 
 public:
+  garbageCollector() = default;
+  garbageCollector(const garbageCollector&) = delete;
+  garbageCollector& operator=(const garbageCollector&) = delete;
+
   ~garbageCollector();
 
-  template <typename T> void delAfterProgress(T *_ptr) {
-    _cleaners.push_back([_ptr] { delete[] _ptr; });
+  template <Deletable T>
+  void delAfterProgress(T* ptr) {
+    static_assert(!std::is_array_v<T>,
+                  "Use delArrayAfterProgress for arrays");
+    __cleaners.push_back([ptr] {
+      CleanupTraits<T>::cleanup(ptr);
+    });
   }
 
-  void delFileAfterProgress(const std::string &_path);
+  template <ArrayDeletable T>
+  void delArrayAfterProgress(T* ptr) {
+    __cleaners.push_back([ptr] {
+      CleanupTraits<T[]>::cleanup(ptr);
+    });
+  }
+
+  void delFileAfterProgress(const std::filesystem::path &_path);
   void closeAfterProgress(FILE *_fp);
   void closeAfterProgress(DIR *_dp);
   void closeAfterProgress(int _fd);
@@ -220,8 +268,7 @@ public:
   PureTuple(PureTuple &other) : tuple_data(new Data[other.capacity]), capacity(other.capacity), count(other.count) {
     std::copy(other.tuple_data, other.tuple_data + count, tuple_data);
   }
-  PureTuple(PureTuple &&other) noexcept
-      : tuple_data(new Data[other.capacity]), capacity(other.capacity), count(other.count) {
+  PureTuple(PureTuple &&other) noexcept : tuple_data(new Data[other.capacity]), capacity(other.capacity), count(other.count) {
     std::copy(other.tuple_data, other.tuple_data + count, tuple_data);
     other.clear();
   }
@@ -522,13 +569,13 @@ public:
   void operator()(const _Type &_value) noexcept { this->value = _value; }
 };
 
-class SilenceStdout {
+class Silencer {
   int saved_stdout = -1;
   int dev_null = -1;
 
 public:
-  SilenceStdout();
-  ~SilenceStdout();
+  Silencer();
+  ~Silencer();
 
   void stop();
   void silenceAgain();
@@ -538,7 +585,7 @@ namespace LoggingProperties {
 extern std::string_view FILE, NAME;
 extern bool PRINT, DISABLE;
 
-void set(std::string_view name, std::string_view file);
+void set(std::string_view name, const std::filesystem::path &file);
 void setProgramName(std::string_view name);
 void setLogFile(std::string_view file);
 
@@ -550,7 +597,7 @@ template <int state> void setPrinting() {
 }
 template <int state> void setLoggingState() {
   if (state == 1 || state == 0)
-    DISABLE = state;
+    DISABLE = !state;
   else
     DISABLE = NO;
 }
@@ -577,42 +624,42 @@ bool hasAdbPermissions();
 /**
  * Checks whether the file/directory exists.
  */
-bool isExists(std::string_view entry);
+bool isExists(const std::filesystem::path &entry);
 
 /**
  * Checks whether the file exists.
  */
-bool fileIsExists(std::string_view file);
+bool fileIsExists(const std::filesystem::path &file);
 
 /**
  * Checks whether the directory exists.
  */
-bool directoryIsExists(std::string_view directory);
+bool directoryIsExists(const std::filesystem::path &directory);
 
 /**
  * Checks whether the link (symbolic or hard) exists.
  */
-bool linkIsExists(std::string_view entry);
+bool linkIsExists(const std::filesystem::path &entry);
 
 /**
  * Checks if the entry is a symbolic link.
  */
-bool isLink(std::string_view entry);
+bool isLink(const std::filesystem::path &entry);
 
 /**
  * Checks if the entry is a symbolic link.
  */
-bool isSymbolicLink(std::string_view entry);
+bool isSymbolicLink(const std::filesystem::path &entry);
 
 /**
  * Checks if the entry is a hard link.
  */
-bool isHardLink(std::string_view entry);
+bool isHardLink(const std::filesystem::path &entry);
 
 /**
  * Checks whether entry1 is linked to entry2.
  */
-bool areLinked(std::string_view entry1, std::string_view entry2);
+bool areLinked(const std::filesystem::path &entry1, const std::filesystem::path &entry2);
 
 // -------------------------------
 // File I/O - not throws Helper::Error
@@ -623,14 +670,14 @@ bool areLinked(std::string_view entry1, std::string_view entry2);
  * If file does not exist, it is automatically created.
  * Returns true on success.
  */
-bool writeFile(std::string_view file, std::string_view text);
+bool writeFile(const std::filesystem::path &file, std::string_view text);
 
 /**
  * Reads file content into string.
  * On success returns file content.
  * On error returns std::nullopt.
  */
-std::optional<std::string> readFile(std::string_view file);
+std::optional<std::string> readFile(const std::filesystem::path &file);
 
 // -------------------------------
 // Creators
@@ -639,22 +686,22 @@ std::optional<std::string> readFile(std::string_view file);
 /**
  * Create directory.
  */
-bool makeDirectory(std::string_view path);
+bool makeDirectory(const std::filesystem::path &path);
 
 /**
  * Create recursive directory.
  */
-bool makeRecursiveDirectory(std::string_view paths);
+bool makeRecursiveDirectory(const std::filesystem::path &paths);
 
 /**
  * Create file.
  */
-bool createFile(std::string_view path);
+bool createFile(const std::filesystem::path &path);
 
 /**
  * Symlink entry1 to entry2.
  */
-bool createSymlink(std::string_view entry1, std::string_view entry2);
+bool createSymlink(const std::filesystem::path &entry1, const std::filesystem::path &entry2);
 
 // -------------------------------
 // Removers - not throws Helper::Error
@@ -663,12 +710,12 @@ bool createSymlink(std::string_view entry1, std::string_view entry2);
 /**
  * Remove file or empty directory.
  */
-bool eraseEntry(std::string_view entry);
+bool eraseEntry(const std::filesystem::path &entry);
 
 /**
  * Remove directory and all directory contents recursively.
  */
-bool eraseDirectoryRecursive(std::string_view directory);
+bool eraseDirectoryRecursive(const std::filesystem::path &directory);
 
 // -------------------------------
 // Getters - not throws Helper::Error
@@ -677,12 +724,12 @@ bool eraseDirectoryRecursive(std::string_view directory);
 /**
  * Get file size.
  */
-int64_t fileSize(std::string_view file);
+int64_t fileSize(const std::filesystem::path &file);
 
 /**
  * Read symlinks.
  */
-std::string readSymlink(std::string_view entry);
+std::string readSymlink(const std::filesystem::path &entry);
 
 // -------------------------------
 // SHA-256
@@ -692,13 +739,13 @@ std::string readSymlink(std::string_view entry);
  * Compare SHA-256 values SHA-256 of files.
  * Throws Helper::Error on error occurred.
  */
-bool sha256Compare(std::string_view file1, std::string_view file2);
+bool sha256Compare(const std::filesystem::path &file1, const std::filesystem::path &file2);
 
 /**
  * Get SHA-256 of file.
  * Throws Helper::Error on error occurred.
  */
-std::optional<std::string> sha256Of(std::string_view path);
+std::optional<std::string> sha256Of(const std::filesystem::path &path);
 
 // -------------------------------
 // Utilities - not throws Helper::Error
@@ -707,7 +754,7 @@ std::optional<std::string> sha256Of(std::string_view path);
 /**
  * Copy file to dest.
  */
-bool copyFile(std::string_view file, std::string_view dest);
+bool copyFile(const std::filesystem::path &file, const std::filesystem::path &dest);
 
 /**
  * Run shell command.
@@ -722,12 +769,12 @@ bool confirmPropt(std::string_view message);
 /**
  * Change file permissions.
  */
-bool changeMode(std::string_view file, mode_t mode);
+bool changeMode(const std::filesystem::path &file, mode_t mode);
 
 /**
  * Change file owner (user ID and group ID).
  */
-bool changeOwner(std::string_view file, uid_t uid, gid_t gid);
+bool changeOwner(const std::filesystem::path &file, uid_t uid, gid_t gid);
 
 /**
  * Get current working directory as string.
@@ -756,17 +803,17 @@ std::pair<std::string, int> runCommandWithOutput(std::string_view cmd);
 /**
  * Joins base path with relative path and returns result.
  */
-std::string pathJoin(std::string base, std::string relative);
+std::filesystem::path pathJoin(std::filesystem::path base, const std::filesystem::path &relative);
 
 /**
  * Get the filename part of given path.
  */
-std::string pathBasename(std::string_view entry);
+std::filesystem::path pathBasename(const std::filesystem::path &entry);
 
 /**
  * Get the directory part of given path.
  */
-std::string pathDirname(std::string_view entry);
+std::filesystem::path pathDirname(const std::filesystem::path &entry);
 
 /**
  * Get random offset depending on size and bufferSize.
@@ -804,6 +851,7 @@ template <uint64_t size> int convertTo(const sizeCastTypes type) {
 #ifdef __ANDROID__
 /**
  * Get input property as string (for Android).
+ * Returns "ERROR" on any error.
  */
 std::string getProperty(std::string_view prop);
 
@@ -822,18 +870,17 @@ std::string getLibVersion();
  * Open input path with flags and add to integrity list.
  * And returns file descriptor.
  */
-[[nodiscard]] int openAndAddToCloseList(const std::string_view &path, garbageCollector &collector, int flags,
-                                        mode_t mode = 0000);
+[[nodiscard]] int openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector, int flags, mode_t mode = 0000);
 /**
  * Open input path with flags and add to integrity list.
  * And returns file pointer.
  */
-[[nodiscard]] FILE *openAndAddToCloseList(const std::string_view &path, garbageCollector &collector, const char *mode);
+[[nodiscard]] FILE *openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector, const char *mode);
 /**
  * Open input directory and add to integrity list.
  * And returns directory pointer.
  */
-[[nodiscard]] DIR *openAndAddToCloseList(const std::string_view &path, garbageCollector &collector);
+[[nodiscard]] DIR *openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector);
 
 } // namespace Helper
 
@@ -857,17 +904,17 @@ std::string getLibVersion();
 
 #ifndef NO_C_TYPE_HANDLERS
 // ABORT(message), ex: ABORT("memory error!\n")
-#define ABORT(msg)                                                                                                     \
-  do {                                                                                                                 \
-    fprintf(stderr, "%s%sCRITICAL ERROR%s: %s\nAborting...\n", BOLD, RED, STYLE_RESET, msg);                           \
-    abort();                                                                                                           \
+#define ABORT(msg)                                                                                                                    \
+  do {                                                                                                                                \
+    fprintf(stderr, "%s%sCRITICAL ERROR%s: %s\nAborting...\n", BOLD, RED, STYLE_RESET, msg);                                          \
+    abort();                                                                                                                          \
   } while (0)
 
 // ERROR(message, exit), ex: ERROR("an error occured.\n", 1)
-#define ERROR(msg, code)                                                                                               \
-  do {                                                                                                                 \
-    fprintf(stderr, "%s%sERROR%s: %s", BOLD, RED, STYLE_RESET, msg);                                                   \
-    exit(code);                                                                                                        \
+#define ERROR(msg, code)                                                                                                              \
+  do {                                                                                                                                \
+    fprintf(stderr, "%s%sERROR%s: %s", BOLD, RED, STYLE_RESET, msg);                                                                  \
+    exit(code);                                                                                                                       \
   } while (0)
 
 // WARNING(message), ex: WARNING("using default setting.\n")
@@ -877,33 +924,29 @@ std::string getLibVersion();
 #define INFO(msg) fprintf(stdout, "%s%sINFO%s: %s", BOLD, GREEN, STYLE_RESET, msg);
 #endif // #ifndef NO_C_TYPE_HANDLERS
 
-#define LOG(level)                                                                                                     \
-  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(),      \
-                 __FILE__, __LINE__)
-#define LOGF(file, level)                                                                                              \
-  Helper::Logger(level, __func__, file, Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
-#define LOGN(name, level)                                                                                              \
-  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
+#define LOG(level)                                                                                                                    \
+  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+#define LOGF(file, level) Helper::Logger(level, __func__, file, Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+#define LOGN(name, level) Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
 #define LOGNF(name, file, level) Helper::Logger(level, file, name, __FILE__, __LINE__)
 
-#define LOG_IF(level, condition)                                                                                       \
-  if (condition)                                                                                                       \
-  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(),      \
-                 __FILE__, __LINE__)
-#define LOGF_IF(file, level, condition)                                                                                \
+#define LOG_IF(level, condition)                                                                                                      \
+  if (condition)                                                                                                                      \
+  Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
+#define LOGF_IF(file, level, condition)                                                                                               \
   if (condition) Helper::Logger(level, __func__, file, Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
-#define LOGN_IF(name, level, condition)                                                                                \
+#define LOGN_IF(name, level, condition)                                                                                               \
   if (condition) Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
-#define LOGNF_IF(name, file, level, condition)                                                                         \
+#define LOGNF_IF(name, file, level, condition)                                                                                        \
   if (condition) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
-#define MKVERSION(name)                                                                                                \
-  char vinfo[512];                                                                                                     \
-  sprintf(vinfo,                                                                                                       \
-          "%s %s-%s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: "                                       \
-          "%s\nBuildFlags: %s",                                                                                        \
-          name, BUILD_VERSION, COMMIT_ID, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION,                     \
-          BUILD_COMPILER_VERSION, BUILD_FLAGS);                                                                        \
+#define MKVERSION(name)                                                                                                               \
+  char vinfo[512];                                                                                                                    \
+  sprintf(vinfo,                                                                                                                      \
+          "%s %s-%s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: "                                                      \
+          "%s\nBuildFlags: %s",                                                                                                       \
+          name, BUILD_VERSION, COMMIT_ID, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION,            \
+          BUILD_FLAGS);                                                                                                               \
   return std::string(vinfo)
 
 #endif // #ifndef LIBHELPER_LIB_HPP

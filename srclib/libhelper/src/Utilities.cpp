@@ -37,6 +37,7 @@
 #include <iostream>
 #include <libhelper/lib.hpp>
 #include <memory>
+#include <random>
 #include <string>
 #include <string_view>
 
@@ -85,13 +86,13 @@ void reset() {
   PRINT = NO;
 }
 
-void set(std::string_view file, std::string_view name) {
-  if (file.data() != nullptr) FILE = file;
+void set(const std::filesystem::path &file, std::string_view name) {
+  if (!file.string().empty()) FILE = file.c_str();
   if (name.data() != nullptr) NAME = name;
 }
 
 void setProgramName(const std::string_view name) { NAME = name; }
-void setLogFile(const std::string_view file) { FILE = file; }
+void setLogFile(std::string_view file) { FILE = file; }
 } // namespace LoggingProperties
 
 bool runCommand(const std::string_view cmd) {
@@ -132,8 +133,7 @@ std::string currentTime() {
   const time_t t = time(nullptr);
 
   if (const tm *date = localtime(&t))
-    return std::string(std::to_string(date->tm_hour) + ":" + std::to_string(date->tm_min) + ":" +
-                       std::to_string(date->tm_sec));
+    return std::string(std::to_string(date->tm_hour) + ":" + std::to_string(date->tm_min) + ":" + std::to_string(date->tm_sec));
   return {};
 }
 
@@ -156,48 +156,39 @@ std::pair<std::string, int> runCommandWithOutput(const std::string_view cmd) {
   return {output, (WIFEXITED(status) ? WEXITSTATUS(status) : -1)};
 }
 
-std::string pathJoin(std::string base, std::string relative) {
-  if (base.back() != '/') base += '/';
-  if (relative[0] == '/') relative.erase(0, 1);
-  base += relative;
+std::filesystem::path pathJoin(std::filesystem::path base, const std::filesystem::path &relative) {
+  base /= relative;
   return base;
 }
 
-std::string pathBasename(const std::string_view entry) {
-  char *base = basename(const_cast<char *>(entry.data()));
-  return (base == nullptr) ? std::string() : std::string(base);
-}
+std::filesystem::path pathBasename(const std::filesystem::path &entry) { return entry.filename(); }
 
-std::string pathDirname(const std::string_view entry) {
-  char *base = dirname(const_cast<char *>(entry.data()));
-  return (base == nullptr) ? std::string() : std::string(base);
-}
+std::filesystem::path pathDirname(const std::filesystem::path &entry) { return entry.parent_path(); }
 
-bool changeMode(const std::string_view file, const mode_t mode) {
+bool changeMode(const std::filesystem::path &file, const mode_t mode) {
   LOGN(HELPER, INFO) << "change mode request: " << file << ". As mode: " << mode << std::endl;
-  return chmod(file.data(), mode) == 0;
+  return chmod(file.c_str(), mode) == 0;
 }
 
-bool changeOwner(const std::string_view file, const uid_t uid, const gid_t gid) {
+bool changeOwner(const std::filesystem::path &file, const uid_t uid, const gid_t gid) {
   LOGN(HELPER, INFO) << "change owner request: " << file << ". As owner:group: " << uid << ":" << gid << std::endl;
-  return chown(file.data(), uid, gid) == 0;
+  return chown(file.c_str(), uid, gid) == 0;
 }
 
-int openAndAddToCloseList(const std::string_view &path, garbageCollector &collector, const int flags,
-                          const mode_t mode) {
-  const int fd = mode == 0 ? open(path.data(), flags) : open(path.data(), flags, mode);
+int openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector, const int flags, const mode_t mode) {
+  const int fd = mode == 0 ? open(path.c_str(), flags) : open(path.c_str(), flags, mode);
   collector.closeAfterProgress(fd);
   return fd;
 }
 
-FILE *openAndAddToCloseList(const std::string_view &path, garbageCollector &collector, const char *mode) {
-  FILE *fp = fopen(path.data(), mode);
+FILE *openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector, const char *mode) {
+  FILE *fp = fopen(path.c_str(), mode);
   collector.closeAfterProgress(fp);
   return fp;
 }
 
-DIR *openAndAddToCloseList(const std::string_view &path, garbageCollector &collector) {
-  DIR *dp = opendir(path.data());
+DIR *openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector) {
+  DIR *dp = opendir(path.c_str());
   collector.closeAfterProgress(dp);
   return dp;
 }
@@ -224,8 +215,9 @@ bool androidReboot(const std::string_view arg) {
 uint64_t getRandomOffset(const uint64_t size, const uint64_t bufferSize) {
   if (size <= bufferSize) return 0;
   const uint64_t maxOffset = size - bufferSize;
-  srand(time(nullptr));
-  return rand() % maxOffset;
+  static std::mt19937_64 generator(std::random_device{}());
+  std::uniform_int_distribution<uint64_t> distribution(0, maxOffset - 1);
+  return distribution(generator);
 }
 
 int convertTo(const uint64_t size, const sizeCastTypes type) {

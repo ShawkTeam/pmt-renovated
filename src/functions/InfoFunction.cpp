@@ -45,57 +45,51 @@ INIT {
   cmd->add_flag("--as-kilobyte", asKiloBytes, "View sizes as kilobyte.")->default_val(false);
   cmd->add_flag("--as-megabyte", asMega, "View sizes as megabyte.")->default_val(false);
   cmd->add_flag("--as-gigabyte", asGiga, "View sizes as gigabyte.")->default_val(false);
-  cmd->add_option("--json-partition-name", jNamePartition, "Specify partition name element for JSON body")
-      ->default_val("name");
+  cmd->add_option("--json-partition-name", jNamePartition, "Specify partition name element for JSON body")->default_val("name");
   cmd->add_option("--json-size-name", jNameSize, "Specify size element name for JSON body")->default_val("size");
-  cmd->add_option("--json-logical-name", jNameLogical, "Specify logical element name for JSON body")
-      ->default_val("isLogical");
+  cmd->add_option("--json-logical-name", jNameLogical, "Specify logical element name for JSON body")->default_val("isLogical");
   cmd->add_option("--json-indent-size", jIndentSize, "Set JSON indent size for printing to screen")->default_val(2);
   return true;
 }
 
 RUN {
   std::vector<PartitionMap::Partition_t> jParts;
-  sizeCastTypes multiple;
-  if (asByte) multiple = B;
-  if (asKiloBytes) multiple = KB;
-  if (asMega) multiple = MB;
-  if (asGiga) multiple = GB;
+  PartitionMap::SizeUnit multiple;
+  if (asByte) multiple = PartitionMap::BYTE;
+  if (asKiloBytes) multiple = PartitionMap::KiB;
+  if (asMega) multiple = PartitionMap::MiB;
+  if (asGiga) multiple = PartitionMap::GiB;
 
-  auto func = [this, &jParts, &multiple] COMMON_LAMBDA_PARAMS -> bool {
-    if (VARS.onLogical && !props.isLogical) {
-      if (VARS.forceProcess)
-        LOGN(IFUN, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
-                            << std::endl;
-      else
-        throw Error("Used --logical (-l) flag but is not logical partition: %s", partition.data());
-    }
-
+  auto getter = [this, &jParts, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS -> bool {
     if (jsonFormat)
-      jParts.push_back({partition, {static_cast<uint64_t>(Helper::convertTo(props.size, multiple)), props.isLogical}});
+      jParts.push_back(partition);
     else
-      OUT.println("partition=%s size=%d isLogical=%s", partition.data(), Helper::convertTo(props.size, multiple),
-                  props.isLogical ? "true" : "false");
+      OUT.println("partition=%s size=%s isLogical=%s", partition.getName().c_str(),
+                  partition.getFormattedSizeString(multiple, true).c_str(), partition.isLogicalPartition() ? "true" : "false");
 
     return true;
   };
 
   if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
-    PARTS.doForAllPartitions(func);
+    PART_TABLES.foreach (getter);
   else if (partitions.back() == "get-logicals")
-    PARTS.doForLogicalPartitions(func);
+    PART_TABLES.foreachLogicalPartitions(getter);
   else if (partitions.back() == "get-physicals")
-    PARTS.doForPhysicalPartitions(func);
-  else
-    PARTS.doForPartitionList(partitions, func);
+    PART_TABLES.foreachPartitions(getter);
+  else {
+    for (const auto& partition : partitions) {
+      if (!PART_TABLES.hasPartition(partition)) throw Error("Couldn't find partition: %s", partition.c_str());
+    }
+    PART_TABLES.foreachFor(partitions, getter);
+  }
 
   if (jsonFormat) {
     nlohmann::json j;
-    j["multipleType"] = Helper::multipleToString(multiple);
+    j["multipleType"] = PartitionMap::Extra::getSizeUnitAsString(multiple);
     j["partitions"] = nlohmann::json::array();
-    for (const auto &[name, props] : jParts) {
-      j["partitions"].push_back({{jNamePartition, name}, {jNameSize, props.size}, {jNameLogical, props.isLogical}});
-    }
+    for (auto &part : jParts)
+      j["partitions"].push_back(
+          {{jNamePartition, part.getName()}, {jNameSize, part.getSize()}, {jNameLogical, part.isLogicalPartition()}});
 
     OUT.println("%s", j.dump(jIndentSize).data());
   }
@@ -105,5 +99,5 @@ RUN {
 
 IS_USED_COMMON_BODY
 
-NAME { return IFUN; };
+NAME { return IFUN; }
 } // namespace PartitionManager

@@ -30,82 +30,61 @@
 #define FUNCTION_CLASS backupFunction
 
 namespace PartitionManager {
-RUN_ASYNC(const std::string &partitionName, const std::string &outputName,
-          const uint64_t bufferSize) {
-  if (!PARTS.hasPartition(partitionName))
-    return PairError("Couldn't find partition: %s", partitionName.data());
+RUN_ASYNC(const std::string &partitionName, const std::string &outputName, const uint64_t bufferSize) {
+  if (!PART_TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
 
-  LOGN(BFUN, INFO) << "Back upping " << partitionName << " as " << outputName
-                   << std::endl;
+  LOGN(BFUN, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
 
-  if (VARS.onLogical && !PARTS.isLogical(partitionName)) {
+  if (VARS.onLogical && !PART_TABLES.isLogical(partitionName)) {
     if (VARS.forceProcess)
-      LOGN(BFUN, WARNING) << "Partition " << partitionName
-                          << " is exists but not logical. Ignoring (from --force, -f)."
-                          << std::endl;
+      LOGN(BFUN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
     else
-      return PairError("Used --logical (-l) flag but is not logical partition: %s",
-                       partitionName.data());
+      return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
   }
 
   if (Helper::fileIsExists(outputName) && !VARS.forceProcess)
-    return PairError("%s is exists. Remove it, or use --force (-f) flag.",
-                     outputName.data());
+    return PairError("%s is exists. Remove it, or use --force (-f) flag.", outputName.data());
 
-  LOGN(BFUN, INFO) << "Using buffer size (for back upping " << partitionName
-                   << "): " << bufferSize << std::endl;
+  LOGN(BFUN, INFO) << "Using buffer size (for back upping " << partitionName << "): " << bufferSize << std::endl;
 
   // Automatically close file descriptors and delete allocated memories (arrays)
   Helper::garbageCollector collector;
 
-  const int pfd = Helper::openAndAddToCloseList(PARTS.getRealPathOf(partitionName),
+  const int pfd = Helper::openAndAddToCloseList(PART_TABLES.partitionWithDupCheck(partitionName, VARS.noWorkOnUsed).getAbsolutePath(),
                                                 collector, O_RDONLY);
-  if (pfd < 0)
-    return PairError("Can't open partition: %s: %s", partitionName.data(),
-                     strerror(errno));
+  if (pfd < 0) return PairError("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
 
-  const int ffd = Helper::openAndAddToCloseList(outputName, collector,
-                                                O_WRONLY | O_CREAT | O_TRUNC, 0644);
-  if (ffd < 0)
-    return PairError("Can't create/open output file %s: %s", outputName.data(),
-                     strerror(errno));
+  const int ffd = Helper::openAndAddToCloseList(outputName, collector, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (ffd < 0) return PairError("Can't create/open output file %s: %s", outputName.data(), strerror(errno));
 
-  LOGN(BFUN, INFO) << "Writing partition " << partitionName << " to file: " << outputName
-                   << std::endl;
+  LOGN(BFUN, INFO) << "Writing partition " << partitionName << " to file: " << outputName << std::endl;
   auto *buffer = new (std::nothrow) char[bufferSize];
   collector.delAfterProgress(buffer);
   memset(buffer, 0x00, bufferSize);
 
   ssize_t bytesRead;
   while ((bytesRead = read(pfd, buffer, bufferSize)) > 0) {
-    if (const ssize_t bytesWritten = write(ffd, buffer, bytesRead);
-        bytesWritten != bytesRead)
-      return PairError("Can't write partition to output file %s: %s", outputName.data(),
-                       strerror(errno));
+    if (const ssize_t bytesWritten = write(ffd, buffer, bytesRead); bytesWritten != bytesRead)
+      return PairError("Can't write partition to output file %s: %s", outputName.data(), strerror(errno));
   }
 
   if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY))
-    LOGN(BFUN, WARNING) << "Failed to change owner of output file: " << outputName
-                        << ". Access problems maybe occur in non-root mode" << std::endl;
+    LOGN(BFUN, WARNING) << "Failed to change owner of output file: " << outputName << ". Access problems maybe occur in non-root mode"
+                        << std::endl;
   if (!Helper::changeMode(outputName, 0664))
     LOGN(BFUN, WARNING) << "Failed to change mode of output file as 660: " << outputName
                         << ". Access problems maybe occur in non-root mode" << std::endl;
 
-  return PairSuccess("%s partition successfully back upped to %s", partitionName.data(),
-                     outputName.data());
+  return PairSuccess("%s partition successfully back upped to %s", partitionName.data(), outputName.data());
 }
 
 INIT {
   LOGN(BFUN, INFO) << "Initializing variables of backup function." << std::endl;
   cmd = _app.add_subcommand("backup", "Backup partition(s) to file(s)");
   cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
-  cmd->add_option("output(s)", rawOutputNames,
-                  "File name(s) (or path(s)) to save the partition image(s)");
-  cmd->add_option("-O,--output-directory", outputDirectory,
-                  "Directory to save the partition image(s)")
-      ->check(CLI::ExistingDirectory);
-  cmd->add_option("-b,--buffer-size", bufferSize,
-                  "Buffer size for reading partition(s) and writing to file(s)")
+  cmd->add_option("output(s)", rawOutputNames, "File name(s) (or path(s)) to save the partition image(s)");
+  cmd->add_option("-O,--output-directory", outputDirectory, "Directory to save the partition image(s)")->check(CLI::ExistingDirectory);
+  cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")
       ->transform(CLI::AsSizeValue(false))
       ->default_val("4KB");
 
@@ -115,21 +94,17 @@ INIT {
 RUN {
   processCommandLine(partitions, outputNames, rawPartitions, rawOutputNames, ',', true);
   if (!outputNames.empty() && partitions.size() != outputNames.size())
-    throw CLI::ValidationError(
-        "You must provide an output name(s) as long as the partition name(s)");
+    throw CLI::ValidationError("You must provide an output name(s) as long as the partition name(s)");
 
   std::vector<std::future<pair>> futures;
   for (size_t i = 0; i < partitions.size(); i++) {
     uint64_t buf = bufferSize;
     std::string partitionName = partitions[i];
-    std::string outputName =
-        outputNames.empty() ? partitionName + ".img" : outputNames[i];
-    if (!outputDirectory.empty())
-      outputName.insert(0, outputDirectory + '/');
+    std::string outputName = outputNames.empty() ? partitionName + ".img" : outputNames[i];
+    if (!outputDirectory.empty()) outputName.insert(0, outputDirectory + '/');
 
     setupBufferSize(buf, partitionName);
-    futures.push_back(
-        std::async(std::launch::async, runAsync, partitionName, outputName, buf));
+    futures.push_back(std::async(std::launch::async, runAsync, partitionName, outputName, buf));
     LOGN(BFUN, INFO) << "Created thread backup upping " << partitionName << std::endl;
   }
 
@@ -144,8 +119,7 @@ RUN {
       OUT.println("%s", fst.c_str());
   }
 
-  if (!endResult)
-    throw Error("%s", end.c_str());
+  if (!endResult) throw Error("%s", end.c_str());
 
   LOGN(BFUN, INFO) << "Operation successfully completed." << std::endl;
   return endResult;

@@ -18,6 +18,7 @@
 #define LIBPMT_LIB_HPP
 
 #include <CLI/CLI11.hpp>
+#include <concepts>
 #include <format>
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
@@ -45,6 +46,7 @@ public:
   FILE *standart = nullptr, *error = nullptr;
 
   OutUtil(); // Default constructor
+  ~OutUtil() {}
 
   __printflike(2, 3) void print(const char *format, ...) const;
   __printflike(2, 3) void println(const char *format, ...) const;
@@ -65,18 +67,20 @@ std::vector<std::string> splitIfHasDelim(const std::string &s, char delim, bool 
 
 // Process vectors with input strings. Use for [flag(s)]-[other flag(s)]
 // situations
-void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2, const std::string &s1,
-                        const std::string &s2, char delim, bool checkForBadUsage = false);
+void processCommandLine(std::vector<std::string> &vec1, std::vector<std::string> &vec2, const std::string &s1, const std::string &s2,
+                        char delim, bool checkForBadUsage = false);
 
 // Setting ups buffer size
-void setupBufferSize(uint64_t &size, const std::string &entry);
+void setupBufferSize(uint64_t &size, const std::filesystem::path &entry);
+
+PartitionMap::Partition_t &duplicateCheck(const std::string &name);
 
 std::string getLibVersion();
 
 std::string getAppVersion(); // Not Android app version (an Android app is
                              // planned!), tells pmt version.
 
-inline OutUtil out;
+extern OutUtil out;
 
 enum basic_function_flags {
   NO_SU = 1,
@@ -100,12 +104,14 @@ public:
 };
 
 // A class for function management.
-template <class Type> class basic_manager {
+template <typename __class>
+  requires std::derived_from<__class, basic_function>
+class basic_manager {
 private:
-  std::vector<std::unique_ptr<Type>> _functions;
+  std::vector<std::unique_ptr<__class>> _functions;
 
 public:
-  void registerFunction(std::unique_ptr<Type> _func, CLI::App &_app) {
+  void registerFunction(std::unique_ptr<__class> _func, CLI::App &_app) {
     LOGN(PMTF, INFO) << "registering: " << _func->name() << std::endl;
     for (const auto &f : _functions) {
       if (std::string(_func->name()) == std::string(f->name())) {
@@ -121,9 +127,8 @@ public:
   [[nodiscard]] bool hasFlagOnUsedFunction(int flag) const {
     for (const auto &func : _functions) {
       if (func->isUsed()) {
-        std::for_each(func->flags.begin(), func->flags.end(), [&](const int x) {
-          LOGN(PMTF, INFO) << "Used flag " << x << " on " << func->name() << std::endl;
-        });
+        std::for_each(func->flags.begin(), func->flags.end(),
+                      [&](const int x) { LOGN(PMTF, INFO) << "Used flag " << x << " on " << func->name() << std::endl; });
         return std::find(func->flags.begin(), func->flags.end(), flag) != func->flags.end();
       }
     }
@@ -159,12 +164,14 @@ public:
 
   std::unique_ptr<PartitionMap::Builder> partitionTables;
 
-  std::string searchPath, logFile;
+  std::string logFile;
+  std::set<std::string> extraTablePaths;
   bool onLogical;
   bool quietProcess;
   bool verboseMode;
   bool viewVersion;
   bool forceProcess;
+  bool noWorkOnUsed;
 };
 
 using FunctionBase = basic_function;

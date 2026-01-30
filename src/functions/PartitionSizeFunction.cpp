@@ -43,38 +43,33 @@ INIT {
 }
 
 RUN {
-  sizeCastTypes multiple = {};
-  if (asByte) multiple = B;
-  if (asKiloBytes) multiple = KB;
-  if (asMega) multiple = MB;
-  if (asGiga) multiple = GB;
+  PartitionMap::SizeUnit multiple = {};
+  if (asByte) multiple = PartitionMap::BYTE;
+  if (asKiloBytes) multiple = PartitionMap::KiB;
+  if (asMega) multiple = PartitionMap::MiB;
+  if (asGiga) multiple = PartitionMap::GiB;
 
-  auto func = [this, &multiple] COMMON_LAMBDA_PARAMS -> bool {
-    if (VARS.onLogical && !props.isLogical) {
-      if (VARS.forceProcess)
-        LOGN(SFUN, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
-                            << std::endl;
-      else
-        throw Error("Used --logical (-l) flag but is not logical partition: %s", partition.data());
-    }
-
+  auto getter = [this, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS -> bool {
     if (onlySize)
-      OUT.println("%d", Helper::convertTo(props.size, multiple));
+      OUT.println("%s", partition.getFormattedSizeString(multiple, true).c_str());
     else
-      OUT.println("%s: %d%s", partition.data(), Helper::convertTo(props.size, multiple),
-                  Helper::multipleToString(multiple).data());
+      OUT.println("%s: %s", partition.getName().c_str(), partition.getFormattedSizeString(multiple).c_str());
 
     return true;
   };
 
   if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
-    PARTS.doForAllPartitions(func);
+    PART_TABLES.foreach (getter);
   else if (partitions.back() == "get-logicals")
-    PARTS.doForLogicalPartitions(func);
+    PART_TABLES.foreachLogicalPartitions(getter);
   else if (partitions.back() == "get-physicals")
-    PARTS.doForPhysicalPartitions(func);
-  else
-    PARTS.doForPartitionList(partitions, func);
+    PART_TABLES.foreachPartitions(getter);
+  else {
+    for (const auto& partition : partitions) {
+      if (!PART_TABLES.hasPartition(partition)) throw Error("Couldn't find partition: %s", partition.c_str());
+    }
+    PART_TABLES.foreachFor(partitions, getter);
+  }
 
   return true;
 }

@@ -25,14 +25,12 @@
 #include <unistd.h>
 
 namespace PartitionMap::Extra {
-std::map<uint64_t, std::string> FileSystemMagicMap = {
-    {FileSystemMagic::EXTFS_FS, "EXT2/3/4"}, {FileSystemMagic::F2FS_FS, "F2FS"},
-    {FileSystemMagic::EROFS_FS, "EROFS"},    {FileSystemMagic::EXFAT_FS, "exFAT"},
-    {FileSystemMagic::FAT12_FS, "FAT12"},    {FileSystemMagic::FAT16_FS, "FAT16"},
-    {FileSystemMagic::FAT32_FS, "FAT32"},    {FileSystemMagic::NTFS_FS, "NTFS"},
-    {FileSystemMagic::MSDOS_FS, "MSDOS"}};
+std::map<uint64_t, std::string> FileSystemMagics = {
+    {FileSystemMagic::EXTFS_FS, "EXT2/3/4"}, {FileSystemMagic::F2FS_FS, "F2FS"},   {FileSystemMagic::EROFS_FS, "EROFS"},
+    {FileSystemMagic::EXFAT_FS, "exFAT"},    {FileSystemMagic::FAT12_FS, "FAT12"}, {FileSystemMagic::FAT16_FS, "FAT16"},
+    {FileSystemMagic::FAT32_FS, "FAT32"},    {FileSystemMagic::NTFS_FS, "NTFS"},   {FileSystemMagic::MSDOS_FS, "MSDOS"}};
 
-std::map<uint64_t, std::string> AndroidMagicMap = {{AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
+std::map<uint64_t, std::string> AndroidMagics = {{AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
                                                    {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
                                                    {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
                                                    {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
@@ -42,7 +40,7 @@ std::map<uint64_t, std::string> AndroidMagicMap = {{AndroidMagic::BOOT_IMAGE, "A
                                                    {AndroidMagic::ELF, "ELF"},
                                                    {AndroidMagic::RAW, "Raw Data"}};
 
-std::map<uint64_t, std::string> MagicMap = {{AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
+std::map<uint64_t, std::string> Magics = {{AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
                                             {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
                                             {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
                                             {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
@@ -70,8 +68,8 @@ size_t getMagicLength(const uint64_t magic) {
 }
 
 bool hasMagic(const uint64_t magic, const ssize_t buf, const std::string &path) {
-  LOGI << "Checking magic of " << path << " with using " << buf << " byte buffer size (has magic 0x" << std::hex
-       << magic << "?)" << std::endl;
+  LOGI << "Checking magic of " << path << " with using " << buf << " byte buffer size (has magic 0x" << std::hex << magic << "?)"
+       << std::endl;
   Helper::garbageCollector collector;
 
   const int fd = Helper::openAndAddToCloseList(path, collector, O_RDONLY);
@@ -109,4 +107,15 @@ std::string formatMagic(const uint64_t magic) {
   ss << "0x" << std::uppercase << std::hex << std::setw(16) << std::setfill('0') << magic;
   return ss.str();
 }
+
+std::string getSizeUnitAsString(SizeUnit size) {
+  switch (size) {
+    case BYTE: return "B";
+    case KiB: return "KiB";
+    case MiB: return "MiB";
+    case GiB: return "GiB";
+    default: return "";
+  }
+}
+
 } // namespace PartitionMap::Extra

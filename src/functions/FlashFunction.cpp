@@ -28,19 +28,17 @@ Copyright 2025 Yağız Zengin
 #define FUNCTION_CLASS flashFunction
 
 namespace PartitionManager {
-RUN_ASYNC(const std::string &partitionName, const std::string &imageName, const uint64_t bufferSize,
-          const bool deleteAfterProgress) {
+RUN_ASYNC(const std::string &partitionName, const std::string &imageName, const uint64_t bufferSize, const bool deleteAfterProgress) {
   if (!Helper::fileIsExists(imageName)) return PairError("Couldn't find image file: %s", imageName.data());
-  if (!PARTS.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
-  if (Helper::fileSize(imageName) > PARTS.sizeOf(partitionName))
+  if (!PART_TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
+  if (Helper::fileSize(imageName) > PART_TABLES.partition(partitionName).getSize())
     return PairError("%s is larger than %s partition size!", imageName.data(), partitionName.data());
 
   LOGN(FFUN, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;
 
-  if (VARS.onLogical && !PARTS.isLogical(partitionName)) {
+  if (VARS.onLogical && !PART_TABLES.isLogical(partitionName)) {
     if (VARS.forceProcess)
-      LOGN(FFUN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
-                          << std::endl;
+      LOGN(FFUN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
     else
       return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
   }
@@ -53,7 +51,8 @@ RUN_ASYNC(const std::string &partitionName, const std::string &imageName, const 
   const int ffd = Helper::openAndAddToCloseList(imageName, collector, O_RDONLY);
   if (ffd < 0) return PairError("Can't open image file %s: %s", imageName.data(), strerror(errno));
 
-  const int pfd = Helper::openAndAddToCloseList(PARTS.getRealPathOf(partitionName), collector, O_RDWR | O_TRUNC);
+  const int pfd = Helper::openAndAddToCloseList(PART_TABLES.partitionWithDupCheck(partitionName, VARS.noWorkOnUsed).getAbsolutePath(),
+                                                collector, O_RDWR | O_TRUNC);
   if (pfd < 0) return PairError("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
 
   LOGN(FFUN, INFO) << "Writing image " << imageName << " to partition: " << partitionName << std::endl;
@@ -104,8 +103,7 @@ RUN {
     uint64_t buf = bufferSize;
 
     setupBufferSize(buf, imageNames[i]);
-    futures.push_back(
-        std::async(std::launch::async, runAsync, partitions[i], imageNames[i], bufferSize, deleteAfterProgress));
+    futures.push_back(std::async(std::launch::async, runAsync, partitions[i], imageNames[i], bufferSize, deleteAfterProgress));
     LOGN(FFUN, INFO) << "Created thread for flashing image to " << partitions[i] << std::endl;
   }
 

@@ -46,9 +46,7 @@ INIT {
 
         return std::string();
       });
-  cmd->add_option("-s,--file-size", testFileSize, "File size of test file")
-      ->transform(CLI::AsSizeValue(false))
-      ->default_val("1GB");
+  cmd->add_option("-s,--file-size", testFileSize, "File size of test file")->transform(CLI::AsSizeValue(false))->default_val("1GB");
   cmd->add_flag("--no-read-test", doNotReadTest, "Don't read test data from disk")->default_val(false);
 
   return true;

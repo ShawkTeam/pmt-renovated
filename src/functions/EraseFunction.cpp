@@ -28,12 +28,11 @@ Copyright 2025 Yağız Zengin
 
 namespace PartitionManager {
 RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
-  if (!PARTS.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
+  if (!PART_TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
 
-  if (VARS.onLogical && !PARTS.isLogical(partitionName)) {
+  if (VARS.onLogical && !PART_TABLES.isLogical(partitionName)) {
     if (VARS.forceProcess)
-      LOGN(EFUN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
-                          << std::endl;
+      LOGN(EFUN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)." << std::endl;
     else
       return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
   }
@@ -42,8 +41,9 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
 
   // Automatically close file descriptors and delete allocated memories (arrays)
   Helper::garbageCollector collector;
+  auto &partition = PART_TABLES.partitionWithDupCheck(partitionName, VARS.noWorkOnUsed);
 
-  const int pfd = Helper::openAndAddToCloseList(PARTS.getRealPathOf(partitionName), collector, O_WRONLY);
+  const int pfd = Helper::openAndAddToCloseList(partition.getAbsolutePath(), collector, O_WRONLY);
   if (pfd < 0) return PairError("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
 
   if (!VARS.forceProcess) {
@@ -59,7 +59,7 @@ RUN_ASYNC(const std::string &partitionName, const uint64_t bufferSize) {
   memset(buffer, 0x00, bufferSize);
 
   ssize_t bytesWritten = 0;
-  const uint64_t partitionSize = PARTS.sizeOf(partitionName);
+  const uint64_t partitionSize = partition.getSize();
 
   while (bytesWritten < partitionSize) {
     size_t toWrite = sizeof(buffer);

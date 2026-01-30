@@ -39,7 +39,7 @@ int main() {
 
     partitions2.clear();
 
-    auto data = partitions.hasDisk("mmcblk0") ? partitions["mmcblk0"] : partitions["sda"];
+    auto data = partitions.hasTable("mmcblk0") ? partitions["mmcblk0"] : partitions["sda"];
     if (data->GetNumParts() == 0) throw Helper::Error("Can't find mmcblk0 or sda (UNEXPECTED?)");
 
     if (GPTPart part = partitions[0]; !part.IsUsed())
@@ -50,27 +50,27 @@ int main() {
     auto partition_list = partitions.getPartitions();
     std::cout << "Listing partitions (data is getted from getPartitions()):" << std::endl;
     for (auto &part : partition_list)
-      std::cout << std::setw(16) << part.getName() << std::endl;
+      std::cout << std::setw(16) << part->getName() << std::endl;
 
-    auto partitions_of_disk = partitions.getPartitionsByDisk("mmcblk0");
-    if (partitions_of_disk.empty()) partitions_of_disk = partitions.getPartitionsByDisk("sda");
+    auto partitions_of_disk = partitions.getPartitionsByTable("mmcblk0");
+    if (partitions_of_disk.empty()) partitions_of_disk = partitions.getPartitionsByTable("sda");
     std::cout << "Listing partitions of table (data is getted from "
-                 "getPartitionsByDisk()):"
+                 "getPartitionsByTable()):"
               << std::endl;
     for (auto &part : partitions_of_disk)
-      std::cout << std::setw(16) << part.getName() << std::endl;
+      std::cout << std::setw(16) << part->getName() << std::endl;
 
     auto logical_partitions = partitions.getLogicalPartitions();
     std::cout << "Listing logical partitions:" << std::endl;
     for (auto &part : logical_partitions)
-      std::cout << std::setw(10) << part.getName() << std::endl;
+      std::cout << std::setw(10) << part->getName() << std::endl;
 
     auto readed_gpt_data_collection = partitions.getAllGPTData();
     std::cout << "Listing readed gpt data paths:" << std::endl;
     std::ranges::for_each(readed_gpt_data_collection, [](const auto &info) { std::cout << " " << info.first; });
     std::cout << std::endl;
 
-    auto data2 = partitions.hasDisk("mmcblk0") ? partitions.getGPTDataOf("mmcblk0") : partitions.getGPTDataOf("sda");
+    auto data2 = partitions.hasTable("mmcblk0") ? partitions.getGPTDataOf("mmcblk0") : partitions.getGPTDataOf("sda");
     if (data2->GetNumParts() == 0) throw Helper::Error("Can't get gpt data of mmcblk0 or sda (UNEXPECTED?)");
 
     if (auto logical_partition_data = partitions.getDataOfLogicalPartitions(); logical_partition_data.empty())
@@ -79,8 +79,8 @@ int main() {
     if (auto partition_data = partitions.getDataOfPartitions(); partition_data.empty())
       std::cerr << "WARNING: Can't get data of partitions" << std::endl;
 
-    if (auto partition_data2 = partitions.getDataOfPartitionsByDisk("mmcblk0"); partition_data2.empty()) {
-      partition_data2 = partitions.getDataOfPartitionsByDisk("sda");
+    if (auto partition_data2 = partitions.getDataOfPartitionsByTable("mmcblk0"); partition_data2.empty()) {
+      partition_data2 = partitions.getDataOfPartitionsByTable("sda");
       if (partition_data2.empty())
         std::cerr << "WARNING: Can't get data of partitions (with "
                      "getDataOfPartititonsByDisk())"
@@ -90,32 +90,27 @@ int main() {
     std::cout << "Seek: " << partitions.getSeek() << std::endl;
 
     std::cout << "Boot partition is exists?: " << std::boolalpha << partitions.hasPartition("boot") << std::endl;
-    std::cout << "System (logical) partition is exists?: " << std::boolalpha << partitions.hasLogicalPartition("system")
-              << std::endl;
-    std::cout << "mmcblk0, sda tables is exists?: " << std::boolalpha << partitions.hasDisk("mmcblk0") << ", "
-              << partitions.hasDisk("sda") << std::endl;
+    std::cout << "System (logical) partition is exists?: " << std::boolalpha << partitions.hasLogicalPartition("system") << std::endl;
+    std::cout << "mmcblk0, sda tables is exists?: " << std::boolalpha << partitions.hasTable("mmcblk0") << ", "
+              << partitions.hasTable("sda") << std::endl;
     std::cout << "Has super partition?: " << std::boolalpha << partitions.isHasSuperPartition() << std::endl;
     std::cout << "System partition is logical?: " << std::boolalpha << partitions.isLogical("system") << std::endl;
-    std::cout << "Disk names are empty?: " << std::boolalpha << partitions.diskNamesEmpty() << std::endl << std::endl;
+    std::cout << "Disk names are empty?: " << std::boolalpha << partitions.tableNamesEmpty() << std::endl << std::endl;
 
-    std::function logicalPartTest = [] FOREACH_LOGICAL_PARTITIONS_LAMBDA_PARAMETERS -> bool {
-      std::cout << std::quoted(lpartition.getName()) << ":" << std::endl;
-      std::cout << "    Size: " << lpartition.getSize() << std::endl;
-      std::cout << "    Path and absolute path: " << lpartition.getPath() << ", " << lpartition.getAbsolutePath()
-                << std::endl;
+    std::function logicalPartTest = [] FOREACH_PARTITIONS_LAMBDA_PARAMETERS -> bool {
+      std::cout << std::quoted(partition.getName()) << ":" << std::endl;
+      std::cout << "    Size: " << partition.getSize() << std::endl;
+      std::cout << "    Path and absolute path: " << partition.getPath() << ", " << partition.getAbsolutePath() << std::endl;
       return true;
     };
     std::function partitionTest = [] FOREACH_PARTITIONS_LAMBDA_PARAMETERS -> bool {
       std::cout << std::quoted(partition.getName()) << ":" << std::endl;
       std::cout << "    Size: " << partition.getFormattedSizeString(PartitionMap::MiB) << std::endl;
-      std::cout << "    Path and by-name path: " << partition.getPath() << ", " << partition.getPathByName()
-                << std::endl;
+      std::cout << "    Path and by-name path: " << partition.getPath() << ", " << partition.getPathByName() << std::endl;
       std::cout << "    Index: " << partition.getIndex() + 1 << std::endl;
-      std::cout << "    Start and end bytes: " << partition.getStartByte() << ", " << partition.getEndByte()
-                << std::endl;
+      std::cout << "    Start and end bytes: " << partition.getStartByte() << ", " << partition.getEndByte() << std::endl;
       std::cout << "    GUID: " << partition.getGUIDAsString() << std::endl;
-      std::cout << "    Is super partition or super-like partition?: " << std::boolalpha << partition.isSuperPartition()
-                << std::endl;
+      std::cout << "    Is super partition or super-like partition?: " << std::boolalpha << partition.isSuperPartition() << std::endl;
       return true;
     };
     std::function gptDataTest = [] FOREACH_GPT_DATA_LAMBDA_PARAMETERS -> bool {

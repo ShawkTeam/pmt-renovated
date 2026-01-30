@@ -30,8 +30,7 @@ INIT {
   cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for max seek depth")
       ->transform(CLI::AsSizeValue(false))
       ->default_val("4KB");
-  cmd->add_flag("--only-check-android-magics", onlyCheckAndroidMagics, "Only check Android magic values.")
-      ->default_val(false);
+  cmd->add_flag("--only-check-android-magics", onlyCheckAndroidMagics, "Only check Android magic values.")->default_val(false);
   cmd->add_flag("--only-check-filesystem-magics", onlyCheckFileSystemMagics, "Only check filesystem magic values.")
       ->default_val(false);
   return true;
@@ -40,30 +39,31 @@ INIT {
 RUN {
   std::map<uint64_t, std::string> magics;
   if (onlyCheckAndroidMagics)
-    magics.merge(PartitionMap::Extras::AndroidMagicMap);
+    magics.merge(PartitionMap::Extra::AndroidMagics);
   else if (onlyCheckFileSystemMagics)
-    magics.merge(PartitionMap::Extras::FileSystemMagicMap);
+    magics.merge(PartitionMap::Extra::FileSystemMagics);
   else
-    magics.merge(PartitionMap::Extras::MagicMap);
+    magics.merge(PartitionMap::Extra::Magics);
 
   for (const auto &content : contents) {
-    if (!PARTS.hasPartition(content) && !Helper::fileIsExists(content))
+    if (!PART_TABLES.hasPartition(content) && !Helper::fileIsExists(content))
       throw Error("Couldn't find partition or image file: %s", content.data());
 
     bool found = false;
     for (const auto &[magic, name] : magics) {
-      if (PartitionMap::Extras::hasMagic(magic, static_cast<ssize_t>(bufferSize),
-                                         Helper::fileIsExists(content) ? content : PARTS.getRealPathOf(content))) {
-        OUT.println("%s contains %s magic (%s)", content.data(), name.data(),
-                    PartitionMap::Extras::formatMagic(magic).data());
+      if (PartitionMap::Extra::hasMagic(
+              magic, static_cast<ssize_t>(bufferSize),
+              Helper::fileIsExists(content)
+                  ? content
+                  : PART_TABLES.partitionWithDupCheck(content, VARS.noWorkOnUsed).getAbsolutePath().c_str())) {
+        OUT.println("%s contains %s magic (%s)", content.data(), name.data(), PartitionMap::Extra::formatMagic(magic).data());
         found = true;
         break;
       }
     }
 
     if (!found)
-      throw Error("Couldn't determine type of %s%s", content.data(),
-                  content == "userdata" ? " (encrypted file system?)" : "");
+      throw Error("Couldn't determine type of %s%s", content.data(), content == "userdata" ? " (encrypted file system?)" : "");
   }
 
   return true;
