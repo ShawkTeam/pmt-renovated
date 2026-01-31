@@ -6,3 +6,11 @@
 	path = external/gptfdisk
 	url = https://android.googlesource.com/platform/external/gptfdisk
 	branch = main
+[submodule "external/json"]
+	path = external/json
+	url = https://github.com/nlohmann/json
+	branch = develop
+[submodule "external/CLI11"]
+	path = external/CLI11
+	url = https://github.com/CLIUtils/CLI11
+	branch = main

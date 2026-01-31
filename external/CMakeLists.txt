@@ -80,3 +80,7 @@ target_compile_options(libgptf_static PRIVATE -Wno-unused-parameter -Wno-macro-r
 target_compile_options(libgptf_shared PRIVATE -Wno-unused-parameter -Wno-macro-redefined -Wno-pragma-pack -std=c++11 -fno-strict-aliasing)
 target_compile_definitions(libgptf_static PRIVATE _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE _LARGEFILE64_SOURCE)
 target_compile_definitions(libgptf_shared PRIVATE _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE _LARGEFILE64_SOURCE)
+
+# Include CLI11 targets.
+set(CLI11_SINGLE_FILE ON)
+add_subdirectory(CLI11)

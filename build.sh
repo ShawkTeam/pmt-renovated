@@ -25,8 +25,8 @@ checks() {
         echo "Please set ANDROID_NDK variable as your NDK path."
         exit 1
     fi
-    if ! which cmake &>/dev/null || ! which ninja &>/dev/null; then
-        echo "Please verify your CMake and Ninja installation."
+    if ! which cmake &>/dev/null || ! which ninja &>/dev/null || ! which python &>/dev/null; then
+        echo "Please verify your CMake, Ninja and Python installation."
         exit 1
     fi
 }

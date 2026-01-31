@@ -37,8 +37,8 @@ add_executable(pmt ${PMT_SOURCES})
 add_executable(pmt_static ${PMT_SOURCES})
 
 # Set linker options
-target_link_libraries(pmt PRIVATE libhelper_shared libpartition_map_shared libgptf_shared libext2_uuid_shared)
-target_link_libraries(pmt_static PRIVATE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static)
+target_link_libraries(pmt PRIVATE libhelper_shared libpartition_map_shared libgptf_shared libext2_uuid_shared CLI11_SINGLE)
+target_link_libraries(pmt_static PRIVATE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static CLI11_SINGLE)
 target_link_options(pmt PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
 target_link_options(pmt_static PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
 

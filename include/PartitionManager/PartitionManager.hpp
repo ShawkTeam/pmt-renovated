@@ -17,7 +17,7 @@
 #ifndef LIBPMT_LIB_HPP
 #define LIBPMT_LIB_HPP
 
-#include <CLI/CLI11.hpp>
+#include <CLI11.hpp>
 #include <concepts>
 #include <format>
 #include <libhelper/lib.hpp>
