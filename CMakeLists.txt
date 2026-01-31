@@ -40,6 +40,7 @@ generateBuildInfo("${FLAGS}")
 # Add include directories
 include_directories(include)
 include_directories(external/json/single_include)
+include_directories(external/picosha2)
 
 # Add libraries and executables
 add_subdirectory(external)
