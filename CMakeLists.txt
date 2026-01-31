@@ -41,6 +41,7 @@ generateBuildInfo("${FLAGS}")
 include_directories(include)
 include_directories(external/json/single_include)
 include_directories(external/picosha2)
+include_directories(external/core/libcutils/include)
 
 # Add libraries and executables
 add_subdirectory(external)

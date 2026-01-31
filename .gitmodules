@@ -18,3 +18,7 @@
 	path = external/picosha2
 	url = https://github.com/okdshin/PicoSHA2
 	branch = master
+[submodule "external/core"]
+	path = external/core
+	url = https://android.googlesource.com/platform/system/core
+	branch = main
