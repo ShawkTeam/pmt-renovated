@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
     AppMain.footer(
         "Copyright (C) 2026 Yağız Zengin\nPartition Manager Tool is written by Yağız Zengin, licensed under GNU GPLv3 license.\nThis "
         "program comes with ABSOLUTELY NO "
-        "WARRANTY. Use --license (or -L) for for more information.\nReport "
+        "WARRANTY. Use --license for more information.\nReport "
         "bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
     AppMain.add_option("-t,--table", FLAGS.extraTablePaths, "Add more partition tables for progress")->delimiter(',');
     AppMain.add_option("-L,--log-file", FLAGS.logFile, "Set log file");
@@ -90,7 +90,7 @@ int main(int argc, char **argv) {
     AppMain.add_flag("-V,--verbose", FLAGS.verboseMode,
                      "Detailed information is written on the screen while the transaction is being carried out");
     AppMain.add_flag("-v,--version", FLAGS.viewVersion, "Print version and exit");
-    AppMain.add_flag("-L,--license", FLAGS.viewLicense, "Print license and exit");
+    AppMain.add_flag("--license", FLAGS.viewLicense, "Print license and exit");
 
     bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
     bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
@@ -124,7 +124,7 @@ int main(int argc, char **argv) {
                    "the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of "
                    "the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be "
                    "useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A "
-                   "PARTICULAR PURPOSE.  See the\n GNU General Public License for more details.\n\nYou should have received a copy of "
+                   "PARTICULAR PURPOSE. See the\nGNU General Public License for more details.\n\nYou should have received a copy of "
                    "the GNU General Public License\nalong with this program.  If not, see <https://www.gnu.org/licenses/>.");
       return EXIT_SUCCESS;
     }
