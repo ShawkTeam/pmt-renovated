@@ -17,12 +17,12 @@
 #include <fstream>
 #include <iomanip>
 #include <iostream>
-#include <libhelper/lib.hpp>
 #include <optional>
-#include <picosha2.h>
 #include <string>
-#include <sys/stat.h>
 #include <vector>
+#include <sys/stat.h>
+#include <libhelper/lib.hpp>
+#include <picosha2.h>
 
 namespace Helper {
 std::optional<std::string> sha256Of(const std::filesystem::path &path) {

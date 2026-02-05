@@ -29,23 +29,10 @@ add_library(libhelper_static STATIC ${LIBHELPER_SOURCES})
 add_executable(libhelper_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)
 
 # Set linker flags and define rquired libraries
-target_link_options(libhelper_shared PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
-target_link_options(libhelper_test PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
-target_link_libraries(libhelper_test PRIVATE libhelper_static)
+target_link_libraries(libhelper_shared PRIVATE pmt_interface_nolibs)
+target_link_libraries(libhelper_static PRIVATE pmt_interface_nolibs)
+target_link_libraries(libhelper_test PRIVATE pmt_interface_nolibs libhelper_static)
 
 # Set appropriate output names and compiler flags
 set_target_properties(libhelper_shared PROPERTIES OUTPUT_NAME "helper")
 set_target_properties(libhelper_static PROPERTIES OUTPUT_NAME "helper")
-
-# Add libhelper to include directories
-target_include_directories(libhelper_shared PUBLIC include)
-target_include_directories(libhelper_static PUBLIC include)
-
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	target_link_options(libhelper_shared PRIVATE -fsanitize=address)
-	target_link_options(libhelper_static PRIVATE -fsanitize=address)
-	target_link_options(libhelper_test PRIVATE -fsanitize=address)
-	target_compile_options(libhelper_shared PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
-	target_compile_options(libhelper_static PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
-	target_compile_options(libhelper_test PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
-endif()

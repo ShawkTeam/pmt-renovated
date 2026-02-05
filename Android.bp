@@ -18,18 +18,17 @@
 filegroup {
     name: "pmt_srcs",
     srcs: [
-        "src/FunctionManager.cpp",
         "src/Main.cpp",
         "src/PartitionManager.cpp",
-        "src/functions/BackupFunction.cpp",
-        "src/functions/EraseFunction.cpp",
-        "src/functions/FlashFunction.cpp",
-        "src/functions/InfoFunction.cpp",
-        "src/functions/MemoryTestFunction.cpp",
-        "src/functions/PartitionSizeFunction.cpp",
-        "src/functions/RealPathFunction.cpp",
-        "src/functions/RebootFunction.cpp",
-        "src/functions/TypeFunction.cpp",
+        "src/plugins/BackupPlugin.cpp",
+        "src/plugins/ErasePlugin.cpp",
+        "src/plugins/FlashPlugin.cpp",
+        "src/plugins/InfoPlugin.cpp",
+        "src/plugins/MemoryTestPlugin.cpp",
+        "src/plugins/PartitionSizePlugin.cpp",
+        "src/plugins/RealPathPlugin.cpp",
+        "src/plugins/RebootPlugin.cpp",
+        "src/plugins/TypePlugin.cpp",
     ],
 }
 
@@ -76,6 +75,7 @@ cc_defaults {
         "-Wno-deprecated-declarations",
         "-fexceptions",
         "-DANDROID_BUILD",
+        "-DBUILTIN_PLUGINS",
     ],
     ldflags: ["-Wl,-s"],
     local_include_dirs: [

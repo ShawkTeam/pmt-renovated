@@ -18,8 +18,8 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
-#include <libpartition_map/lib.hpp>
 #include <unistd.h>
+#include <libpartition_map/lib.hpp>
 
 int main() {
   if (!Helper::hasSuperUser()) return 2; // Check root access.

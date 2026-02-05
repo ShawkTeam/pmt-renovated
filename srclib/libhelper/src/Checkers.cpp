@@ -15,10 +15,10 @@
 */
 
 #include <__filesystem/path.h>
-#include <libhelper/lib.hpp>
-#include <private/android_filesystem_config.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <libhelper/lib.hpp>
+#include <private/android_filesystem_config.h>
 
 namespace Helper {
 bool hasSuperUser() { return getuid() == AID_ROOT; }

@@ -17,10 +17,10 @@
 #include <algorithm>
 #include <filesystem>
 #include <iostream>
-#include <libpartition_map/lib.hpp>
-#include <libpartition_map/redefine_logging_macros.hpp>
 #include <ranges>
 #include <utility>
+#include <libpartition_map/lib.hpp>
+#include <libpartition_map/redefine_logging_macros.hpp>
 
 namespace PartitionMap {
 
@@ -43,7 +43,9 @@ void Builder::scan() {
       for (uint32_t i = 0; i < storedGpt.GetNumParts(); ++i) {
         if (GPTPart part = storedGpt[i]; part.IsUsed()) {
           partitions.push_back(Partition_t({part, i, p})); // Add to partition list.
-          LOGI << "Registered partition: " << part.GetDescription() << std::endl;
+          silencer.stop();
+          LOGI << "Registered partition: " << part.GetDescription() << std::endl << std::flush;
+          silencer.silenceAgain();
         }
       }
     }
@@ -76,7 +78,7 @@ void Builder::scanLogicalPartitions() {
   LOGI << "Removing non-partition contents from data." << std::endl;
   std::erase_if(partitions, [](Partition_t &part) -> bool {
     if (part.getName().find("com.") != std::string::npos ||
-           part.getName() == "userdata") { // Erase non-partition contents (like com.android.adbd) and userdata.
+        part.getName() == "userdata") { // Erase non-partition contents (like com.android.adbd) and userdata.
       LOGI << "Removed: " << part.getName() << std::endl;
       return true;
     }
@@ -176,8 +178,10 @@ std::vector<std::pair<bool, std::string>> Builder::getDuplicatePartitionPosition
   std::vector<std::pair<bool, std::string>> parts;
   for (auto &part : partitions) {
     if (part.getName() == name) {
-      if (part.isLogicalPartition()) parts.emplace_back(!part.getPathByName().empty(), "");
-      else parts.emplace_back(!part.getPathByName().empty(), part.getTableName());
+      if (part.isLogicalPartition())
+        parts.emplace_back(!part.getPathByName().empty(), "");
+      else
+        parts.emplace_back(!part.getPathByName().empty(), part.getTableName());
     }
   }
 
@@ -222,18 +226,18 @@ std::vector<std::pair<std::string, uint64_t>> Builder::getDataOfLogicalPartition
   return parts;
 }
 
-std::vector<std::tuple<std::string, uint64_t, bool>> Builder::getDataOfPartitions() {
+std::vector<BasicInfo> Builder::getDataOfPartitions() {
   LOGI << "Providing data of partitions." << std::endl;
-  std::vector<std::tuple<std::string, uint64_t, bool>> parts;
+  std::vector<BasicInfo> parts;
   for (auto &part : getPartitions())
     parts.emplace_back(part->getName(), part->getSize(), part->isSuperPartition());
 
   return parts;
 }
 
-std::vector<std::tuple<std::string, uint64_t, bool>> Builder::getDataOfPartitionsByTable(const std::string &name) {
+std::vector<BasicInfo> Builder::getDataOfPartitionsByTable(const std::string &name) {
   LOGI << "Providing data of table " << std::quoted(name) << " partitions." << std::endl;
-  std::vector<std::tuple<std::string, uint64_t, bool>> parts;
+  std::vector<BasicInfo> parts;
   for (auto &part : getPartitions())
     if (part->getTableName() == name) parts.emplace_back(part->getName(), part->getSize(), part->isSuperPartition());
 
@@ -355,7 +359,7 @@ bool Builder::valid() {
   return !hasGptProblems;
 }
 
-bool Builder::foreach(const std::function<bool(Partition_t &)> &function) {
+bool Builder::foreach (const std::function<bool(Partition_t &)> &function) {
   LOGI << "Foreaching input function for all partitions." << std::endl;
   bool isSuccess = true;
   for (Partition_t &part : partitions)

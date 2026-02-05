@@ -18,6 +18,7 @@
 #define LIBHELPER_LIB_HPP
 
 #include <__filesystem/path.h>
+#include <concepts>
 #include <dirent.h>
 #include <exception>
 #include <functional>
@@ -28,7 +29,6 @@
 #include <string>
 #include <string_view>
 #include <vector>
-#include <concepts>
 
 #define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)
 #define MB(x) (KB(x) * 1024)                    // MB(4) = 4194304 (KB(4) * 1024)
@@ -89,73 +89,49 @@ public:
   Logger &operator<<(std::ostream &(*msg)(std::ostream &));
 };
 
-template <typename T>
-struct CleanupTraits {
-  static void cleanup(T* ptr) {
-    delete ptr;
-  }
+template <typename T> struct CleanupTraits {
+  static void cleanup(T *ptr) { delete ptr; }
 };
 
-template <typename T>
-struct CleanupTraits<T[]> {
-  static void cleanup(T* ptr) {
-    delete[] ptr;
-  }
+template <typename T> struct CleanupTraits<T[]> {
+  static void cleanup(T *ptr) { delete[] ptr; }
 };
 
-template <>
-struct CleanupTraits<FILE> {
-  static void cleanup(FILE* fp) {
+template <> struct CleanupTraits<FILE> {
+  static void cleanup(FILE *fp) {
     if (fp) fclose(fp);
   }
 };
 
-template <>
-struct CleanupTraits<DIR> {
-  static void cleanup(DIR* dp) {
+template <> struct CleanupTraits<DIR> {
+  static void cleanup(DIR *dp) {
     if (dp) closedir(dp);
   }
 };
 
 template <typename T>
-concept Deletable =
-  !std::is_void_v<T> &&
-  !std::is_array_v<T> &&
-  requires(T* p) {
-  CleanupTraits<T>::cleanup(p);
-  };
+concept Deletable = !std::is_void_v<T> && !std::is_array_v<T> && requires(T *p) { CleanupTraits<T>::cleanup(p); };
 
 template <typename T>
-concept ArrayDeletable =
-  !std::is_void_v<T> &&
-  requires(T* p) {
-  CleanupTraits<T[]>::cleanup(p);
-  };
+concept ArrayDeletable = !std::is_void_v<T> && requires(T *p) { CleanupTraits<T[]>::cleanup(p); };
 
 class garbageCollector {
   std::vector<std::function<void()>> __cleaners;
 
 public:
   garbageCollector() = default;
-  garbageCollector(const garbageCollector&) = delete;
-  garbageCollector& operator=(const garbageCollector&) = delete;
+  garbageCollector(const garbageCollector &) = delete;
+  garbageCollector &operator=(const garbageCollector &) = delete;
 
   ~garbageCollector();
 
-  template <Deletable T>
-  void delAfterProgress(T* ptr) {
-    static_assert(!std::is_array_v<T>,
-                  "Use delArrayAfterProgress for arrays");
-    __cleaners.push_back([ptr] {
-      CleanupTraits<T>::cleanup(ptr);
-    });
+  template <Deletable T> void delAfterProgress(T *ptr) {
+    static_assert(!std::is_array_v<T>, "Use delArrayAfterProgress for arrays");
+    __cleaners.push_back([ptr] { CleanupTraits<T>::cleanup(ptr); });
   }
 
-  template <ArrayDeletable T>
-  void delArrayAfterProgress(T* ptr) {
-    __cleaners.push_back([ptr] {
-      CleanupTraits<T[]>::cleanup(ptr);
-    });
+  template <ArrayDeletable T> void delArrayAfterProgress(T *ptr) {
+    __cleaners.push_back([ptr] { CleanupTraits<T[]>::cleanup(ptr); });
   }
 
   void delFileAfterProgress(const std::filesystem::path &_path);
@@ -571,6 +547,7 @@ public:
 
 class Silencer {
   int saved_stdout = -1;
+  int saved_stderr = -1;
   int dev_null = -1;
 
 public:
@@ -928,7 +905,7 @@ std::string getLibVersion();
   Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
 #define LOGF(file, level) Helper::Logger(level, __func__, file, Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)
 #define LOGN(name, level) Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), name, __FILE__, __LINE__)
-#define LOGNF(name, file, level) Helper::Logger(level, file, name, __FILE__, __LINE__)
+#define LOGNF(name, file, level) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
 #define LOG_IF(level, condition)                                                                                                      \
   if (condition)                                                                                                                      \

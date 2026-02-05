@@ -15,36 +15,64 @@
 #
 
 # Sources
-set(PMT_SOURCES
-	${CMAKE_CURRENT_SOURCE_DIR}/FunctionManager.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/PartitionManager.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Main.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/Out.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/BackupFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/CleanLogFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/EraseFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/FlashFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/InfoFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/MemoryTestFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/PartitionSizeFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/RealPathFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/RebootFunction.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/functions/TypeFunction.cpp
-)
+if(NOT BUILTIN_PLUGINS)
+	set(PMT_SOURCES
+			${CMAKE_CURRENT_SOURCE_DIR}/PartitionManager.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/Main.cpp)
+else()
+	set(PMT_SOURCES
+			${CMAKE_CURRENT_SOURCE_DIR}/PartitionManager.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/Main.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/BackupPlugin.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/CleanLogPlugin.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/ErasePlugin.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/FlashPlugin.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/InfoPlugin.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/MemoryTestPlugin.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/PartitionSizePlugin.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/RealPathPlugin.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/RebootPlugin.cpp
+			${CMAKE_CURRENT_SOURCE_DIR}/plugins/TypePlugin.cpp)
+	add_compile_definitions(BUILTIN_PLUGINS)
+endif()
 
 # Add pmt
 add_executable(pmt ${PMT_SOURCES})
 add_executable(pmt_static ${PMT_SOURCES})
 
 # Set linker options
-target_link_libraries(pmt PRIVATE libhelper_shared libpartition_map_shared libgptf_shared libext2_uuid_shared CLI11_SINGLE)
-target_link_libraries(pmt_static PRIVATE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static CLI11_SINGLE)
-target_link_options(pmt PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
-target_link_options(pmt_static PRIVATE "LINKER:-rpath,/data/data/com.termux/files/usr/lib")
+target_link_libraries(pmt PRIVATE pmt_shared_interface)
+target_link_libraries(pmt_static PRIVATE pmt_static_interface)
 
-if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-	target_link_options(pmt PRIVATE -fsanitize=address)
-	target_link_options(pmt_static PRIVATE -fsanitize=address)
-	target_compile_options(pmt PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
-	target_compile_options(pmt_static PRIVATE -gdwarf-5 -fsanitize=address -fno-stack-protector)
+if(NOT BUILTIN_PLUGINS)
+	add_library(pmt_backup_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/BackupPlugin.cpp)
+	add_library(pmt_clean_log_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/CleanLogPlugin.cpp)
+	add_library(pmt_erase_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/ErasePlugin.cpp)
+	add_library(pmt_flash_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/FlashPlugin.cpp)
+	add_library(pmt_info_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/InfoPlugin.cpp)
+	add_library(pmt_memory_test_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/MemoryTestPlugin.cpp)
+	add_library(pmt_partition_size_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/PartitionSizePlugin.cpp)
+	add_library(pmt_real_path_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/RealPathPlugin.cpp)
+	add_library(pmt_reboot_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/RebootPlugin.cpp)
+	add_library(pmt_type_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/TypePlugin.cpp)
+	target_link_libraries(pmt_backup_plugin PRIVATE pmt_shared_interface)
+	target_link_libraries(pmt_clean_log_plugin PRIVATE pmt_shared_interface)
+	target_link_libraries(pmt_erase_plugin PRIVATE pmt_shared_interface)
+	target_link_libraries(pmt_flash_plugin PRIVATE pmt_shared_interface)
+	target_link_libraries(pmt_info_plugin PRIVATE pmt_shared_interface)
+	target_link_libraries(pmt_memory_test_plugin PRIVATE pmt_shared_interface)
+	target_link_libraries(pmt_partition_size_plugin PRIVATE pmt_shared_interface)
+	target_link_libraries(pmt_real_path_plugin PRIVATE pmt_shared_interface)
+	target_link_libraries(pmt_reboot_plugin PRIVATE pmt_shared_interface)
+	target_link_libraries(pmt_type_plugin PRIVATE pmt_shared_interface)
+	set_target_properties(pmt_backup_plugin PROPERTIES PREFIX "" OUTPUT_NAME "backupplugin")
+	set_target_properties(pmt_clean_log_plugin PROPERTIES PREFIX "" OUTPUT_NAME "cleanlogplugin")
+	set_target_properties(pmt_erase_plugin PROPERTIES PREFIX "" OUTPUT_NAME "eraseplugin")
+	set_target_properties(pmt_flash_plugin PROPERTIES PREFIX "" OUTPUT_NAME "flashplugin")
+	set_target_properties(pmt_info_plugin PROPERTIES PREFIX "" OUTPUT_NAME "infoplugin")
+	set_target_properties(pmt_memory_test_plugin PROPERTIES PREFIX "" OUTPUT_NAME "memorytestplugin")
+	set_target_properties(pmt_partition_size_plugin PROPERTIES PREFIX "" OUTPUT_NAME "partitionsizeplugin")
+	set_target_properties(pmt_real_path_plugin PROPERTIES PREFIX "" OUTPUT_NAME "realpathplugin")
+	set_target_properties(pmt_reboot_plugin PROPERTIES PREFIX "" OUTPUT_NAME "rebootplugin")
+	set_target_properties(pmt_type_plugin PROPERTIES PREFIX "" OUTPUT_NAME "typeplugin")
 endif()

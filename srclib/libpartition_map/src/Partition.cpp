@@ -14,11 +14,11 @@
    limitations under the License.
 */
 
-#include <asm-generic/fcntl.h>
 #include <filesystem>
+#include <ostream>
+#include <asm-generic/fcntl.h>
 #include <libpartition_map/lib.hpp>
 #include <libpartition_map/redefine_logging_macros.hpp>
-#include <ostream>
 
 namespace PartitionMap {
 

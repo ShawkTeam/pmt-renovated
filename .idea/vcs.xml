@@ -3,6 +3,7 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/CLI11" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/core" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/e2fsprogs" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/gptfdisk" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/json" vcs="Git" />

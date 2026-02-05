@@ -15,13 +15,13 @@
 */
 
 #include <cerrno>
-#include <dirent.h>
-#include <fcntl.h>
 #include <iomanip>
-#include <libhelper/lib.hpp>
 #include <string>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <dirent.h>
+#include <fcntl.h>
+#include <libhelper/lib.hpp>
 
 namespace Helper {
 bool writeFile(const std::filesystem::path &file, const std::string_view text) {

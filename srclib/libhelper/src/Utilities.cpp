@@ -14,32 +14,26 @@
    limitations under the License.
 */
 
-#include <cutils/android_reboot.h>
-#include <fcntl.h>
-
 #include <cstdio>
 #include <cstdlib>
 #include <ctime>
+#include <cstdarg>
+#include <iostream>
+#include <memory>
+#include <random>
+#include <string>
+#include <string_view>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <libhelper/lib.hpp>
 #ifndef ANDROID_BUILD
 #include <sys/_system_properties.h>
-
 #include <generated/buildInfo.hpp>
 #else
 #include <sys/system_properties.h>
 #endif
 #include <cutils/android_reboot.h>
-#include <libgen.h>
-#include <sys/_system_properties.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
-#include <cstdarg>
-#include <iostream>
-#include <libhelper/lib.hpp>
-#include <memory>
-#include <random>
-#include <string>
-#include <string_view>
 
 #ifdef __ANDROID__
 // From system/core/libcutils/android_reboot.cpp android16-s2-release

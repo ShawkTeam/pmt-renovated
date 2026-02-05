@@ -19,23 +19,31 @@
 
 #include <filesystem>
 #include <functional>
-#include <gpt.h>
-#include <libhelper/lib.hpp>
 #include <map>
 #include <memory>
 #include <string>
-#include <tuple>
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <libhelper/lib.hpp>
+#include <gpt.h>
+#ifdef NONE
+#undef NONE
+#endif
 
 namespace PartitionMap {
 
 enum SizeUnit : int { BYTE = 1, KiB = 2, MiB = 3, GiB = 4 };
+
 struct BasicData {
   GPTPart gptPart;
   uint32_t index;
   std::filesystem::path tablePath;
+};
+struct BasicInfo {
+  std::string name;
+  uint64_t size;
+  bool isLogical;
 };
 
 template <typename __class>
@@ -52,6 +60,7 @@ concept minimumPartitionClass = requires(__class cls, __class cls2, GUIDData gda
 
   // Check required constructors
   __class{};
+  ~__class{};
   __class{path};
   __class{data};
   __class{cls};
@@ -67,7 +76,7 @@ concept minimumPartitionClass = requires(__class cls, __class cls2, GUIDData gda
 }; // concept minimumPartitionClass
 
 class Partition_t {
-  std::filesystem::path tablePath;             // The table path to which the partition
+  std::filesystem::path tablePath;            // The table path to which the partition
                                               // belongs (like /dev/block/sdc).
   std::filesystem::path logicalPartitionPath; // Path of logical partition.
   uint32_t index = 0;                         // The actual index of the partition within the table.
@@ -89,10 +98,8 @@ public:
   Partition_t(const Partition_t &other) = default;
   explicit Partition_t(const BasicData &input)
       : tablePath(input.tablePath), index(input.index), gptPart(input.gptPart) {} // For normal partitions.
-  explicit Partition_t(const std::filesystem::path &path)                       /* NOLINT(modernize-pass-by-value) */
-      : logicalPartitionPath(path), gptPart(GPTPart()) {
-    isLogical = true;
-  } // For logical partitions.
+  explicit Partition_t(const std::filesystem::path &path)                         /* NOLINT(modernize-pass-by-value) */
+      : logicalPartitionPath(path), gptPart(GPTPart()), isLogical(true) {} // For logical partitions.
 
   GPTPart getGPTPart();     // Get copy of GPTPart data.
   GPTPart *getGPTPartRef(); // Get reference of GPTPart data.
@@ -134,11 +141,12 @@ public:
   explicit operator bool();                        // p (equals !empty())
   bool operator!();                                // !p (equals empty())
 
-  Partition_t &operator=(const Partition_t &other) = default; // p1 = p2
-  friend std::ostream &operator<<(std::ostream &os,
-                                  Partition_t &other); // std::cout << p1
+  Partition_t &operator=(const Partition_t &other) = default;            // p1 = p2
+  friend std::ostream &operator<<(std::ostream &os, Partition_t &other); // std::cout << p1
 }; // class Partition_t
 
+// template <typename __class>
+// requires minimumPartitionClass<__class>
 class Builder {
   std::vector<Partition_t> partitions;
   std::map<std::filesystem::path, std::shared_ptr<GPTData>> gptDataCollection;
@@ -163,10 +171,10 @@ public:
     scanLogicalPartitions();
   }
 
-  std::vector<Partition_t *> getPartitions();                              // Get partitions (std::vector<Partition_t*>).
-  std::vector<const Partition_t *> getPartitions() const;                  // Get partitions (std::vector<const Partition_t*>).
-  std::vector<Partition_t *> getLogicalPartitions();                       // Get logical partitions.
-  std::vector<const Partition_t *> getLogicalPartitions() const;           // Get logical partitions (const).
+  std::vector<Partition_t *> getPartitions();                               // Get partitions (std::vector<Partition_t*>).
+  std::vector<const Partition_t *> getPartitions() const;                   // Get partitions (std::vector<const Partition_t*>).
+  std::vector<Partition_t *> getLogicalPartitions();                        // Get logical partitions.
+  std::vector<const Partition_t *> getLogicalPartitions() const;            // Get logical partitions (const).
   std::vector<Partition_t *> getPartitionsByTable(const std::string &name); // Get partitions of table by name.
   std::vector<const Partition_t *> getPartitionsByTable(const std::string &name) const; // Get partitions of table by name (const).
 
@@ -180,10 +188,8 @@ public:
   const std::shared_ptr<GPTData> &getGPTDataOf(const std::string &name) const; // Get gpt data of table by name.
 
   std::vector<std::pair<std::string, uint64_t>> getDataOfLogicalPartitions(); // Get logical partition information.
-  std::vector<std::tuple<std::string, uint64_t, bool>> getDataOfPartitions(); // Get information about partitions.
-
-  std::vector<std::tuple<std::string, uint64_t, bool>>
-  getDataOfPartitionsByTable(const std::string &name); // Get information about partitions by table name.
+  std::vector<BasicInfo> getDataOfPartitions();                               // Get information about partitions.
+  std::vector<BasicInfo> getDataOfPartitionsByTable(const std::string &name); // Get information about partitions by table name.
 
   Partition_t &partition(const std::string &name, const std::string &from = "");
   Partition_t &partitionWithDupCheck(const std::string &name, bool check = true);
@@ -194,33 +200,36 @@ public:
 
   bool hasPartition(const std::string &name); // Check <name> partition is existing or not (checks partitions and logicalPartitions).
   bool hasLogicalPartition(const std::string &name); // Check <name> logical partition is existing or not.
-  bool hasTable(const std::string &name) const;       // Check <name> table name is existing or not.
+  bool hasTable(const std::string &name) const;      // Check <name> table name is existing or not.
   bool isUsesUFS() const;                            // Get the device uses UFS or not.
   bool isHasSuperPartition() const;                  // Get any table has super partition or not.
   bool isLogical(const std::string &name);           // Check <name> is logical partition or
                                                      // not. Same as hasLogicalPartition().
   bool empty() const;                                // Checks partitions, logicalPartitions and
                                                      // gptDataCollection is empty or not.
-  bool tableNamesEmpty() const;                       // Checks tableNames is empty or not.
+  bool tableNamesEmpty() const;                      // Checks tableNames is empty or not.
   bool valid();                                      // Validate GPTData collection integrity. Checks with
                                                      // GPTData::Verify() and GPTData::CheckHeaderValidity().
 
-  bool foreach (const std::function<bool(Partition_t &)> &function);
-  bool foreachPartitions(const std::function<bool(Partition_t &)> &function); // For-each input function for partition list.
-  bool
-  foreachLogicalPartitions(const std::function<bool(Partition_t &)> &function); // For-each input function for logical partition list.
+  bool foreach (const std::function<bool(Partition_t &)> &function);                 // For-each input function for all partitions.
+  bool foreachPartitions(const std::function<bool(Partition_t &)> &function);        // For-each input function for partitions.
+  bool foreachLogicalPartitions(const std::function<bool(Partition_t &)> &function); // For-each input function for logical partitions.
   bool
   foreachGptData(const std::function<bool(const std::filesystem::path &,
                                           std::shared_ptr<GPTData> &)> &function); // For-each input function for gpt data collection.
-  bool foreachFor(const std::vector<std::string> &list, const std::function<bool(Partition_t &)> &function);
-  bool foreachForLogicalPartitions(const std::vector<std::string> &list, const std::function<bool(Partition_t &)> &function);
-  bool foreachForPartitions(const std::vector<std::string> &list, const std::function<bool(Partition_t &)> &function);
+  bool foreachFor(const std::vector<std::string> &list,
+                  const std::function<bool(Partition_t &)> &function); // For-each input function for input partition list (all types).
+  bool foreachForLogicalPartitions(const std::vector<std::string> &list,
+                                   const std::function<bool(Partition_t &)>
+                                       &function); // For-each input function for input partition list (only normal partitions).
+  bool foreachForPartitions(const std::vector<std::string> &list,
+                            const std::function<bool(Partition_t &)>
+                                &function); // For-each input function for input partition list (only normal partitions).
 
-  void reScan(bool auto_toggle = false);    // Rescan tables.
+  void reScan(bool auto_toggle = false);     // Rescan tables.
   void addTable(const std::string &name);    // Add table.
   void removeTable(const std::string &name); // Remove table.
-  void setSeek(const std::string &name);    // Set the table name that the
-                                            // [uint32_t] operator will use.
+  void setSeek(const std::string &name);     // Set the table name that the [uint32_t] operator will use.
 
   void setTables(std::unordered_set<std::string> names); // Set tables. By names (like sda, sdc, sdg).
   void setGPTDataOf(const std::string &name,

@@ -14,23 +14,18 @@
    limitations under the License.
 */
 
-#include <dirent.h>
-#include <fcntl.h>
-#include <libgen.h>
-#include <unistd.h>
-
 #include <cerrno>
 #include <cstdarg>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
 #include <exception>
 #include <fstream>
-#include <functional>
 #include <iomanip>
 #include <iostream>
-#include <libhelper/lib.hpp>
+#include <ranges>
 #include <sstream>
+#include <dirent.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <libhelper/lib.hpp>
 
 namespace Helper {
 Error::Error(const char *format, ...) {
@@ -102,29 +97,23 @@ Logger &Logger::operator<<(std::ostream &(*msg)(std::ostream &)) {
 }
 
 garbageCollector::~garbageCollector() {
-  for (auto it = __cleaners.rbegin(); it != __cleaners.rend(); ++it)
-    (*it)();
+  for (auto &__cleaner : std::ranges::reverse_view(__cleaners))
+    __cleaner();
 }
 
 void garbageCollector::delFileAfterProgress(const std::filesystem::path &__path) {
-  __cleaners.push_back([__path] {
-      std::filesystem::remove(__path);
-    });
+  __cleaners.emplace_back([__path] { std::filesystem::remove(__path); });
 }
 void garbageCollector::closeAfterProgress(int __fd) {
-  __cleaners.push_back([__fd] {
-      if (__fd >= 0) close(__fd);
-    });
+  __cleaners.emplace_back([__fd] {
+    if (__fd >= 0) close(__fd);
+  });
 }
 void garbageCollector::closeAfterProgress(FILE *__fp) {
-  __cleaners.push_back([__fp] {
-      CleanupTraits<FILE>::cleanup(__fp);
-    });
+  __cleaners.emplace_back([__fp] { CleanupTraits<FILE>::cleanup(__fp); });
 }
 void garbageCollector::closeAfterProgress(DIR *__dp) {
-  __cleaners.push_back([__dp] {
-      CleanupTraits<DIR>::cleanup(__dp);
-    });
+  __cleaners.emplace_back([__dp] { CleanupTraits<DIR>::cleanup(__dp); });
 }
 
 Silencer::Silencer() { silenceAgain(); }
@@ -134,19 +123,28 @@ Silencer::~Silencer() {
 }
 
 void Silencer::stop() {
+  if (saved_stdout == -1 && saved_stderr == -1 && dev_null == -1) return;
   fflush(stdout);
+  fflush(stderr);
   dup2(saved_stdout, STDOUT_FILENO);
+  dup2(saved_stderr, STDERR_FILENO);
   close(saved_stdout);
+  close(saved_stderr);
   close(dev_null);
   saved_stdout = -1;
+  saved_stderr = -1;
   dev_null = -1;
 }
 
 void Silencer::silenceAgain() {
+  if (saved_stdout != -1 && saved_stderr != -1 && dev_null != -1) return;
   fflush(stdout);
+  fflush(stderr);
   saved_stdout = dup(STDOUT_FILENO);
+  saved_stderr = dup(STDERR_FILENO);
   dev_null = open("/dev/null", O_WRONLY);
   dup2(dev_null, STDOUT_FILENO);
+  dup2(dev_null, STDERR_FILENO);
 }
 
 } // namespace Helper

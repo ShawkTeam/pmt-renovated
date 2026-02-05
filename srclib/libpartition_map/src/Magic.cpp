@@ -14,15 +14,15 @@
    limitations under the License.
 */
 
-#include <fcntl.h>
 #include <iomanip>
-#include <libhelper/lib.hpp>
-#include <libpartition_map/lib.hpp>
-#include <libpartition_map/redefine_logging_macros.hpp>
 #include <map>
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include <fcntl.h>
+#include <libhelper/lib.hpp>
+#include <libpartition_map/lib.hpp>
+#include <libpartition_map/redefine_logging_macros.hpp>
 
 namespace PartitionMap::Extra {
 std::map<uint64_t, std::string> FileSystemMagics = {
@@ -31,33 +31,33 @@ std::map<uint64_t, std::string> FileSystemMagics = {
     {FileSystemMagic::FAT32_FS, "FAT32"},    {FileSystemMagic::NTFS_FS, "NTFS"},   {FileSystemMagic::MSDOS_FS, "MSDOS"}};
 
 std::map<uint64_t, std::string> AndroidMagics = {{AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
-                                                   {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
-                                                   {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
-                                                   {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
-                                                   {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
-                                                   {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
-                                                   {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
-                                                   {AndroidMagic::ELF, "ELF"},
-                                                   {AndroidMagic::RAW, "Raw Data"}};
+                                                 {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
+                                                 {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
+                                                 {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
+                                                 {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
+                                                 {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
+                                                 {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
+                                                 {AndroidMagic::ELF, "ELF"},
+                                                 {AndroidMagic::RAW, "Raw Data"}};
 
 std::map<uint64_t, std::string> Magics = {{AndroidMagic::BOOT_IMAGE, "Android Boot Image"},
-                                            {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
-                                            {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
-                                            {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
-                                            {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
-                                            {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
-                                            {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
-                                            {AndroidMagic::ELF, "ELF"},
-                                            {AndroidMagic::RAW, "Raw Data"},
-                                            {FileSystemMagic::EXTFS_FS, "EXT2/3/4"},
-                                            {FileSystemMagic::F2FS_FS, "F2FS"},
-                                            {FileSystemMagic::EROFS_FS, "EROFS"},
-                                            {FileSystemMagic::EXFAT_FS, "exFAT"},
-                                            {FileSystemMagic::FAT12_FS, "FAT12"},
-                                            {FileSystemMagic::FAT16_FS, "FAT16"},
-                                            {FileSystemMagic::FAT32_FS, "FAT32"},
-                                            {FileSystemMagic::NTFS_FS, "NTFS"},
-                                            {FileSystemMagic::MSDOS_FS, "MSDOS"}};
+                                          {AndroidMagic::VBOOT_IMAGE, "Android Vendor Boot Image"},
+                                          {AndroidMagic::LK_IMAGE, "Android LK (Bootloader)"},
+                                          {AndroidMagic::DTBO_IMAGE, "Android DTBO Image"},
+                                          {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
+                                          {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
+                                          {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
+                                          {AndroidMagic::ELF, "ELF"},
+                                          {AndroidMagic::RAW, "Raw Data"},
+                                          {FileSystemMagic::EXTFS_FS, "EXT2/3/4"},
+                                          {FileSystemMagic::F2FS_FS, "F2FS"},
+                                          {FileSystemMagic::EROFS_FS, "EROFS"},
+                                          {FileSystemMagic::EXFAT_FS, "exFAT"},
+                                          {FileSystemMagic::FAT12_FS, "FAT12"},
+                                          {FileSystemMagic::FAT16_FS, "FAT16"},
+                                          {FileSystemMagic::FAT32_FS, "FAT32"},
+                                          {FileSystemMagic::NTFS_FS, "NTFS"},
+                                          {FileSystemMagic::MSDOS_FS, "MSDOS"}};
 
 size_t getMagicLength(const uint64_t magic) {
   size_t length = 0;
@@ -110,11 +110,16 @@ std::string formatMagic(const uint64_t magic) {
 
 std::string getSizeUnitAsString(SizeUnit size) {
   switch (size) {
-    case BYTE: return "B";
-    case KiB: return "KiB";
-    case MiB: return "MiB";
-    case GiB: return "GiB";
-    default: return "";
+    case BYTE:
+      return "B";
+    case KiB:
+      return "KiB";
+    case MiB:
+      return "MiB";
+    case GiB:
+      return "GiB";
+    default:
+      return "";
   }
 }
 

@@ -23,6 +23,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
+# Build plugins as built-in or dynamic.
+option(BUILTIN_PLUGINS "Enable builtin plugins." OFF)
+
 # Set compiler flags
 add_compile_options(-Werror -Wno-deprecated-declarations)
 if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
@@ -32,16 +35,11 @@ endif()
 
 # Add pmt's CMake module(s)
 include(build/cmake/generate_headers.cmake)
+include(build/cmake/interface.cmake)
 
 # Generate header(s)
 get_property(FLAGS DIRECTORY PROPERTY COMPILE_OPTIONS)
 generateBuildInfo("${FLAGS}")
-
-# Add include directories
-include_directories(include)
-include_directories(external/json/single_include)
-include_directories(external/picosha2)
-include_directories(external/core/libcutils/include)
 
 # Add libraries and executables
 add_subdirectory(external)

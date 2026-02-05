@@ -60,8 +60,8 @@ add_library(libgptf_shared SHARED ${LIBGPTF_SRCS})
 # Add include directories
 target_include_directories(libext2_uuid_shared PUBLIC ${E2FSPROGS_LIB} ${E2FSPROGS_LIB}/uuid)
 target_include_directories(libext2_uuid_static PUBLIC ${E2FSPROGS_LIB} ${E2FSPROGS_LIB}/uuid)
-target_include_directories(libgptf_shared PUBLIC ${GPTFDISK})
-target_include_directories(libgptf_static PUBLIC ${GPTFDISK})
+target_include_directories(libgptf_shared PRIVATE ${GPTFDISK})
+target_include_directories(libgptf_static PRIVATE ${GPTFDISK})
 
 # Set appropriate output names
 set_target_properties(libext2_uuid_shared PROPERTIES OUTPUT_NAME "ext2_uuid")
@@ -74,10 +74,10 @@ target_link_libraries(libgptf_static PRIVATE libext2_uuid_static)
 target_link_libraries(libgptf_shared PRIVATE libext2_uuid_shared)
 
 # Set compiler flags
-target_compile_options(libext2_uuid_shared PRIVATE -Wno-pointer-arith -Wno-sign-compare -Wno-type-limits -Wno-typedef-redefinition -Wno-unused-parameter)
-target_compile_options(libext2_uuid_static PRIVATE -Wno-pointer-arith -Wno-sign-compare -Wno-type-limits -Wno-typedef-redefinition -Wno-unused-parameter)
-target_compile_options(libgptf_static PRIVATE -Wno-unused-parameter -Wno-macro-redefined -Wno-pragma-pack -std=c++11 -fno-strict-aliasing)
-target_compile_options(libgptf_shared PRIVATE -Wno-unused-parameter -Wno-macro-redefined -Wno-pragma-pack -std=c++11 -fno-strict-aliasing)
+target_compile_options(libext2_uuid_shared PRIVATE -Wno-pointer-arith -Wno-sign-compare -Wno-type-limits -Wno-typedef-redefinition -Wno-unused-parameter -fPIC)
+target_compile_options(libext2_uuid_static PRIVATE -Wno-pointer-arith -Wno-sign-compare -Wno-type-limits -Wno-typedef-redefinition -Wno-unused-parameter -fPIC)
+target_compile_options(libgptf_static PRIVATE -Wno-unused-parameter -Wno-macro-redefined -Wno-pragma-pack -std=c++11 -fno-strict-aliasing -fPIC)
+target_compile_options(libgptf_shared PRIVATE -Wno-unused-parameter -Wno-macro-redefined -Wno-pragma-pack -std=c++11 -fno-strict-aliasing -fPIC)
 target_compile_definitions(libgptf_static PRIVATE _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE _LARGEFILE64_SOURCE)
 target_compile_definitions(libgptf_shared PRIVATE _FILE_OFFSET_BITS=64 _LARGEFILE_SOURCE _LARGEFILE64_SOURCE)
 

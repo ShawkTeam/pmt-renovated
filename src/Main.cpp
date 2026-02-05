@@ -14,9 +14,139 @@
    limitations under the License.
 */
 
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <string>
+#include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
+#include <PartitionManager/Plugin.hpp>
+
+#undef FLAGS
+#undef TABLES
+#define FLAGS (*Flags)
+#define TABLES (*FLAGS.partitionTables)
+
+static void sigHandler(int sig) {
+  if (sig == SIGINT) Out::println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
+  if (sig == SIGABRT) Out::println("\n%sAborted.%s", RED, STYLE_RESET);
+  exit(sig);
+}
 
 int main(int argc, char **argv) {
-  // Call integrated main function in core
-  return PartitionManager::Main(argc, argv);
+  CLI::App AppMain{"Partition Manager Tool"};
+  CLI::App bootstrap{"Partition Manager Bootstrap"};
+  auto Flags = std::make_shared<PartitionManager::BasicFlags>(); // Generate flag structure.
+
+  try {
+    // try-catch start
+
+    signal(SIGINT, sigHandler); // Trap CTRL+C.
+    signal(SIGABRT, sigHandler); // Trap abort signals.
+
+    // Catch arguments from stdin.
+    if (!isatty(fileno(stdin))) {
+      char buf[128];
+      while (fgets(buf, sizeof(buf), stdin) != nullptr) {
+        buf[strcspn(buf, "\n")] = 0;
+        const char *token = strtok(buf, " \t");
+        while (token != nullptr) {
+          argv[argc] = strdup(token);
+          argc++;
+          token = strtok(nullptr, " \t");
+        }
+      }
+    }
+
+    PartitionManager::BasicManager manager(AppMain, "/sdcard/Documents/last_pmt_logs.log", Flags);
+    std::vector<std::string> plugins;
+    std::string pluginPath;
+
+    // To prevent bootstrap from affecting the main application, disable some of its attributes.
+    bootstrap.allow_extras();
+    bootstrap.fallthrough(true);
+    bootstrap.set_help_flag();
+    bootstrap.set_help_all_flag();
+
+    AppMain.allow_extras();
+    AppMain.fallthrough(true);
+    AppMain.set_help_all_flag("--help-all", "Print full help message and exit");
+    AppMain.footer("Partition Manager Tool is written by YZBruh\nThis project licensed under Apache 2.0 license\nReport bugs to "
+                   "https://github.com/ShawkTeam/pmt-renovated/issues");
+    AppMain.add_option("-t,--table", FLAGS.extraTablePaths, "Add more partition tables for progress")->delimiter(',');
+    AppMain.add_option("-L,--log-file", FLAGS.logFile, "Set log file");
+    AppMain.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(','); // Dummy option for help message.
+    AppMain.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")
+        ->check(CLI::ExistingDirectory); // Dummy option for help message.
+    AppMain.add_flag("-s,--select-on-duplicate", FLAGS.noWorkOnUsed,
+                     "Select partition for work if has input named duplicate partitions.");
+    AppMain.add_flag("-f,--force", FLAGS.forceProcess, "Force process to be processed");
+    AppMain.add_flag("-l,--logical", FLAGS.onLogical, "Specify that the target partition is logical");
+    AppMain.add_flag("-q,--quiet", FLAGS.quietProcess, "Quiet process");
+    AppMain.add_flag("-V,--verbose", FLAGS.verboseMode,
+                     "Detailed information is written on the screen while the transaction is being carried out");
+    AppMain.add_flag("-v,--version", FLAGS.viewVersion, "Print version and exit");
+
+    bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
+    bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
+
+    bootstrap.parse(argc, argv);
+
+    manager.loadBuiltinPlugins(); // Load built-in plugins if existed.
+    if (!plugins.empty()) {
+      for (const auto &path : plugins)
+        manager.loadPlugin(path); // Load input plugins.
+    }
+    if (!pluginPath.empty()) {
+      for (const auto &entry : std::filesystem::directory_iterator(pluginPath))
+        // Try installing all the files with the .so extension in the directory as plugins.
+        if (entry.path().extension().string() == ".so") manager.loadPlugin(entry.path().string());
+    }
+
+    AppMain.parse(argc, argv);
+
+    if (argc < 2 || (argc == 3 && (!plugins.empty() || !pluginPath.empty()))) {
+      Out::println("Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.", argv[0]);
+      return EXIT_FAILURE;
+    }
+
+    Helper::Silencer silencer; // It suppresses stdout and stderr. It redirects them to /dev/null. One of the best ways to run silently.
+    if (!FLAGS.quietProcess) silencer.stop();
+    if (FLAGS.verboseMode) Helper::LoggingProperties::setPrinting<YES>();
+    if (FLAGS.viewVersion) {
+      Out::println("%s", PartitionManager::getAppVersion().data());
+      return EXIT_SUCCESS;
+    }
+
+    if (!Helper::hasSuperUser()) // Root access is a fundamental requirement for this program.
+      throw Helper::Error("This program requires super-user privileges.");
+    if (!FLAGS.extraTablePaths.empty()) // If a partition table has been specified for scanning, attempt the load.
+      std::ranges::for_each(FLAGS.extraTablePaths, [&](const std::string &name) { TABLES.addTable(name); });
+    if (!TABLES && FLAGS.extraTablePaths.empty())
+      throw PartitionManager::Error("Can't found any partition table in /dev/block. Specify tables "
+                                    "-t (--table) argument.");
+
+    if (FLAGS.onLogical) {
+      if (!TABLES.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
+        throw PartitionManager::Error("This device doesn't contains logical partitions. But you "
+                                      "used -l (--logical) flag.");
+    }
+
+    return manager.runUsed() == true ? EXIT_SUCCESS : EXIT_FAILURE;
+  } catch (CLI::CallForHelp&) {
+    // catch CLI::CallForHelp for printing help texts.
+
+    std::cout << AppMain.help() << std::endl;
+    return 0;
+  } catch (Helper::Error &error) {
+    // catch Helper::Error
+
+    fprintf(stderr, "%s%sFAIL:%s\n%s\n", RED, BOLD, STYLE_RESET, error.what());
+    return EXIT_FAILURE;
+  } catch (CLI::Error &error) {
+    // catch CLI::Error
+
+    fprintf(stderr, "%s: %s\n", argv[0], error.what());
+    return error.get_exit_code();
+  } // try-catch end
 }
