@@ -84,4 +84,4 @@ target_compile_definitions(libgptf_shared PRIVATE _FILE_OFFSET_BITS=64 _LARGEFIL
 
 # Include CLI11 targets.
 set(CLI11_SINGLE_FILE ON)
-add_subdirectory(CLI11/single-include)
+add_subdirectory(CLI11)
