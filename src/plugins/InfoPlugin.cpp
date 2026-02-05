@@ -37,11 +37,11 @@ class InfoPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
-  const char* logPath = nullptr;
+  const char *logPath = nullptr;
 
   ~InfoPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("info", "Tell info(s) of input partition list")
               ->footer("Use get-all or getvar-all as partition name for getting "
@@ -111,8 +111,9 @@ public:
       j["multipleType"] = PartitionMap::Extra::getSizeUnitAsString(multiple);
       j["partitions"] = nlohmann::json::array();
       for (auto &part : jParts)
-        j["partitions"].push_back(
-            {{jNamePartition, part.getName()}, {jNameSize, std::stoull(part.getFormattedSizeString(multiple, true))}, {jNameLogical, part.isLogicalPartition()}});
+        j["partitions"].push_back({{jNamePartition, part.getName()},
+                                   {jNameSize, std::stoull(part.getFormattedSizeString(multiple, true))},
+                                   {jNameLogical, part.isLogicalPartition()}});
 
       Out::println("%s", j.dump(jIndentSize).data());
     }

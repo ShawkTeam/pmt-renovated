@@ -100,7 +100,7 @@ public:
   explicit Partition_t(const BasicData &input)
       : tablePath(input.tablePath), index(input.index), gptPart(input.gptPart) {} // For normal partitions.
   explicit Partition_t(const std::filesystem::path &path)                         /* NOLINT(modernize-pass-by-value) */
-      : logicalPartitionPath(path), gptPart(GPTPart()), isLogical(true) {} // For logical partitions.
+      : logicalPartitionPath(path), gptPart(GPTPart()), isLogical(true) {}        // For logical partitions.
 
   GPTPart getGPTPart();     // Get copy of GPTPart data.
   GPTPart *getGPTPartRef(); // Get reference of GPTPart data.

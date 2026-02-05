@@ -25,7 +25,7 @@ namespace PartitionManager {
 
 BasicFlags::BasicFlags()
     : logFile(Helper::LoggingProperties::FILE), onLogical(false), quietProcess(false), verboseMode(false), viewVersion(false),
-      forceProcess(false), noWorkOnUsed(false) {
+      viewLicense(false), forceProcess(false), noWorkOnUsed(false) {
   try {
     partitionTables = std::make_unique<PartitionMap::Builder>();
   } catch (...) {

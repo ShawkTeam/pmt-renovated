@@ -42,7 +42,7 @@ int main(int argc, char **argv) {
   try {
     // try-catch start
 
-    signal(SIGINT, sigHandler); // Trap CTRL+C.
+    signal(SIGINT, sigHandler);  // Trap CTRL+C.
     signal(SIGABRT, sigHandler); // Trap abort signals.
 
     // Catch arguments from stdin.
@@ -72,8 +72,11 @@ int main(int argc, char **argv) {
     AppMain.allow_extras();
     AppMain.fallthrough(true);
     AppMain.set_help_all_flag("--help-all", "Print full help message and exit");
-    AppMain.footer("Partition Manager Tool is written by YZBruh\nThis project licensed under Apache 2.0 license\nReport bugs to "
-                   "https://github.com/ShawkTeam/pmt-renovated/issues");
+    AppMain.footer(
+        "Copyright (C) 2026 Yağız Zengin\nPartition Manager Tool is written by Yağız Zengin, licensed under GNU GPLv3 license.\nThis "
+        "program comes with ABSOLUTELY NO "
+        "WARRANTY. Use --license (or -L) for for more information.\nReport "
+        "bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
     AppMain.add_option("-t,--table", FLAGS.extraTablePaths, "Add more partition tables for progress")->delimiter(',');
     AppMain.add_option("-L,--log-file", FLAGS.logFile, "Set log file");
     AppMain.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(','); // Dummy option for help message.
@@ -87,6 +90,7 @@ int main(int argc, char **argv) {
     AppMain.add_flag("-V,--verbose", FLAGS.verboseMode,
                      "Detailed information is written on the screen while the transaction is being carried out");
     AppMain.add_flag("-v,--version", FLAGS.viewVersion, "Print version and exit");
+    AppMain.add_flag("-L,--license", FLAGS.viewLicense, "Print license and exit");
 
     bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
     bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
@@ -111,9 +115,19 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
     }
 
-    Helper::Silencer silencer; // It suppresses stdout and stderr. It redirects them to /dev/null. One of the best ways to run silently.
+    Helper::Silencer
+        silencer; // It suppresses stdout and stderr. It redirects them to /dev/null. One of the best ways to run silently.
     if (!FLAGS.quietProcess) silencer.stop();
     if (FLAGS.verboseMode) Helper::LoggingProperties::setPrinting<YES>();
+    if (FLAGS.viewLicense) {
+      Out::println("Copyright (C) 2026 Yağız Zengin\n\nThis program is free software: you can redistribute it and/or modify\nit under "
+                   "the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of "
+                   "the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be "
+                   "useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A "
+                   "PARTICULAR PURPOSE.  See the\n GNU General Public License for more details.\n\nYou should have received a copy of "
+                   "the GNU General Public License\nalong with this program.  If not, see <https://www.gnu.org/licenses/>.");
+      return EXIT_SUCCESS;
+    }
     if (FLAGS.viewVersion) {
       Out::println("%s", PartitionManager::getAppVersion().data());
       return EXIT_SUCCESS;
@@ -134,7 +148,7 @@ int main(int argc, char **argv) {
     }
 
     return manager.runUsed() == true ? EXIT_SUCCESS : EXIT_FAILURE;
-  } catch (CLI::CallForHelp&) {
+  } catch (CLI::CallForHelp &) {
     // catch CLI::CallForHelp for printing help texts.
 
     std::cout << AppMain.help() << std::endl;

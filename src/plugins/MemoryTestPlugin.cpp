@@ -41,7 +41,7 @@ public:
 
   ~MemoryTestPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("memtest", "Test your write/read speed of device.");

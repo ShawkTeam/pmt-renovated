@@ -57,6 +57,7 @@ public:
   bool quietProcess;
   bool verboseMode;
   bool viewVersion;
+  bool viewLicense;
   bool forceProcess;
   bool noWorkOnUsed;
 };

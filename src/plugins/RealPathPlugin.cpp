@@ -31,11 +31,11 @@ class RealPathPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
-  const char* logPath = nullptr;
+  const char *logPath = nullptr;
 
   ~RealPathPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("real-path", "Tell real paths of partition(s)");
@@ -62,7 +62,7 @@ public:
       if (FLAGS.onLogical && !part.isLogicalPartition()) {
         if (FLAGS.forceProcess)
           LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
-                                << std::endl;
+                                          << std::endl;
         else
           throw Error("Used --logical (-l) flag but is not logical partition: %s", partition.data());
       }

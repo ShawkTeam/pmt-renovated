@@ -30,11 +30,11 @@ class RebootPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
-  const char* logPath = nullptr;
+  const char *logPath = nullptr;
 
   ~RebootPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("reboot", "Reboots device");
@@ -52,7 +52,8 @@ public:
   bool used() override { return cmd->parsed(); }
 
   bool run() override {
-    LOGNF(PLUGIN, logPath, INFO) << "Rebooting device!!! (custom reboot target: " << (rebootTarget.empty() ? "none" : rebootTarget) << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Rebooting device!!! (custom reboot target: " << (rebootTarget.empty() ? "none" : rebootTarget)
+                                 << std::endl;
 
     if (Helper::androidReboot(rebootTarget))
       Out::println("Reboot command was sent");

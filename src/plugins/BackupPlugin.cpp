@@ -39,11 +39,11 @@ class BackupPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
-  const char* logPath = nullptr;
+  const char *logPath = nullptr;
 
   ~BackupPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = mainFlags;
@@ -76,7 +76,7 @@ public:
     if (FLAGS.onLogical && !TABLES.isLogical(partitionName)) {
       if (FLAGS.forceProcess)
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
-                              << std::endl;
+                                        << std::endl;
       else
         return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
     }
@@ -109,10 +109,10 @@ public:
 
     if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY))
       LOGNF(PLUGIN, logPath, WARNING) << "Failed to change owner of output file: " << outputName
-                            << ". Access problems maybe occur in non-root mode" << std::endl;
+                                      << ". Access problems maybe occur in non-root mode" << std::endl;
     if (!Helper::changeMode(outputName, 0664))
       LOGNF(PLUGIN, logPath, WARNING) << "Failed to change mode of output file as 660: " << outputName
-                            << ". Access problems maybe occur in non-root mode" << std::endl;
+                                      << ". Access problems maybe occur in non-root mode" << std::endl;
 
     return PairSuccess("%s partition successfully back upped to %s", partitionName.data(), outputName.data());
   }

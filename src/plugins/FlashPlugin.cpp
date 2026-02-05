@@ -42,7 +42,7 @@ public:
 
   ~FlashPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = mainFlags;
@@ -80,7 +80,7 @@ public:
     if (FLAGS.onLogical && !TABLES.isLogical(partitionName)) {
       if (FLAGS.forceProcess)
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
-                              << std::endl;
+                                        << std::endl;
       else
         return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
     }
