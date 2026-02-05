@@ -15,9 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include <map>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <map>
+#include <CLI11.hpp>
 
 #define PLUGIN "TypePlugin"
 #define PLUGIN_VERSION "1.0"
@@ -35,8 +36,9 @@ public:
 
   ~TypePlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, FlagsBase &mainFlags) override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+    logPath = logpath.c_str();
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("type", "Get type of the partition(s) or image(s)");
     flags = mainFlags;
     cmd->add_option("content(s)", contents, "Content(s)")->required()->delimiter(',');
@@ -51,7 +53,8 @@ public:
   }
 
   bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    cmd = nullptr;
     return true;
   }
 

@@ -17,6 +17,7 @@
 
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
+#include <CLI11.hpp>
 
 #define PLUGIN "RebootPlugin"
 #define PLUGIN_VERSION "1.0"
@@ -29,11 +30,13 @@ class RebootPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
+  const char* logPath = nullptr;
 
   ~RebootPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, FlagsBase &mainFlags) override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+    logPath = logpath.c_str();
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("reboot", "Reboots device");
     flags = mainFlags;
     cmd->add_option("rebootTarget", rebootTarget, "Reboot target (default: normal)");
@@ -41,14 +44,15 @@ public:
   }
 
   bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    cmd = nullptr;
     return true;
   }
 
   bool used() override { return cmd->parsed(); }
 
   bool run() override {
-    LOGN(PLUGIN, INFO) << "Rebooting device!!! (custom reboot target: " << (rebootTarget.empty() ? "none" : rebootTarget) << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Rebooting device!!! (custom reboot target: " << (rebootTarget.empty() ? "none" : rebootTarget) << std::endl;
 
     if (Helper::androidReboot(rebootTarget))
       Out::println("Reboot command was sent");

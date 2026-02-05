@@ -15,13 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <PartitionManager/PartitionManager.hpp>
-#include <PartitionManager/Plugin.hpp>
 #include <cerrno>
 #include <cstdlib>
-#include <fcntl.h>
 #include <future>
+#include <fcntl.h>
 #include <unistd.h>
+#include <PartitionManager/PartitionManager.hpp>
+#include <PartitionManager/Plugin.hpp>
+#include <CLI11.hpp>
 
 #define PLUGIN "FlashPlugin"
 #define PLUGIN_VERSION "1.0"
@@ -37,11 +38,13 @@ class FlashPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
+  const char *logPath = nullptr;
 
   ~FlashPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, FlagsBase &mainFlags) override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+    logPath = logpath.c_str();
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = mainFlags;
     cmd = mainApp.add_subcommand("flash", "Flash image(s) to partition(s)");
     cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
@@ -56,7 +59,8 @@ public:
   }
 
   bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    cmd = nullptr;
     return true;
   }
 
@@ -69,19 +73,19 @@ public:
       return PairError("%s is larger than %s partition size!", imageName.data(), partitionName.data());
 
     uint64_t buf = bufferSize;
-    setupBufferSize(buf, TABLES.partitionWithDupCheck(partitionName).getAbsolutePath(), *TABLES_REF);
+    setupBufferSize(buf, TABLES.partitionWithDupCheck(partitionName).getAbsolutePath(), TABLES_REF);
 
-    LOGN(PLUGIN, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;
 
     if (FLAGS.onLogical && !TABLES.isLogical(partitionName)) {
       if (FLAGS.forceProcess)
-        LOGN(PLUGIN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
+        LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                               << std::endl;
       else
         return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
     }
 
-    LOGN(PLUGIN, INFO) << "Using buffer size: " << buf << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
 
     // Automatically close file descriptors and delete allocated memories (arrays)
     Helper::garbageCollector collector;
@@ -93,7 +97,7 @@ public:
                                                   collector, O_RDWR | O_TRUNC);
     if (pfd < 0) return PairError("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
 
-    LOGN(PLUGIN, INFO) << "Writing image " << imageName << " to partition: " << partitionName << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Writing image " << imageName << " to partition: " << partitionName << std::endl;
     auto *buffer = new (std::nothrow) char[buf];
     collector.delAfterProgress(buffer);
     memset(buffer, 0x00, buf);
@@ -105,7 +109,7 @@ public:
     }
 
     if (deleteAfterProgress) {
-      LOGN(PLUGIN, INFO) << "Deleting flash file: " << imageName << std::endl;
+      LOGNF(PLUGIN, logPath, INFO) << "Deleting flash file: " << imageName << std::endl;
       if (!Helper::eraseEntry(imageName) && !FLAGS.quietProcess)
         WARNING(std::string("Cannot erase flash file: " + imageName + "\n").data());
     }
@@ -125,7 +129,7 @@ public:
     std::vector<std::future<resultPair>> futures;
     for (size_t i = 0; i < partitions.size(); i++) {
       futures.push_back(std::async(std::launch::async, &FlashPlugin::runAsync, this, partitions[i], imageNames[i]));
-      LOGN(PLUGIN, INFO) << "Created thread for flashing image to " << partitions[i] << std::endl;
+      LOGNF(PLUGIN, logPath, INFO) << "Created thread for flashing image to " << partitions[i] << std::endl;
     }
 
     std::string end;
@@ -141,7 +145,7 @@ public:
 
     if (!endResult) throw Error("%s", end.c_str());
 
-    LOGN(PLUGIN, INFO) << "Operation successfully completed." << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
     return endResult;
   }
 

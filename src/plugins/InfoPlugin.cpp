@@ -15,12 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <PartitionManager/PartitionManager.hpp>
-#include <PartitionManager/Plugin.hpp>
 #include <cerrno>
 #include <cstdlib>
 #include <fcntl.h>
+#include <PartitionManager/PartitionManager.hpp>
+#include <PartitionManager/Plugin.hpp>
 #include <nlohmann/json.hpp>
+#include <CLI11.hpp>
 
 #define PLUGIN "InfoPlugin"
 #define PLUGIN_VERSION "1.0"
@@ -36,10 +37,11 @@ class InfoPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
+  const char* logPath = nullptr;
 
   ~InfoPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, FlagsBase &mainFlags) override {
+  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
     LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("info", "Tell info(s) of input partition list")
               ->footer("Use get-all or getvar-all as partition name for getting "
@@ -67,6 +69,7 @@ public:
 
   bool onUnload() override {
     LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    cmd = nullptr;
     return true;
   }
 
@@ -109,7 +112,7 @@ public:
       j["partitions"] = nlohmann::json::array();
       for (auto &part : jParts)
         j["partitions"].push_back(
-            {{jNamePartition, part.getName()}, {jNameSize, part.getSize()}, {jNameLogical, part.isLogicalPartition()}});
+            {{jNamePartition, part.getName()}, {jNameSize, std::stoull(part.getFormattedSizeString(multiple, true))}, {jNameLogical, part.isLogicalPartition()}});
 
       Out::println("%s", j.dump(jIndentSize).data());
     }

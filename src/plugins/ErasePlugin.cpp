@@ -15,12 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <PartitionManager/PartitionManager.hpp>
-#include <PartitionManager/Plugin.hpp>
 #include <cerrno>
-#include <fcntl.h>
 #include <future>
 #include <unistd.h>
+#include <fcntl.h>
+#include <PartitionManager/PartitionManager.hpp>
+#include <PartitionManager/Plugin.hpp>
+#include <CLI11.hpp>
 
 #define PLUGIN "ErasePlugin"
 #define PLUGIN_VERSION "1.0"
@@ -34,11 +35,13 @@ class ErasePlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
+  const char* logPath = nullptr;
 
   ~ErasePlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, FlagsBase &mainFlags) override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+    logPath = logpath.c_str();
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("erase", "Writes zero bytes to partition(s)");
     flags = mainFlags;
     cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
@@ -50,7 +53,8 @@ public:
   }
 
   bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    cmd = nullptr;
     return true;
   }
 
@@ -61,16 +65,16 @@ public:
 
     if (FLAGS.onLogical && !TABLES.isLogical(partitionName)) {
       if (FLAGS.forceProcess)
-        LOGN(PLUGIN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
+        LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                               << std::endl;
       else
         return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
     }
 
     uint64_t buf = bufferSize;
-    setupBufferSize(buf, partitionName, *TABLES_REF);
+    setupBufferSize(buf, partitionName, TABLES_REF);
 
-    LOGN(PLUGIN, INFO) << "Using buffer size: " << buf;
+    LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf;
 
     // Automatically close file descriptors and delete allocated memories (arrays)
     Helper::garbageCollector collector;
@@ -86,7 +90,7 @@ public:
         throw Error("Operation canceled.");
     }
 
-    LOGN(PLUGIN, INFO) << "Writing zero bytes to partition: " << partitionName << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Writing zero bytes to partition: " << partitionName << std::endl;
     auto *buffer = new (std::nothrow) char[buf];
     collector.delAfterProgress(buffer);
     memset(buffer, 0x00, buf);
@@ -111,7 +115,7 @@ public:
     std::vector<std::future<resultPair>> futures;
     for (const auto &partitionName : partitions) {
       futures.push_back(std::async(std::launch::async, &ErasePlugin::runAsync, this, partitionName));
-      LOGN(PLUGIN, INFO) << "Created thread for writing zero bytes to " << partitionName << std::endl;
+      LOGNF(PLUGIN, logPath, INFO) << "Created thread for writing zero bytes to " << partitionName << std::endl;
     }
 
     std::string end;
@@ -127,7 +131,7 @@ public:
 
     if (!endResult) throw Error("%s", end.c_str());
 
-    LOGN(PLUGIN, INFO) << "Operation successfully completed." << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
     return endResult;
   }
 

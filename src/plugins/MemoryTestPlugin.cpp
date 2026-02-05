@@ -15,14 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <PartitionManager/PartitionManager.hpp>
-#include <PartitionManager/Plugin.hpp>
 #include <chrono>
 #include <cstdlib>
 #include <cstring>
-#include <fcntl.h>
 #include <random>
+#include <fcntl.h>
 #include <unistd.h>
+#include <PartitionManager/PartitionManager.hpp>
+#include <PartitionManager/Plugin.hpp>
+#include <CLI11.hpp>
 
 #define PLUGIN "MemoryTestPlugin"
 #define PLUGIN_VERSION "1.0"
@@ -40,8 +41,9 @@ public:
 
   ~MemoryTestPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, FlagsBase &mainFlags) override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+    logPath = logpath.c_str();
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("memtest", "Test your write/read speed of device.");
     flags = mainFlags;
     cmd->add_option("testDirectory", testPath, "Path to test directory")
@@ -63,7 +65,8 @@ public:
   }
 
   bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    cmd = nullptr;
     return true;
   }
 
@@ -74,11 +77,11 @@ public:
       throw Error("File size is more than 2GB! Sizes over 2GB may not give accurate "
                   "results in the write test. Use -f (--force) for skip this error.");
 
-    LOGN(PLUGIN, INFO) << "Starting memory test on " << testPath << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Starting memory test on " << testPath << std::endl;
     Helper::garbageCollector collector;
     const std::string test = Helper::pathJoin(testPath, "test.bin");
 
-    LOGN(PLUGIN, INFO) << "Generating random data for testing" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Generating random data for testing" << std::endl;
     auto *buffer = new (std::nothrow) char[bufferSize];
     collector.delAfterProgress(buffer);
 
@@ -90,7 +93,7 @@ public:
     const int wfd = Helper::openAndAddToCloseList(test, collector, O_WRONLY | O_CREAT | O_TRUNC | O_SYNC, 0644);
     if (wfd < 0) throw Error("Can't open/create test file: %s", strerror(errno));
 
-    LOGN(PLUGIN, INFO) << "Sequential write test started!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Sequential write test started!" << std::endl;
     const auto startWrite = std::chrono::high_resolution_clock::now();
     ssize_t bytesWritten = 0;
     while (bytesWritten < testFileSize) {
@@ -103,7 +106,7 @@ public:
 
     const double writeTime = std::chrono::duration<double>(endWrite - startWrite).count();
     Out::println("Sequential write speed: %3.f MB/s", (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / writeTime);
-    LOGN(PLUGIN, INFO) << "Sequential write test done!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Sequential write test done!" << std::endl;
 
     if (!doNotReadTest) {
       auto *rawBuffer = new char[bufferSize + 4096];
@@ -112,7 +115,7 @@ public:
       const int rfd = Helper::openAndAddToCloseList(test, collector, O_RDONLY | O_DIRECT);
       if (rfd < 0) throw Error("Can't open test file: %s", strerror(errno));
 
-      LOGN(PLUGIN, INFO) << "Sequential read test started!" << std::endl;
+      LOGNF(PLUGIN, logPath, INFO) << "Sequential read test started!" << std::endl;
       const auto startRead = std::chrono::high_resolution_clock::now();
       size_t total = 0;
       ssize_t bytesRead;
@@ -123,7 +126,7 @@ public:
 
       const double read_time = std::chrono::duration<double>(endRead - startRead).count();
       Out::println("Sequential read speed: %3.f MB/s", (static_cast<double>(total) / (1024.0 * 1024.0)) / read_time);
-      LOGN(PLUGIN, INFO) << "Sequential read test done!" << std::endl;
+      LOGNF(PLUGIN, logPath, INFO) << "Sequential read test done!" << std::endl;
     }
 
     return true;

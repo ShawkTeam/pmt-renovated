@@ -21,6 +21,7 @@
   <component name="CMakeRunConfigurationManager">
     <generated>
       <config projectName="pmt" targetName="pmt_static" />
+      <config projectName="pmt" targetName="CLI11" />
       <config projectName="pmt" targetName="pmt_info_plugin" />
       <config projectName="pmt" targetName="pmt_erase_plugin" />
       <config projectName="pmt" targetName="pmt_partition_size_plugin" />
@@ -51,13 +52,19 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/dictionaries/project.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: fix project settings and CMake errors.">
       <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pmt-renovated.iml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,8 +100,10 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "RunOnceActivity.west.config.association.type.startup.service": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Shell Script.Build (Debug).executor": "Run",
     "Shell Script.Build (Debug, with built-in plugins).executor": "Run",
     "Shell Script.Start Test.executor": "Run",
+    "cf.advertisement.text.overridden": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
     "git-widget-placeholder": "main",
@@ -108,7 +117,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Shell Script.Build (Debug, with built-in plugins)">
+  <component name="RunManager" selected="Shell Script.Start Test">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -364,11 +373,29 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1770326533349</updated>
-      <workItem from="1770326534999" duration="1214000" />
+      <workItem from="1770326534999" duration="3097000" />
     </task>
+    <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
+      <option name="closed" value="true" />
+      <created>1770327800351</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1770327800351</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VCPKGProject">
+    <isAutomaticCheckingOnLaunch value="false" />
+    <isAutomaticFoundErrors value="true" />
+    <isAutomaticReloadCMake value="true" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="pmt: fix project settings and CMake errors." />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt: fix project settings and CMake errors." />
   </component>
 </project>

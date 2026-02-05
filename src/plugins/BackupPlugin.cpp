@@ -15,15 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <PartitionManager/PartitionManager.hpp>
-#include <PartitionManager/Plugin.hpp>
 #include <cerrno>
 #include <chrono>
 #include <cstdlib>
 #include <fcntl.h>
 #include <future>
-#include <private/android_filesystem_config.h>
 #include <unistd.h>
+#include <PartitionManager/PartitionManager.hpp>
+#include <PartitionManager/Plugin.hpp>
+#include <CLI11.hpp>
+#include <private/android_filesystem_config.h>
 
 #define PLUGIN "BackupPlugin"
 #define PLUGIN_VERSION "1.0"
@@ -38,11 +39,13 @@ class BackupPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
+  const char* logPath = nullptr;
 
   ~BackupPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, FlagsBase &mainFlags) override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+    logPath = logpath.c_str();
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = mainFlags;
     cmd = mainApp.add_subcommand("backup", "Backup partition(s) to file(s)");
     cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
@@ -56,7 +59,8 @@ public:
   }
 
   bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    cmd = nullptr;
     return true;
   }
 
@@ -65,13 +69,13 @@ public:
   resultPair runAsync(const std::string &partitionName, const std::string &outputName) const {
     if (!TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
     uint64_t buf = bufferSize;
-    setupBufferSize(buf, TABLES.partitionWithDupCheck(partitionName).getAbsolutePath(), *TABLES_REF);
+    setupBufferSize(buf, TABLES.partitionWithDupCheck(partitionName).getAbsolutePath(), TABLES_REF);
 
-    LOGN(PLUGIN, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
 
     if (FLAGS.onLogical && !TABLES.isLogical(partitionName)) {
       if (FLAGS.forceProcess)
-        LOGN(PLUGIN, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
+        LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                               << std::endl;
       else
         return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
@@ -80,7 +84,7 @@ public:
     if (Helper::fileIsExists(outputName) && !FLAGS.forceProcess)
       return PairError("%s is exists. Remove it, or use --force (-f) flag.", outputName.data());
 
-    LOGN(PLUGIN, INFO) << "Using buffer size (for back upping " << partitionName << "): " << buf << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for back upping " << partitionName << "): " << buf << std::endl;
 
     // Automatically close file descriptors and delete allocated memories (arrays)
     Helper::garbageCollector collector;
@@ -92,7 +96,7 @@ public:
     const int ffd = Helper::openAndAddToCloseList(outputName, collector, O_WRONLY | O_CREAT | O_TRUNC, 0644);
     if (ffd < 0) return PairError("Can't create/open output file %s: %s", outputName.data(), strerror(errno));
 
-    LOGN(PLUGIN, INFO) << "Writing partition " << partitionName << " to file: " << outputName << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Writing partition " << partitionName << " to file: " << outputName << std::endl;
     auto *buffer = new (std::nothrow) char[buf];
     collector.delAfterProgress(buffer);
     memset(buffer, 0x00, buf);
@@ -104,10 +108,10 @@ public:
     }
 
     if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY))
-      LOGN(PLUGIN, WARNING) << "Failed to change owner of output file: " << outputName
+      LOGNF(PLUGIN, logPath, WARNING) << "Failed to change owner of output file: " << outputName
                             << ". Access problems maybe occur in non-root mode" << std::endl;
     if (!Helper::changeMode(outputName, 0664))
-      LOGN(PLUGIN, WARNING) << "Failed to change mode of output file as 660: " << outputName
+      LOGNF(PLUGIN, logPath, WARNING) << "Failed to change mode of output file as 660: " << outputName
                             << ". Access problems maybe occur in non-root mode" << std::endl;
 
     return PairSuccess("%s partition successfully back upped to %s", partitionName.data(), outputName.data());
@@ -125,7 +129,7 @@ public:
       if (!outputDirectory.empty()) outputName.insert(0, outputDirectory + '/');
 
       futures.push_back(std::async(std::launch::async, &BackupPlugin::runAsync, this, partitionName, outputName));
-      LOGN(PLUGIN, INFO) << "Created thread backup upping " << partitionName << std::endl;
+      LOGNF(PLUGIN, logPath, INFO) << "Created thread backup upping " << partitionName << std::endl;
     }
 
     std::string end;
@@ -141,7 +145,7 @@ public:
 
     if (!endResult) throw Error("%s", end.c_str());
 
-    LOGN(PLUGIN, INFO) << "Operation successfully completed." << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
     return endResult;
   }
 

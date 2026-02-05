@@ -17,6 +17,7 @@
 
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
+#include <CLI11.hpp>
 
 #define PLUGIN "PartitionSizePlugin"
 #define PLUGIN_VERSION "1.0"
@@ -33,8 +34,9 @@ public:
 
   ~PartitionSizePlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, FlagsBase &mainFlags) override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+    logPath = logpath.c_str();
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("sizeof", "Tell size(s) of input partition list")
               ->footer("Use get-all or getvar-all as partition name for getting "
                        "sizes of all partitions.\nUse get-logicals as partition "
@@ -55,7 +57,8 @@ public:
   }
 
   bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    cmd = nullptr;
     return true;
   }
 

@@ -17,6 +17,7 @@
 
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
+#include <CLI11.hpp>
 
 #define PLUGIN "RealPathPlugin"
 #define PLUGIN_VERSION "1.0"
@@ -30,11 +31,13 @@ class RealPathPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
+  const char* logPath = nullptr;
 
   ~RealPathPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, FlagsBase &mainFlags) override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  bool onLoad(CLI::App &mainApp, const std::string& logpath, FlagsBase &mainFlags) override {
+    logPath = logpath.c_str();
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("real-path", "Tell real paths of partition(s)");
     flags = mainFlags;
     cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
@@ -44,7 +47,8 @@ public:
   }
 
   bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    cmd = nullptr;
     return true;
   }
 
@@ -57,7 +61,7 @@ public:
       auto &part = TABLES.partitionWithDupCheck(partition, FLAGS.noWorkOnUsed);
       if (FLAGS.onLogical && !part.isLogicalPartition()) {
         if (FLAGS.forceProcess)
-          LOGN(PLUGIN, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
+          LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
                                 << std::endl;
         else
           throw Error("Used --logical (-l) flag but is not logical partition: %s", partition.data());
