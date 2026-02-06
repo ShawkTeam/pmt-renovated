@@ -81,7 +81,11 @@ Logger::~Logger() {
     }
   }
 
-  if (std::ofstream fileStream(_logFile, std::ios::app); fileStream) {
+  if (std::fstream fileStream(_logFile, std::ios::app | std::ios::in | std::ios::out); fileStream) {
+    if (std::filesystem::file_size(_logFile) == 0)
+      fileStream << std::string(46, '-') << std::endl
+                 << " LOGGING BEGIN! LOGGING BEGIN! LOGGING BEGIN!" << std::endl
+                 << std::string(46, '-') << std::endl;
     fileStream << logLine;
   } else {
     LoggingProperties::setLogFile("last_logs.log");
