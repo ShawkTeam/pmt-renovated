@@ -126,27 +126,16 @@ public:
       if (!imageDirectory.empty()) imageNames[i].insert(0, imageDirectory + '/');
     }
 
-    std::vector<std::future<resultPair>> futures;
+    Helper::AsyncManager<resultPair> manager;
     for (size_t i = 0; i < partitions.size(); i++) {
-      futures.push_back(std::async(std::launch::async, &FlashPlugin::runAsync, this, partitions[i], imageNames[i]));
+      manager.addProcess(&FlashPlugin::runAsync, this, partitions[i], imageNames[i]);
       LOGNF(PLUGIN, logPath, INFO) << "Created thread for flashing image to " << partitions[i] << std::endl;
     }
 
-    std::string end;
-    bool endResult = true;
-    for (auto &future : futures) {
-      auto [fst, snd] = future.get();
-      if (!snd) {
-        end += fst + '\n';
-        endResult = false;
-      } else
-        Out::println("%s", fst.c_str());
-    }
-
-    if (!endResult) throw Error("%s", end.c_str());
+    const auto result = manager.getResults();
 
     LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
-    return endResult;
+    return manager.finalize(result);
   }
 
   std::string getName() override { return PLUGIN; }

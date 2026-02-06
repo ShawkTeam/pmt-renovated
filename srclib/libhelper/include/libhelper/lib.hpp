@@ -18,9 +18,6 @@
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 
-#include <__filesystem/path.h>
-#include <concepts>
-#include <dirent.h>
 #include <exception>
 #include <functional>
 #include <optional>
@@ -30,6 +27,10 @@
 #include <string>
 #include <string_view>
 #include <vector>
+#include <future>
+#include <iostream>
+#include <__filesystem/path.h>
+#include <dirent.h>
 
 #define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)
 #define MB(x) (KB(x) * 1024)                    // MB(4) = 4194304 (KB(4) * 1024)
@@ -60,8 +61,8 @@ namespace Helper {
 // Throwable error class
 class Error final : public std::exception {
 private:
-  std::string _message;
   std::ostringstream _oss;
+  std::string _message;
 
 public:
   __printflike(2, 3) explicit Error(const char *format, ...);
@@ -180,6 +181,72 @@ public:
 
     return ret;
   }
+};
+
+// Provides a capsule structure to store variable references and values.
+template <typename _Type> class Capsule : public garbageCollector {
+public:
+  _Type &value;
+
+  // The value to be stored is taken as a reference as an argument
+  explicit Capsule(_Type &value) noexcept : value(value) {}
+
+  // Set the value.
+  void set(_Type &_value) noexcept { this->value = _value; }
+
+  // Get reference of the value.
+  _Type &get() noexcept { return this->value; }
+  _Type &get() const noexcept { return this->value; }
+
+  // You can get the reference of the stored value in the input type (casting is
+  // required).
+  explicit operator _Type &() noexcept { return &this->value; }
+  explicit operator _Type &() const noexcept { return &this->value; }
+  explicit operator _Type *() noexcept { return &this->value; }
+
+  // The value of another capsule is taken.
+  Capsule &operator=(const Capsule &other) noexcept {
+    this->value = other.value;
+    return *this;
+  }
+
+  // Assign another value.
+  Capsule &operator=(const _Type &_value) noexcept {
+    this->value = _value;
+    return *this;
+  }
+
+  // Check if this capsule and another capsule hold the same data.
+  bool operator==(const Capsule &other) const noexcept { return this->value == other.value; }
+
+  // Check if this capsule value and another capsule value hold the same data.
+  bool operator==(const _Type &_value) const noexcept { return this->value == _value; }
+
+  // Check that this capsule and another capsule do not hold the same data.
+  bool operator!=(const Capsule &other) const noexcept { return !(*this == other); }
+
+  // Check that this capsule value and another capsule value do not hold the
+  // same data.
+  bool operator!=(const _Type &_value) const noexcept { return !(*this == _value); }
+
+  // Check if the current held value is actually empty.
+  explicit operator bool() const noexcept { return this->value != _Type{}; }
+
+  // Check that the current held value is actually empty.
+  bool operator!() const noexcept { return this->value == _Type{}; }
+
+  // Change the value with the input operator.
+  friend Capsule &operator>>(const _Type &_value, Capsule &_capsule) noexcept {
+    _capsule.value = _value;
+    return _capsule;
+  }
+
+  // Get the reference of the value held.
+  _Type &operator()() noexcept { return value; }
+  _Type &operator()() const noexcept { return value; }
+
+  // Set the value.
+  void operator()(const _Type &_value) noexcept { this->value = _value; }
 };
 
 template <typename _Type1, typename _Type2, typename _Type3> class PureTuple {
@@ -316,8 +383,8 @@ public:
   }
 
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
-  std::enable_if_t<std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>, bool>
-  find(const std::tuple<_Type1, _Type2, _Type3> &t) const noexcept {
+  requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
+  bool find(const std::tuple<_Type1, _Type2, _Type3> &t) const noexcept {
     for (size_t i = 0; i < count; i++)
       if (tuple_data[i] == t) return true;
 
@@ -337,8 +404,8 @@ public:
   }
 
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
-  std::enable_if_t<std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>, void>
-  insert(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
+  requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
+  void insert(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
     expand_if_needed();
     if (!find(t)) tuple_data[count++] = Data{std::get<0>(t), std::get<1>(t), std::get<2>(t)};
   }
@@ -392,8 +459,8 @@ public:
   }
 
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
-  std::enable_if_t<std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>, void>
-  pop(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
+  requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
+  void pop(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
     for (size_t i = 0; i < count; i++) {
       if (tuple_data[i] == t) {
         for (size_t j = i; j < count - 1; j++)
@@ -479,73 +546,6 @@ public:
   }
 };
 
-// Provides a capsule structure to store variable references and values.
-template <typename _Type> class Capsule : public garbageCollector {
-public:
-  _Type &value;
-
-  // The value to be stored is taken as a reference as an argument
-  explicit Capsule(_Type &value) noexcept : value(value) {}
-
-  // Set the value.
-  void set(const _Type &_value) noexcept { this->value = _value; }
-  void set(_Type &_value) noexcept { this->value = _value; }
-
-  // Get reference of the value.
-  _Type &get() noexcept { return this->value; }
-  const _Type &get() const noexcept { return this->value; }
-
-  // You can get the reference of the stored value in the input type (casting is
-  // required).
-  operator _Type &() noexcept { return this->value; }
-  operator const _Type &() const noexcept { return this->value; }
-  explicit operator _Type *() noexcept { return &this->value; }
-
-  // The value of another capsule is taken.
-  Capsule &operator=(const Capsule &other) noexcept {
-    this->value = other.value;
-    return *this;
-  }
-
-  // Assign another value.
-  Capsule &operator=(const _Type &_value) noexcept {
-    this->value = _value;
-    return *this;
-  }
-
-  // Check if this capsule and another capsule hold the same data.
-  bool operator==(const Capsule &other) const noexcept { return this->value == other.value; }
-
-  // Check if this capsule value and another capsule value hold the same data.
-  bool operator==(const _Type &_value) const noexcept { return this->value == _value; }
-
-  // Check that this capsule and another capsule do not hold the same data.
-  bool operator!=(const Capsule &other) const noexcept { return !(*this == other); }
-
-  // Check that this capsule value and another capsule value do not hold the
-  // same data.
-  bool operator!=(const _Type &_value) const noexcept { return !(*this == _value); }
-
-  // Check if the current held value is actually empty.
-  explicit operator bool() const noexcept { return this->value != _Type{}; }
-
-  // Check that the current held value is actually empty.
-  bool operator!() const noexcept { return this->value == _Type{}; }
-
-  // Change the value with the input operator.
-  friend Capsule &operator>>(const _Type &_value, Capsule &_capsule) noexcept {
-    _capsule.value = _value;
-    return _capsule;
-  }
-
-  // Get the reference of the value held.
-  _Type &operator()() noexcept { return value; }
-  const _Type &operator()() const noexcept { return value; }
-
-  // Set the value.
-  void operator()(const _Type &_value) noexcept { this->value = _value; }
-};
-
 class Silencer {
   int saved_stdout = -1;
   int saved_stderr = -1;
@@ -557,6 +557,47 @@ public:
 
   void stop();
   void silenceAgain();
+};
+
+template <typename __return_type>
+class AsyncManager {
+  std::vector<std::future<__return_type>> futures;
+
+public:
+  template <typename ...Args>
+  void addProcess(Args &&...args) {
+    futures.push_back(std::async(std::launch::async, std::forward<Args>(args)...));
+  }
+
+  std::pair<std::string, bool> getResults() {
+    std::string error_message;
+    std::pair<std::string, bool> res = {"", true};
+    if constexpr (std::is_same_v<__return_type, std::pair<std::string, bool>>) {
+      for (auto &future : futures) {
+        auto [message, result] = future.get();
+        if (!result) error_message += message + '\n';
+        else std::cout << message << std::endl;
+      }
+      if (!error_message.empty()) res = {error_message, false};
+    } else {
+      for (auto &future : futures) {
+        auto result = future.get();
+        if constexpr (requires { !result; }) {
+          if (!result) {
+            if constexpr (std::is_same_v<__return_type, std::string>) error_message += result + '\n';
+          } else std::cout << result << std::endl;
+        } else throw Error("Result type is unexpected type!");
+      }
+      if (!error_message.empty()) res = {error_message, false};
+    }
+
+    return res;
+  }
+
+  bool finalize(const std::pair<std::string, bool> &res) const {
+    if (!res.first.empty()) throw Error("%s", res.first.c_str());
+    return res.second;
+  }
 };
 
 namespace LoggingProperties {

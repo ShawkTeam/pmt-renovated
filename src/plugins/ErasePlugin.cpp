@@ -112,27 +112,16 @@ public:
   }
 
   bool run() override {
-    std::vector<std::future<resultPair>> futures;
+    Helper::AsyncManager<resultPair> manager;
     for (const auto &partitionName : partitions) {
-      futures.push_back(std::async(std::launch::async, &ErasePlugin::runAsync, this, partitionName));
+      manager.addProcess(&ErasePlugin::runAsync, this, partitionName);
       LOGNF(PLUGIN, logPath, INFO) << "Created thread for writing zero bytes to " << partitionName << std::endl;
     }
 
-    std::string end;
-    bool endResult = true;
-    for (auto &future : futures) {
-      auto [fst, snd] = future.get();
-      if (!snd) {
-        end += fst + '\n';
-        endResult = false;
-      } else
-        Out::println("%s", fst.c_str());
-    }
-
-    if (!endResult) throw Error("%s", end.c_str());
+    const auto result = manager.getResults();
 
     LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
-    return endResult;
+    return manager.finalize(result);
   }
 
   std::string getName() override { return PLUGIN; }

@@ -122,31 +122,20 @@ public:
     if (!outputNames.empty() && partitions.size() != outputNames.size())
       throw CLI::ValidationError("You must provide an output name(s) as long as the partition name(s)");
 
-    std::vector<std::future<resultPair>> futures;
+    Helper::AsyncManager<resultPair> manager;
     for (size_t i = 0; i < partitions.size(); i++) {
       std::string partitionName = partitions[i];
       std::string outputName = outputNames.empty() ? partitionName + ".img" : outputNames[i];
       if (!outputDirectory.empty()) outputName.insert(0, outputDirectory + '/');
 
-      futures.push_back(std::async(std::launch::async, &BackupPlugin::runAsync, this, partitionName, outputName));
+      manager.addProcess(&BackupPlugin::runAsync, this, partitionName, outputName);
       LOGNF(PLUGIN, logPath, INFO) << "Created thread backup upping " << partitionName << std::endl;
     }
 
-    std::string end;
-    bool endResult = true;
-    for (auto &future : futures) {
-      auto [fst, snd] = future.get();
-      if (!snd) {
-        end += fst + '\n';
-        endResult = false;
-      } else
-        Out::println("%s", fst.c_str());
-    }
-
-    if (!endResult) throw Error("%s", end.c_str());
+    const auto result = manager.getResults();
 
     LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
-    return endResult;
+    return manager.finalize(result);
   }
 
   std::string getName() override { return PLUGIN; }
