@@ -595,7 +595,7 @@ public:
   }
 
   bool finalize(const std::pair<std::string, bool> &res) const {
-    if (!res.first.empty()) throw Error("%s", res.first.c_str());
+    if (res.second) throw Error("%s", res.first.c_str());
     return res.second;
   }
 };

@@ -38,11 +38,11 @@ constexpr char kAbortedMessage[] = "\nAborted.\n";
 static void sigHandler(int sig) {
   if (sig == SIGINT) {
     write(STDERR_FILENO, kInterruptedMessage, sizeof(kInterruptedMessage) - 1);
-    _exit(128 + SIGINT);
+    exit(128 + SIGINT);
   }
   if (sig == SIGABRT) {
     write(STDERR_FILENO, kAbortedMessage, sizeof(kAbortedMessage) - 1);
-    _exit(128 + SIGABRT);
+    exit(128 + SIGABRT);
   }
 }
 

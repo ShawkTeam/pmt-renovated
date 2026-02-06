@@ -52,12 +52,8 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: If the log file is a new file, a text entry about its origin is added.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper: New method for asynchronous operations and some improvements.&#10; - A helper class called `AsyncManager` has been added.&#10; - Where `std::enable_if` was used, a feature left over from C++17, it has been replaced with C++20 `requires`.&#10; - Some improvements in the `Capsule` class.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -69,7 +65,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/src/plugins/PartitionSizePlugin.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/lib.hpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -86,35 +82,35 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.RadMigrateCodeStyle": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.west.config.association.type.startup.service": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Shell Script.Build (Debug).executor": "Run",
-    "Shell Script.Build (Debug, with built-in plugins).executor": "Run",
-    "Shell Script.Cleanup.executor": "Run",
-    "Shell Script.Reformat Code.executor": "Run",
-    "Shell Script.Start Test.executor": "Run",
-    "cf.advertisement.text.overridden": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
-    "last_opened_file_path": "/home/yzbruh/Masaüstü/Projects/pmt-renovated-github/build.sh",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.sync",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.west.config.association.type.startup.service&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Shell Script.Build (Debug).executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Build (Debug, with built-in plugins).executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Cleanup.executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Reformat Code.executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Start Test.executor&quot;: &quot;Run&quot;,
+    &quot;cf.advertisement.text.overridden&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/Masaüstü/Projects/pmt-renovated-github/build.sh&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.sync&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Shell Script.Build (Debug, with built-in plugins)">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
@@ -342,12 +338,18 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="CMake Application.CLI11-generate-single-file" />
+      <item itemvalue="CMake Application.CLI11" />
       <item itemvalue="CMake Application.libext2_uuid_shared" />
       <item itemvalue="CMake Application.libext2_uuid_static" />
       <item itemvalue="CMake Application.libgptf_shared" />
       <item itemvalue="CMake Application.libgptf_static" />
-      <item itemvalue="CMake Application.CLI11-generate-single-file" />
-      <item itemvalue="CMake Application.CLI11" />
+      <item itemvalue="CMake Application.libhelper_shared" />
+      <item itemvalue="CMake Application.libhelper_static" />
+      <item itemvalue="CMake Application.libhelper_test" />
+      <item itemvalue="CMake Application.libpartition_map_shared" />
+      <item itemvalue="CMake Application.libpartition_map_static" />
+      <item itemvalue="CMake Application.libpartition_map_test" />
       <item itemvalue="CMake Application.pmt" />
       <item itemvalue="CMake Application.pmt_backup_plugin" />
       <item itemvalue="CMake Application.pmt_clean_log_plugin" />
@@ -360,19 +362,13 @@
       <item itemvalue="CMake Application.pmt_reboot_plugin" />
       <item itemvalue="CMake Application.pmt_static" />
       <item itemvalue="CMake Application.pmt_type_plugin" />
-      <item itemvalue="CMake Application.libhelper_shared" />
-      <item itemvalue="CMake Application.libhelper_static" />
-      <item itemvalue="CMake Application.libhelper_test" />
-      <item itemvalue="CMake Application.libpartition_map_shared" />
-      <item itemvalue="CMake Application.libpartition_map_static" />
-      <item itemvalue="CMake Application.libpartition_map_test" />
-      <item itemvalue="Shell Script.Cleanup" />
-      <item itemvalue="Shell Script.Start Test" />
-      <item itemvalue="Shell Script.Reformat Code" />
-      <item itemvalue="Shell Script.Build (Release, with built-in plugins)" />
-      <item itemvalue="Shell Script.Build (Release)" />
       <item itemvalue="Shell Script.Build (Debug, with built-in plugins)" />
       <item itemvalue="Shell Script.Build (Debug)" />
+      <item itemvalue="Shell Script.Build (Release, with built-in plugins)" />
+      <item itemvalue="Shell Script.Build (Release)" />
+      <item itemvalue="Shell Script.Cleanup" />
+      <item itemvalue="Shell Script.Reformat Code" />
+      <item itemvalue="Shell Script.Start Test" />
     </list>
   </component>
   <component name="TaskManager">
@@ -384,7 +380,8 @@
       <updated>1770326533349</updated>
       <workItem from="1770326534999" duration="3230000" />
       <workItem from="1770329821553" duration="1085000" />
-      <workItem from="1770405351481" duration="8301000" />
+      <workItem from="1770405351481" duration="8640000" />
+      <workItem from="1770416996647" duration="8000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -426,7 +423,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770408916427</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="libhelper: New method for asynchronous operations and some improvements.&#10; - A helper class called `AsyncManager` has been added.&#10; - Where `std::enable_if` was used, a feature left over from C++17, it has been replaced with C++20 `requires`.&#10; - Some improvements in the `Capsule` class.">
+      <option name="closed" value="true" />
+      <created>1770416852212</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1770416852212</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -443,6 +448,7 @@
     <MESSAGE value="pmt: Add more information about license and reformat code." />
     <MESSAGE value="pmt: fix license flag." />
     <MESSAGE value="pmt: If the log file is a new file, a text entry about its origin is added." />
-    <option name="LAST_COMMIT_MESSAGE" value="pmt: If the log file is a new file, a text entry about its origin is added." />
+    <MESSAGE value="libhelper: New method for asynchronous operations and some improvements.&#10; - A helper class called `AsyncManager` has been added.&#10; - Where `std::enable_if` was used, a feature left over from C++17, it has been replaced with C++20 `requires`.&#10; - Some improvements in the `Capsule` class." />
+    <option name="LAST_COMMIT_MESSAGE" value="libhelper: New method for asynchronous operations and some improvements.&#10; - A helper class called `AsyncManager` has been added.&#10; - Where `std::enable_if` was used, a feature left over from C++17, it has been replaced with C++20 `requires`.&#10; - Some improvements in the `Capsule` class." />
   </component>
 </project>
