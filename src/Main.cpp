@@ -18,6 +18,8 @@
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
+#include <iostream>
+#include <sstream>
 #include <string>
 #include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
@@ -28,10 +30,20 @@
 #define FLAGS (*Flags)
 #define TABLES (*FLAGS.partitionTables)
 
+namespace {
+constexpr char kInterruptedMessage[] = "\nInterrupted.\n";
+constexpr char kAbortedMessage[] = "\nAborted.\n";
+}
+
 static void sigHandler(int sig) {
-  if (sig == SIGINT) Out::println("\n%sInterrupted.%s", YELLOW, STYLE_RESET);
-  if (sig == SIGABRT) Out::println("\n%sAborted.%s", RED, STYLE_RESET);
-  exit(sig);
+  if (sig == SIGINT) {
+    write(STDERR_FILENO, kInterruptedMessage, sizeof(kInterruptedMessage) - 1);
+    _exit(128 + SIGINT);
+  }
+  if (sig == SIGABRT) {
+    write(STDERR_FILENO, kAbortedMessage, sizeof(kAbortedMessage) - 1);
+    _exit(128 + SIGABRT);
+  }
 }
 
 int main(int argc, char **argv) {
@@ -45,19 +57,24 @@ int main(int argc, char **argv) {
     signal(SIGINT, sigHandler);  // Trap CTRL+C.
     signal(SIGABRT, sigHandler); // Trap abort signals.
 
+    std::vector<std::string> args;
+    args.reserve(static_cast<size_t>(argc));
+    for (int i = 0; i < argc; ++i) args.emplace_back(argv[i]);
+
     // Catch arguments from stdin.
     if (!isatty(fileno(stdin))) {
-      char buf[128];
-      while (fgets(buf, sizeof(buf), stdin) != nullptr) {
-        buf[strcspn(buf, "\n")] = 0;
-        const char *token = strtok(buf, " \t");
-        while (token != nullptr) {
-          argv[argc] = strdup(token);
-          argc++;
-          token = strtok(nullptr, " \t");
-        }
+      std::string line;
+      while (std::getline(std::cin, line)) {
+        std::istringstream iss(line);
+        for (std::string token; iss >> token;) args.emplace_back(std::move(token));
       }
     }
+
+    std::vector<char *> argvStorage;
+    argvStorage.reserve(args.size());
+    for (auto &arg : args) argvStorage.push_back(arg.data());
+    argc = static_cast<int>(argvStorage.size());
+    argv = argvStorage.data();
 
     PartitionManager::BasicManager manager(AppMain, "/sdcard/Documents/last_pmt_logs.log", Flags);
     std::vector<std::string> plugins;
