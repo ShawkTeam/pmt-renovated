@@ -76,7 +76,6 @@ int main(int argc, char **argv) {
     argc = static_cast<int>(argvStorage.size());
     argv = argvStorage.data();
 
-    PartitionManager::BasicManager manager(AppMain, "/sdcard/Documents/last_pmt_logs.log", Flags);
     std::vector<std::string> plugins;
     std::string pluginPath;
 
@@ -111,8 +110,12 @@ int main(int argc, char **argv) {
 
     bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
     bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
+    bootstrap.add_option("-L,--log-file", FLAGS.logFile, "Set log file");
 
     bootstrap.parse(argc, argv);
+
+    Helper::LoggingProperties::setLogFile(FLAGS.logFile);
+    PartitionManager::BasicManager manager(AppMain, FLAGS.logFile, Flags);
 
     manager.loadBuiltinPlugins(); // Load built-in plugins if existed.
     if (!plugins.empty()) {
