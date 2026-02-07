@@ -52,9 +52,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="manager: update installer for 1.5.0 release.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: fixup termux link directories.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manager.sh" beforeDir="false" afterPath="$PROJECT_DIR$/manager.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -114,7 +115,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Shell Script.Build (Debug)">
+  <component name="RunManager" selected="Shell Script.Cleanup">
     <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="CLION.EXTERNAL.BUILD" enabled="true" />
@@ -358,7 +359,7 @@
       <workItem from="1770329821553" duration="1085000" />
       <workItem from="1770405351481" duration="8640000" />
       <workItem from="1770416996647" duration="1006000" />
-      <workItem from="1770459120770" duration="7424000" />
+      <workItem from="1770459120770" duration="8765000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -456,7 +457,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770467733862</updated>
     </task>
-    <option name="localTasksCounter" value="13" />
+    <task id="LOCAL-00013" summary="pmt: fixup termux link directories.">
+      <option name="closed" value="true" />
+      <created>1770469378265</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1770469378265</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -516,7 +525,8 @@
     <MESSAGE value="github: fixup builder workflow.&#10; - Initialize submodules of pmt repository." />
     <MESSAGE value="github: Fix an issue where the Builder workflow wasn't printing commits correctly." />
     <MESSAGE value="manager: update installer for 1.5.0 release." />
-    <option name="LAST_COMMIT_MESSAGE" value="manager: update installer for 1.5.0 release." />
+    <MESSAGE value="pmt: fixup termux link directories." />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt: fixup termux link directories." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

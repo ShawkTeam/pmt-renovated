@@ -54,10 +54,6 @@ endif()
 target_link_libraries(pmt PRIVATE pmt_shared_interface)
 target_link_libraries(pmt_static PRIVATE pmt_static_interface)
 
-# Add libk directories for termux
-target_link_directories(pmt PRIVATE "/data/data/com.termux/files/usr/lib")
-target_link_directories(pmt_static PRIVATE "/data/data/com.termux/files/usr/lib")
-
 if(NOT BUILTIN_PLUGINS)
 	add_library(pmt_backup_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/BackupPlugin.cpp)
 	add_library(pmt_clean_log_plugin SHARED ${CMAKE_CURRENT_SOURCE_DIR}/plugins/CleanLogPlugin.cpp)

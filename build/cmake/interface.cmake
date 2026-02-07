@@ -32,9 +32,9 @@ set(INCLUDE_DIRECTORIES
         "${CMAKE_SOURCE_DIR}/srclib/libpartition_map/include"
 )
 
-target_link_directories(pmt_shared_interface INTERFACE "/data/data/com.termux/files/usr/lib")
-target_link_directories(pmt_static_interface INTERFACE "/data/data/com.termux/files/usr/lib")
-target_link_directories(pmt_interface_nolibs INTERFACE "/data/data/com.termux/files/usr/lib")
+target_link_options(pmt_shared_interface INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
+target_link_options(pmt_static_interface INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
+target_link_options(pmt_interface_nolibs INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
 
 target_link_libraries(pmt_shared_interface INTERFACE libhelper_shared libpartition_map_shared libgptf_static libext2_uuid_static CLI11_SINGLE)
 target_link_libraries(pmt_static_interface INTERFACE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static CLI11_SINGLE)
