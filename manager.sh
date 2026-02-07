@@ -55,7 +55,7 @@ setup() {
 	set -e
 	install -t "$PREFIX/bin" "$PREFIX/tmp/pmt"
 	if [ -f "$PREFIX/tmp/libhelper.so" ]; then
-	  find "$PREFIX/tmp" -name "lib*.so" -name "lib*.a" -exec install -t "$PREFIX/lib" {} \;
+	  find "$PREFIX/tmp" -name "*lib*" -exec install -t "$PREFIX/lib" {} \;
 	fi
 	echo "Installed successfully. Try running 'pmt' command."
 }

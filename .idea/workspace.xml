@@ -52,11 +52,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: fixup termux link directories.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: fixup manager and termux issue.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manager.sh" beforeDir="false" afterPath="$PROJECT_DIR$/manager.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -359,7 +357,7 @@
       <workItem from="1770329821553" duration="1085000" />
       <workItem from="1770405351481" duration="8640000" />
       <workItem from="1770416996647" duration="1006000" />
-      <workItem from="1770459120770" duration="8765000" />
+      <workItem from="1770459120770" duration="10416000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -465,7 +463,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770469378265</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="pmt: fixup manager and termux issue.">
+      <option name="closed" value="true" />
+      <created>1770470784072</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1770470784073</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -526,7 +532,8 @@
     <MESSAGE value="github: Fix an issue where the Builder workflow wasn't printing commits correctly." />
     <MESSAGE value="manager: update installer for 1.5.0 release." />
     <MESSAGE value="pmt: fixup termux link directories." />
-    <option name="LAST_COMMIT_MESSAGE" value="pmt: fixup termux link directories." />
+    <MESSAGE value="pmt: fixup manager and termux issue." />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt: fixup manager and termux issue." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
