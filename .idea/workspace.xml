@@ -52,8 +52,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="github: remove unnecessary workflow.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="github: fixup builder workflow.&#10; - Initialize submodules of pmt repository.">
       <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/project.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -356,7 +358,7 @@
       <workItem from="1770329821553" duration="1085000" />
       <workItem from="1770405351481" duration="8640000" />
       <workItem from="1770416996647" duration="1006000" />
-      <workItem from="1770459120770" duration="2508000" />
+      <workItem from="1770459120770" duration="5318000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -430,7 +432,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770461311926</updated>
     </task>
-    <option name="localTasksCounter" value="10" />
+    <task id="LOCAL-00010" summary="github: fixup builder workflow.&#10; - Initialize submodules of pmt repository.">
+      <option name="closed" value="true" />
+      <created>1770461786647</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1770461786647</updated>
+    </task>
+    <option name="localTasksCounter" value="11" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -451,7 +461,8 @@
     <MESSAGE value="pmt: Use exit() instead of _exit() for memory safety." />
     <MESSAGE value="pmt: Improve the build system according to the new plugin system.&#10; - Even if plugins are not compiled built-in, pmt_static is always configured to be built-in.&#10; - The build script and GitHub workflow have been adapted.&#10; - Other improvements..." />
     <MESSAGE value="github: remove unnecessary workflow." />
-    <option name="LAST_COMMIT_MESSAGE" value="github: remove unnecessary workflow." />
+    <MESSAGE value="github: fixup builder workflow.&#10; - Initialize submodules of pmt repository." />
+    <option name="LAST_COMMIT_MESSAGE" value="github: fixup builder workflow.&#10; - Initialize submodules of pmt repository." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

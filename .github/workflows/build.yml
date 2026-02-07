@@ -58,7 +58,20 @@ jobs:
           echo "BUILD=${{ github.workspace }}/pmt" >> $GITHUB_ENV
           cd ..
           echo -e "Read [Wiki - About Release Types](https://github.com/ShawkTeam/pmt-renovated/wiki/About-Release-Types) for getting more information.\n\n### Changes\n" > release.txt
-          git log --since="2025-08-21" --pretty=format:" * %ad | [%s](https://github.com/ShawkTeam/pmt-renovated/commit/%H)" --date=short | sed 's/ -.*//' | grep -v cleanup >> release.txt
+          git log --since=2025-08-21 \
+            --no-merges \
+            --pretty=format:'%ad|%s|%h|%H' \
+            --date=short |
+          awk -F'|' '
+          {
+            subject = $2
+            sub(/ - .*/, "", subject)   # SADECE " - " ve sonrası
+            gsub(/[[:space:]]+$/, "", subject)
+
+            printf "* %s | %s ([%s](https://github.com/ShawkTeam/pmt-renovated/commit/%s))\n",
+                   $1, subject, $3, $4
+          } ' | grep -v cleanup >> release.txt
+
         working-directory: ${{ github.workspace }}
 
       - name: Upload To GitHub Releases
