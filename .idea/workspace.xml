@@ -52,8 +52,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="github: Fix an issue where the Builder workflow wasn't printing commits correctly.">
-      <change beforePath="$PROJECT_DIR$/.idea/jsonSchemas.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsonSchemas.xml" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="manager: update installer for 1.5.0 release.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manager.sh" beforeDir="false" afterPath="$PROJECT_DIR$/manager.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -112,7 +114,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Shell Script.Cleanup">
+  <component name="RunManager" selected="Shell Script.Build (Debug)">
     <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="CLION.EXTERNAL.BUILD" enabled="true" />
@@ -356,7 +358,7 @@
       <workItem from="1770329821553" duration="1085000" />
       <workItem from="1770405351481" duration="8640000" />
       <workItem from="1770416996647" duration="1006000" />
-      <workItem from="1770459120770" duration="5648000" />
+      <workItem from="1770459120770" duration="7424000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -446,7 +448,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770467276889</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="manager: update installer for 1.5.0 release.">
+      <option name="closed" value="true" />
+      <created>1770467733862</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1770467733862</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -456,6 +466,42 @@
     <isAutomaticCheckingOnLaunch value="false" />
     <isAutomaticFoundErrors value="true" />
     <isAutomaticReloadCMake value="true" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="a2510d36-fedc-4420-8faa-49485521d766" value="TOOL_WINDOW" />
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="a2510d36-fedc-4420-8faa-49485521d766">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="pmt: fix project settings and CMake errors." />
@@ -469,7 +515,8 @@
     <MESSAGE value="github: remove unnecessary workflow." />
     <MESSAGE value="github: fixup builder workflow.&#10; - Initialize submodules of pmt repository." />
     <MESSAGE value="github: Fix an issue where the Builder workflow wasn't printing commits correctly." />
-    <option name="LAST_COMMIT_MESSAGE" value="github: Fix an issue where the Builder workflow wasn't printing commits correctly." />
+    <MESSAGE value="manager: update installer for 1.5.0 release." />
+    <option name="LAST_COMMIT_MESSAGE" value="manager: update installer for 1.5.0 release." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

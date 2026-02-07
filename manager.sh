@@ -30,7 +30,7 @@ checks() {
 }
 
 select_variant() {
-	local LINK ARCH VARIANT
+	export LINK ARCH VARIANT
 
 	if getprop ro.product.cpu.abi | grep "arm64-v8a" &>/dev/null; then ARCH="arm64-v8a"
 	else ARCH="armeabi-v7a"
@@ -40,7 +40,7 @@ select_variant() {
 }
 
 download() {
-	echo "Downloading pmt-${VARIANT}${ARCH}.zip (${RELEASE})"
+	echo "Downloading pmt-${VARIANT}${ARCH}-builtin.zip (${RELEASE})"
 	if ! wget -O "$PREFIX/tmp/pmt.zip" "${LINK}" &>/dev/null; then
 		rm "$PREFIX/tmp/*.zip"
 		error "Download failed! LINK=${LINK}"
@@ -65,7 +65,7 @@ uninstall() {
 }
 
 is_installed() {
-	/system/bin/which pmt &>/dev/null || error "PMT is already installed."
+	/system/bin/which pmt &>/dev/null && error "PMT is already installed."
 }
 
 cleanup() {
