@@ -34,7 +34,7 @@ checks() {
 
 clean() {
     echo "Cleaning workspace."
-    for a in "${TARGET_ABI_LIST[@]}"; do rm -rf "build_$a"; done
+    for a in "${TARGET_ABI_LIST[@]}"; do rm -rf "build_$a" && rm -rf "build_$a-builtin"; done
     rm -rf include/generated \
         srclib/libhelper/tests/dir \
         srclib/libhelper/tests/linkdir \
@@ -50,18 +50,28 @@ build() {
 
     for a in "${TARGET_ABI_LIST[@]}"; do
         echo "Configuring for $a..."
-        mkdir -p "build_$a"
+        mkdir -p "build_$a" "build_$a-builtin"
         cmake -B "build_$a" -G Ninja -S . "$@" \
             -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI="$a" \
             -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
             -DANDROID_STL=c++_static
+        cmake -B "build_$a-builtin" -G Ninja -S . "$@" \
+            -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+            -DANDROID_ABI="$a" \
+            -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
+            -DANDROID_STL=c++_static \
+            -DBUILTIN_PLUGINS=ON
     done
 
     for a in "${TARGET_ABI_LIST[@]}"; do
         echo "Building $a artifacts... Using $(($(nproc) - 2)) thread."
         cmake --build "build_$a" -j$(($(nproc) - 2))
         echo "$a build complete, artifacts: $PWD/build_$a"
+
+        echo "Building $a-builtin artifacts... Using $(($(nproc) - 2)) thread."
+        cmake --build "build_$a-builtin" -j$(($(nproc) - 2))
+        echo "$a-builtin build complete, artifacts: $PWD/build_$a-builtin"
     done
 }
 

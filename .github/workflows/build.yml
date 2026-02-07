@@ -40,13 +40,19 @@ jobs:
           bash build.sh clean
           bash build.sh build -DCMAKE_BUILD_TYPE=Release
           cd build_arm64-v8a
-          cp src/pmt src/pmt_static srclib/libhelper/libhelper.* srclib/libpartition_map/libpartition_map.* .
-          zip pmt-arm64-v8a.zip pmt libhelper.* libpartition_map.*
+          cp src/pmt src/pmt_static src/*plugin.so srclib/libhelper/libhelper.* srclib/libpartition_map/libpartition_map.* .
+          zip pmt-arm64-v8a.zip pmt libhelper.* libpartition_map.* *plugin.so
           zip pmt-static-arm64-v8a.zip pmt_static
-          cd ../build_armeabi-v7a
+          cd ../build_arm64-v8a-builtin
           cp src/pmt src/pmt_static srclib/libhelper/libhelper.* srclib/libpartition_map/libpartition_map.* .
-          zip pmt-armeabi-v7a.zip pmt libhelper.* libpartition_map.*
+          zip pmt-arm64-v8a-builtin.zip pmt libhelper.* libpartition_map.*
+          cd ../build_armeabi-v7a
+          cp src/pmt src/pmt_static src/*plugin.so srclib/libhelper/libhelper.* srclib/libpartition_map/libpartition_map.* .
+          zip pmt-armeabi-v7a.zip pmt libhelper.* libpartition_map.* *plugin.so
           zip pmt-static-armeabi-v7a.zip pmt_static
+          cd ../build_armeabi-v7a-builtin
+          cp src/pmt src/pmt_static srclib/libhelper/libhelper.* srclib/libpartition_map/libpartition_map.* .
+          zip pmt-armeabi-v7a-builtin.zip pmt libhelper.* libpartition_map.*
           echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV 
           echo "BUILD=${{ github.workspace }}/pmt" >> $GITHUB_ENV
           cd ..
@@ -60,7 +66,9 @@ jobs:
         with:
           files: |
             ${{ env.BUILD }}/build_arm64-v8a/*.zip
+            ${{ env.BUILD }}/build_arm64-v8a-builtin/*.zip
             ${{ env.BUILD }}/build_armeabi-v7a/*.zip
+            ${{ env.BUILD }}/build_armeabi-v7a-builtin/*.zip
           name: Partition Manager Tool Release ${{ env.BUILD_DATE }}
           tag_name: ${{ env.BUILD_DATE }}
           body_path: ${{ env.BUILD }}/release.txt

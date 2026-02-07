@@ -31,7 +31,7 @@ add_executable(libpartition_map_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)
 set_target_properties(libpartition_map_shared PROPERTIES OUTPUT_NAME "partition_map")
 set_target_properties(libpartition_map_static PROPERTIES OUTPUT_NAME "partition_map")
 
-# Set linker flags and define required libraries
+# Apply common interface and define required libs
 target_link_libraries(libpartition_map_shared PRIVATE pmt_interface_nolibs libhelper_shared libgptf_static libext2_uuid_static)
 target_link_libraries(libpartition_map_static PRIVATE pmt_interface_nolibs libhelper_static libgptf_static libext2_uuid_static)
 target_link_libraries(libpartition_map_test PRIVATE pmt_interface_nolibs libpartition_map_static libhelper_static libgptf_static libext2_uuid_static)

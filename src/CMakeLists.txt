@@ -15,7 +15,20 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# Sources
+# Define sources
+set(PLUGIN_SOURCES
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/BackupPlugin.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/CleanLogPlugin.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/ErasePlugin.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/FlashPlugin.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/InfoPlugin.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/MemoryTestPlugin.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/PartitionSizePlugin.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/RealPathPlugin.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/RebootPlugin.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/plugins/TypePlugin.cpp
+)
+
 if(NOT BUILTIN_PLUGINS)
 	set(PMT_SOURCES
 			${CMAKE_CURRENT_SOURCE_DIR}/PartitionManager.cpp
@@ -24,24 +37,20 @@ else()
 	set(PMT_SOURCES
 			${CMAKE_CURRENT_SOURCE_DIR}/PartitionManager.cpp
 			${CMAKE_CURRENT_SOURCE_DIR}/Main.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/BackupPlugin.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/CleanLogPlugin.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/ErasePlugin.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/FlashPlugin.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/InfoPlugin.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/MemoryTestPlugin.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/PartitionSizePlugin.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/RealPathPlugin.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/RebootPlugin.cpp
-			${CMAKE_CURRENT_SOURCE_DIR}/plugins/TypePlugin.cpp)
+			${PLUGIN_SOURCES})
 	add_compile_definitions(BUILTIN_PLUGINS)
 endif()
 
-# Add pmt
+# Add pmt to build targets
 add_executable(pmt ${PMT_SOURCES})
-add_executable(pmt_static ${PMT_SOURCES})
+if(BUILTIN_PLUGINS)
+	add_executable(pmt_static ${PMT_SOURCES})
+else()
+	add_executable(pmt_static ${PMT_SOURCES} ${PLUGIN_SOURCES})
+	target_compile_definitions(pmt_static PRIVATE BUILTIN_PLUGINS)
+endif()
 
-# Set linker options
+# Apply common interfaces
 target_link_libraries(pmt PRIVATE pmt_shared_interface)
 target_link_libraries(pmt_static PRIVATE pmt_static_interface)
 

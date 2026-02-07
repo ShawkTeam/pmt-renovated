@@ -93,24 +93,24 @@ int main(int argc, char **argv) {
         "program comes with ABSOLUTELY NO "
         "WARRANTY. Use --license for more information.\nReport "
         "bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
-    AppMain.add_option("-t,--table", FLAGS.extraTablePaths, "Add more partition tables for progress")->delimiter(',');
-    AppMain.add_option("-L,--log-file", FLAGS.logFile, "Set log file");
+    AppMain.add_option("-t,--table", FLAGS.extraTablePaths, "Add more partition tables for progress.")->delimiter(',');
+    AppMain.add_option("-L,--log-file", FLAGS.logFile, "Set log file.");
     AppMain.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(','); // Dummy option for help message.
     AppMain.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")
         ->check(CLI::ExistingDirectory); // Dummy option for help message.
     AppMain.add_flag("-s,--select-on-duplicate", FLAGS.noWorkOnUsed,
                      "Select partition for work if has input named duplicate partitions.");
-    AppMain.add_flag("-f,--force", FLAGS.forceProcess, "Force process to be processed");
-    AppMain.add_flag("-l,--logical", FLAGS.onLogical, "Specify that the target partition is logical");
-    AppMain.add_flag("-q,--quiet", FLAGS.quietProcess, "Quiet process");
+    AppMain.add_flag("-f,--force", FLAGS.forceProcess, "Force process to be processed.");
+    AppMain.add_flag("-l,--logical", FLAGS.onLogical, "Specify that the target partition is logical.");
+    AppMain.add_flag("-q,--quiet", FLAGS.quietProcess, "Quiet process.");
     AppMain.add_flag("-V,--verbose", FLAGS.verboseMode,
-                     "Detailed information is written on the screen while the transaction is being carried out");
-    AppMain.add_flag("-v,--version", FLAGS.viewVersion, "Print version and exit");
-    AppMain.add_flag("--license", FLAGS.viewLicense, "Print license and exit");
+                     "Detailed information is written on the screen while the transaction is being carried out.");
+    AppMain.add_flag("-v,--version", FLAGS.viewVersion, "Print version and exit.");
+    AppMain.add_flag("--license", FLAGS.viewLicense, "Print license and exit.");
 
     bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
     bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
-    bootstrap.add_option("-L,--log-file", FLAGS.logFile, "Set log file");
+    bootstrap.add_option("-L,--log-file", FLAGS.logFile, "Set log file.");
 
     bootstrap.parse(argc, argv);
 
