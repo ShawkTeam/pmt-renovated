@@ -52,16 +52,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: Use exit() instead of _exit() for memory safety.">
-      <change afterPath="$PROJECT_DIR$/.idea/jsonSchemas.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/CMakeLists.txt" afterDir="false" />
-    </list>
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: Improve the build system according to the new plugin system.&#10; - Even if plugins are not compiled built-in, pmt_static is always configured to be built-in.&#10; - The build script and GitHub workflow have been adapted.&#10; - Other improvements..." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -119,7 +110,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Shell Script.Build (Debug)">
+  <component name="RunManager" selected="Shell Script.Cleanup">
     <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="CLION.EXTERNAL.BUILD" enabled="true" />
@@ -363,7 +354,7 @@
       <workItem from="1770329821553" duration="1085000" />
       <workItem from="1770405351481" duration="8640000" />
       <workItem from="1770416996647" duration="1006000" />
-      <workItem from="1770459120770" duration="1632000" />
+      <workItem from="1770459120770" duration="2003000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -421,7 +412,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770417327557</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="pmt: Improve the build system according to the new plugin system.&#10; - Even if plugins are not compiled built-in, pmt_static is always configured to be built-in.&#10; - The build script and GitHub workflow have been adapted.&#10; - Other improvements...">
+      <option name="closed" value="true" />
+      <created>1770461073768</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1770461073768</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -440,7 +439,8 @@
     <MESSAGE value="pmt: If the log file is a new file, a text entry about its origin is added." />
     <MESSAGE value="libhelper: New method for asynchronous operations and some improvements.&#10; - A helper class called `AsyncManager` has been added.&#10; - Where `std::enable_if` was used, a feature left over from C++17, it has been replaced with C++20 `requires`.&#10; - Some improvements in the `Capsule` class." />
     <MESSAGE value="pmt: Use exit() instead of _exit() for memory safety." />
-    <option name="LAST_COMMIT_MESSAGE" value="pmt: Use exit() instead of _exit() for memory safety." />
+    <MESSAGE value="pmt: Improve the build system according to the new plugin system.&#10; - Even if plugins are not compiled built-in, pmt_static is always configured to be built-in.&#10; - The build script and GitHub workflow have been adapted.&#10; - Other improvements..." />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt: Improve the build system according to the new plugin system.&#10; - Even if plugins are not compiled built-in, pmt_static is always configured to be built-in.&#10; - The build script and GitHub workflow have been adapted.&#10; - Other improvements..." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
