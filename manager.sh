@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 THIS="$(basename "$0")"
-RELEASE="20250821"
+RELEASE="20260207"
 
 echo() { command echo "[$THIS]: $*"; }
 error() { echo "$*"; exit 1; }
@@ -30,14 +30,13 @@ checks() {
 }
 
 select_variant() {
-	LINK=""; ARCH=""; VARIANT=""
+	local LINK ARCH VARIANT
 
 	if getprop ro.product.cpu.abi | grep "arm64-v8a" &>/dev/null; then ARCH="arm64-v8a"
 	else ARCH="armeabi-v7a"
 	fi
-  if grep "static" <<< "$1" &>/dev/null; then VARIANT="static-"; fi
 
-	LINK="https://github.com/ShawkTeam/pmt-renovated/releases/download/${RELEASE}/pmt-${VARIANT}${ARCH}.zip"
+	LINK="https://github.com/ShawkTeam/pmt-renovated/releases/download/${RELEASE}/pmt-${VARIANT}${ARCH}-builtin.zip"
 }
 
 download() {
@@ -74,7 +73,7 @@ cleanup() {
 }
 
 if [ $# -eq 0 ]; then
-    command echo "Usage: $0 install|uninstall [--static]"
+    command echo "Usage: $0 install|uninstall"
     exit 1
 fi
 
@@ -85,7 +84,7 @@ case $1 in
     "install")
     	is_installed
     	checks
-    	select_variant "$(grep "static" <<< "$2" &>/dev/null && command echo static)"
+    	select_variant
 			download
 			setup
     ;;
@@ -95,7 +94,7 @@ case $1 in
     "reinstall")
     	uninstall
     	checks
-      select_variant "$(grep "static" <<< "$2" &>/dev/null && command echo static)"
+      select_variant
       download
       setup
     ;;

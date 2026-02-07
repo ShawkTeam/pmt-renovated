@@ -3,6 +3,22 @@
   <component name="JsonSchemaMappingsProjectConfiguration">
     <state>
       <map>
+        <entry key="GitHub Action JSON Schema">
+          <value>
+            <SchemaInfo>
+              <option name="name" value="GitHub Action JSON Schema" />
+              <option name="relativePathToSchema" value="jar://$APPLICATION_HOME_DIR$/plugins/vcs-github-IU/lib/vcs-github.jar!/schemas/github-action.json" />
+              <option name="applicationDefined" value="true" />
+              <option name="patterns">
+                <list>
+                  <Item>
+                    <option name="path" value=".github/workflows/build.yml" />
+                  </Item>
+                </list>
+              </option>
+            </SchemaInfo>
+          </value>
+        </entry>
         <entry key="GitHub Actions Workflow">
           <value>
             <SchemaInfo>
