@@ -52,10 +52,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libpartition_map: fix tests and constructors of classes.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,6 +68,8 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/include/libpartition_map/lib.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/include/libpartition_map/lib.hpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" root0="FORCE_HIGHLIGHTING" />
   </component>
   <component name="ProjectApplicationVersion">
@@ -362,7 +365,7 @@
       <workItem from="1770405351481" duration="8640000" />
       <workItem from="1770416996647" duration="1006000" />
       <workItem from="1770459120770" duration="13892000" />
-      <workItem from="1770658651745" duration="11039000" />
+      <workItem from="1770658651745" duration="12094000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -492,7 +495,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770669433974</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="libpartition_map: fix tests and constructors of classes.">
+      <option name="closed" value="true" />
+      <created>1770670068415</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1770670068415</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -556,7 +567,8 @@
     <MESSAGE value="pmt: fixup manager and termux issue." />
     <MESSAGE value="manager: fixup installing libraries" />
     <MESSAGE value="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary." />
-    <option name="LAST_COMMIT_MESSAGE" value="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary." />
+    <MESSAGE value="libpartition_map: fix tests and constructors of classes." />
+    <option name="LAST_COMMIT_MESSAGE" value="libpartition_map: fix tests and constructors of classes." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

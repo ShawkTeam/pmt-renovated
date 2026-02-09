@@ -661,6 +661,22 @@ Builder::operator bool() const { return valid(); }
 
 bool Builder::operator!() const { return !valid(); }
 
+std::vector<const Partition_t *> Builder::operator*() const {
+  std::vector<const Partition_t *> parts;
+  for (const auto &part : partitions)
+    parts.push_back(&part);
+
+  return parts;
+}
+
+std::vector<Partition_t *> Builder::operator*() {
+  std::vector<Partition_t *> parts;
+  for (auto &part : partitions)
+    parts.push_back(&part);
+
+  return parts;
+}
+
 const std::shared_ptr<GPTData> &Builder::operator[](const std::string &name) const {
   const std::filesystem::path p("/dev/block/" + name);
   if (!gptDataCollection.contains(p)) throw Error("Can't find GPT data of %s", name.c_str());

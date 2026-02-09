@@ -221,6 +221,10 @@ Partition_t::operator bool() const { return !empty(); }
 
 bool Partition_t::operator!() const { return empty(); }
 
+GPTPart *Partition_t::operator*() { return getGPTPartRef(); }
+
+const GPTPart *Partition_t::operator*() const { return getGPTPartRef(); }
+
 Partition_t &Partition_t::operator=(Partition_t &&other) noexcept {
   if (this != &other) {
     tablePath = std::move(other.tablePath);

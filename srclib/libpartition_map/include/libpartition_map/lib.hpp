@@ -159,6 +159,8 @@ public:
   explicit operator bool() const;                  // p (returns !empty())
   bool operator!() const;                          // !p (returns empty())
 
+  const GPTPart *operator*() const;                                      // const GPTPart* part = *p1
+  GPTPart *operator*();                                                  // GPTPart* part = *pd1
   Partition_t &operator=(const Partition_t &other) = default;            // p1 = p2
   Partition_t &operator=(Partition_t &&other) noexcept;                  // p1 = std::move(p2)
   friend std::ostream &operator<<(std::ostream &os, Partition_t &other); // std::cout << p1
@@ -306,9 +308,11 @@ public:
   explicit operator bool() const;              // if (pd) { ... } (equals to valid())
   bool operator!() const;                      // if (!pd) { ... } (equals to !valid())
 
-  const std::shared_ptr<GPTData> &operator[](const std::string &name) const; // std::shared_ptr<GPTData> data = pd["sda"]
+  std::vector<const Partition_t *> operator*() const;                        // std::vector<const Partition_t *> = *pd
+  std::vector<Partition_t *> operator*();                                    // std::vector<Partition_t *> = *pd
+  const std::shared_ptr<GPTData> &operator[](const std::string &name) const; // const std::shared_ptr<GPTData> data = pd["sda"]
   std::shared_ptr<GPTData> &operator[](const std::string &name);             // std::shared_ptr<GPTData> data = pd["sda"]
-  const GPTPart *operator[](uint32_t index) const;                           // GPTPart* part = pd[2]
+  const GPTPart *operator[](uint32_t index) const;                           // const GPTPart* part = pd[2]
   GPTPart *operator[](uint32_t index);                                       // GPTPart* part = pd[2]
 
   Builder &operator=(const Builder &other) = default; // pd2 = pd1
