@@ -17,7 +17,7 @@
 
 # Project info
 cmake_minimum_required(VERSION 3.20)
-project(pmt VERSION 1.5.0)
+project(pmt VERSION 1.6.0)
 
 # Use modern C++ 20 standart
 set(CMAKE_CXX_STANDARD 20)

@@ -34,7 +34,7 @@ Partition_t &Partition_t::AsLogicalPartition(Partition_t &orig, const std::files
   return orig;
 }
 
-GPTPart Partition_t::getGPTPart() {
+GPTPart Partition_t::getGPTPart() const {
   if (isLogical) throw Error("This is not a normal partition object!");
   return gptPart;
 }
@@ -44,9 +44,15 @@ GPTPart *Partition_t::getGPTPartRef() {
   return &gptPart;
 }
 
+const GPTPart *Partition_t::getGPTPartRef() const {
+  if (isLogical) throw Error("This is not a normal partition object!");
+  return &gptPart;
+}
+
 std::filesystem::path Partition_t::getPath() const {
-  std::string suffix = isdigit(tablePath.string().back()) ? "p" : "";
-  std::string path = isLogical ? logicalPartitionPath : std::filesystem::path(tablePath.string() + suffix + std::to_string(index + 1));
+  const std::string suffix = isdigit(tablePath.string().back()) ? "p" : "";
+  std::filesystem::path path =
+      isLogical ? logicalPartitionPath : std::filesystem::path(tablePath.string() + suffix + std::to_string(index + 1));
   return path;
 }
 
@@ -55,12 +61,17 @@ std::filesystem::path Partition_t::getAbsolutePath() const {
   return getPath();
 }
 
-std::filesystem::path Partition_t::getDiskPath() const {
+std::filesystem::path &Partition_t::getTablePath() {
   if (isLogical) throw Error("This is not a normal partition object!");
   return tablePath;
 }
 
-std::filesystem::path Partition_t::getPathByName() {
+const std::filesystem::path &Partition_t::getTablePath() const {
+  if (isLogical) throw Error("This is not a normal partition object!");
+  return tablePath;
+}
+
+std::filesystem::path Partition_t::getPathByName() const {
   if (isLogical) return logicalPartitionPath;
   std::filesystem::path result = "/dev/block/by-name";
   result /= gptPart.GetDescription();
@@ -69,7 +80,7 @@ std::filesystem::path Partition_t::getPathByName() {
   return result;
 }
 
-std::string Partition_t::getName() {
+std::string Partition_t::getName() const {
   if (isLogical) return logicalPartitionPath.filename().string();
   return gptPart.GetDescription();
 }
@@ -100,7 +111,12 @@ std::string Partition_t::getGUIDAsString() const {
   return gptPart.GetUniqueGUID().AsString();
 }
 
-uint32_t Partition_t::getIndex() const {
+uint32_t &Partition_t::getIndex() {
+  if (isLogical) throw Error("This is not a normal partition object!");
+  return index;
+}
+
+const uint32_t &Partition_t::getIndex() const {
   if (isLogical) throw Error("This is not a normal partition object!");
   return index;
 }
@@ -185,7 +201,7 @@ bool Partition_t::isSuperPartition() const {
 
 bool Partition_t::isLogicalPartition() const { return isLogical; }
 
-bool Partition_t::empty() { return isLogical ? logicalPartitionPath.empty() : !gptPart.IsUsed() && tablePath.empty(); }
+bool Partition_t::empty() const { return isLogical ? logicalPartitionPath.empty() : !gptPart.IsUsed() && tablePath.empty(); }
 
 bool Partition_t::operator==(const Partition_t &other) const {
   if (isLogical) return logicalPartitionPath == other.logicalPartitionPath;
@@ -201,9 +217,25 @@ bool Partition_t::operator!=(const Partition_t &other) const { return !(*this ==
 
 bool Partition_t::operator!=(const GUIDData &other) const { return !(*this == other); }
 
-Partition_t::operator bool() { return !empty(); }
+Partition_t::operator bool() const { return !empty(); }
 
-bool Partition_t::operator!() { return empty(); }
+bool Partition_t::operator!() const { return empty(); }
+
+Partition_t &Partition_t::operator=(Partition_t &&other) noexcept {
+  if (this != &other) {
+    tablePath = std::move(other.tablePath);
+    index = other.index;
+    logicalPartitionPath = std::move(other.logicalPartitionPath);
+    gptPart = other.gptPart;
+    isLogical = other.isLogical;
+
+    other.index = 0;
+    other.gptPart = GPTPart();
+    other.isLogical = false;
+  }
+
+  return *this;
+}
 
 std::ostream &operator<<(std::ostream &os, Partition_t &other) {
   os << "Name: " << other.getName() << std::endl
@@ -211,7 +243,7 @@ std::ostream &operator<<(std::ostream &os, Partition_t &other) {
      << "Path: " << other.getPath() << std::endl;
 
   if (!other.isLogical)
-    os << "Disk path: " << other.getDiskPath() << std::endl
+    os << "Disk path: " << other.getTablePath() << std::endl
        << "Index: " << other.getIndex() << std::endl
        << "GUID: " << other.gptPart.GetUniqueGUID().AsString() << std::endl;
 

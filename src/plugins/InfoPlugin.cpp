@@ -83,7 +83,7 @@ public:
     if (asMega) multiple = PartitionMap::MiB;
     if (asGiga) multiple = PartitionMap::GiB;
 
-    auto getter = [this, &jParts, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS -> bool {
+    auto getter = [this, &jParts, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS_CONST -> bool {
       if (jsonFormat)
         jParts.push_back(partition);
       else

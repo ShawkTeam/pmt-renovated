@@ -33,6 +33,7 @@ class TypePlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
+  const char *logPath = nullptr;
 
   ~TypePlugin() override = default;
 

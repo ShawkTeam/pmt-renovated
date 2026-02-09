@@ -38,6 +38,7 @@ class MemoryTestPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
+  const char *logPath = nullptr;
 
   ~MemoryTestPlugin() override = default;
 

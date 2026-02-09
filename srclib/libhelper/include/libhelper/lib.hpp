@@ -383,7 +383,7 @@ public:
   }
 
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
-  requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
+    requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
   bool find(const std::tuple<_Type1, _Type2, _Type3> &t) const noexcept {
     for (size_t i = 0; i < count; i++)
       if (tuple_data[i] == t) return true;
@@ -404,7 +404,7 @@ public:
   }
 
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
-  requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
+    requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
   void insert(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
     expand_if_needed();
     if (!find(t)) tuple_data[count++] = Data{std::get<0>(t), std::get<1>(t), std::get<2>(t)};
@@ -459,7 +459,7 @@ public:
   }
 
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
-  requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
+    requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
   void pop(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
     for (size_t i = 0; i < count; i++) {
       if (tuple_data[i] == t) {
@@ -559,13 +559,11 @@ public:
   void silenceAgain();
 };
 
-template <typename __return_type>
-class AsyncManager {
+template <typename __return_type> class AsyncManager {
   std::vector<std::future<__return_type>> futures;
 
 public:
-  template <typename ...Args>
-  void addProcess(Args &&...args) {
+  template <typename... Args> void addProcess(Args &&...args) {
     futures.push_back(std::async(std::launch::async, std::forward<Args>(args)...));
   }
 
@@ -575,8 +573,10 @@ public:
     if constexpr (std::is_same_v<__return_type, std::pair<std::string, bool>>) {
       for (auto &future : futures) {
         auto [message, result] = future.get();
-        if (!result) error_message += message + '\n';
-        else std::cout << message << std::endl;
+        if (!result)
+          error_message += message + '\n';
+        else
+          std::cout << message << std::endl;
       }
       if (!error_message.empty()) res = {error_message, false};
     } else {
@@ -585,8 +585,10 @@ public:
         if constexpr (requires { !result; }) {
           if (!result) {
             if constexpr (std::is_same_v<__return_type, std::string>) error_message += result + '\n';
-          } else std::cout << result << std::endl;
-        } else throw Error("Result type is unexpected type!");
+          } else
+            std::cout << result << std::endl;
+        } else
+          throw Error("Result type is unexpected type!");
       }
       if (!error_message.empty()) res = {error_message, false};
     }

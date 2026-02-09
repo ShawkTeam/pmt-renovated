@@ -33,7 +33,7 @@
 namespace {
 constexpr char kInterruptedMessage[] = "\nInterrupted.\n";
 constexpr char kAbortedMessage[] = "\nAborted.\n";
-}
+} // namespace
 
 static void sigHandler(int sig) {
   if (sig == SIGINT) {
@@ -59,20 +59,23 @@ int main(int argc, char **argv) {
 
     std::vector<std::string> args;
     args.reserve(static_cast<size_t>(argc));
-    for (int i = 0; i < argc; ++i) args.emplace_back(argv[i]);
+    for (int i = 0; i < argc; ++i)
+      args.emplace_back(argv[i]);
 
     // Catch arguments from stdin.
     if (!isatty(fileno(stdin))) {
       std::string line;
       while (std::getline(std::cin, line)) {
         std::istringstream iss(line);
-        for (std::string token; iss >> token;) args.emplace_back(std::move(token));
+        for (std::string token; iss >> token;)
+          args.emplace_back(std::move(token));
       }
     }
 
     std::vector<char *> argvStorage;
     argvStorage.reserve(args.size());
-    for (auto &arg : args) argvStorage.push_back(arg.data());
+    for (auto &arg : args)
+      argvStorage.push_back(arg.data());
     argc = static_cast<int>(argvStorage.size());
     argv = argvStorage.data();
 

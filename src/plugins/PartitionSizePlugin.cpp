@@ -31,6 +31,7 @@ class PartitionSizePlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
   FlagsBase flags;
+  const char *logPath = nullptr;
 
   ~PartitionSizePlugin() override = default;
 
@@ -71,7 +72,7 @@ public:
     if (asMega) multiple = PartitionMap::MiB;
     if (asGiga) multiple = PartitionMap::GiB;
 
-    auto getter = [this, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS -> bool {
+    auto getter = [this, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS_CONST -> bool {
       if (onlySize)
         Out::println("%s", partition.getFormattedSizeString(multiple, true).c_str());
       else
