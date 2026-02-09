@@ -35,17 +35,17 @@ Partition_t &Partition_t::AsLogicalPartition(Partition_t &orig, const std::files
 }
 
 GPTPart Partition_t::getGPTPart() const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return gptPart;
 }
 
 GPTPart *Partition_t::getGPTPartRef() {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return &gptPart;
 }
 
 const GPTPart *Partition_t::getGPTPartRef() const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return &gptPart;
 }
 
@@ -62,12 +62,12 @@ std::filesystem::path Partition_t::getAbsolutePath() const {
 }
 
 std::filesystem::path &Partition_t::getTablePath() {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return tablePath;
 }
 
 const std::filesystem::path &Partition_t::getTablePath() const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return tablePath;
 }
 
@@ -86,7 +86,7 @@ std::string Partition_t::getName() const {
 }
 
 std::string Partition_t::getTableName() const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return tablePath.filename();
 }
 
@@ -107,17 +107,17 @@ std::string Partition_t::getFormattedSizeString(SizeUnit size_unit, bool no_type
 }
 
 std::string Partition_t::getGUIDAsString() const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return gptPart.GetUniqueGUID().AsString();
 }
 
 uint32_t &Partition_t::getIndex() {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return index;
 }
 
 const uint32_t &Partition_t::getIndex() const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return index;
 }
 
@@ -146,56 +146,56 @@ uint64_t Partition_t::getSize(uint32_t sectorSize) const {
 }
 
 uint64_t Partition_t::getStartByte(uint32_t sectorSize) const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return gptPart.GetFirstLBA() * sectorSize;
 }
 
 uint64_t Partition_t::getEndByte(uint32_t sectorSize) const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return (gptPart.GetLastLBA() + 1) * sectorSize;
 }
 
 GUIDData Partition_t::getGUID() const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return gptPart.GetUniqueGUID();
 }
 
 void Partition_t::set(const BasicData &data) {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   gptPart = data.gptPart;
   tablePath = data.tablePath;
   index = data.index;
 }
 
 void Partition_t::setPartitionPath(const std::filesystem::path &path) {
-  if (!isLogical) throw Error("This is not a logical partition object!");
+  if (!isLogical) throw ERR << "This is not a logical partition object!";
   logicalPartitionPath = path;
 }
 
 void Partition_t::setIndex(const uint32_t new_index) {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   index = new_index;
 }
 
 void Partition_t::setDiskPath(const std::filesystem::path &path) {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   tablePath = path;
 }
 
 void Partition_t::setDiskName(const std::string &name) {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   std::filesystem::path p("/dev/block");
   p /= name; // Add name
   setDiskPath(p);
 }
 
 void Partition_t::setGptPart(const GPTPart &otherGptPart) {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   gptPart = otherGptPart;
 }
 
 bool Partition_t::isSuperPartition() const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return getGUID() == GUIDData("89A12DE1-5E41-4CB3-8B4C-B1441EB5DA38");
 }
 
@@ -209,7 +209,7 @@ bool Partition_t::operator==(const Partition_t &other) const {
 }
 
 bool Partition_t::operator==(const GUIDData &other) const {
-  if (isLogical) throw Error("This is not a normal partition object!");
+  if (isLogical) throw ERR << "This is not a normal partition object!";
   return gptPart.GetUniqueGUID() == other;
 }
 

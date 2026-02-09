@@ -31,9 +31,9 @@ std::optional<std::string> sha256Of(const std::filesystem::path &path) {
                      << std::endl;
   std::string fp = (isLink(path)) ? readSymlink(path) : std::string(path);
 
-  if (!fileIsExists(fp)) throw Error("Is not exists or not file: %s", fp.data());
+  if (!fileIsExists(fp)) throw ERR << "Is not exists or not file: " << fp;
 
-  if (const std::ifstream file(fp, std::ios::binary); !file) throw Error("Cannot open file: %s", fp.data());
+  if (const std::ifstream file(fp, std::ios::binary); !file) throw ERR << "Cannot open file: " << fp;
 
   std::vector<unsigned char> hash(picosha2::k_digest_size);
   picosha2::hash256(fp, hash.begin(), hash.end());

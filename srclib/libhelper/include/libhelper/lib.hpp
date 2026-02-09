@@ -65,8 +65,17 @@ private:
   std::string _message;
 
 public:
+  Error() = default;
+  Error(const Error& other) noexcept : _message(other._message) {}
   __printflike(2, 3) explicit Error(const char *format, ...);
 
+  template <typename T> Error&& operator<<(const T& msg) && {
+    _oss << msg;
+    _message = _oss.str();
+    return std::move(*this);
+  }
+
+  Error &operator<<(std::ostream &(*msg)(std::ostream &));
   [[nodiscard]] const char *what() const noexcept override;
 };
 
@@ -588,7 +597,7 @@ public:
           } else
             std::cout << result << std::endl;
         } else
-          throw Error("Result type is unexpected type!");
+          throw Error() << "Result type is unexpected type!";
       }
       if (!error_message.empty()) res = {error_message, false};
     }
@@ -944,6 +953,8 @@ std::string getLibVersion();
 // INFO(message), ex: INFO("operation ended.\n")
 #define INFO(msg) fprintf(stdout, "%s%sINFO%s: %s", BOLD, GREEN, STYLE_RESET, msg);
 #endif // #ifndef NO_C_TYPE_HANDLERS
+
+#define ERR Helper::Error()
 
 #define LOG(level)                                                                                                                    \
   Helper::Logger(level, __func__, Helper::LoggingProperties::FILE.data(), Helper::LoggingProperties::NAME.data(), __FILE__, __LINE__)

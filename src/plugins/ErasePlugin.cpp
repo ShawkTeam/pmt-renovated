@@ -87,7 +87,7 @@ public:
       if (!Helper::confirmPropt("Are you sure you want to continue? This could render your device "
                                 "unusable! Do not continue if you "
                                 "do not know what you are doing!"))
-        throw Error("Operation canceled.");
+        throw ERR << "Operation canceled.";
     }
 
     LOGNF(PLUGIN, logPath, INFO) << "Writing zero bytes to partition: " << partitionName << std::endl;

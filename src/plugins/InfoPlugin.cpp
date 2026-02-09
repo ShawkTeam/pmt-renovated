@@ -101,7 +101,7 @@ public:
       TABLES.foreachPartitions(getter);
     else {
       for (const auto &partition : partitions) {
-        if (!TABLES.hasPartition(partition)) throw Error("Couldn't find partition: %s", partition.c_str());
+        if (!TABLES.hasPartition(partition)) throw ERR << "Couldn't find partition: " << partition;
       }
       TABLES.foreachFor(partitions, getter);
     }

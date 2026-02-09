@@ -48,6 +48,12 @@ Error::Error(const char *format, ...) {
   LOGN(HELPER, ERROR) << _message << std::endl;
 }
 
+Error &Error::operator<<(std::ostream &(*msg)(std::ostream &)) {
+  _oss << msg;
+  _message = _oss.str();
+  return *this;
+}
+
 const char *Error::what() const noexcept { return _message.data(); }
 
 Logger::Logger(const LogLevels level, const char *func, const char *file, const char *name, const char *source_file, const int line)

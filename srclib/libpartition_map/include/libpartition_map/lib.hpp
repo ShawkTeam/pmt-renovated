@@ -31,6 +31,10 @@
 #ifdef NONE
 #undef NONE
 #endif
+#ifdef ERR
+#undef ERR
+#define ERR PartitionMap::Error()
+#endif
 
 namespace PartitionMap {
 

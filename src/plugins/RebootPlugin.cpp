@@ -58,7 +58,7 @@ public:
     if (Helper::androidReboot(rebootTarget))
       Out::println("Reboot command was sent");
     else
-      throw Error("Cannot reboot device");
+      throw ERR << "Cannot reboot device!";
 
     return true;
   }

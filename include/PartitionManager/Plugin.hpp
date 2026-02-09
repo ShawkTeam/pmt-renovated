@@ -111,12 +111,12 @@ public:
     LOGN(PM, INFO) << "Loading external plugin: " << pluginPath << std::endl;
 
     void *handle = dlopen(pluginPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
-    if (!handle) throw PluginError("dlopen failed: %s: %s", pluginPath.c_str(), dlerror());
+    if (!handle) throw PluginError() << "dlopen failed: " << pluginPath << ": " << dlerror();
 
     auto create = (Creator)(dlsym(handle, "create_plugin"));
     if (!create) {
       dlclose(handle);
-      throw PluginError("dlsym failed: %s: create_plugin: %s", pluginPath.c_str(), dlerror());
+      throw PluginError() << "dlsym failed: " << pluginPath << ": create_plugin: " << dlerror();
     }
 
     auto plugin = std::unique_ptr<__class>(create());

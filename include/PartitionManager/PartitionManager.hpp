@@ -21,7 +21,12 @@
 #include <memory>
 #include <string>
 #include <set>
+#include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
+#ifdef ERR
+#undef ERR
+#define ERR PartitionManager::Error()
+#endif
 
 class Out {
 public:

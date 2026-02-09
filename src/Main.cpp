@@ -157,17 +157,17 @@ int main(int argc, char **argv) {
     }
 
     if (!Helper::hasSuperUser()) // Root access is a fundamental requirement for this program.
-      throw Helper::Error("This program requires super-user privileges.");
+      throw ERR << "This program requires super-user privileges.";
     if (!FLAGS.extraTablePaths.empty()) // If a partition table has been specified for scanning, attempt the load.
       std::ranges::for_each(FLAGS.extraTablePaths, [&](const std::string &name) { TABLES.addTable(name); });
     if (!TABLES && FLAGS.extraTablePaths.empty())
-      throw PartitionManager::Error("Can't found any partition table in /dev/block. Specify tables "
-                                    "-t (--table) argument.");
+      throw ERR << "Can't found any partition table in /dev/block. Specify tables "
+                                    "-t (--table) argument.";
 
     if (FLAGS.onLogical) {
       if (!TABLES.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
-        throw PartitionManager::Error("This device doesn't contains logical partitions. But you "
-                                      "used -l (--logical) flag.");
+        throw ERR << "This device doesn't contains logical partitions. But you "
+                                      "used -l (--logical) flag.";
     }
 
     return manager.runUsed() == true ? EXIT_SUCCESS : EXIT_FAILURE;

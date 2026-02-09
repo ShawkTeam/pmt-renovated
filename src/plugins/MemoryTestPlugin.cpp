@@ -75,8 +75,8 @@ public:
 
   bool run() override {
     if (testFileSize > GB(2) && !FLAGS.forceProcess)
-      throw Error("File size is more than 2GB! Sizes over 2GB may not give accurate "
-                  "results in the write test. Use -f (--force) for skip this error.");
+      throw ERR << "File size is more than 2GB! Sizes over 2GB may not give accurate "
+                  "results in the write test. Use -f (--force) for skip this error.";
 
     LOGNF(PLUGIN, logPath, INFO) << "Starting memory test on " << testPath << std::endl;
     Helper::garbageCollector collector;
@@ -92,14 +92,14 @@ public:
     collector.delFileAfterProgress(test);
 
     const int wfd = Helper::openAndAddToCloseList(test, collector, O_WRONLY | O_CREAT | O_TRUNC | O_SYNC, 0644);
-    if (wfd < 0) throw Error("Can't open/create test file: %s", strerror(errno));
+    if (wfd < 0) throw ERR << "Can't open/create test file: " << strerror(errno);
 
     LOGNF(PLUGIN, logPath, INFO) << "Sequential write test started!" << std::endl;
     const auto startWrite = std::chrono::high_resolution_clock::now();
     ssize_t bytesWritten = 0;
     while (bytesWritten < testFileSize) {
       const ssize_t ret = write(wfd, buffer, bufferSize);
-      if (ret < 0) throw Error("Can't write to test file: %s", strerror(errno));
+      if (ret < 0) throw ERR << "Can't write to test file: " << strerror(errno);
       bytesWritten += ret;
     }
 
@@ -114,7 +114,7 @@ public:
       collector.delAfterProgress(rawBuffer);
       auto *bufferRead = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(rawBuffer) + 4096 - 1) & ~(4096 - 1));
       const int rfd = Helper::openAndAddToCloseList(test, collector, O_RDONLY | O_DIRECT);
-      if (rfd < 0) throw Error("Can't open test file: %s", strerror(errno));
+      if (rfd < 0) throw ERR << "Can't open test file: " << strerror(errno);
 
       LOGNF(PLUGIN, logPath, INFO) << "Sequential read test started!" << std::endl;
       const auto startRead = std::chrono::high_resolution_clock::now();

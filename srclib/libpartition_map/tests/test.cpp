@@ -44,7 +44,7 @@ int main() {
     if (data->GetNumParts() == 0) throw Helper::Error("Can't find mmcblk0 or sda (UNEXPECTED?)");
 
     if (auto part = partitions[0]; !part->IsUsed())
-      std::cerr << "WARNING: (GPTPart part = partitions[2]) check failed "
+      std::cerr << "WARNING: (GPTPart part = partitions[0]) check failed "
                    "(part.IsUsed() returned false)"
                 << std::endl;
 
