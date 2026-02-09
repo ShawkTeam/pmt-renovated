@@ -97,8 +97,10 @@ public:
 
   static Partition_t &AsLogicalPartition(Partition_t &orig, const std::filesystem::path &path);
 
-  Partition_t() : gptPart(GPTPart()) {}            // Partition_t partititon
-  Partition_t(const Partition_t &other) = default; // Partition_t partition(otherPartition)
+  Partition_t() : gptPart(GPTPart()) {} // Partition_t partititon
+  Partition_t(const Partition_t &other)
+      : tablePath(other.tablePath), logicalPartitionPath(other.logicalPartitionPath), index(other.index), gptPart(other.gptPart),
+        isLogical(other.isLogical) {} // Partition_t partition(otherPartition)
   Partition_t(Partition_t &&other) noexcept
       : tablePath(std::move(other.tablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)), index(other.index),
         gptPart(other.gptPart), isLogical(other.isLogical) { // Partition_t partition(std::move(otherPartition))
@@ -187,6 +189,10 @@ public:
     scan();
     scanLogicalPartitions();
   }
+
+  Builder(const Builder &other)
+      : partitions(other.partitions), gptDataCollection(other.gptDataCollection), tableNames(other.tableNames),
+        buildAutoOnDiskChanges(other.buildAutoOnDiskChanges), isUFS(other.isUFS), seek(other.seek) {}
 
   Builder(Builder &&other) noexcept
       : partitions(std::move(other.partitions)), gptDataCollection(std::move(other.gptDataCollection)),
@@ -302,8 +308,8 @@ public:
 
   const std::shared_ptr<GPTData> &operator[](const std::string &name) const; // std::shared_ptr<GPTData> data = pd["sda"]
   std::shared_ptr<GPTData> &operator[](const std::string &name);             // std::shared_ptr<GPTData> data = pd["sda"]
-  const GPTPart *operator[](uint32_t index) const;                           // GPTPart part = pd[2]
-  GPTPart *operator[](uint32_t index);                                       // GPTPart part = pd[2]
+  const GPTPart *operator[](uint32_t index) const;                           // GPTPart* part = pd[2]
+  GPTPart *operator[](uint32_t index);                                       // GPTPart* part = pd[2]
 
   Builder &operator=(const Builder &other) = default; // pd2 = pd1
   Builder &operator=(Builder &&other) noexcept;       // pd2 = std::move(p1)

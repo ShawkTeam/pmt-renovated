@@ -43,7 +43,7 @@ int main() {
     auto data = partitions.hasTable("mmcblk0") ? partitions["mmcblk0"] : partitions["sda"];
     if (data->GetNumParts() == 0) throw Helper::Error("Can't find mmcblk0 or sda (UNEXPECTED?)");
 
-    if (GPTPart part = partitions[0]; !part.IsUsed())
+    if (auto part = partitions[0]; !part->IsUsed())
       std::cerr << "WARNING: (GPTPart part = partitions[2]) check failed "
                    "(part.IsUsed() returned false)"
                 << std::endl;

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="BackendCodeEditorMiscSettings">
-    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="30" type="long" />
+    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="34" type="long" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/GlobalSettingsUpgraded/IsUpgraded/@EntryValue" value="true" type="bool" />
     <option name="/Default/RiderDebugger/RiderRestoreDecompile/RestoreDecompileSetting/@EntryValue" value="false" type="bool" />
@@ -52,18 +52,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="manager: fixup installing libraries">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -125,7 +117,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="CMake Application.pmt">
+  <component name="RunManager" selected="Shell Script.Build (Debug)">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -370,7 +362,7 @@
       <workItem from="1770405351481" duration="8640000" />
       <workItem from="1770416996647" duration="1006000" />
       <workItem from="1770459120770" duration="13892000" />
-      <workItem from="1770658651745" duration="10194000" />
+      <workItem from="1770658651745" duration="11039000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -492,7 +484,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770472351224</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary.">
+      <option name="closed" value="true" />
+      <created>1770669433973</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1770669433974</updated>
+    </task>
+    <option name="localTasksCounter" value="17" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -555,7 +555,8 @@
     <MESSAGE value="pmt: fixup termux link directories." />
     <MESSAGE value="pmt: fixup manager and termux issue." />
     <MESSAGE value="manager: fixup installing libraries" />
-    <option name="LAST_COMMIT_MESSAGE" value="manager: fixup installing libraries" />
+    <MESSAGE value="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary." />
+    <option name="LAST_COMMIT_MESSAGE" value="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
