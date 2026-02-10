@@ -101,7 +101,7 @@ public:
 } // namespace PartitionManager
 
 #ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, TypePlugin);
+REGISTER_BUILTIN_PLUGIN(PartitionManager, TypePlugin)
 #else
-extern "C" PartitionManager::BasicPlugin *create_plugin() { return new PartitionManager::TypePlugin(); }
+REGISTER_DYNAMIC_PLUGIN(PartitionManager::TypePlugin)
 #endif // #ifdef BUILTIN_PLUGINS

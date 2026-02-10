@@ -141,7 +141,7 @@ public:
 } // namespace PartitionManager
 
 #ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, MemoryTestPlugin);
+REGISTER_BUILTIN_PLUGIN(PartitionManager, MemoryTestPlugin)
 #else
-extern "C" PartitionManager::BasicPlugin *create_plugin() { return new PartitionManager::MemoryTestPlugin(); }
+REGISTER_DYNAMIC_PLUGIN(PartitionManager::MemoryTestPlugin)
 #endif // #ifdef BUILTIN_PLUGINS

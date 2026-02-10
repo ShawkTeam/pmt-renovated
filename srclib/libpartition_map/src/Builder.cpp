@@ -36,8 +36,8 @@ void Builder::scan() {
     p /= name; // Append device.
 
     LOGI << "Silencing stdout..." << std::endl << std::flush;
+    Helper::Silencer silencer;
     if (auto gpt = std::make_shared<GPTData>(); gpt->LoadPartitions(p)) {
-      Helper::Silencer silencer;
       gptDataCollection[p] = std::move(gpt); // Add to GPT data list.
 
       auto &storedGpt = *gptDataCollection[p];
@@ -54,7 +54,7 @@ void Builder::scan() {
 
   LOGI << "Scan complete!" << std::endl;
   LOGI << "Sorting partitions by name." << std::endl;
-  std::ranges::sort(partitions, [](Partition_t a, Partition_t b) { return a.getName() < b.getName(); });
+  std::ranges::sort(partitions, [](const Partition_t &a, const Partition_t &b) { return a.getName() < b.getName(); });
 }
 
 void Builder::scanLogicalPartitions() {
@@ -583,9 +583,9 @@ bool Builder::foreachForLogicalPartitions(const std::vector<std::string> &list,
   return isSuccess;
 }
 
-void Builder::reScan(bool auto_toggle) {
+void Builder::reScan(bool auto_toggled) {
   LOGI << "Rescanning..." << std::endl;
-  if (auto_toggle) {
+  if (auto_toggled) {
     if (!buildAutoOnDiskChanges) return;
   }
   scan();
@@ -645,6 +645,14 @@ bool Builder::Extra::isReallyTable(const std::string &name) {
 
   return std::filesystem::exists(p.string());
 }
+
+Builder::iterator Builder::begin() { return partitions.begin(); }
+Builder::iterator Builder::end() { return partitions.end(); }
+
+Builder::const_iterator Builder::begin() const { return partitions.begin(); }
+Builder::const_iterator Builder::end() const { return partitions.end(); }
+Builder::const_iterator Builder::cbegin() const { return partitions.cbegin(); }
+Builder::const_iterator Builder::cend() const { return partitions.cend(); }
 
 bool Builder::operator==(const Builder &other) const {
   bool equal = true;

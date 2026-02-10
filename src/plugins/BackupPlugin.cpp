@@ -68,8 +68,8 @@ public:
 
   resultPair runAsync(const std::string &partitionName, const std::string &outputName) const {
     if (!TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
-    uint64_t buf = bufferSize;
-    setupBufferSize(buf, TABLES.partitionWithDupCheck(partitionName).getAbsolutePath(), TABLES_REF);
+    const auto& partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
+    const uint64_t buf = std::min<uint64_t>(bufferSize, partition.getSize());
 
     LOGNF(PLUGIN, logPath, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
 
@@ -86,25 +86,10 @@ public:
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for back upping " << partitionName << "): " << buf << std::endl;
 
-    // Automatically close file descriptors and delete allocated memories (arrays)
-    Helper::garbageCollector collector;
-
-    const int pfd = Helper::openAndAddToCloseList(TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed).getAbsolutePath(),
-                                                  collector, O_RDONLY);
-    if (pfd < 0) return PairError("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
-
-    const int ffd = Helper::openAndAddToCloseList(outputName, collector, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (ffd < 0) return PairError("Can't create/open output file %s: %s", outputName.data(), strerror(errno));
-
-    LOGNF(PLUGIN, logPath, INFO) << "Writing partition " << partitionName << " to file: " << outputName << std::endl;
-    auto *buffer = new (std::nothrow) char[buf];
-    collector.delAfterProgress(buffer);
-    memset(buffer, 0x00, buf);
-
-    ssize_t bytesRead;
-    while ((bytesRead = read(pfd, buffer, buf)) > 0) {
-      if (const ssize_t bytesWritten = write(ffd, buffer, bytesRead); bytesWritten != bytesRead)
-        return PairError("Can't write partition to output file %s: %s", outputName.data(), strerror(errno));
+    try {
+      (void)partition.dumpImage(outputName, buf);
+    } catch (Helper::Error &error) {
+      return PairError("Failed to write %s partition to %s image: %s", partitionName.c_str(), outputName.c_str(), error.what());
     }
 
     if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY))
@@ -133,8 +118,6 @@ public:
     }
 
     const auto result = manager.getResults();
-
-    LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
     return manager.finalize(result);
   }
 
@@ -146,7 +129,7 @@ public:
 } // namespace PartitionManager
 
 #ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, BackupPlugin);
+REGISTER_BUILTIN_PLUGIN(PartitionManager, BackupPlugin)
 #else
-extern "C" PartitionManager::BasicPlugin *create_plugin() { return new PartitionManager::BackupPlugin(); }
+REGISTER_DYNAMIC_PLUGIN(PartitionManager::BackupPlugin)
 #endif // #ifdef BUILTIN_PLUGINS

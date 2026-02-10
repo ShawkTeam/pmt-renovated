@@ -18,6 +18,10 @@
 #ifndef PARTITION_MANAGER__PARTITION_MANAGER_HPP
 #define PARTITION_MANAGER__PARTITION_MANAGER_HPP
 
+#if __cplusplus < 202002L
+#error "Partition Manager is requires C++20 or higher C++ standarts."
+#endif
+
 #include <memory>
 #include <string>
 #include <set>

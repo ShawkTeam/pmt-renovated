@@ -71,7 +71,7 @@ public:
 } // namespace PartitionManager
 
 #ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, RebootPlugin);
+REGISTER_BUILTIN_PLUGIN(PartitionManager, RebootPlugin)
 #else
-extern "C" PartitionManager::BasicPlugin *create_plugin() { return new PartitionManager::RebootPlugin(); }
+REGISTER_DYNAMIC_PLUGIN(PartitionManager::RebootPlugin)
 #endif // #ifdef BUILTIN_PLUGINS

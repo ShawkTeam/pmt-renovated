@@ -18,6 +18,10 @@
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 
+#if __cplusplus < 202002L
+#error "libhelper is requires C++20 or higher C++ standarts."
+#endif
+
 #include <exception>
 #include <functional>
 #include <optional>
@@ -135,6 +139,13 @@ public:
   garbageCollector &operator=(const garbageCollector &) = delete;
 
   ~garbageCollector();
+
+  template <typename T>
+  T* allocateArray(const size_t size) {
+    T* ptr = new T[size];
+    delArrayAfterProgress(ptr);
+    return ptr;
+  }
 
   template <Deletable T> void delAfterProgress(T *ptr) {
     static_assert(!std::is_array_v<T>, "Use delArrayAfterProgress for arrays");
@@ -606,7 +617,7 @@ public:
   }
 
   bool finalize(const std::pair<std::string, bool> &res) const {
-    if (res.second) throw Error("%s", res.first.c_str());
+    if (!res.second) throw Error("%s", res.first.c_str());
     return res.second;
   }
 };

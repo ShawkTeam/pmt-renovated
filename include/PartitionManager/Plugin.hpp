@@ -18,6 +18,10 @@
 #ifndef PARTITION_MANAGER_PLUGIN_HPP
 #define PARTITION_MANAGER_PLUGIN_HPP
 
+#if __cplusplus < 202002L
+#error "Partition Manager Tool's plugin system is requires C++20 or higher C++ standarts."
+#endif
+
 #define PM "PluginManager"
 #define PM_VERSION "1.0"
 
@@ -197,18 +201,10 @@ using BasicBuiltinPluginRegistry = BuiltinPluginRegistry<BasicPlugin>;
                 });                                                                                 \
             }                                                                                       \
         };                                                                                          \
-        static __class##_AutoRegister _reg
-#define REGISTER_BUILTIN_PLUGIN_NO_NAMESPACE(__class)                                               \
-        struct __class##_AutoRegister {                                                             \
-            __class##_AutoRegister() {                                                              \
-              PartitionManager::BuiltinPluginRegistry<PartitionManager::BasicPlugin>::getInstance() \
-                .registerPlugin([]() {                                                              \
-                    return new __class();                                                           \
-                });                                                                                 \
-            }                                                                                       \
-        };                                                                                          \
-        static __class##_AutoRegister _reg
+        static __class##_AutoRegister _reg;
 
+#define REGISTER_DYNAMIC_PLUGIN(__class) \
+  extern "C" PartitionManager::BasicPlugin *create_plugin() { return new __class(); }
 #define FLAGS (*flags)
 #define TABLES (*FLAGS.partitionTables)
 #define TABLES_REF *flags->partitionTables
@@ -253,7 +249,7 @@ inline auto splitIfHasDelim = [](const std::string &s, const char delim, const b
 
 // Process vectors with input strings. Use for [flag(s)]-[other flag(s)] situtations.
 inline auto processCommandLine = [](std::vector<std::string> &vec1, std::vector<std::string> &vec2, const std::string &s1,
-                                    const std::string &s2, char delim, bool checkForBadUsage) {
+                                    const std::string &s2, const char delim, bool checkForBadUsage) {
   vec1 = splitIfHasDelim(s1, delim, checkForBadUsage);
   vec2 = splitIfHasDelim(s2, delim, checkForBadUsage);
 

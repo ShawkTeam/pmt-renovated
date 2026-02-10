@@ -62,7 +62,7 @@ public:
 } // namespace PartitionManager
 
 #ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, CleanLogPlugin);
+REGISTER_BUILTIN_PLUGIN(PartitionManager, CleanLogPlugin)
 #else
-extern "C" PartitionManager::BasicPlugin *create_plugin() { return new PartitionManager::CleanLogPlugin(); }
+REGISTER_DYNAMIC_PLUGIN(PartitionManager::CleanLogPlugin)
 #endif // #ifdef BUILTIN_PLUGINS

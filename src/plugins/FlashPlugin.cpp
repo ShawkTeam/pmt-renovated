@@ -51,7 +51,7 @@ public:
     cmd->add_option("imageFile(s)", rawImageNames, "Name(s) of image file(s)")->required();
     cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading image(s) and writing to partition(s)")
         ->transform(CLI::AsSizeValue(false))
-        ->default_val("4KB");
+        ->default_val("1MB");
     cmd->add_option("-I,--image-directory", imageDirectory, "Directory to find image(s) and flash to partition(s)");
     cmd->add_flag("-d,--delete", deleteAfterProgress, "Delete flash file(s) after progress.")->default_val(false);
 
@@ -72,8 +72,8 @@ public:
     if (Helper::fileSize(imageName) > TABLES.partition(partitionName).getSize())
       return PairError("%s is larger than %s partition size!", imageName.data(), partitionName.data());
 
-    uint64_t buf = bufferSize;
-    setupBufferSize(buf, TABLES.partitionWithDupCheck(partitionName).getAbsolutePath(), TABLES_REF);
+    auto& partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
+    const uint64_t buf = std::min<uint64_t>(bufferSize, partition.getSize());
 
     LOGNF(PLUGIN, logPath, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;
 
@@ -87,25 +87,10 @@ public:
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
 
-    // Automatically close file descriptors and delete allocated memories (arrays)
-    Helper::garbageCollector collector;
-
-    const int ffd = Helper::openAndAddToCloseList(imageName, collector, O_RDONLY);
-    if (ffd < 0) return PairError("Can't open image file %s: %s", imageName.data(), strerror(errno));
-
-    const int pfd = Helper::openAndAddToCloseList(TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed).getAbsolutePath(),
-                                                  collector, O_RDWR | O_TRUNC);
-    if (pfd < 0) return PairError("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
-
-    LOGNF(PLUGIN, logPath, INFO) << "Writing image " << imageName << " to partition: " << partitionName << std::endl;
-    auto *buffer = new (std::nothrow) char[buf];
-    collector.delAfterProgress(buffer);
-    memset(buffer, 0x00, buf);
-
-    ssize_t bytesRead;
-    while ((bytesRead = read(ffd, buffer, buf)) > 0) {
-      if (const ssize_t bytesWritten = write(pfd, buffer, bytesRead); bytesWritten != bytesRead)
-        return PairError("Can't write partition to output file %s: %s", imageName.data(), strerror(errno));
+    try {
+      (void)partition.writeImage(imageName, buf);
+    } catch (Helper::Error &error) {
+      return PairError("Failed to write %s image to %s partition: %s", imageName.c_str(), partitionName.c_str(), error.what());
     }
 
     if (deleteAfterProgress) {
@@ -133,8 +118,6 @@ public:
     }
 
     const auto result = manager.getResults();
-
-    LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
     return manager.finalize(result);
   }
 
@@ -146,7 +129,7 @@ public:
 } // namespace PartitionManager
 
 #ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, FlashPlugin);
+REGISTER_BUILTIN_PLUGIN(PartitionManager, FlashPlugin)
 #else
-extern "C" PartitionManager::BasicPlugin *create_plugin() { return new PartitionManager::FlashPlugin(); }
+REGISTER_DYNAMIC_PLUGIN(PartitionManager::FlashPlugin)
 #endif // #ifdef BUILTIN_PLUGINS

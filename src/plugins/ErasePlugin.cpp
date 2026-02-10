@@ -132,7 +132,7 @@ public:
 } // namespace PartitionManager
 
 #ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, ErasePlugin);
+REGISTER_BUILTIN_PLUGIN(PartitionManager, ErasePlugin)
 #else
-extern "C" PartitionManager::BasicPlugin *create_plugin() { return new PartitionManager::ErasePlugin(); }
+REGISTER_DYNAMIC_PLUGIN(PartitionManager::ErasePlugin)
 #endif // #ifdef BUILTIN_PLUGINS

@@ -17,6 +17,7 @@
 
 #include <filesystem>
 #include <ostream>
+#include <unistd.h>
 #include <asm-generic/fcntl.h>
 #include <libpartition_map/lib.hpp>
 #include <libpartition_map/redefine_logging_macros.hpp>
@@ -158,6 +159,90 @@ uint64_t Partition_t::getEndByte(uint32_t sectorSize) const {
 GUIDData Partition_t::getGUID() const {
   if (isLogical) throw ERR << "This is not a normal partition object!";
   return gptPart.GetUniqueGUID();
+}
+
+bool Partition_t::dumpImage(const std::filesystem::path &destination, uint64_t bufsize) const {
+  Helper::garbageCollector collector;
+  const std::filesystem::path dest = destination.empty() ? (std::filesystem::path("./") += getName() + ".img") : destination;
+  const std::filesystem::path toOpen = isLogical ? getAbsolutePath() : getPath();
+
+  const int partitionfd = Helper::openAndAddToCloseList(toOpen, collector, O_RDONLY);
+  if (partitionfd < 0) throw ERR << "Cannot open " << std::quoted(toOpen.string()) << ": " << strerror(errno);
+
+  const int outfd = Helper::openAndAddToCloseList(dest, collector, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+  if (outfd < 1) throw ERR << "Cannot create/open " << std::quoted(dest.string()) << ": " << strerror(errno);
+
+  const uint64_t bufferSize = std::min<uint64_t>(bufsize, getSize());
+  std::vector<char> buffer(bufferSize);
+
+  const uint64_t totalBytesToRead = getSize();
+  uint64_t bytesReadSoFar = 0;
+
+  while (bytesReadSoFar < totalBytesToRead) {
+    uint64_t toRead = std::min(bufferSize, totalBytesToRead - bytesReadSoFar);
+
+    ssize_t bytesRead = read(partitionfd, buffer.data(), toRead);
+    if (bytesRead <= 0)
+      throw ERR << "Cannot read " << std::quoted(toOpen.string()) << ": " << strerror(errno);
+
+    if (const ssize_t bytesWritten = write(outfd, buffer.data(), bytesRead); bytesWritten != bytesRead)
+      throw ERR << "Write error at " << bytesReadSoFar << " bytes: " << strerror(errno);
+
+    bytesReadSoFar += bytesRead;
+  }
+
+  return bytesReadSoFar == totalBytesToRead;
+}
+
+bool Partition_t::writeImage(const std::filesystem::path &image, uint64_t bufsize) {
+  Helper::garbageCollector collector;
+
+  const int64_t imageSize = Helper::fileSize(image);
+  if (imageSize < 0) throw ERR << "Cannot get size of: " << std::quoted(image.string()) << ": " << strerror(errno);
+  if (imageSize > getSize()) throw ERR << std::quoted(image.string()) << " is larger than " << std::quoted(getName()) << " (" << imageSize << " > " << getSize() << ").";
+
+  const std::filesystem::path toWrite = isLogical ? getAbsolutePath() : getPath();
+  const int partitionfd = Helper::openAndAddToCloseList(toWrite, collector, O_WRONLY);
+  if (partitionfd < 0) throw ERR << "Cannot open " << toWrite.string() << ": " << strerror(errno);
+
+  const int imagefd = Helper::openAndAddToCloseList(image, collector, O_RDONLY);
+  if (imagefd < 0) throw ERR << "Cannot open " << image.string() << ": " << strerror(errno);
+
+  uint64_t bytesWrittenSoFar = 0;
+  const uint64_t bufferSize = std::min<uint64_t>(bufsize, getSize());
+  std::vector<char> buffer(bufferSize);
+
+  while (bytesWrittenSoFar < imageSize) {
+    uint64_t toRead = std::min(bufferSize, imageSize - bytesWrittenSoFar);
+
+    ssize_t bytesRead = read(imagefd, buffer.data(), toRead);
+    if (bytesRead <= 0) throw ERR << "Cannot read " << std::quoted(image.string()) << ": " << strerror(errno);
+
+    if (const ssize_t bytesWritten = write(partitionfd, buffer.data(), bytesRead); bytesWritten != bytesRead)
+      throw ERR << "Write error at " << bytesWrittenSoFar << " bytes. The partition may be damaged! " << strerror(errno);
+
+    bytesWrittenSoFar += bytesRead;
+  }
+
+  if (bytesWrittenSoFar < getSize()) {
+    uint64_t remainingBytes = getSize() - bytesWrittenSoFar;
+    std::ranges::fill(buffer, 0x00);
+
+    while (remainingBytes > 0) {
+#ifdef __LP64__
+      uint64_t toWriteSize = std::min(buffer.size(), remainingBytes);
+#else
+      uint64_t toWriteSize = std::min<uint64_t>(buffer.size(), remainingBytes);
+#endif
+      ssize_t written = write(partitionfd, buffer.data(), toWriteSize);
+
+      if (written <= 0) throw ERR << "Cannot fill the outside of partition (of image file): " << strerror(errno);
+      remainingBytes -= written;
+    }
+  }
+
+  fsync(partitionfd);
+  return bytesWrittenSoFar == imageSize;
 }
 
 void Partition_t::set(const BasicData &data) {

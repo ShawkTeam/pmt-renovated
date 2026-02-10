@@ -49,6 +49,7 @@ static void sigHandler(int sig) {
 int main(int argc, char **argv) {
   CLI::App AppMain{"Partition Manager Tool"};
   CLI::App bootstrap{"Partition Manager Bootstrap"};
+  const char* prog = argv[0];
   auto Flags = std::make_shared<PartitionManager::BasicFlags>(); // Generate flag structure.
 
   try {
@@ -170,7 +171,7 @@ int main(int argc, char **argv) {
                                       "used -l (--logical) flag.";
     }
 
-    return manager.runUsed() == true ? EXIT_SUCCESS : EXIT_FAILURE;
+    return !manager.runUsed();
   } catch (CLI::CallForHelp &) {
     // catch CLI::CallForHelp for printing help texts.
 
@@ -184,7 +185,7 @@ int main(int argc, char **argv) {
   } catch (CLI::Error &error) {
     // catch CLI::Error
 
-    fprintf(stderr, "%s: %s\n", argv[0], error.what());
+    fprintf(stderr, "%s: %s\n", prog, error.what());
     return error.get_exit_code();
   } // try-catch end
 }

@@ -105,7 +105,7 @@ public:
 } // namespace PartitionManager
 
 #ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, PartitionSizePlugin);
+REGISTER_BUILTIN_PLUGIN(PartitionManager, PartitionSizePlugin)
 #else
-extern "C" PartitionManager::BasicPlugin *create_plugin() { return new PartitionManager::PartitionSizePlugin(); }
+REGISTER_DYNAMIC_PLUGIN(PartitionManager::PartitionSizePlugin)
 #endif // #ifdef BUILTIN_PLUGINS

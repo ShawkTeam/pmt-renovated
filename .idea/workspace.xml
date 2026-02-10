@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="BackendCodeEditorMiscSettings">
-    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="42" type="long" />
+    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="6" type="long" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/GlobalSettingsUpgraded/IsUpgraded/@EntryValue" value="true" type="bool" />
     <option name="/Default/RiderDebugger/RiderRestoreDecompile/RestoreDecompileSetting/@EntryValue" value="false" type="bool" />
@@ -52,24 +52,27 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libpartition_map: add * operators to classes, etc.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code.">
+      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Classes.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Classes.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,9 +100,9 @@
   &quot;associatedIndex&quot;: 1
 }</component>
   <component name="ProjectId" id="39GdqSUKnUIiNYqjFt1Z50CqJIN" />
-  <component name="ProjectStatusUIService"><![CDATA[{
-  "uiKindId": "Widget"
-}]]></component>
+  <component name="ProjectStatusUIService">{
+  &quot;uiKindId&quot;: &quot;Widget&quot;
+}</component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -134,18 +137,13 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Shell Script.Build (Debug)">
+  <component name="RunManager" selected="CMake Application.pmt">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -336,12 +334,18 @@
       <method v="2" />
     </configuration>
     <list>
+      <item itemvalue="CMake Application.CLI11-generate-single-file" />
+      <item itemvalue="CMake Application.CLI11" />
       <item itemvalue="CMake Application.libext2_uuid_shared" />
       <item itemvalue="CMake Application.libext2_uuid_static" />
       <item itemvalue="CMake Application.libgptf_shared" />
       <item itemvalue="CMake Application.libgptf_static" />
-      <item itemvalue="CMake Application.CLI11-generate-single-file" />
-      <item itemvalue="CMake Application.CLI11" />
+      <item itemvalue="CMake Application.libhelper_shared" />
+      <item itemvalue="CMake Application.libhelper_static" />
+      <item itemvalue="CMake Application.libhelper_test" />
+      <item itemvalue="CMake Application.libpartition_map_shared" />
+      <item itemvalue="CMake Application.libpartition_map_static" />
+      <item itemvalue="CMake Application.libpartition_map_test" />
       <item itemvalue="CMake Application.pmt" />
       <item itemvalue="CMake Application.pmt_backup_plugin" />
       <item itemvalue="CMake Application.pmt_clean_log_plugin" />
@@ -354,17 +358,11 @@
       <item itemvalue="CMake Application.pmt_reboot_plugin" />
       <item itemvalue="CMake Application.pmt_static" />
       <item itemvalue="CMake Application.pmt_type_plugin" />
-      <item itemvalue="CMake Application.libhelper_shared" />
-      <item itemvalue="CMake Application.libhelper_static" />
-      <item itemvalue="CMake Application.libhelper_test" />
-      <item itemvalue="CMake Application.libpartition_map_shared" />
-      <item itemvalue="CMake Application.libpartition_map_static" />
-      <item itemvalue="CMake Application.libpartition_map_test" />
-      <item itemvalue="Shell Script.Cleanup" />
-      <item itemvalue="Shell Script.Start Test" />
-      <item itemvalue="Shell Script.Reformat Code" />
-      <item itemvalue="Shell Script.Build (Release)" />
       <item itemvalue="Shell Script.Build (Debug)" />
+      <item itemvalue="Shell Script.Build (Release)" />
+      <item itemvalue="Shell Script.Cleanup" />
+      <item itemvalue="Shell Script.Reformat Code" />
+      <item itemvalue="Shell Script.Start Test" />
     </list>
   </component>
   <component name="TaskManager">
@@ -379,7 +377,8 @@
       <workItem from="1770405351481" duration="8640000" />
       <workItem from="1770416996647" duration="1006000" />
       <workItem from="1770459120770" duration="13892000" />
-      <workItem from="1770658651745" duration="16956000" />
+      <workItem from="1770658651745" duration="17023000" />
+      <workItem from="1770746074875" duration="13978000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -525,7 +524,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770671044740</updated>
     </task>
-    <option name="localTasksCounter" value="19" />
+    <task id="LOCAL-00019" summary="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code.">
+      <option name="closed" value="true" />
+      <created>1770675941406</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1770675941406</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -591,7 +598,8 @@
     <MESSAGE value="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary." />
     <MESSAGE value="libpartition_map: fix tests and constructors of classes." />
     <MESSAGE value="libpartition_map: add * operators to classes, etc." />
-    <option name="LAST_COMMIT_MESSAGE" value="libpartition_map: add * operators to classes, etc." />
+    <MESSAGE value="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code." />
+    <option name="LAST_COMMIT_MESSAGE" value="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

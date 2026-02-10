@@ -18,6 +18,10 @@
 #ifndef LIBPARTITION_MAP_LIB_HPP
 #define LIBPARTITION_MAP_LIB_HPP
 
+#if __cplusplus < 202002L
+#error "libpartition_map is requires C++20 or higher C++ standarts."
+#endif
+
 #include <filesystem>
 #include <functional>
 #include <map>
@@ -65,7 +69,6 @@ concept minimumPartitionClass = requires(__class cls, __class cls2, GUIDData gda
 
   // Check required constructors
   __class{};
-  ~__class{};
   __class{path};
   __class{data};
   __class{cls};
@@ -102,9 +105,7 @@ public:
   static Partition_t &AsLogicalPartition(Partition_t &orig, const std::filesystem::path &path);
 
   Partition_t() : gptPart(GPTPart()) {} // Partition_t partititon
-  Partition_t(const Partition_t &other)
-      : tablePath(other.tablePath), logicalPartitionPath(other.logicalPartitionPath), index(other.index), gptPart(other.gptPart),
-        isLogical(other.isLogical) {} // Partition_t partition(otherPartition)
+  Partition_t(const Partition_t &other) = default; // Partition_t partition(otherPartition)
   Partition_t(Partition_t &&other) noexcept
       : tablePath(std::move(other.tablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)), index(other.index),
         gptPart(other.gptPart), isLogical(other.isLogical) { // Partition_t partition(std::move(otherPartition))
@@ -137,13 +138,16 @@ public:
 
   std::string getGUIDAsString() const; // Get partition GUID as string.
 
-  const uint32_t &getIndex() const;                        // Get partition index in GPT table (const).
-  uint32_t &getIndex();                                    // Get partition index in GPT table (non-const).
+  const uint32_t &getIndex() const;                        // Get partition index in GPT table (const) reference.
+  uint32_t &getIndex();                                    // Get partition index in GPT table (non-const) as reference.
   uint64_t getSize(uint32_t sectorSize = 4096) const;      // Get partition size in bytes.
   uint64_t getStartByte(uint32_t sectorSize = 4096) const; // Starting byte address.
   uint64_t getEndByte(uint32_t sectorSize = 4096) const;   // Ending byte address.
 
   GUIDData getGUID() const; // Get partition GUID.
+
+  [[maybe_unused]] bool dumpImage(const std::filesystem::path& destination = "", uint64_t bufsize = MB(1)) const; // Dump image of partition.
+  [[maybe_unused]] bool writeImage(const std::filesystem::path& image, uint64_t bufsize = MB(1)); // Write input image to partition.
 
   void set(const BasicData &data);                          // Set GPTPart object, index and table path.
   void setPartitionPath(const std::filesystem::path &path); // Set partition path. Only for logical partitions.
@@ -185,6 +189,9 @@ class Builder {
   void findTablePaths();
 
 public:
+  using iterator = std::vector<Partition_t>::iterator;
+  using const_iterator = std::vector<Partition_t>::const_iterator;
+
   class Extra {
   public:
     static bool isReallyTable(const std::string &name);
@@ -196,9 +203,7 @@ public:
     scanLogicalPartitions();
   }
 
-  Builder(const Builder &other)
-      : partitions(other.partitions), gptDataCollection(other.gptDataCollection), tableNames(other.tableNames),
-        buildAutoOnDiskChanges(other.buildAutoOnDiskChanges), isUFS(other.isUFS), seek(other.seek) {}
+  Builder(const Builder &other) = default; // Builder map(otherMap)
 
   Builder(Builder &&other) noexcept
       : partitions(std::move(other.partitions)), gptDataCollection(std::move(other.gptDataCollection)),
@@ -272,10 +277,10 @@ public:
       const std::function<bool(const Partition_t &)> &function) const;               // For-each input function for logical partitions.
   bool foreachLogicalPartitions(const std::function<bool(Partition_t &)> &function); // For-each input function for logical partitions.
   bool foreachGptData(
-      const std::function<bool(const std::filesystem::path &,
+      const std::function<bool(const std::filesystem::path &path,
                                const std::shared_ptr<GPTData> &)> &function) const; // For-each input function for gpt data collection.
   bool
-  foreachGptData(const std::function<bool(const std::filesystem::path &,
+  foreachGptData(const std::function<bool(const std::filesystem::path &path,
                                           std::shared_ptr<GPTData> &)> &function); // For-each input function for gpt data collection.
   bool foreachFor(
       const std::vector<std::string> &list,
@@ -295,7 +300,7 @@ public:
                             const std::function<bool(Partition_t &)>
                                 &function); // For-each input function for input partition list (only normal partitions).
 
-  void reScan(bool auto_toggle = false);     // Rescan tables.
+  void reScan(bool auto_toggled = false);    // Rescan tables.
   void addTable(const std::string &name);    // Add table.
   void removeTable(const std::string &name); // Remove table.
   void setSeek(const std::string &name);     // Set the table name that the [uint32_t] operator will use.
@@ -306,6 +311,13 @@ public:
   void setAutoScanOnTableChanges(bool state);       // Set auto scanning as <state>.
   void clear();                                     // Cleanup data (excepts auto scan state and seek name).
   void reset();                                     // Cleanup (clear()) and reset variables.
+
+  iterator begin(); // Non-const begin iterator for range-based loop.
+  iterator end(); // Non-const end iterator for range-based loop.
+  const_iterator begin() const; // Const begin iterator for range-based loop.
+  const_iterator end() const; // Const end iterator for range-based loop.
+  const_iterator cbegin() const; // Const begin iterator for modern C++ range-based loop.
+  const_iterator cend() const; // Const begin iterator for modern C++ range-based loop.
 
   bool operator==(const Builder &other) const; // pd1 == pd2
   bool operator!=(const Builder &other) const; // pd1 != pd2
@@ -325,14 +337,10 @@ public:
 
 using Error = Helper::Error;
 
-constexpr int NAME = 0;
-constexpr int SIZE = 1;
-constexpr int DYNAMIC = 2;
-
-std::string getLibVersion();
+std::string getLibVersion(); // Get version string of library.
 
 namespace Extra {
-namespace FileSystemMagic {
+namespace FileSystemMagic { // Known magics of filesystems.
 constexpr uint64_t EXTFS_FS = 0xEF53;
 constexpr uint64_t F2FS_FS = 0xF2F52010;
 constexpr uint64_t EROFS_FS = 0xE0F5E1E2;
@@ -344,7 +352,7 @@ constexpr uint64_t NTFS_FS = 0x5346544E;
 constexpr uint64_t MSDOS_FS = 0x4d44;
 } // namespace FileSystemMagic
 
-namespace AndroidMagic {
+namespace AndroidMagic { // Known magics of android-spefic structures.
 constexpr uint64_t BOOT_IMAGE = 0x2144494F52444E41;
 constexpr uint64_t VBOOT_IMAGE = 0x544F4F4252444E56;
 constexpr uint64_t LK_IMAGE = 0x00006B6C;
