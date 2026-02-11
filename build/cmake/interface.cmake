@@ -19,15 +19,17 @@
 add_library(pmt_shared_interface INTERFACE)
 add_library(pmt_static_interface INTERFACE)
 add_library(pmt_interface_nolibs INTERFACE)
+add_library(pmt_interface_nolibs_nocflags INTERFACE)
 
 set(INCLUDE_DIRECTORIES
         "${CMAKE_SOURCE_DIR}/include"
         "${CMAKE_SOURCE_DIR}/external/e2fsprogs/lib"
-        "${CMAKE_SOURCE_DIR}/external/e2fsprogs/uuid"
+        "${CMAKE_SOURCE_DIR}/external/e2fsprogs/lib/uuid"
         "${CMAKE_SOURCE_DIR}/external/gptfdisk"
         "${CMAKE_SOURCE_DIR}/external/json/single_include"
         "${CMAKE_SOURCE_DIR}/external/picosha2"
         "${CMAKE_SOURCE_DIR}/external/core/libcutils/include"
+        "${CMAKE_SOURCE_DIR}/external/core/libcutils"
         "${CMAKE_SOURCE_DIR}/srclib/libhelper/include"
         "${CMAKE_SOURCE_DIR}/srclib/libpartition_map/include"
 )
@@ -35,6 +37,7 @@ set(INCLUDE_DIRECTORIES
 target_link_options(pmt_shared_interface INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
 target_link_options(pmt_static_interface INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
 target_link_options(pmt_interface_nolibs INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
+target_link_options(pmt_interface_nolibs_nocflags INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
 
 target_link_libraries(pmt_shared_interface INTERFACE libhelper_shared libpartition_map_shared libgptf_static libext2_uuid_static CLI11_SINGLE)
 target_link_libraries(pmt_static_interface INTERFACE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static CLI11_SINGLE)
@@ -42,6 +45,7 @@ target_link_libraries(pmt_static_interface INTERFACE libhelper_static libpartiti
 target_include_directories(pmt_shared_interface INTERFACE ${INCLUDE_DIRECTORIES})
 target_include_directories(pmt_static_interface INTERFACE ${INCLUDE_DIRECTORIES})
 target_include_directories(pmt_interface_nolibs INTERFACE ${INCLUDE_DIRECTORIES})
+target_include_directories(pmt_interface_nolibs_nocflags INTERFACE ${INCLUDE_DIRECTORIES})
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     target_link_options(pmt_shared_interface INTERFACE -fsanitize=address)
