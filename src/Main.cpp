@@ -49,7 +49,7 @@ static void sigHandler(int sig) {
 int main(int argc, char **argv) {
   CLI::App AppMain{"Partition Manager Tool"};
   CLI::App bootstrap{"Partition Manager Bootstrap"};
-  const char* prog = argv[0];
+  const char *prog = argv[0];
   auto Flags = std::make_shared<PartitionManager::BasicFlags>(); // Generate flag structure.
 
   try {
@@ -163,12 +163,12 @@ int main(int argc, char **argv) {
       std::ranges::for_each(FLAGS.extraTablePaths, [&](const std::string &name) { TABLES.addTable(name); });
     if (!TABLES && FLAGS.extraTablePaths.empty())
       throw ERR << "Can't found any partition table in /dev/block. Specify tables "
-                                    "-t (--table) argument.";
+                   "-t (--table) argument.";
 
     if (FLAGS.onLogical) {
       if (!TABLES.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
         throw ERR << "This device doesn't contains logical partitions. But you "
-                                      "used -l (--logical) flag.";
+                     "used -l (--logical) flag.";
     }
 
     return !manager.runUsed();

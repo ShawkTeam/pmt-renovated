@@ -182,8 +182,7 @@ bool Partition_t::dumpImage(const std::filesystem::path &destination, uint64_t b
     uint64_t toRead = std::min(bufferSize, totalBytesToRead - bytesReadSoFar);
 
     ssize_t bytesRead = read(partitionfd, buffer.data(), toRead);
-    if (bytesRead <= 0)
-      throw ERR << "Cannot read " << std::quoted(toOpen.string()) << ": " << strerror(errno);
+    if (bytesRead <= 0) throw ERR << "Cannot read " << std::quoted(toOpen.string()) << ": " << strerror(errno);
 
     if (const ssize_t bytesWritten = write(outfd, buffer.data(), bytesRead); bytesWritten != bytesRead)
       throw ERR << "Write error at " << bytesReadSoFar << " bytes: " << strerror(errno);
@@ -199,7 +198,9 @@ bool Partition_t::writeImage(const std::filesystem::path &image, uint64_t bufsiz
 
   const int64_t imageSize = Helper::fileSize(image);
   if (imageSize < 0) throw ERR << "Cannot get size of: " << std::quoted(image.string()) << ": " << strerror(errno);
-  if (imageSize > getSize()) throw ERR << std::quoted(image.string()) << " is larger than " << std::quoted(getName()) << " (" << imageSize << " > " << getSize() << ").";
+  if (imageSize > getSize())
+    throw ERR << std::quoted(image.string()) << " is larger than " << std::quoted(getName()) << " (" << imageSize << " > " << getSize()
+              << ").";
 
   const std::filesystem::path toWrite = isLogical ? getAbsolutePath() : getPath();
   const int partitionfd = Helper::openAndAddToCloseList(toWrite, collector, O_WRONLY);

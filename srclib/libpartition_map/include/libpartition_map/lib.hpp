@@ -104,7 +104,7 @@ public:
 
   static Partition_t &AsLogicalPartition(Partition_t &orig, const std::filesystem::path &path);
 
-  Partition_t() : gptPart(GPTPart()) {} // Partition_t partititon
+  Partition_t() : gptPart(GPTPart()) {}            // Partition_t partititon
   Partition_t(const Partition_t &other) = default; // Partition_t partition(otherPartition)
   Partition_t(Partition_t &&other) noexcept
       : tablePath(std::move(other.tablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)), index(other.index),
@@ -146,8 +146,9 @@ public:
 
   GUIDData getGUID() const; // Get partition GUID.
 
-  [[maybe_unused]] bool dumpImage(const std::filesystem::path& destination = "", uint64_t bufsize = MB(1)) const; // Dump image of partition.
-  [[maybe_unused]] bool writeImage(const std::filesystem::path& image, uint64_t bufsize = MB(1)); // Write input image to partition.
+  [[maybe_unused]] bool dumpImage(const std::filesystem::path &destination = "",
+                                  uint64_t bufsize = MB(1)) const;                                // Dump image of partition.
+  [[maybe_unused]] bool writeImage(const std::filesystem::path &image, uint64_t bufsize = MB(1)); // Write input image to partition.
 
   void set(const BasicData &data);                          // Set GPTPart object, index and table path.
   void setPartitionPath(const std::filesystem::path &path); // Set partition path. Only for logical partitions.
@@ -312,12 +313,12 @@ public:
   void clear();                                     // Cleanup data (excepts auto scan state and seek name).
   void reset();                                     // Cleanup (clear()) and reset variables.
 
-  iterator begin(); // Non-const begin iterator for range-based loop.
-  iterator end(); // Non-const end iterator for range-based loop.
-  const_iterator begin() const; // Const begin iterator for range-based loop.
-  const_iterator end() const; // Const end iterator for range-based loop.
+  iterator begin();              // Non-const begin iterator for range-based loop.
+  iterator end();                // Non-const end iterator for range-based loop.
+  const_iterator begin() const;  // Const begin iterator for range-based loop.
+  const_iterator end() const;    // Const end iterator for range-based loop.
   const_iterator cbegin() const; // Const begin iterator for modern C++ range-based loop.
-  const_iterator cend() const; // Const begin iterator for modern C++ range-based loop.
+  const_iterator cend() const;   // Const begin iterator for modern C++ range-based loop.
 
   bool operator==(const Builder &other) const; // pd1 == pd2
   bool operator!=(const Builder &other) const; // pd1 != pd2

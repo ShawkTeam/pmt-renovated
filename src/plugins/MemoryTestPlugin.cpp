@@ -76,7 +76,7 @@ public:
   bool run() override {
     if (testFileSize > GB(2) && !FLAGS.forceProcess)
       throw ERR << "File size is more than 2GB! Sizes over 2GB may not give accurate "
-                  "results in the write test. Use -f (--force) for skip this error.";
+                   "results in the write test. Use -f (--force) for skip this error.";
 
     LOGNF(PLUGIN, logPath, INFO) << "Starting memory test on " << testPath << std::endl;
     Helper::garbageCollector collector;

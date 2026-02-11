@@ -86,8 +86,7 @@ public:
         }
       }
 
-      if (!found)
-        throw ERR << "Couldn't determine type of " << content << (content == "userdata" ? " (encrypted filesystem?)" : "");
+      if (!found) throw ERR << "Couldn't determine type of " << content << (content == "userdata" ? " (encrypted filesystem?)" : "");
     }
 
     return true;

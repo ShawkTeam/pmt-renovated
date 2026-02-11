@@ -70,10 +70,10 @@ private:
 
 public:
   Error() = default;
-  Error(const Error& other) noexcept : _message(other._message) {}
+  Error(const Error &other) noexcept : _message(other._message) {}
   __printflike(2, 3) explicit Error(const char *format, ...);
 
-  template <typename T> Error&& operator<<(const T& msg) && {
+  template <typename T> Error &&operator<<(const T &msg) && {
     _oss << msg;
     _message = _oss.str();
     return std::move(*this);
@@ -140,9 +140,8 @@ public:
 
   ~garbageCollector();
 
-  template <typename T>
-  T* allocateArray(const size_t size) {
-    T* ptr = new T[size];
+  template <typename T> T *allocateArray(const size_t size) {
+    T *ptr = new T[size];
     delArrayAfterProgress(ptr);
     return ptr;
   }

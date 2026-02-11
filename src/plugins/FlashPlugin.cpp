@@ -72,7 +72,7 @@ public:
     if (Helper::fileSize(imageName) > TABLES.partition(partitionName).getSize())
       return PairError("%s is larger than %s partition size!", imageName.data(), partitionName.data());
 
-    auto& partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
+    auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
     const uint64_t buf = std::min<uint64_t>(bufferSize, partition.getSize());
 
     LOGNF(PLUGIN, logPath, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;

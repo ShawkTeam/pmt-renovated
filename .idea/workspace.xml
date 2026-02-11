@@ -52,26 +52,15 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code.">
-      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: Improve libraries, add standard checks, etc.&#10; - Functions for writing/reading images to/from partitions have been added to the `Partition_t` class. And adaptation was made.&#10;  - Minor additions have been made to libhelper's garbage collector.&#10;  - Macro controls were added to prevent operation below the C++20 standard.&#10;  - Some improvements (fixing memory leaks, etc.).">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -137,7 +126,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="CMake Application.pmt">
+  <component name="RunManager" selected="Shell Script.Start Test">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -378,7 +367,8 @@
       <workItem from="1770416996647" duration="1006000" />
       <workItem from="1770459120770" duration="13892000" />
       <workItem from="1770658651745" duration="17023000" />
-      <workItem from="1770746074875" duration="13978000" />
+      <workItem from="1770746074875" duration="14102000" />
+      <workItem from="1770837860238" duration="11000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -532,7 +522,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770675941406</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="pmt: Improve libraries, add standard checks, etc.&#10; - Functions for writing/reading images to/from partitions have been added to the `Partition_t` class. And adaptation was made.&#10;  - Minor additions have been made to libhelper's garbage collector.&#10;  - Macro controls were added to prevent operation below the C++20 standard.&#10;  - Some improvements (fixing memory leaks, etc.).">
+      <option name="closed" value="true" />
+      <created>1770760088928</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1770760088928</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -599,7 +597,8 @@
     <MESSAGE value="libpartition_map: fix tests and constructors of classes." />
     <MESSAGE value="libpartition_map: add * operators to classes, etc." />
     <MESSAGE value="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code." />
-    <option name="LAST_COMMIT_MESSAGE" value="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code." />
+    <MESSAGE value="pmt: Improve libraries, add standard checks, etc.&#10; - Functions for writing/reading images to/from partitions have been added to the `Partition_t` class. And adaptation was made.&#10;  - Minor additions have been made to libhelper's garbage collector.&#10;  - Macro controls were added to prevent operation below the C++20 standard.&#10;  - Some improvements (fixing memory leaks, etc.)." />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt: Improve libraries, add standard checks, etc.&#10; - Functions for writing/reading images to/from partitions have been added to the `Partition_t` class. And adaptation was made.&#10;  - Minor additions have been made to libhelper's garbage collector.&#10;  - Macro controls were added to prevent operation below the C++20 standard.&#10;  - Some improvements (fixing memory leaks, etc.)." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

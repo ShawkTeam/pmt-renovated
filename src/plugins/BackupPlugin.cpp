@@ -68,7 +68,7 @@ public:
 
   resultPair runAsync(const std::string &partitionName, const std::string &outputName) const {
     if (!TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
-    const auto& partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
+    const auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
     const uint64_t buf = std::min<uint64_t>(bufferSize, partition.getSize());
 
     LOGNF(PLUGIN, logPath, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
