@@ -1,13 +1,12 @@
 cmake-build-debug/
 cmake-build-release/
 build_arm64-v8a/
+build_arm64-v8a-builtin/
 build_armeabi-v7a/
+build_armeabi-v7a-builtin/
 build_x86_64/
+build_x86_64-builtin/
 build_x86/
+build_x86-builtin/
 external/
-include/nlohmann/
-include/CLI/
-srclib/libhelper/include/cutils/
-srclib/libhelper/include/private/
 include/generated/
-include/picosha2.h
