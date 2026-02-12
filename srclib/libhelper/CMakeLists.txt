@@ -24,16 +24,10 @@ set(LIBHELPER_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Utilities.cpp
 )
 
-# Add targets
-add_library(libhelper_shared SHARED ${LIBHELPER_SOURCES})
-add_library(libhelper_static STATIC ${LIBHELPER_SOURCES})
+add_super_library(helper USE_INTERFACE_NOLIBS SOURCES ${LIBHELPER_SOURCES})
+
+# Add target of tests
 add_executable(libhelper_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)
 
 # Apply common interface and add libhelper_static to libhelper_test's required libs
-target_link_libraries(libhelper_shared PRIVATE pmt_interface_nolibs)
-target_link_libraries(libhelper_static PRIVATE pmt_interface_nolibs)
-target_link_libraries(libhelper_test PRIVATE pmt_interface_nolibs libhelper_static)
-
-# Set appropriate output names
-set_target_properties(libhelper_shared PROPERTIES OUTPUT_NAME "helper")
-set_target_properties(libhelper_static PROPERTIES OUTPUT_NAME "helper")
+target_link_libraries(libhelper_test PRIVATE pmt::interface::nolibs libhelper_static)

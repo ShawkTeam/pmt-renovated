@@ -36,7 +36,7 @@ endif()
 
 # Add pmt's CMake module(s)
 include(build/cmake/generate_headers.cmake)
-include(build/cmake/interface.cmake)
+include(build/cmake/functions.cmake)
 
 # Generate header(s)
 get_property(FLAGS DIRECTORY PROPERTY COMPILE_OPTIONS)

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="BackendCodeEditorMiscSettings">
-    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="14" type="long" />
+    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="18" type="long" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/GlobalSettingsUpgraded/IsUpgraded/@EntryValue" value="true" type="bool" />
     <option name="/Default/RiderDebugger/RiderRestoreDecompile/RestoreDecompileSetting/@EntryValue" value="false" type="bool" />
@@ -20,29 +20,41 @@
   </component>
   <component name="CMakeRunConfigurationManager">
     <generated>
-      <config projectName="pmt" targetName="pmt_static" />
-      <config projectName="pmt" targetName="CLI11" />
-      <config projectName="pmt" targetName="pmt_info_plugin" />
-      <config projectName="pmt" targetName="pmt_erase_plugin" />
-      <config projectName="pmt" targetName="pmt_partition_size_plugin" />
-      <config projectName="pmt" targetName="pmt_flash_plugin" />
-      <config projectName="pmt" targetName="libext2_uuid_shared" />
+      <config projectName="pmt" targetName="memory_test_plugin" />
+      <config projectName="pmt" targetName="info_plugin" />
       <config projectName="pmt" targetName="libext2_uuid_static" />
-      <config projectName="pmt" targetName="pmt_clean_log_plugin" />
-      <config projectName="pmt" targetName="pmt_backup_plugin" />
-      <config projectName="pmt" targetName="pmt_memory_test_plugin" />
-      <config projectName="pmt" targetName="libpartition_map_shared" />
-      <config projectName="pmt" targetName="libpartition_map_static" />
-      <config projectName="pmt" targetName="pmt_reboot_plugin" />
+      <config projectName="pmt" targetName="backup_plugin" />
+      <config projectName="pmt" targetName="libext4_utils_static" />
+      <config projectName="pmt" targetName="flash_plugin" />
+      <config projectName="pmt" targetName="libcrypto_utils_shared" />
       <config projectName="pmt" targetName="libgptf_shared" />
+      <config projectName="pmt" targetName="fmtlib_static" />
       <config projectName="pmt" targetName="pmt" />
       <config projectName="pmt" targetName="libhelper_shared" />
       <config projectName="pmt" targetName="libhelper_static" />
       <config projectName="pmt" targetName="libgptf_static" />
-      <config projectName="pmt" targetName="pmt_real_path_plugin" />
+      <config projectName="pmt" targetName="liblp_static" />
+      <config projectName="pmt" targetName="libext4_utils_shared" />
+      <config projectName="pmt" targetName="pmt_static" />
+      <config projectName="pmt" targetName="CLI11" />
+      <config projectName="pmt" targetName="reboot_plugin" />
+      <config projectName="pmt" targetName="libext2_uuid_shared" />
+      <config projectName="pmt" targetName="type_plugin" />
+      <config projectName="pmt" targetName="liblp_shared" />
+      <config projectName="pmt" targetName="libcrypto_utils_static" />
+      <config projectName="pmt" targetName="libpartition_map_shared" />
+      <config projectName="pmt" targetName="libpartition_map_static" />
+      <config projectName="pmt" targetName="clean_log_plugin" />
+      <config projectName="pmt" targetName="libsparse_shared" />
+      <config projectName="pmt" targetName="fmtlib_shared" />
+      <config projectName="pmt" targetName="libbase_static" />
+      <config projectName="pmt" targetName="libsparse_static" />
+      <config projectName="pmt" targetName="erase_plugin" />
+      <config projectName="pmt" targetName="libbase_shared" />
+      <config projectName="pmt" targetName="real_path_plugin" />
       <config projectName="pmt" targetName="CLI11-generate-single-file" />
-      <config projectName="pmt" targetName="pmt_type_plugin" />
       <config projectName="pmt" targetName="libpartition_map_test" />
+      <config projectName="pmt" targetName="partition_size_plugin" />
       <config projectName="pmt" targetName="libhelper_test" />
     </generated>
   </component>
@@ -52,12 +64,31 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: reformat code">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="clang-format: update ignore list (for reformat.sh)">
+      <change afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/external/boringssl" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/external/extras" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/external/fmtlib" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/external/libbase" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libbase.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libcrypto_utils.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libext4_utils.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/liblp.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libsparse.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libbase.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libcrypto_utils.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libext4_utils.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/liblp.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libsparse.so" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -104,6 +135,7 @@
     "SHELLCHECK.PATH": "/home/yzbruh/.local/share/JetBrains/CLion2025.2/Shell Script/shellcheck",
     "Shell Script.Build (Debug).executor": "Run",
     "Shell Script.Build (Debug, with built-in plugins).executor": "Run",
+    "Shell Script.Build (Release).executor": "Run",
     "Shell Script.Cleanup.executor": "Run",
     "Shell Script.Reformat Code.executor": "Run",
     "Shell Script.Start Test.executor": "Run",
@@ -137,12 +169,77 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="backup_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="backup_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="clean_log_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="clean_log_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="erase_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="erase_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="flash_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="flash_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="fmtlib_shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="fmtlib_shared" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="fmtlib_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="fmtlib_static" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="info_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="info_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="libbase_shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libbase_shared" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="libbase_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libbase_static" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="libcrypto_utils_shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libcrypto_utils_shared" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="libcrypto_utils_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libcrypto_utils_static" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="libext2_uuid_shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libext2_uuid_shared" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="libext2_uuid_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libext2_uuid_static" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="libext4_utils_shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libext4_utils_shared" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="libext4_utils_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libext4_utils_static" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -172,6 +269,16 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="liblp_shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="liblp_shared" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="liblp_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="liblp_static" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="libpartition_map_shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libpartition_map_shared" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -187,52 +294,27 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="libsparse_shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libsparse_shared" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="libsparse_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libsparse_static" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="memory_test_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="memory_test_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="partition_size_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="partition_size_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="pmt" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="pmt" RUN_TARGET_NAME="pmt">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="pmt_backup_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_backup_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="pmt_clean_log_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_clean_log_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="pmt_erase_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_erase_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="pmt_flash_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_flash_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="pmt_info_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_info_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="pmt_memory_test_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_memory_test_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="pmt_partition_size_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_partition_size_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="pmt_real_path_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_real_path_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="pmt_reboot_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_reboot_plugin" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -242,7 +324,17 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="pmt_type_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="pmt_type_plugin" CONFIG_NAME="Debug">
+    <configuration name="real_path_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="real_path_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="reboot_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="reboot_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="type_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="type_plugin" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -325,10 +417,29 @@
     <list>
       <item itemvalue="CMake Application.CLI11-generate-single-file" />
       <item itemvalue="CMake Application.CLI11" />
+      <item itemvalue="CMake Application.backup_plugin" />
+      <item itemvalue="CMake Application.clean_log_plugin" />
+      <item itemvalue="CMake Application.erase_plugin" />
+      <item itemvalue="CMake Application.flash_plugin" />
+      <item itemvalue="CMake Application.info_plugin" />
+      <item itemvalue="CMake Application.memory_test_plugin" />
+      <item itemvalue="CMake Application.partition_size_plugin" />
+      <item itemvalue="CMake Application.fmtlib_shared" />
+      <item itemvalue="CMake Application.fmtlib_static" />
+      <item itemvalue="CMake Application.libbase_shared" />
+      <item itemvalue="CMake Application.libbase_static" />
+      <item itemvalue="CMake Application.libcrypto_utils_shared" />
+      <item itemvalue="CMake Application.libcrypto_utils_static" />
       <item itemvalue="CMake Application.libext2_uuid_shared" />
       <item itemvalue="CMake Application.libext2_uuid_static" />
+      <item itemvalue="CMake Application.libext4_utils_shared" />
+      <item itemvalue="CMake Application.libext4_utils_static" />
       <item itemvalue="CMake Application.libgptf_shared" />
       <item itemvalue="CMake Application.libgptf_static" />
+      <item itemvalue="CMake Application.liblp_shared" />
+      <item itemvalue="CMake Application.liblp_static" />
+      <item itemvalue="CMake Application.libsparse_shared" />
+      <item itemvalue="CMake Application.libsparse_static" />
       <item itemvalue="CMake Application.libhelper_shared" />
       <item itemvalue="CMake Application.libhelper_static" />
       <item itemvalue="CMake Application.libhelper_test" />
@@ -336,17 +447,10 @@
       <item itemvalue="CMake Application.libpartition_map_static" />
       <item itemvalue="CMake Application.libpartition_map_test" />
       <item itemvalue="CMake Application.pmt" />
-      <item itemvalue="CMake Application.pmt_backup_plugin" />
-      <item itemvalue="CMake Application.pmt_clean_log_plugin" />
-      <item itemvalue="CMake Application.pmt_erase_plugin" />
-      <item itemvalue="CMake Application.pmt_flash_plugin" />
-      <item itemvalue="CMake Application.pmt_info_plugin" />
-      <item itemvalue="CMake Application.pmt_memory_test_plugin" />
-      <item itemvalue="CMake Application.pmt_partition_size_plugin" />
-      <item itemvalue="CMake Application.pmt_real_path_plugin" />
-      <item itemvalue="CMake Application.pmt_reboot_plugin" />
       <item itemvalue="CMake Application.pmt_static" />
-      <item itemvalue="CMake Application.pmt_type_plugin" />
+      <item itemvalue="CMake Application.real_path_plugin" />
+      <item itemvalue="CMake Application.reboot_plugin" />
+      <item itemvalue="CMake Application.type_plugin" />
       <item itemvalue="Shell Script.Build (Debug)" />
       <item itemvalue="Shell Script.Build (Release)" />
       <item itemvalue="Shell Script.Cleanup" />
@@ -368,7 +472,9 @@
       <workItem from="1770459120770" duration="13892000" />
       <workItem from="1770658651745" duration="17023000" />
       <workItem from="1770746074875" duration="14102000" />
-      <workItem from="1770837860238" duration="10201000" />
+      <workItem from="1770837860238" duration="10656000" />
+      <workItem from="1770848595109" duration="133000" />
+      <workItem from="1770891040251" duration="17673000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -538,7 +644,31 @@
       <option name="project" value="LOCAL" />
       <updated>1770838071033</updated>
     </task>
-    <option name="localTasksCounter" value="22" />
+    <task id="LOCAL-00022" summary="pmt: Preparations for liblp, improvements, etc.">
+      <option name="closed" value="true" />
+      <created>1770848355773</created>
+      <option name="number" value="00022" />
+      <option name="presentableId" value="LOCAL-00022" />
+      <option name="project" value="LOCAL" />
+      <updated>1770848355773</updated>
+    </task>
+    <task id="LOCAL-00023" summary="clang-format: update ignore list (for reformat.sh)">
+      <option name="closed" value="true" />
+      <created>1770848563611</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1770848563611</updated>
+    </task>
+    <task id="LOCAL-00024" summary="clang-format: update ignore list (for reformat.sh)">
+      <option name="closed" value="true" />
+      <created>1770848704013</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1770848704013</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -557,6 +687,11 @@
     </option>
     <option name="TAB_STATES">
       <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
         <entry key="a2510d36-fedc-4420-8faa-49485521d766">
           <value>
             <State>
@@ -607,7 +742,9 @@
     <MESSAGE value="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code." />
     <MESSAGE value="pmt: Improve libraries, add standard checks, etc.&#10; - Functions for writing/reading images to/from partitions have been added to the `Partition_t` class. And adaptation was made.&#10;  - Minor additions have been made to libhelper's garbage collector.&#10;  - Macro controls were added to prevent operation below the C++20 standard.&#10;  - Some improvements (fixing memory leaks, etc.)." />
     <MESSAGE value="pmt: reformat code" />
-    <option name="LAST_COMMIT_MESSAGE" value="pmt: reformat code" />
+    <MESSAGE value="pmt: Preparations for liblp, improvements, etc." />
+    <MESSAGE value="clang-format: update ignore list (for reformat.sh)" />
+    <option name="LAST_COMMIT_MESSAGE" value="clang-format: update ignore list (for reformat.sh)" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

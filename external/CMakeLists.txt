@@ -22,10 +22,17 @@ add_subdirectory(CLI11)
 # Set directory paths
 set(E2FSPROGS ${CMAKE_CURRENT_SOURCE_DIR}/e2fsprogs)
 set(GPTFDISK ${CMAKE_CURRENT_SOURCE_DIR}/gptfdisk)
+set(FMTLIB ${CMAKE_CURRENT_SOURCE_DIR}/fmtlib)
+set(LIBBASE ${CMAKE_CURRENT_SOURCE_DIR}/libbase)
+set(LIBCUTILS ${CMAKE_CURRENT_SOURCE_DIR}/core/libcutils)
+set(LIBCRYPTO_UTILS ${CMAKE_CURRENT_SOURCE_DIR}/core/libcrypto_utils)
+set(LIBSPARSE ${CMAKE_CURRENT_SOURCE_DIR}/core/libsparse)
+set(LIBEXT4_UTILS ${CMAKE_CURRENT_SOURCE_DIR}/extras/ext4_utils)
+set(LIBLP ${CMAKE_CURRENT_SOURCE_DIR}/core/fs_mgr/liblp)
 set(PREBUILTS ${CMAKE_SOURCE_DIR}/build/prebuilts/${CMAKE_ANDROID_ARCH_ABI})
 
 # libext2_uuid sources
-set(LIBEXT2_UUID_SRCS
+set(LIBEXT2_UUID_SOURCES
         ${E2FSPROGS}/lib/uuid/clear.c
         ${E2FSPROGS}/lib/uuid/compare.c
         ${E2FSPROGS}/lib/uuid/copy.c
@@ -39,7 +46,7 @@ set(LIBEXT2_UUID_SRCS
 )
 
 # libgptf sources
-set(LIBGPTF_SRCS
+set(LIBGPTF_SOURCES
         ${GPTFDISK}/gptcl.cc
         ${GPTFDISK}/crc32.cc
         ${GPTFDISK}/support.cc
@@ -57,30 +64,105 @@ set(LIBGPTF_SRCS
         ${GPTFDISK}/android_popt.cc
 )
 
+# fmtlib sources
+set(FMTLIB_SOURCES ${FMTLIB}/src/format.cc)
+
+# libbase sources
+set(LIBBASE_SOURCES
+        ${LIBBASE}/abi_compatibility.cpp
+        ${LIBBASE}/chrono_utils.cpp
+        ${LIBBASE}/cmsg.cpp
+        ${LIBBASE}/file.cpp
+        ${LIBBASE}/hex.cpp
+        ${LIBBASE}/logging.cpp
+        ${LIBBASE}/mapped_file.cpp
+        ${LIBBASE}/parsebool.cpp
+        ${LIBBASE}/parsenetaddress.cpp
+        ${LIBBASE}/posix_strerror_r.cpp
+        ${LIBBASE}/process.cpp
+        ${LIBBASE}/properties.cpp
+        ${LIBBASE}/result.cpp
+        ${LIBBASE}/stringprintf.cpp
+        ${LIBBASE}/strings.cpp
+        ${LIBBASE}/threads.cpp
+        ${LIBBASE}/test_utils.cpp
+        ${LIBBASE}/errors_unix.cpp
+        ${LIBCUTILS}/android_get_control_file.cpp
+)
+
+# libcrypto_utils sources
+set(LIBCRYPTO_UTILS_SOURCES ${LIBCRYPTO_UTILS}/android_pubkey.cpp)
+
+# libsparse sources
+set(LIBSPARSE_SOURCES
+        ${LIBSPARSE}/backed_block.cpp
+        ${LIBSPARSE}/output_file.cpp
+        ${LIBSPARSE}/sparse.cpp
+        ${LIBSPARSE}/sparse_crc32.cpp
+        ${LIBSPARSE}/sparse_err.cpp
+        ${LIBSPARSE}/sparse_read.cpp
+)
+
+# libext4_utils sources
+set(LIBEXT4_UTILS_SOURCES
+        ${LIBEXT4_UTILS}/ext4_utils.cpp
+        ${LIBEXT4_UTILS}/wipe.cpp
+        ${LIBEXT4_UTILS}/ext4_sb.cpp
+)
+
+# liblp sources
+set(LIBLP_SOURCES
+        ${LIBLP}/builder.cpp
+        ${LIBLP}/super_layout_builder.cpp
+        ${LIBLP}/images.cpp
+        ${LIBLP}/partition_opener.cpp
+        ${LIBLP}/property_fetcher.cpp
+        ${LIBLP}/reader.cpp
+        ${LIBLP}/utility.cpp
+        ${LIBLP}/writer.cpp
+)
+
 # Add libraries
-add_library(libext2_uuid_shared SHARED ${LIBEXT2_UUID_SRCS})
-add_library(libext2_uuid_static STATIC ${LIBEXT2_UUID_SRCS})
-add_library(libgptf_static STATIC ${LIBGPTF_SRCS})
-add_library(libgptf_shared SHARED ${LIBGPTF_SRCS})
+add_library(libcrypto SHARED IMPORTED)
+set_target_properties(libcrypto PROPERTIES IMPORTED_LOCATION "${PREBUILTS}/libcrypto.so")
 
-# Set appropriate output names
-set_target_properties(libext2_uuid_shared PROPERTIES OUTPUT_NAME "ext2_uuid")
-set_target_properties(libext2_uuid_static PROPERTIES OUTPUT_NAME "ext2_uuid")
-set_target_properties(libgptf_shared PROPERTIES OUTPUT_NAME "gptf")
-set_target_properties(libgptf_static PROPERTIES OUTPUT_NAME "gptf")
-
-# Define required libraries
-target_link_libraries(libext2_uuid_shared PRIVATE pmt_interface_nolibs_nocflags)
-target_link_libraries(libext2_uuid_static PRIVATE pmt_interface_nolibs_nocflags)
-target_link_libraries(libgptf_shared PRIVATE pmt_interface_nolibs_nocflags libext2_uuid_shared)
-target_link_libraries(libgptf_static PRIVATE pmt_interface_nolibs_nocflags libext2_uuid_static)
-
-# Add compiler flags
-target_compile_options(libext2_uuid_shared PRIVATE -Wno-pointer-arith -Wno-sign-compare -Wno-type-limits -Wno-typedef-redefinition -Wno-unused-parameter -fPIC)
-target_compile_options(libext2_uuid_static PRIVATE -Wno-pointer-arith -Wno-sign-compare -Wno-type-limits -Wno-typedef-redefinition -Wno-unused-parameter -fPIC)
-target_compile_options(libgptf_static PRIVATE -Wno-unused-parameter -Wno-macro-redefined -Wno-pragma-pack -std=c++11 -fno-strict-aliasing -fPIC)
-target_compile_options(libgptf_shared PRIVATE -Wno-unused-parameter -Wno-macro-redefined -Wno-pragma-pack -std=c++11 -fno-strict-aliasing -fPIC)
-
-# Add compiler definations
-target_compile_definitions(libgptf_shared PRIVATE _FILE_OFFSET_BITS=64)
-target_compile_definitions(libgptf_static PRIVATE _FILE_OFFSET_BITS=64)
+add_super_library(ext2_uuid USE_INTERFACE_NOLIBS_NOFLAGS
+        SOURCES ${LIBEXT2_UUID_SOURCES}
+        COMPILE_OPTIONS -Wno-pointer-arith -Wno-sign-compare -Wno-type-limits -Wno-typedef-redefinition -Wno-unused-parameter
+)
+add_super_library(gptf USE_INTERFACE_NOLIBS_NOFLAGS
+        SOURCES ${LIBGPTF_SOURCES}
+        COMPILE_OPTIONS -Wno-unused-parameter -Wno-macro-redefined -Wno-pragma-pack -std=c++11 -fno-strict-aliasing
+        DEFINATIONS _FILE_OFFSET_BITS=64
+        LIBS ext2_uuid
+)
+add_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
+        SOURCES ${FMTLIB_SOURCES}
+        COMPILE_OPTIONS -fno-exceptions -UNDEBUG
+)
+add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS
+        SOURCES ${LIBBASE_SOURCES}
+        COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
+        DEFINATIONS _FILE_OFFSET_BITS=64
+        LIBS fmtlib log
+)
+add_super_library(crypto_utils USE_INTERFACE_NOLIBS_NOFLAGS
+        SOURCES ${LIBCRYPTO_UTILS_SOURCES}
+        LIBS libcrypto
+)
+add_super_library(sparse USE_INTERFACE_NOLIBS_NOFLAGS
+        SOURCES ${LIBSPARSE_SOURCES}
+        LIBS base z
+)
+add_super_library(ext4_utils USE_INTERFACE_NOLIBS_NOFLAGS
+        SOURCES ${LIBEXT4_UTILS_SOURCES}
+        COMPILE_OPTIONS -fno-strict-aliasing
+        DEFINATIONS _FILE_OFFSET_BITS=64 REAL_UUID
+        LIBS base ext2_uuid
+)
+add_super_library(lp USE_INTERFACE_NOLIBS_NOFLAGS
+        SOURCES ${LIBLP_SOURCES}
+        COMPILE_OPTIONS -Wno-error
+        DEFINATIONS _FILE_OFFSET_BITS=64
+        LIBS base crypto_utils libcrypto sparse ext4_utils
+)

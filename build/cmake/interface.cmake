@@ -16,10 +16,15 @@
 #
 
 # Add common interface for libraries, etc.
-add_library(pmt_shared_interface INTERFACE)
-add_library(pmt_static_interface INTERFACE)
+add_library(pmt_interface_shared INTERFACE)
+add_library(pmt_interface_static INTERFACE)
 add_library(pmt_interface_nolibs INTERFACE)
-add_library(pmt_interface_nolibs_nocflags INTERFACE)
+add_library(pmt_interface_nolibs_and_flags INTERFACE)
+
+add_library(pmt::interface::shared ALIAS pmt_interface_shared)
+add_library(pmt::interface::static ALIAS pmt_interface_static)
+add_library(pmt::interface::nolibs ALIAS pmt_interface_nolibs)
+add_library(pmt::interface::nolibs_and_flags ALIAS pmt_interface_nolibs_and_flags)
 
 set(INCLUDE_DIRECTORIES
         "${CMAKE_SOURCE_DIR}/include"
@@ -30,29 +35,37 @@ set(INCLUDE_DIRECTORIES
         "${CMAKE_SOURCE_DIR}/external/picosha2"
         "${CMAKE_SOURCE_DIR}/external/core/libcutils/include"
         "${CMAKE_SOURCE_DIR}/external/core/libcutils"
+        "${CMAKE_SOURCE_DIR}/external/core/fs_mgr/include"
+        "${CMAKE_SOURCE_DIR}/external/core/fs_mgr/liblp/include"
+        "${CMAKE_SOURCE_DIR}/external/core/libsparse/include"
+        "${CMAKE_SOURCE_DIR}/external/core/libcrypto_utils/include"
+        "${CMAKE_SOURCE_DIR}/external/libbase/include"
+        "${CMAKE_SOURCE_DIR}/external/extras/ext4_utils/include"
+        "${CMAKE_SOURCE_DIR}/external/fmtlib/include"
+        "${CMAKE_SOURCE_DIR}/external/boringssl/src/include"
         "${CMAKE_SOURCE_DIR}/srclib/libhelper/include"
         "${CMAKE_SOURCE_DIR}/srclib/libpartition_map/include"
 )
 
-target_link_options(pmt_shared_interface INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
-target_link_options(pmt_static_interface INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
+target_link_options(pmt_interface_shared INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
+target_link_options(pmt_interface_static INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
 target_link_options(pmt_interface_nolibs INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
-target_link_options(pmt_interface_nolibs_nocflags INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
+target_link_options(pmt_interface_nolibs_and_flags INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
 
-target_link_libraries(pmt_shared_interface INTERFACE libhelper_shared libpartition_map_shared libgptf_static libext2_uuid_static CLI11_SINGLE)
-target_link_libraries(pmt_static_interface INTERFACE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static CLI11_SINGLE)
+target_link_libraries(pmt_interface_shared INTERFACE libhelper_shared libpartition_map_shared libgptf_static libext2_uuid_static CLI11_SINGLE)
+target_link_libraries(pmt_interface_static INTERFACE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static CLI11_SINGLE)
 
-target_include_directories(pmt_shared_interface INTERFACE ${INCLUDE_DIRECTORIES})
-target_include_directories(pmt_static_interface INTERFACE ${INCLUDE_DIRECTORIES})
+target_include_directories(pmt_interface_shared INTERFACE ${INCLUDE_DIRECTORIES})
+target_include_directories(pmt_interface_static INTERFACE ${INCLUDE_DIRECTORIES})
 target_include_directories(pmt_interface_nolibs INTERFACE ${INCLUDE_DIRECTORIES})
-target_include_directories(pmt_interface_nolibs_nocflags INTERFACE ${INCLUDE_DIRECTORIES})
+target_include_directories(pmt_interface_nolibs_and_flags INTERFACE ${INCLUDE_DIRECTORIES})
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
-    target_link_options(pmt_shared_interface INTERFACE -fsanitize=address)
-    target_link_options(pmt_static_interface INTERFACE -fsanitize=address)
+    target_link_options(pmt_interface_shared INTERFACE -fsanitize=address)
+    target_link_options(pmt_interface_static INTERFACE -fsanitize=address)
     target_link_options(pmt_interface_nolibs INTERFACE -fsanitize=address)
     
-    target_compile_options(pmt_shared_interface INTERFACE -gdwarf-5 -fsanitize=address -fno-stack-protector)
-    target_compile_options(pmt_static_interface INTERFACE -gdwarf-5 -fsanitize=address -fno-stack-protector)
+    target_compile_options(pmt_interface_shared INTERFACE -gdwarf-5 -fsanitize=address -fno-stack-protector)
+    target_compile_options(pmt_interface_static INTERFACE -gdwarf-5 -fsanitize=address -fno-stack-protector)
     target_compile_options(pmt_interface_nolibs INTERFACE -gdwarf-5 -fsanitize=address -fno-stack-protector)
 endif()

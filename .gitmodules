@@ -22,3 +22,19 @@
 	path = external/core
 	url = https://android.googlesource.com/platform/system/core
 	branch = main
+[submodule "external/libbase"]
+	path = external/libbase
+	url = https://android.googlesource.com/platform/system/libbase
+	branch = main
+[submodule "external/extras"]
+	path = external/extras
+	url = https://android.googlesource.com/platform/system/extras
+	branch = main
+[submodule "external/fmtlib"]
+	path = external/fmtlib
+	url = https://android.googlesource.com/platform/external/fmtlib
+	branch = main
+[submodule "external/boringssl"]
+	path = external/boringssl
+	url = https://android.googlesource.com/platform/external/boringssl
+	branch = main
