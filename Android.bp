@@ -15,6 +15,34 @@
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 //
 
+license {
+    name: "external_nlohmann_json_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-MIT",
+    ],
+    license_text: ["external/json/LICENSE.MIT"],
+}
+
+license {
+    name: "external_cli11_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-BSD-3-Clause",
+    ],
+    license_text: ["external/CLI11/LICENSE"],
+}
+
+license {
+    name: "pmt_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+
+        "SPDX-license-identifier-GPL-3.0",
+    ],
+    license_text: ["LICENSE"],
+}
+
 // Partition manager tool source list
 filegroup {
     name: "pmt_srcs",

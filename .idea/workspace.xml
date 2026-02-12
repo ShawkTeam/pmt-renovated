@@ -64,31 +64,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="clang-format: update ignore list (for reformat.sh)">
-      <change afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/external/boringssl" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/external/extras" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/external/fmtlib" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/external/libbase" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libbase.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libcrypto_utils.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libext4_utils.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/liblp.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libsparse.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libbase.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libcrypto_utils.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libext4_utils.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/liblp.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libsparse.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android.bp" beforeDir="false" afterPath="$PROJECT_DIR$/Android.bp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -97,7 +75,7 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/external/e2fsprogs" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/src/Main.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -142,7 +120,7 @@
     "cf.advertisement.text.overridden": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "main",
+    "git-widget-placeholder": "ef148046",
     "last_opened_file_path": "/home/yzbruh/Masaüstü/Projects/pmt-renovated-github/.github/workflows",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
@@ -474,7 +452,7 @@
       <workItem from="1770746074875" duration="14102000" />
       <workItem from="1770837860238" duration="10656000" />
       <workItem from="1770848595109" duration="133000" />
-      <workItem from="1770891040251" duration="17673000" />
+      <workItem from="1770891040251" duration="18699000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -668,7 +646,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770848704013</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable.">
+      <option name="closed" value="true" />
+      <created>1770909662085</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1770909662086</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -744,7 +730,8 @@
     <MESSAGE value="pmt: reformat code" />
     <MESSAGE value="pmt: Preparations for liblp, improvements, etc." />
     <MESSAGE value="clang-format: update ignore list (for reformat.sh)" />
-    <option name="LAST_COMMIT_MESSAGE" value="clang-format: update ignore list (for reformat.sh)" />
+    <MESSAGE value="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable." />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
