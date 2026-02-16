@@ -69,7 +69,7 @@ public:
   resultPair runAsync(const std::string &partitionName, const std::string &outputName) const {
     if (!TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
     const auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
-    const uint64_t buf = std::min<uint64_t>(bufferSize, partition.getSize());
+    const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
 
     LOGNF(PLUGIN, logPath, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
 
@@ -87,7 +87,7 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for back upping " << partitionName << "): " << buf << std::endl;
 
     try {
-      (void)partition.dumpImage(outputName, buf);
+      (void)partition.dump(outputName, buf);
     } catch (Helper::Error &error) {
       return PairError("Failed to write %s partition to %s image: %s", partitionName.c_str(), outputName.c_str(), error.what());
     }

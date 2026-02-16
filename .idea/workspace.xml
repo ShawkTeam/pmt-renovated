@@ -46,12 +46,12 @@
       <config projectName="pmt" targetName="libpartition_map_static" />
       <config projectName="pmt" targetName="clean_log_plugin" />
       <config projectName="pmt" targetName="libsparse_shared" />
+      <config projectName="pmt" targetName="erase_plugin" />
       <config projectName="pmt" targetName="fmtlib_shared" />
       <config projectName="pmt" targetName="libbase_static" />
       <config projectName="pmt" targetName="libsparse_static" />
-      <config projectName="pmt" targetName="erase_plugin" />
-      <config projectName="pmt" targetName="libbase_shared" />
       <config projectName="pmt" targetName="real_path_plugin" />
+      <config projectName="pmt" targetName="libbase_shared" />
       <config projectName="pmt" targetName="CLI11-generate-single-file" />
       <config projectName="pmt" targetName="libpartition_map_test" />
       <config projectName="pmt" targetName="partition_size_plugin" />
@@ -60,13 +60,30 @@
   </component>
   <component name="CMakeSettings">
     <configurations>
-      <configuration PROFILE_NAME="Debug" ENABLED="true" GENERATION_DIR="cmake-build-debug" CONFIG_NAME="Debug" GENERATION_OPTIONS="-G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_STL=c++_static -DANDROID_PLATFORM=android-24" BUILD_OPTIONS="-j 10" />
+      <configuration PROFILE_NAME="Debug" ENABLED="true" GENERATION_DIR="cmake-build-debug" CONFIG_NAME="Debug" GENERATION_OPTIONS="-G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_ABI=arm64-v8a -DANDROID_STL=c++_static -DANDROID_PLATFORM=android-30" BUILD_OPTIONS="-j 10" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt/external: Add license notify for Android Build System">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Android.bp" beforeDir="false" afterPath="$PROJECT_DIR$/Android.bp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/functions.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +92,13 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/external/e2fsprogs" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/external/core" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
     <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/src/Main.cpp" root0="SKIP_HIGHLIGHTING" />
@@ -120,23 +143,18 @@
     "cf.advertisement.text.overridden": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "ef148046",
+    "git-widget-placeholder": "a3b721a3",
     "last_opened_file_path": "/home/yzbruh/Masaüstü/Projects/pmt-renovated-github/.github/workflows",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "settings.json.schema",
+    "settings.editor.selected.configurable": "CMakeSettings",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Shell Script.Start Test">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="CMake Application.pmt">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -452,7 +470,9 @@
       <workItem from="1770746074875" duration="14102000" />
       <workItem from="1770837860238" duration="10656000" />
       <workItem from="1770848595109" duration="133000" />
-      <workItem from="1770891040251" duration="18699000" />
+      <workItem from="1770891040251" duration="18868000" />
+      <workItem from="1771068712149" duration="8954000" />
+      <workItem from="1771263495031" duration="2754000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -654,7 +674,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770909662086</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="pmt/external: Add license notify for Android Build System">
+      <option name="closed" value="true" />
+      <created>1770910532184</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1770910532184</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -666,19 +694,9 @@
     <isAutomaticReloadCMake value="true" />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
-    <option name="OPEN_GENERIC_TABS">
-      <map>
-        <entry key="a2510d36-fedc-4420-8faa-49485521d766" value="TOOL_WINDOW" />
-      </map>
-    </option>
     <option name="TAB_STATES">
       <map>
         <entry key="MAIN">
-          <value>
-            <State />
-          </value>
-        </entry>
-        <entry key="a2510d36-fedc-4420-8faa-49485521d766">
           <value>
             <State>
               <option name="FILTERS">
@@ -686,20 +704,12 @@
                   <entry key="branch">
                     <value>
                       <list>
-                        <option value="HEAD" />
-                      </list>
-                    </value>
-                  </entry>
-                  <entry key="roots">
-                    <value>
-                      <list>
-                        <option value="$PROJECT_DIR$" />
+                        <option value="main" />
                       </list>
                     </value>
                   </entry>
                 </map>
               </option>
-              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
             </State>
           </value>
         </entry>
@@ -731,7 +741,8 @@
     <MESSAGE value="pmt: Preparations for liblp, improvements, etc." />
     <MESSAGE value="clang-format: update ignore list (for reformat.sh)" />
     <MESSAGE value="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable." />
-    <option name="LAST_COMMIT_MESSAGE" value="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable." />
+    <MESSAGE value="pmt/external: Add license notify for Android Build System" />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt/external: Add license notify for Android Build System" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

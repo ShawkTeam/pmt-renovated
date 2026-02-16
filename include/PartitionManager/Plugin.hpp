@@ -260,7 +260,7 @@ inline auto processCommandLine = [](std::vector<std::string> &vec1, std::vector<
 // Setting ups correct buffer size for input entry.
 inline auto setupBufferSize = [](uint64_t &size, const std::filesystem::path &entry, PartitionMap::Builder &builder) {
   if (builder.hasPartition(entry.filename())) {
-    const uint64_t psize = builder.partition(entry.filename().string()).getSize();
+    const uint64_t psize = builder.partition(entry.filename().string()).size();
 
     if (psize % size != 0) {
       Out::println("%sWARNING%s: Specified buffer size is invalid for %s! Using "

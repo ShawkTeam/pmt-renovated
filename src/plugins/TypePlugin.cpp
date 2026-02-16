@@ -79,7 +79,7 @@ public:
         if (PartitionMap::Extra::hasMagic(magic, static_cast<ssize_t>(bufferSize),
                                           Helper::fileIsExists(content)
                                               ? content
-                                              : TABLES.partitionWithDupCheck(content, FLAGS.noWorkOnUsed).getAbsolutePath().c_str())) {
+                                              : TABLES.partitionWithDupCheck(content, FLAGS.noWorkOnUsed).absolutePath().c_str())) {
           Out::println("%s contains %s magic (%s)", content.data(), name.data(), PartitionMap::Extra::formatMagic(magic).data());
           found = true;
           break;

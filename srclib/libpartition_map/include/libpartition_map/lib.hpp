@@ -32,6 +32,14 @@
 #include <vector>
 #include <libhelper/lib.hpp>
 #include <gpt.h>
+/*
+#if __ANDROID_API__ >= 30
+#include <liblp/liblp.h>
+#include <liblp/builder.h>
+#include <android-base/properties.h>
+#endif
+*/
+
 #ifdef NONE
 #undef NONE
 #endif
@@ -86,10 +94,10 @@ concept minimumPartitionClass = requires(__class cls, __class cls2, GUIDData gda
 }; // concept minimumPartitionClass
 
 class Partition_t {
-  std::filesystem::path tablePath;            // The table path to which the partition
+  std::filesystem::path localTablePath;       // The table path to which the partition
                                               // belongs (like /dev/block/sdc).
   std::filesystem::path logicalPartitionPath; // Path of logical partition.
-  uint32_t index = 0;                         // The actual index of the partition within the table.
+  uint32_t localIndex = 0;                    // The actual index of the partition within the table.
   mutable GPTPart gptPart;                    // Complete data for the partition.
 
   bool isLogical = false; // This class contains a logical partition?
@@ -107,14 +115,15 @@ public:
   Partition_t() : gptPart(GPTPart()) {}            // Partition_t partititon
   Partition_t(const Partition_t &other) = default; // Partition_t partition(otherPartition)
   Partition_t(Partition_t &&other) noexcept
-      : tablePath(std::move(other.tablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)), index(other.index),
-        gptPart(other.gptPart), isLogical(other.isLogical) { // Partition_t partition(std::move(otherPartition))
-    other.index = 0;
+      : localTablePath(std::move(other.localTablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)),
+        localIndex(other.localIndex), gptPart(other.gptPart),
+        isLogical(other.isLogical) { // Partition_t partition(std::move(otherPartition))
+    other.localIndex = 0;
     other.gptPart = GPTPart();
     other.isLogical = false;
   }
   explicit Partition_t(const BasicData &input)
-      : tablePath(input.tablePath), index(input.index), gptPart(input.gptPart) {
+      : localTablePath(input.tablePath), localIndex(input.index), gptPart(input.gptPart) {
   } // Partition_t partition({myGptPart, 4, "/dev/block/sda"}); For normal partitions.
   explicit Partition_t(const std::filesystem::path &path) /* NOLINT(modernize-pass-by-value) */
       : logicalPartitionPath(path), gptPart(GPTPart()), isLogical(true) {
@@ -124,31 +133,31 @@ public:
   GPTPart *getGPTPartRef();             // Get reference of GPTPart data (non-const reference).
   const GPTPart *getGPTPartRef() const; // Get reference of GPTPart data (const reference).
 
-  std::filesystem::path getPath() const; // Get partition path (like /dev/block/sdc4)
+  std::filesystem::path path() const; // Get partition path (like /dev/block/sdc4)
   std::filesystem::path
-  getAbsolutePath() const; // Get absolute partition path (returns std::filesystem::read_symlink(getPath()) for normal partitions)
-  const std::filesystem::path &getTablePath() const; // Get tablePath variable (const reference).
-  std::filesystem::path &getTablePath();             // Get tablePath variable (non-const reference).
-  std::filesystem::path getPathByName() const;       // Get partition path by name.
+  absolutePath() const; // Get absolute partition path (returns std::filesystem::read_symlink(getPath()) for normal partitions)
+  const std::filesystem::path &tablePath() const; // Get tablePath variable (const reference).
+  std::filesystem::path &tablePath();             // Get tablePath variable (non-const reference).
+  std::filesystem::path pathByName() const;       // Get partition path by name.
 
-  std::string getName() const;      // Get partition name.
-  std::string getTableName() const; // Get table name.
-  std::string getFormattedSizeString(SizeUnit size_unit,
-                                     bool no_type = false) const; // Get partition size as formatted string.
+  std::string name() const;      // Get partition name.
+  std::string tableName() const; // Get table name.
+  std::string formattedSizeString(SizeUnit size_unit,
+                                  bool no_type = false) const; // Get partition size as formatted string.
 
-  std::string getGUIDAsString() const; // Get partition GUID as string.
+  std::string GUIDAsString() const; // Get partition GUID as string.
 
-  const uint32_t &getIndex() const;                        // Get partition index in GPT table (const) reference.
-  uint32_t &getIndex();                                    // Get partition index in GPT table (non-const) as reference.
-  uint64_t getSize(uint32_t sectorSize = 4096) const;      // Get partition size in bytes.
-  uint64_t getStartByte(uint32_t sectorSize = 4096) const; // Starting byte address.
-  uint64_t getEndByte(uint32_t sectorSize = 4096) const;   // Ending byte address.
+  const uint32_t &index() const;                    // Get partition index in GPT table (const) reference.
+  uint32_t &index();                                // Get partition index in GPT table (non-const) as reference.
+  uint64_t size(uint32_t sectorSize = 4096) const;  // Get partition size in bytes.
+  uint64_t start(uint32_t sectorSize = 4096) const; // Get starting byte address.
+  uint64_t end(uint32_t sectorSize = 4096) const;   // Get ending byte address.
 
-  GUIDData getGUID() const; // Get partition GUID.
+  GUIDData GUID() const; // Get partition GUID.
 
-  [[maybe_unused]] bool dumpImage(const std::filesystem::path &destination = "",
-                                  uint64_t bufsize = MB(1)) const;                                // Dump image of partition.
-  [[maybe_unused]] bool writeImage(const std::filesystem::path &image, uint64_t bufsize = MB(1)); // Write input image to partition.
+  [[maybe_unused]] bool dump(const std::filesystem::path &destination = "",
+                             uint64_t bufsize = MB(1)) const;                                // Dump image of partition.
+  [[maybe_unused]] bool write(const std::filesystem::path &image, uint64_t bufsize = MB(1)); // Write input image to partition.
 
   void set(const BasicData &data);                          // Set GPTPart object, index and table path.
   void setPartitionPath(const std::filesystem::path &path); // Set partition path. Only for logical partitions.
@@ -178,12 +187,11 @@ public:
 // template <typename __class>
 // requires minimumPartitionClass<__class>
 class Builder {
-  std::vector<Partition_t> partitions;
+  std::vector<Partition_t> localPartitions;
   std::map<std::filesystem::path, std::shared_ptr<GPTData>> gptDataCollection;
-  std::unordered_set<std::string> tableNames;
+  std::unordered_set<std::string> localTableNames;
 
   bool buildAutoOnDiskChanges, isUFS;
-  std::string seek;
 
   void scan();
   void scanLogicalPartitions();
@@ -207,51 +215,46 @@ public:
   Builder(const Builder &other) = default; // Builder map(otherMap)
 
   Builder(Builder &&other) noexcept
-      : partitions(std::move(other.partitions)), gptDataCollection(std::move(other.gptDataCollection)),
-        tableNames(std::move(other.tableNames)), buildAutoOnDiskChanges(other.buildAutoOnDiskChanges), isUFS(other.isUFS),
-        seek(std::move(other.seek)) { // Builder map(std::move(otherMap))
+      : localPartitions(std::move(other.localPartitions)), gptDataCollection(std::move(other.gptDataCollection)),
+        localTableNames(std::move(other.localTableNames)), buildAutoOnDiskChanges(other.buildAutoOnDiskChanges),
+        isUFS(other.isUFS) { // Builder map(std::move(otherMap))
     other.buildAutoOnDiskChanges = true;
     other.isUFS = false;
   }
 
-  std::vector<Partition_t *> getAllPartitions(); // Get references of all partitions (std::vector<Partition_t*>, non-const).
-  std::vector<const Partition_t *> getAllPartitions() const; // Get references of all partitions (std::vector<Partition_t*>, const).
-  std::vector<Partition_t *> getPartitions();                // Get references of partitions (std::vector<Partition_t*>, non-const).
-  std::vector<const Partition_t *> getPartitions() const;    // Get references of partitions (std::vector<const Partition_t*>, const).
-  std::vector<Partition_t *> getLogicalPartitions();         // Get references of logical partitions (non-const).
-  std::vector<const Partition_t *> getLogicalPartitions() const; // Get references of logical partitions (const).
-  std::vector<Partition_t *>
-  getPartitionsByTable(const std::string &name); // Get references of partitions of table by name (non-const).
+  std::vector<Partition_t *> allPartitions();             // Get references of all partitions (std::vector<Partition_t*>, non-const).
+  std::vector<const Partition_t *> allPartitions() const; // Get references of all partitions (std::vector<Partition_t*>, const).
+  std::vector<Partition_t *> partitions();                // Get references of partitions (std::vector<Partition_t*>, non-const).
+  std::vector<const Partition_t *> partitions() const;    // Get references of partitions (std::vector<const Partition_t*>, const).
+  std::vector<Partition_t *> logicalPartitions();         // Get references of logical partitions (non-const).
+  std::vector<const Partition_t *> logicalPartitions() const;            // Get references of logical partitions (const).
+  std::vector<Partition_t *> partitionsByTable(const std::string &name); // Get references of partitions of table by name (non-const).
   std::vector<const Partition_t *>
-  getPartitionsByTable(const std::string &name) const; // Get references of partitions of table by name (const).
+  partitionsByTable(const std::string &name) const; // Get references of partitions of table by name (const).
 
-  std::vector<std::pair<bool, std::string>> getDuplicatePartitionPositions(const std::string &name) const;
+  std::vector<std::pair<bool, std::string>> duplicatePartitionPositions(const std::string &name) const;
 
-  const std::unordered_set<std::string> &getTableNames() const;    // Get references of table names (const)
-  std::unordered_set<std::string> &getTableNames();                // Get references of table names (non-const).
-  std::unordered_set<std::filesystem::path> getTablePaths() const; // Get table paths (form gptDataCollection).
+  const std::unordered_set<std::string> &tableNames() const;    // Get references of table names (const)
+  std::unordered_set<std::string> &tableNames();                // Get references of table names (non-const).
+  std::unordered_set<std::filesystem::path> tablePaths() const; // Get table paths (form gptDataCollection).
 
-  const std::map<std::filesystem::path, std::shared_ptr<GPTData>> &getAllGPTData() const; // Get gptDataCollection.
+  const std::map<std::filesystem::path, std::shared_ptr<GPTData>> &allGPTData() const; // Get gptDataCollection.
 
-  const std::shared_ptr<GPTData> &getGPTDataOf(
+  const std::shared_ptr<GPTData> &GPTDataOf(
       const std::string &name) const; // Get gpt data of table by name (retrieve it as const std::shared_ptr as it is stored, const).
   std::shared_ptr<GPTData> &
-  getGPTDataOf(const std::string &name); // Get gpt data of table by name (retrieve it as std::shared_ptr as it is stored, non-const).
+  GPTDataOf(const std::string &name); // Get gpt data of table by name (retrieve it as std::shared_ptr as it is stored, non-const).
 
-  std::vector<std::pair<std::string, uint64_t>> getDataOfLogicalPartitions(); // Get logical partition information.
-  std::vector<BasicInfo> getDataOfPartitions();                               // Get information about partitions.
-  std::vector<BasicInfo> getDataOfPartitionsByTable(const std::string &name); // Get information about partitions by table name.
+  std::vector<std::pair<std::string, uint64_t>> dataOfLogicalPartitions(); // Get logical partition information.
+  std::vector<BasicInfo> dataOfPartitions();                               // Get information about partitions.
+  std::vector<BasicInfo> dataOfPartitionsByTable(const std::string &name); // Get information about partitions by table name.
 
   const Partition_t &partition(const std::string &name, const std::string &from = "") const;
   Partition_t &partition(const std::string &name, const std::string &from = "");
   const Partition_t &partitionWithDupCheck(const std::string &name, bool check = true) const;
   Partition_t &partitionWithDupCheck(const std::string &name, bool check = true);
 
-  const std::string &getSeek() const;
-  std::string &getSeek(); // Get the table name that the [uint32_t] operator will use.
-
-  int hasDuplicateNamedPartition(const std::string &name) const;
-  int hasDuplicateNamedPartition(const std::string &name); // Check <name> named partitions are duplicate.
+  int hasDuplicateNamedPartition(const std::string &name) const; // Check <name> named partitions are duplicate.
 
   bool
   hasPartition(const std::string &name) const; // Check <name> partition is existing or not (checks partitions and logicalPartitions).
@@ -272,39 +275,37 @@ public:
 
   bool foreach (const std::function<bool(const Partition_t &)> &function) const; // For-each input function for all partitions (const).
   bool foreach (const std::function<bool(Partition_t &)> &function); // For-each input function for all partitions (non-const).
-  bool foreachPartitions(const std::function<bool(const Partition_t &)> &function) const; // For-each input function for partitions.
-  bool foreachPartitions(const std::function<bool(Partition_t &)> &function);             // For-each input function for partitions.
+  bool foreachPartitions(const std::function<bool(const Partition_t &)> &function) const; // For-each input function for partitions (const).
+  bool foreachPartitions(const std::function<bool(Partition_t &)> &function);             // For-each input function for partitions (non-const).
   bool foreachLogicalPartitions(
-      const std::function<bool(const Partition_t &)> &function) const;               // For-each input function for logical partitions.
-  bool foreachLogicalPartitions(const std::function<bool(Partition_t &)> &function); // For-each input function for logical partitions.
+      const std::function<bool(const Partition_t &)> &function) const;               // For-each input function for logical partitions (const).
+  bool foreachLogicalPartitions(const std::function<bool(Partition_t &)> &function); // For-each input function for logical partitions (non-const).
   bool foreachGptData(
       const std::function<bool(const std::filesystem::path &path,
-                               const std::shared_ptr<GPTData> &)> &function) const; // For-each input function for gpt data collection.
+                               const std::shared_ptr<GPTData> &)> &function) const; // For-each input function for gpt data collection (const).
   bool
   foreachGptData(const std::function<bool(const std::filesystem::path &path,
-                                          std::shared_ptr<GPTData> &)> &function); // For-each input function for gpt data collection.
+                                          std::shared_ptr<GPTData> &)> &function); // For-each input function for gpt data collection (non-const).
   bool foreachFor(
       const std::vector<std::string> &list,
-      const std::function<bool(const Partition_t &)> &function) const; // For-each input function for input partition list (all types).
+      const std::function<bool(const Partition_t &)> &function) const; // For-each input function for input partition list (all types, const).
   bool foreachFor(const std::vector<std::string> &list,
-                  const std::function<bool(Partition_t &)> &function); // For-each input function for input partition list (all types).
+                  const std::function<bool(Partition_t &)> &function); // For-each input function for input partition list (all types, non-const).
   bool foreachForLogicalPartitions(const std::vector<std::string> &list,
                                    const std::function<bool(const Partition_t &)> &function)
-      const; // For-each input function for input partition list (only normal partitions).
+      const; // For-each input function for input partition list (only normal partitions, const).
   bool foreachForLogicalPartitions(const std::vector<std::string> &list,
                                    const std::function<bool(Partition_t &)>
-                                       &function); // For-each input function for input partition list (only normal partitions).
+                                       &function); // For-each input function for input partition list (only normal partitions, non-const).
   bool foreachForPartitions(const std::vector<std::string> &list,
                             const std::function<bool(const Partition_t &)> &function)
-      const; // For-each input function for input partition list (only normal partitions).
+      const; // For-each input function for input partition list (only normal partitions, const).
   bool foreachForPartitions(const std::vector<std::string> &list,
                             const std::function<bool(Partition_t &)>
-                                &function); // For-each input function for input partition list (only normal partitions).
+                                &function); // For-each input function for input partition list (only normal partitions, non-const).
 
-  void reScan(bool auto_toggled = false);    // Rescan tables.
-  void addTable(const std::string &name);    // Add table.
+  void reScan(bool auto_toggled = false);    // Rescan tables. DO NOT USE `reScan(true)` MANUALLY!
   void removeTable(const std::string &name); // Remove table.
-  void setSeek(const std::string &name);     // Set the table name that the [uint32_t] operator will use.
 
   void setTables(std::unordered_set<std::string> names); // Set tables. By names (like sda, sdc, sdg).
   void setGPTDataOf(const std::string &name,
@@ -329,12 +330,74 @@ public:
   std::vector<Partition_t *> operator*();                                    // std::vector<Partition_t *> = *pd
   const std::shared_ptr<GPTData> &operator[](const std::string &name) const; // const std::shared_ptr<GPTData> data = pd["sda"]
   std::shared_ptr<GPTData> &operator[](const std::string &name);             // std::shared_ptr<GPTData> data = pd["sda"]
-  const GPTPart *operator[](uint32_t index) const;                           // const GPTPart* part = pd[2]
-  GPTPart *operator[](uint32_t index);                                       // GPTPart* part = pd[2]
+  const GPTPart *operator()(const std::string &name, uint32_t index) const;  // const GPTPart* part = pd("sda", 3);
+  GPTPart *operator()(const std::string &name, uint32_t index);              // GPTPart* part = pd("sda", 3);
 
   Builder &operator=(const Builder &other) = default; // pd2 = pd1
   Builder &operator=(Builder &&other) noexcept;       // pd2 = std::move(p1)
 };
+
+/*
+#if __ANDROID_API__ >= 30 // The current libbase version requires a minimum API level of 30.
+using namespace android::fs_mgr;
+
+class SuperManager {
+  uint32_t slot;
+  std::error_code error;
+  std::filesystem::path superPartition;
+  std::unique_ptr<LpMetadata> lpMetadata;
+
+  void readMetadata(); // Read metadata from super partition.
+
+public:
+  SuperManager();
+  explicit SuperManager(const std::filesystem::path &superPartitionPath); // Read metadata from input partition path.
+  SuperManager(const SuperManager &other);                                // Copy constructor.
+  SuperManager(SuperManager &&other) noexcept;                            // Move constructor.
+
+  static bool isEmptySuperImage(const std::filesystem::path &superImagePath); // Checks ibput super image is empty.
+
+  bool hasPartition(const std::string &name) const;      // Checks <name> partition is existing.
+  bool hasFreeSpace() const;                             // Checks has free space in super partition.
+  bool hasFreeSpace(const std::string &groupName) const; // Checks has free space in <groupName> named group in super partition.
+
+  std::unique_ptr<LpMetadata> &getMetadata();         // Get LpMetadata reference (non-const).
+  std::unique_ptr<LpMetadata> &getMetadata() const;   // Get LpMetadata reference (const).
+  std::vector<PartitionGroup *> getGroups();          // Get list of PartitionGroup* as reference list (non-const).
+  std::vector<PartitionGroup *> getGroups() const;    // Get list of PartitionGroup* as reference list (const).
+  std::vector<Partition *> &getPartitions();          // Get list of Partition* as reference list (non-const).
+  std::vector<Partition *> &getPartitions() const;    // Get list of Partitipn* as reference list (const).
+  std::vector<std::string> getGroupNames() const;     // Get list of group names.
+  std::vector<std::string> getPartitionNames() const; // Get list of partition names.
+
+  uint64_t getSize() const;      // Get size of super partition.
+  uint64_t getFreeSpace() const; // Get free space in super partition.
+  uint64_t getUsedSpace() const; // Get used space in super partition.
+
+  std::error_code getError() const;
+
+  bool createPartition(const std::string &name, const std::string &groupName = "",
+                       uint32_t attributes = LP_PARTITION_ATTR_NONE);               // Create new partition as <name> named.
+  bool deletePartition(const std::string &name, const std::string &groupName = ""); // Delete <name> named partition.
+  bool changeGroup(const std::string &name,
+                   const std::string &groupName = ""); // Change group of <name> named partition as <groupName> named group.
+  bool resizeGroup(const std::string &groupName, uint64_t newSize); // Resize <groupName> named group.
+  bool resizePartition(const std::string &name, uint64_t newSize);  // Resize <name> named partititon as <newSize>.
+  bool resizePartition(const std::string &name, const std::string &groupName,
+                       uint64_t newSize); // Resize <name> named partition in <groupName> named group in as <newSize>.
+  bool saveChanges();                     // Write changes to super partition.
+
+  bool dumpSuperImage() const;                            // Dump super image.
+  bool dumpPartitionImage(const std::string &name) const; // Dump <name> named partition image.
+
+  void reloadMetadata(); // Reload metadata of super partition.
+
+  SuperManager &operator=(const SuperManager &other);     // Copy operator.
+  SuperManager &operator=(SuperManager &&other) noexcept; // Move operator.
+}; // class SuperManager
+
+#endif // #if __ANDROID_API__ >= 30
+*/
 
 using Error = Helper::Error;
 

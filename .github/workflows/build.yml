@@ -36,7 +36,7 @@ jobs:
         id: build
         run: |
           git clone https://github.com/ShawkTeam/pmt-renovated -b main ./pmt && cd pmt
-          git submodule update --init --recursive --depth 1
+          git submodule update --init --recursive
           export ANDROID_NDK="${{ github.workspace }}/android-ndk-r28c"
           bash build.sh clean
           bash build.sh build -DCMAKE_BUILD_TYPE=Release

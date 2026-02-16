@@ -69,11 +69,11 @@ public:
   resultPair runAsync(const std::string &partitionName, const std::string &imageName) const {
     if (!Helper::fileIsExists(imageName)) return PairError("Couldn't find image file: %s", imageName.data());
     if (!TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
-    if (Helper::fileSize(imageName) > TABLES.partition(partitionName).getSize())
+    if (Helper::fileSize(imageName) > TABLES.partition(partitionName).size())
       return PairError("%s is larger than %s partition size!", imageName.data(), partitionName.data());
 
     auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
-    const uint64_t buf = std::min<uint64_t>(bufferSize, partition.getSize());
+    const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
 
     LOGNF(PLUGIN, logPath, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;
 
@@ -88,7 +88,7 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
 
     try {
-      (void)partition.writeImage(imageName, buf);
+      (void)partition.write(imageName, buf);
     } catch (Helper::Error &error) {
       return PairError("Failed to write %s image to %s partition: %s", imageName.c_str(), partitionName.c_str(), error.what());
     }

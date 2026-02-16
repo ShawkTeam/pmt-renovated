@@ -3,10 +3,15 @@
   <component name="VcsDirectoryMappings">
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/CLI11" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/boringssl" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/core" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/e2fsprogs" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/extras" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/fmtlib" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/gptfdisk" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/json" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/libbase" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/external/libbase_sdk29" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/picosha2" vcs="Git" />
   </component>
 </project>

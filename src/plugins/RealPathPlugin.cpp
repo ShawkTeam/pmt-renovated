@@ -68,9 +68,9 @@ public:
       }
 
       if (byName)
-        Out::println("%s", part.getPathByName().c_str());
+        Out::println("%s", part.pathByName().c_str());
       else
-        Out::println("%s", part.getAbsolutePath().c_str());
+        Out::println("%s", part.absolutePath().c_str());
     }
 
     return true;

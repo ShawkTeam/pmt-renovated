@@ -35,17 +35,22 @@ set(INCLUDE_DIRECTORIES
         "${CMAKE_SOURCE_DIR}/external/picosha2"
         "${CMAKE_SOURCE_DIR}/external/core/libcutils/include"
         "${CMAKE_SOURCE_DIR}/external/core/libcutils"
-        "${CMAKE_SOURCE_DIR}/external/core/fs_mgr/include"
-        "${CMAKE_SOURCE_DIR}/external/core/fs_mgr/liblp/include"
-        "${CMAKE_SOURCE_DIR}/external/core/libsparse/include"
-        "${CMAKE_SOURCE_DIR}/external/core/libcrypto_utils/include"
-        "${CMAKE_SOURCE_DIR}/external/libbase/include"
-        "${CMAKE_SOURCE_DIR}/external/extras/ext4_utils/include"
-        "${CMAKE_SOURCE_DIR}/external/fmtlib/include"
-        "${CMAKE_SOURCE_DIR}/external/boringssl/src/include"
         "${CMAKE_SOURCE_DIR}/srclib/libhelper/include"
         "${CMAKE_SOURCE_DIR}/srclib/libpartition_map/include"
 )
+
+if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
+    list(APPEND INCLUDE_DIRECTORIES
+            "${CMAKE_SOURCE_DIR}/external/core/fs_mgr/include"
+            "${CMAKE_SOURCE_DIR}/external/core/fs_mgr/liblp/include"
+            "${CMAKE_SOURCE_DIR}/external/core/libsparse/include"
+            "${CMAKE_SOURCE_DIR}/external/core/libcrypto_utils/include"
+            "${CMAKE_SOURCE_DIR}/external/libbase/include"
+            "${CMAKE_SOURCE_DIR}/external/extras/ext4_utils/include"
+            "${CMAKE_SOURCE_DIR}/external/fmtlib/include"
+            "${CMAKE_SOURCE_DIR}/external/boringssl/src/include"
+    )
+endif()
 
 target_link_options(pmt_interface_shared INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
 target_link_options(pmt_interface_static INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")

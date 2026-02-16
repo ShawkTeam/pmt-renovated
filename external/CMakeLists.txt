@@ -123,9 +123,6 @@ set(LIBLP_SOURCES
 )
 
 # Add libraries
-add_library(libcrypto SHARED IMPORTED)
-set_target_properties(libcrypto PROPERTIES IMPORTED_LOCATION "${PREBUILTS}/libcrypto.so")
-
 add_super_library(ext2_uuid USE_INTERFACE_NOLIBS_NOFLAGS
         SOURCES ${LIBEXT2_UUID_SOURCES}
         COMPILE_OPTIONS -Wno-pointer-arith -Wno-sign-compare -Wno-type-limits -Wno-typedef-redefinition -Wno-unused-parameter
@@ -136,33 +133,39 @@ add_super_library(gptf USE_INTERFACE_NOLIBS_NOFLAGS
         DEFINATIONS _FILE_OFFSET_BITS=64
         LIBS ext2_uuid
 )
-add_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
-        SOURCES ${FMTLIB_SOURCES}
-        COMPILE_OPTIONS -fno-exceptions -UNDEBUG
-)
-add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS
-        SOURCES ${LIBBASE_SOURCES}
-        COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
-        DEFINATIONS _FILE_OFFSET_BITS=64
-        LIBS fmtlib log
-)
-add_super_library(crypto_utils USE_INTERFACE_NOLIBS_NOFLAGS
-        SOURCES ${LIBCRYPTO_UTILS_SOURCES}
-        LIBS libcrypto
-)
-add_super_library(sparse USE_INTERFACE_NOLIBS_NOFLAGS
-        SOURCES ${LIBSPARSE_SOURCES}
-        LIBS base z
-)
-add_super_library(ext4_utils USE_INTERFACE_NOLIBS_NOFLAGS
-        SOURCES ${LIBEXT4_UTILS_SOURCES}
-        COMPILE_OPTIONS -fno-strict-aliasing
-        DEFINATIONS _FILE_OFFSET_BITS=64 REAL_UUID
-        LIBS base ext2_uuid
-)
-add_super_library(lp USE_INTERFACE_NOLIBS_NOFLAGS
-        SOURCES ${LIBLP_SOURCES}
-        COMPILE_OPTIONS -Wno-error
-        DEFINATIONS _FILE_OFFSET_BITS=64
-        LIBS base crypto_utils libcrypto sparse ext4_utils
-)
+
+if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
+    add_library(libcrypto SHARED IMPORTED)
+    set_target_properties(libcrypto PROPERTIES IMPORTED_LOCATION "${PREBUILTS}/libcrypto.so")
+
+    add_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
+            SOURCES ${FMTLIB_SOURCES}
+            COMPILE_OPTIONS -fno-exceptions -UNDEBUG
+    )
+    add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBBASE_SOURCES}
+            COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
+            DEFINATIONS _FILE_OFFSET_BITS=64
+            LIBS fmtlib log
+    )
+    add_super_library(crypto_utils USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBCRYPTO_UTILS_SOURCES}
+            LIBS libcrypto
+    )
+    add_super_library(sparse USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBSPARSE_SOURCES}
+            LIBS base z
+    )
+    add_super_library(ext4_utils USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBEXT4_UTILS_SOURCES}
+            COMPILE_OPTIONS -fno-strict-aliasing
+            DEFINATIONS _FILE_OFFSET_BITS=64 REAL_UUID
+            LIBS base ext2_uuid
+    )
+    add_super_library(lp USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBLP_SOURCES}
+            COMPILE_OPTIONS -Wno-error
+            DEFINATIONS _FILE_OFFSET_BITS=64
+            LIBS base crypto_utils libcrypto sparse ext4_utils
+    )
+endif()

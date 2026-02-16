@@ -87,8 +87,8 @@ public:
       if (jsonFormat)
         jParts.push_back(partition);
       else
-        Out::println("partition=%s size=%s isLogical=%s", partition.getName().c_str(),
-                     partition.getFormattedSizeString(multiple, true).c_str(), partition.isLogicalPartition() ? "true" : "false");
+        Out::println("partition=%s size=%s isLogical=%s", partition.name().c_str(),
+                     partition.formattedSizeString(multiple, true).c_str(), partition.isLogicalPartition() ? "true" : "false");
 
       return true;
     };
@@ -111,8 +111,8 @@ public:
       j["multipleType"] = PartitionMap::Extra::getSizeUnitAsString(multiple);
       j["partitions"] = nlohmann::json::array();
       for (auto &part : jParts)
-        j["partitions"].push_back({{jNamePartition, part.getName()},
-                                   {jNameSize, std::stoull(part.getFormattedSizeString(multiple, true))},
+        j["partitions"].push_back({{jNamePartition, part.name()},
+                                   {jNameSize, std::stoull(part.formattedSizeString(multiple, true))},
                                    {jNameLogical, part.isLogicalPartition()}});
 
       Out::println("%s", j.dump(jIndentSize).data());

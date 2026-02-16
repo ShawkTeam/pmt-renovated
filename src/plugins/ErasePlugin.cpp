@@ -80,7 +80,7 @@ public:
     Helper::garbageCollector collector;
     auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
 
-    const int pfd = Helper::openAndAddToCloseList(partition.getAbsolutePath(), collector, O_WRONLY);
+    const int pfd = Helper::openAndAddToCloseList(partition.absolutePath(), collector, O_WRONLY);
     if (pfd < 0) return PairError("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
 
     if (!FLAGS.forceProcess) {
@@ -96,7 +96,7 @@ public:
     memset(buffer, 0x00, buf);
 
     ssize_t bytesWritten = 0;
-    const uint64_t partitionSize = partition.getSize();
+    const uint64_t partitionSize = partition.size();
 
     while (bytesWritten < partitionSize) {
       size_t toWrite = sizeof(buffer);

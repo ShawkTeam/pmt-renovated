@@ -74,9 +74,9 @@ public:
 
     auto getter = [this, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS_CONST -> bool {
       if (onlySize)
-        Out::println("%s", partition.getFormattedSizeString(multiple, true).c_str());
+        Out::println("%s", partition.formattedSizeString(multiple, true).c_str());
       else
-        Out::println("%s: %s", partition.getName().c_str(), partition.getFormattedSizeString(multiple).c_str());
+        Out::println("%s: %s", partition.name().c_str(), partition.formattedSizeString(multiple).c_str());
 
       return true;
     };

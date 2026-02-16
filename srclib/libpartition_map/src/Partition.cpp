@@ -50,49 +50,49 @@ const GPTPart *Partition_t::getGPTPartRef() const {
   return &gptPart;
 }
 
-std::filesystem::path Partition_t::getPath() const {
-  const std::string suffix = isdigit(tablePath.string().back()) ? "p" : "";
+std::filesystem::path Partition_t::path() const {
+  const std::string suffix = isdigit(localTablePath.string().back()) ? "p" : "";
   std::filesystem::path path =
-      isLogical ? logicalPartitionPath : std::filesystem::path(tablePath.string() + suffix + std::to_string(index + 1));
+      isLogical ? logicalPartitionPath : std::filesystem::path(localTablePath.string() + suffix + std::to_string(localIndex + 1));
   return path;
 }
 
-std::filesystem::path Partition_t::getAbsolutePath() const {
+std::filesystem::path Partition_t::absolutePath() const {
   if (isLogical) return std::filesystem::read_symlink(logicalPartitionPath);
-  return getPath();
+  return path();
 }
 
-std::filesystem::path &Partition_t::getTablePath() {
+std::filesystem::path &Partition_t::tablePath() {
   if (isLogical) throw ERR << "This is not a normal partition object!";
-  return tablePath;
+  return localTablePath;
 }
 
-const std::filesystem::path &Partition_t::getTablePath() const {
+const std::filesystem::path &Partition_t::tablePath() const {
   if (isLogical) throw ERR << "This is not a normal partition object!";
-  return tablePath;
+  return localTablePath;
 }
 
-std::filesystem::path Partition_t::getPathByName() const {
+std::filesystem::path Partition_t::pathByName() const {
   if (isLogical) return logicalPartitionPath;
   std::filesystem::path result = "/dev/block/by-name";
   result /= gptPart.GetDescription();
 
-  if (!std::filesystem::exists("/dev/block/by-name") || std::filesystem::read_symlink(result) != getPath()) return {};
+  if (!std::filesystem::exists("/dev/block/by-name") || std::filesystem::read_symlink(result) != path()) return {};
   return result;
 }
 
-std::string Partition_t::getName() const {
+std::string Partition_t::name() const {
   if (isLogical) return logicalPartitionPath.filename().string();
   return gptPart.GetDescription();
 }
 
-std::string Partition_t::getTableName() const {
+std::string Partition_t::tableName() const {
   if (isLogical) throw ERR << "This is not a normal partition object!";
-  return tablePath.filename();
+  return localTablePath.filename();
 }
 
-std::string Partition_t::getFormattedSizeString(SizeUnit size_unit, bool no_type) const {
-  uint64_t size = getSize();
+std::string Partition_t::formattedSizeString(SizeUnit size_unit, bool no_type) const {
+  uint64_t size = size();
   switch (size_unit) {
     case BYTE:
       return no_type ? std::to_string(size) : std::to_string(size) + "B";
@@ -107,22 +107,22 @@ std::string Partition_t::getFormattedSizeString(SizeUnit size_unit, bool no_type
   return no_type ? std::to_string(size) : std::to_string(size) + "B";
 }
 
-std::string Partition_t::getGUIDAsString() const {
+std::string Partition_t::GUIDAsString() const {
   if (isLogical) throw ERR << "This is not a normal partition object!";
   return gptPart.GetUniqueGUID().AsString();
 }
 
-uint32_t &Partition_t::getIndex() {
+uint32_t &Partition_t::index() {
   if (isLogical) throw ERR << "This is not a normal partition object!";
-  return index;
+  return localIndex;
 }
 
-const uint32_t &Partition_t::getIndex() const {
+const uint32_t &Partition_t::index() const {
   if (isLogical) throw ERR << "This is not a normal partition object!";
-  return index;
+  return localIndex;
 }
 
-uint64_t Partition_t::getSize(uint32_t sectorSize) const {
+uint64_t Partition_t::size(uint32_t sectorSize) const {
   if (isLogical) {
     Helper::garbageCollector collector;
     int fd = Helper::openAndAddToCloseList(std::filesystem::read_symlink(logicalPartitionPath).string(), collector, O_RDONLY);
@@ -146,25 +146,25 @@ uint64_t Partition_t::getSize(uint32_t sectorSize) const {
   return gptPart.GetLengthLBA() * sectorSize;
 }
 
-uint64_t Partition_t::getStartByte(uint32_t sectorSize) const {
+uint64_t Partition_t::start(uint32_t sectorSize) const {
   if (isLogical) throw ERR << "This is not a normal partition object!";
   return gptPart.GetFirstLBA() * sectorSize;
 }
 
-uint64_t Partition_t::getEndByte(uint32_t sectorSize) const {
+uint64_t Partition_t::end(uint32_t sectorSize) const {
   if (isLogical) throw ERR << "This is not a normal partition object!";
   return (gptPart.GetLastLBA() + 1) * sectorSize;
 }
 
-GUIDData Partition_t::getGUID() const {
+GUIDData Partition_t::GUID() const {
   if (isLogical) throw ERR << "This is not a normal partition object!";
   return gptPart.GetUniqueGUID();
 }
 
-bool Partition_t::dumpImage(const std::filesystem::path &destination, uint64_t bufsize) const {
+bool Partition_t::dump(const std::filesystem::path &destination, uint64_t bufsize) const {
   Helper::garbageCollector collector;
-  const std::filesystem::path dest = destination.empty() ? (std::filesystem::path("./") += getName() + ".img") : destination;
-  const std::filesystem::path toOpen = isLogical ? getAbsolutePath() : getPath();
+  const std::filesystem::path dest = destination.empty() ? (std::filesystem::path("./") += name() + ".img") : destination;
+  const std::filesystem::path toOpen = isLogical ? absolutePath() : path();
 
   const int partitionfd = Helper::openAndAddToCloseList(toOpen, collector, O_RDONLY);
   if (partitionfd < 0) throw ERR << "Cannot open " << std::quoted(toOpen.string()) << ": " << strerror(errno);
@@ -172,10 +172,10 @@ bool Partition_t::dumpImage(const std::filesystem::path &destination, uint64_t b
   const int outfd = Helper::openAndAddToCloseList(dest, collector, O_WRONLY | O_CREAT | O_TRUNC, 0644);
   if (outfd < 1) throw ERR << "Cannot create/open " << std::quoted(dest.string()) << ": " << strerror(errno);
 
-  const uint64_t bufferSize = std::min<uint64_t>(bufsize, getSize());
+  const uint64_t bufferSize = std::min<uint64_t>(bufsize, size());
   std::vector<char> buffer(bufferSize);
 
-  const uint64_t totalBytesToRead = getSize();
+  const uint64_t totalBytesToRead = size();
   uint64_t bytesReadSoFar = 0;
 
   while (bytesReadSoFar < totalBytesToRead) {
@@ -193,16 +193,16 @@ bool Partition_t::dumpImage(const std::filesystem::path &destination, uint64_t b
   return bytesReadSoFar == totalBytesToRead;
 }
 
-bool Partition_t::writeImage(const std::filesystem::path &image, uint64_t bufsize) {
+bool Partition_t::write(const std::filesystem::path &image, uint64_t bufsize) {
   Helper::garbageCollector collector;
 
   const int64_t imageSize = Helper::fileSize(image);
   if (imageSize < 0) throw ERR << "Cannot get size of: " << std::quoted(image.string()) << ": " << strerror(errno);
-  if (imageSize > getSize())
-    throw ERR << std::quoted(image.string()) << " is larger than " << std::quoted(getName()) << " (" << imageSize << " > " << getSize()
+  if (imageSize > size())
+    throw ERR << std::quoted(image.string()) << " is larger than " << std::quoted(name()) << " (" << imageSize << " > " << size()
               << ").";
 
-  const std::filesystem::path toWrite = isLogical ? getAbsolutePath() : getPath();
+  const std::filesystem::path toWrite = isLogical ? absolutePath() : path();
   const int partitionfd = Helper::openAndAddToCloseList(toWrite, collector, O_WRONLY);
   if (partitionfd < 0) throw ERR << "Cannot open " << toWrite.string() << ": " << strerror(errno);
 
@@ -210,7 +210,7 @@ bool Partition_t::writeImage(const std::filesystem::path &image, uint64_t bufsiz
   if (imagefd < 0) throw ERR << "Cannot open " << image.string() << ": " << strerror(errno);
 
   uint64_t bytesWrittenSoFar = 0;
-  const uint64_t bufferSize = std::min<uint64_t>(bufsize, getSize());
+  const uint64_t bufferSize = std::min<uint64_t>(bufsize, size());
   std::vector<char> buffer(bufferSize);
 
   while (bytesWrittenSoFar < imageSize) {
@@ -225,8 +225,8 @@ bool Partition_t::writeImage(const std::filesystem::path &image, uint64_t bufsiz
     bytesWrittenSoFar += bytesRead;
   }
 
-  if (bytesWrittenSoFar < getSize()) {
-    uint64_t remainingBytes = getSize() - bytesWrittenSoFar;
+  if (bytesWrittenSoFar < size()) {
+    uint64_t remainingBytes = size() - bytesWrittenSoFar;
     std::ranges::fill(buffer, 0x00);
 
     while (remainingBytes > 0) {
@@ -249,8 +249,8 @@ bool Partition_t::writeImage(const std::filesystem::path &image, uint64_t bufsiz
 void Partition_t::set(const BasicData &data) {
   if (isLogical) throw ERR << "This is not a normal partition object!";
   gptPart = data.gptPart;
-  tablePath = data.tablePath;
-  index = data.index;
+  localTablePath = data.tablePath;
+  localIndex = data.index;
 }
 
 void Partition_t::setPartitionPath(const std::filesystem::path &path) {
@@ -260,12 +260,12 @@ void Partition_t::setPartitionPath(const std::filesystem::path &path) {
 
 void Partition_t::setIndex(const uint32_t new_index) {
   if (isLogical) throw ERR << "This is not a normal partition object!";
-  index = new_index;
+  localIndex = new_index;
 }
 
 void Partition_t::setDiskPath(const std::filesystem::path &path) {
   if (isLogical) throw ERR << "This is not a normal partition object!";
-  tablePath = path;
+  localTablePath = path;
 }
 
 void Partition_t::setDiskName(const std::string &name) {
@@ -282,16 +282,17 @@ void Partition_t::setGptPart(const GPTPart &otherGptPart) {
 
 bool Partition_t::isSuperPartition() const {
   if (isLogical) throw ERR << "This is not a normal partition object!";
-  return getGUID() == GUIDData("89A12DE1-5E41-4CB3-8B4C-B1441EB5DA38");
+  return GUID() == GUIDData("89A12DE1-5E41-4CB3-8B4C-B1441EB5DA38");
 }
 
 bool Partition_t::isLogicalPartition() const { return isLogical; }
 
-bool Partition_t::empty() const { return isLogical ? logicalPartitionPath.empty() : !gptPart.IsUsed() && tablePath.empty(); }
+bool Partition_t::empty() const { return isLogical ? logicalPartitionPath.empty() : !gptPart.IsUsed() && localTablePath.empty(); }
 
 bool Partition_t::operator==(const Partition_t &other) const {
   if (isLogical) return logicalPartitionPath == other.logicalPartitionPath;
-  return tablePath == other.tablePath && index == other.index && gptPart.GetUniqueGUID() == other.gptPart.GetUniqueGUID();
+  return localTablePath == other.localTablePath && localIndex == other.localIndex &&
+         gptPart.GetUniqueGUID() == other.gptPart.GetUniqueGUID();
 }
 
 bool Partition_t::operator==(const GUIDData &other) const {
@@ -313,13 +314,13 @@ const GPTPart *Partition_t::operator*() const { return getGPTPartRef(); }
 
 Partition_t &Partition_t::operator=(Partition_t &&other) noexcept {
   if (this != &other) {
-    tablePath = std::move(other.tablePath);
-    index = other.index;
+    localTablePath = std::move(other.localTablePath);
+    localIndex = other.localIndex;
     logicalPartitionPath = std::move(other.logicalPartitionPath);
     gptPart = other.gptPart;
     isLogical = other.isLogical;
 
-    other.index = 0;
+    other.localIndex = 0;
     other.gptPart = GPTPart();
     other.isLogical = false;
   }
@@ -328,13 +329,13 @@ Partition_t &Partition_t::operator=(Partition_t &&other) noexcept {
 }
 
 std::ostream &operator<<(std::ostream &os, Partition_t &other) {
-  os << "Name: " << other.getName() << std::endl
+  os << "Name: " << other.name() << std::endl
      << "Logical: " << std::boolalpha << other.isLogical << std::endl
-     << "Path: " << other.getPath() << std::endl;
+     << "Path: " << other.path() << std::endl;
 
   if (!other.isLogical)
-    os << "Disk path: " << other.getTablePath() << std::endl
-       << "Index: " << other.getIndex() << std::endl
+    os << "Disk path: " << other.tablePath() << std::endl
+       << "Index: " << other.index() << std::endl
        << "GUID: " << other.gptPart.GetUniqueGUID().AsString() << std::endl;
 
   return os;
