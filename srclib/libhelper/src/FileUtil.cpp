@@ -22,7 +22,8 @@
 #include <unistd.h>
 #include <dirent.h>
 #include <fcntl.h>
-#include <libhelper/lib.hpp>
+#include <libhelper/functions.hpp>
+#include <libhelper/management.hpp>
 
 namespace Helper {
 bool writeFile(const std::filesystem::path &file, const std::string_view text) {

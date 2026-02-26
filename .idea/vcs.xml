@@ -11,7 +11,6 @@
     <mapping directory="$PROJECT_DIR$/external/gptfdisk" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/json" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/libbase" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/external/libbase_sdk29" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/external/picosha2" vcs="Git" />
   </component>
 </project>

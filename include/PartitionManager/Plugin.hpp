@@ -32,7 +32,7 @@
 #include <utility>
 #include <vector>
 #include <dlfcn.h>
-#include <libhelper/lib.hpp>
+#include <libhelper/logging.hpp>
 #include <libpartition_map/lib.hpp>
 #include <CLI11.hpp>
 

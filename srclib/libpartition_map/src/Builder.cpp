@@ -20,6 +20,8 @@
 #include <iostream>
 #include <ranges>
 #include <utility>
+#include <libhelper/management.hpp>
+#include <libhelper/functions.hpp>
 #include <libpartition_map/lib.hpp>
 #include <libpartition_map/redefine_logging_macros.hpp>
 
@@ -390,6 +392,17 @@ bool Builder::hasLogicalPartition(const std::string &name) const {
 bool Builder::hasTable(const std::string &name) const {
   LOGI << "Checking " << std::quoted(name) << " partition table is exists." << std::endl;
   return localTableNames.contains(name);
+}
+
+uint64_t Builder::freeSpaceOf(const std::string &name) const {
+  if (!localTableNames.contains(name)) return std::numeric_limits<uint64_t>::max();
+
+  const auto &data = GPTDataOf(name);
+  uint32_t numSegments = 0;
+  uint64_t largestSegment = 0;
+  uint64_t totalFreeSectors = data->FindFreeBlocks(&numSegments, &largestSegment);
+
+  return totalFreeSectors * data->GetBlockSize();
 }
 
 int Builder::hasDuplicateNamedPartition(const std::string &name) const {

@@ -22,14 +22,14 @@
 #include <string>
 #include <vector>
 #include <sys/stat.h>
-#include <libhelper/lib.hpp>
+#include <libhelper/functions.hpp>
 #include <picosha2.h>
 
 namespace Helper {
 std::optional<std::string> sha256Of(const std::filesystem::path &path) {
   LOGN(HELPER, INFO) << "get sha256 of " << std::quoted(path.string()) << " request. Getting full path (if input is link and exists)."
                      << std::endl;
-  std::string fp = (isLink(path)) ? readSymlink(path) : std::string(path);
+  const std::string fp = (isLink(path)) ? readSymlink(path) : std::string(path);
 
   if (!fileIsExists(fp)) throw ERR << "Is not exists or not file: " << fp;
 

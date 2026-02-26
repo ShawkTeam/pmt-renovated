@@ -49,7 +49,7 @@ static void sigHandler(int sig) {
 int main(int argc, char **argv) {
   CLI::App AppMain{"Partition Manager Tool"};
   CLI::App bootstrap{"Partition Manager Bootstrap"};
-  const char *prog = argv[0];
+  std::vector<char *> argvStorage;
   auto Flags = std::make_shared<PartitionManager::BasicFlags>(); // Generate flag structure.
 
   try {
@@ -73,7 +73,6 @@ int main(int argc, char **argv) {
       }
     }
 
-    std::vector<char *> argvStorage;
     argvStorage.reserve(args.size());
     for (auto &arg : args)
       argvStorage.push_back(arg.data());
@@ -97,7 +96,6 @@ int main(int argc, char **argv) {
         "program comes with ABSOLUTELY NO "
         "WARRANTY. Use --license for more information.\nReport "
         "bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
-    AppMain.add_option("-t,--table", FLAGS.extraTablePaths, "Add more partition tables for progress.")->delimiter(',');
     AppMain.add_option("-L,--log-file", FLAGS.logFile, "Set log file.");
     AppMain.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(','); // Dummy option for help message.
     AppMain.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")
@@ -115,10 +113,12 @@ int main(int argc, char **argv) {
     bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
     bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
     bootstrap.add_option("-L,--log-file", FLAGS.logFile, "Set log file.");
+    bootstrap.add_flag("-V,--verbose", FLAGS.verboseMode, "Detailed information is written on the screen while the transaction is being carried out.");
 
     bootstrap.parse(argc, argv);
 
-    Helper::LoggingProperties::setLogFile(FLAGS.logFile);
+    Helper::Logger::Properties::setPrinting(FLAGS.verboseMode);
+    Helper::Logger::Properties::setFile(FLAGS.logFile);
     PartitionManager::BasicManager manager(AppMain, FLAGS.logFile, Flags);
 
     manager.loadBuiltinPlugins(); // Load built-in plugins if existed.
@@ -142,7 +142,6 @@ int main(int argc, char **argv) {
     Helper::Silencer
         silencer; // It suppresses stdout and stderr. It redirects them to /dev/null. One of the best ways to run silently.
     if (!FLAGS.quietProcess) silencer.stop();
-    if (FLAGS.verboseMode) Helper::LoggingProperties::setPrinting<YES>();
     if (FLAGS.viewLicense) {
       Out::println("Copyright (C) 2026 Yağız Zengin\n\nThis program is free software: you can redistribute it and/or modify\nit under "
                    "the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of "
@@ -159,11 +158,7 @@ int main(int argc, char **argv) {
 
     if (!Helper::hasSuperUser()) // Root access is a fundamental requirement for this program.
       throw ERR << "This program requires super-user privileges.";
-    if (!FLAGS.extraTablePaths.empty()) // If a partition table has been specified for scanning, attempt the load.
-      std::ranges::for_each(FLAGS.extraTablePaths, [&](const std::string &name) { TABLES.addTable(name); });
-    if (!TABLES && FLAGS.extraTablePaths.empty())
-      throw ERR << "Can't found any partition table in /dev/block. Specify tables "
-                   "-t (--table) argument.";
+    if (!TABLES) throw ERR << "Can't found any partition table in /dev/block.";
 
     if (FLAGS.onLogical) {
       if (!TABLES.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
@@ -185,7 +180,7 @@ int main(int argc, char **argv) {
   } catch (CLI::Error &error) {
     // catch CLI::Error
 
-    fprintf(stderr, "%s: %s\n", prog, error.what());
+    fprintf(stderr, "%s: %s\n", argv[0], error.what());
     return error.get_exit_code();
   } // try-catch end
 }

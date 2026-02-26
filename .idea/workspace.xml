@@ -64,23 +64,36 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt/external: Add license notify for Android Build System">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libpartition_map: Remove/rename some functions. Improvements.&#10; - The function names in Partition_t and Builder should be rebranded more appropriately.&#10; - Improve the builder, remove unnecessary elements, and provide a better structure.&#10; - Improve the test and adapt the plugins to the new functions.">
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/capsule.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/error.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/macros.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/pure_tuple.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/random.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/cmake/functions.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/PartitionManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/PartitionManager.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Checkers.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Checkers.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Classes.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" afterDir="false" />
@@ -97,7 +110,7 @@
         <entry key="$PROJECT_DIR$" value="main" />
       </map>
     </option>
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/external/core" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
@@ -116,6 +129,9 @@
   &quot;associatedIndex&quot;: 1
 }</component>
   <component name="ProjectId" id="39GdqSUKnUIiNYqjFt1Z50CqJIN" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
   <component name="ProjectStatusUIService">{
   &quot;uiKindId&quot;: &quot;Widget&quot;
 }</component>
@@ -123,38 +139,43 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "RunOnceActivity.RadMigrateCodeStyle": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
-    "RunOnceActivity.cidr.known.project.marker": "true",
-    "RunOnceActivity.readMode.enableVisualFormatting": "true",
-    "RunOnceActivity.west.config.association.type.startup.service": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "SHELLCHECK.PATH": "/home/yzbruh/.local/share/JetBrains/CLion2025.2/Shell Script/shellcheck",
-    "Shell Script.Build (Debug).executor": "Run",
-    "Shell Script.Build (Debug, with built-in plugins).executor": "Run",
-    "Shell Script.Build (Release).executor": "Run",
-    "Shell Script.Cleanup.executor": "Run",
-    "Shell Script.Reformat Code.executor": "Run",
-    "Shell Script.Start Test.executor": "Run",
-    "cf.advertisement.text.overridden": "true",
-    "cf.first.check.clang-format": "false",
-    "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "a3b721a3",
-    "last_opened_file_path": "/home/yzbruh/Masaüstü/Projects/pmt-renovated-github/.github/workflows",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "CMakeSettings",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.west.config.association.type.startup.service&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;SHELLCHECK.PATH&quot;: &quot;/home/yzbruh/.local/share/JetBrains/CLion2025.2/Shell Script/shellcheck&quot;,
+    &quot;Shell Script.Build (Debug).executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Build (Debug, with built-in plugins).executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Build (Release).executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Cleanup.executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Reformat Code.executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Start Test.executor&quot;: &quot;Run&quot;,
+    &quot;cf.advertisement.text.overridden&quot;: &quot;true&quot;,
+    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
+    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/Masaüstü/Projects/pmt-renovated-github/.github/workflows&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
-  <component name="RunManager" selected="CMake Application.pmt">
+}</component>
+  <component name="RunManager" selected="Shell Script.Start Test">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -417,11 +438,9 @@
       <item itemvalue="CMake Application.clean_log_plugin" />
       <item itemvalue="CMake Application.erase_plugin" />
       <item itemvalue="CMake Application.flash_plugin" />
-      <item itemvalue="CMake Application.info_plugin" />
-      <item itemvalue="CMake Application.memory_test_plugin" />
-      <item itemvalue="CMake Application.partition_size_plugin" />
       <item itemvalue="CMake Application.fmtlib_shared" />
       <item itemvalue="CMake Application.fmtlib_static" />
+      <item itemvalue="CMake Application.info_plugin" />
       <item itemvalue="CMake Application.libbase_shared" />
       <item itemvalue="CMake Application.libbase_static" />
       <item itemvalue="CMake Application.libcrypto_utils_shared" />
@@ -432,16 +451,18 @@
       <item itemvalue="CMake Application.libext4_utils_static" />
       <item itemvalue="CMake Application.libgptf_shared" />
       <item itemvalue="CMake Application.libgptf_static" />
-      <item itemvalue="CMake Application.liblp_shared" />
-      <item itemvalue="CMake Application.liblp_static" />
-      <item itemvalue="CMake Application.libsparse_shared" />
-      <item itemvalue="CMake Application.libsparse_static" />
       <item itemvalue="CMake Application.libhelper_shared" />
       <item itemvalue="CMake Application.libhelper_static" />
       <item itemvalue="CMake Application.libhelper_test" />
+      <item itemvalue="CMake Application.liblp_shared" />
+      <item itemvalue="CMake Application.liblp_static" />
       <item itemvalue="CMake Application.libpartition_map_shared" />
       <item itemvalue="CMake Application.libpartition_map_static" />
       <item itemvalue="CMake Application.libpartition_map_test" />
+      <item itemvalue="CMake Application.libsparse_shared" />
+      <item itemvalue="CMake Application.libsparse_static" />
+      <item itemvalue="CMake Application.memory_test_plugin" />
+      <item itemvalue="CMake Application.partition_size_plugin" />
       <item itemvalue="CMake Application.pmt" />
       <item itemvalue="CMake Application.pmt_static" />
       <item itemvalue="CMake Application.real_path_plugin" />
@@ -472,7 +493,11 @@
       <workItem from="1770848595109" duration="133000" />
       <workItem from="1770891040251" duration="18868000" />
       <workItem from="1771068712149" duration="8954000" />
-      <workItem from="1771263495031" duration="2754000" />
+      <workItem from="1771263495031" duration="9393000" />
+      <workItem from="1771531028662" duration="4574000" />
+      <workItem from="1771772385366" duration="180000" />
+      <workItem from="1772042041557" duration="6138000" />
+      <workItem from="1772124441434" duration="10603000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -682,7 +707,15 @@
       <option name="project" value="LOCAL" />
       <updated>1770910532184</updated>
     </task>
-    <option name="localTasksCounter" value="27" />
+    <task id="LOCAL-00027" summary="libpartition_map: Remove/rename some functions. Improvements.&#10; - The function names in Partition_t and Builder should be rebranded more appropriately.&#10; - Improve the builder, remove unnecessary elements, and provide a better structure.&#10; - Improve the test and adapt the plugins to the new functions.">
+      <option name="closed" value="true" />
+      <created>1771266432699</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1771266432700</updated>
+    </task>
+    <option name="localTasksCounter" value="28" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -717,7 +750,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: fix project settings and CMake errors." />
     <MESSAGE value="pmt: Fix code issues caused by the confusion in Git." />
     <MESSAGE value="pmt: Add more information about license and reformat code." />
     <MESSAGE value="pmt: fix license flag." />
@@ -742,7 +774,8 @@
     <MESSAGE value="clang-format: update ignore list (for reformat.sh)" />
     <MESSAGE value="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable." />
     <MESSAGE value="pmt/external: Add license notify for Android Build System" />
-    <option name="LAST_COMMIT_MESSAGE" value="pmt/external: Add license notify for Android Build System" />
+    <MESSAGE value="libpartition_map: Remove/rename some functions. Improvements.&#10; - The function names in Partition_t and Builder should be rebranded more appropriately.&#10; - Improve the builder, remove unnecessary elements, and provide a better structure.&#10; - Improve the test and adapt the plugins to the new functions." />
+    <option name="LAST_COMMIT_MESSAGE" value="libpartition_map: Remove/rename some functions. Improvements.&#10; - The function names in Partition_t and Builder should be rebranded more appropriately.&#10; - Improve the builder, remove unnecessary elements, and provide a better structure.&#10; - Improve the test and adapt the plugins to the new functions." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

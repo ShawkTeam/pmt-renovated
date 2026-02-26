@@ -35,6 +35,7 @@ class BackupPlugin final : public BasicPlugin {
   std::vector<std::string> partitions, outputNames;
   std::string rawPartitions, rawOutputNames, outputDirectory;
   uint64_t bufferSize = 0;
+  bool noSetPermissions = false;
 
 public:
   CLI::App *cmd = nullptr;
@@ -54,7 +55,9 @@ public:
         ->check(CLI::ExistingDirectory);
     cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")
         ->transform(CLI::AsSizeValue(false))
-        ->default_val("4KB");
+        ->default_val("1MB");
+    cmd->add_flag("-n,--no-set-perms", noSetPermissions, "Don't change permission and owner after progress")
+        ->default_val(false);
     return true;
   }
 
@@ -92,12 +95,14 @@ public:
       return PairError("Failed to write %s partition to %s image: %s", partitionName.c_str(), outputName.c_str(), error.what());
     }
 
-    if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY))
-      LOGNF(PLUGIN, logPath, WARNING) << "Failed to change owner of output file: " << outputName
-                                      << ". Access problems maybe occur in non-root mode" << std::endl;
-    if (!Helper::changeMode(outputName, 0664))
-      LOGNF(PLUGIN, logPath, WARNING) << "Failed to change mode of output file as 660: " << outputName
-                                      << ". Access problems maybe occur in non-root mode" << std::endl;
+    if (!noSetPermissions) {
+      if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY))
+        LOGNF(PLUGIN, logPath, WARNING) << "Failed to change owner of output file: " << outputName
+                                        << ". Access problems maybe occur in non-root mode" << std::endl;
+      if (!Helper::changeMode(outputName, 0664))
+        LOGNF(PLUGIN, logPath, WARNING) << "Failed to change mode of output file as 660: " << outputName
+                                        << ". Access problems maybe occur in non-root mode" << std::endl;
+    }
 
     return PairSuccess("%s partition successfully back upped to %s", partitionName.data(), outputName.data());
   }
@@ -117,8 +122,7 @@ public:
       LOGNF(PLUGIN, logPath, INFO) << "Created thread backup upping " << partitionName << std::endl;
     }
 
-    const auto result = manager.getResults();
-    return manager.finalize(result);
+    return manager();
   }
 
   std::string getName() override { return PLUGIN; }

@@ -117,8 +117,7 @@ public:
       LOGNF(PLUGIN, logPath, INFO) << "Created thread for flashing image to " << partitions[i] << std::endl;
     }
 
-    const auto result = manager.getResults();
-    return manager.finalize(result);
+    return manager();
   }
 
   std::string getName() override { return PLUGIN; }

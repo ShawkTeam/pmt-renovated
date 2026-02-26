@@ -118,10 +118,8 @@ public:
       LOGNF(PLUGIN, logPath, INFO) << "Created thread for writing zero bytes to " << partitionName << std::endl;
     }
 
-    const auto result = manager.getResults();
-
     LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
-    return manager.finalize(result);
+    return manager();
   }
 
   std::string getName() override { return PLUGIN; }

@@ -18,7 +18,7 @@
 #include <__filesystem/path.h>
 #include <sys/stat.h>
 #include <unistd.h>
-#include <libhelper/lib.hpp>
+#include <libhelper/functions.hpp>
 #include <private/android_filesystem_config.h>
 
 namespace Helper {
@@ -62,6 +62,6 @@ bool areLinked(const std::filesystem::path &entry1, const std::filesystem::path 
   const std::string st1 = isSymbolicLink(entry1) ? readSymlink(entry1) : entry1.string();
   const std::string st2 = isSymbolicLink(entry2) ? readSymlink(entry2) : entry2.string();
 
-  return (st1 == st2);
+  return st1 == st2;
 }
 } // namespace Helper

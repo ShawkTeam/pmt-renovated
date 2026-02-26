@@ -50,7 +50,7 @@ public:
 
   bool run() override {
     LOGNF(PLUGIN, logPath, INFO) << "Removing log file: " << FLAGS.logFile << std::endl;
-    Helper::LoggingProperties::setLoggingState<YES>(); // eraseEntry writes log!
+    Helper::Logger::Properties::setLogging(true); // eraseEntry writes log!
     return Helper::eraseEntry(FLAGS.logFile);
   }
 

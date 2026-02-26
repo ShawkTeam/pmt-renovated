@@ -20,6 +20,8 @@
 #include <fstream>
 #include <iostream>
 #include <unistd.h>
+#include <libhelper/error.hpp>
+#include <libhelper/functions.hpp>
 #include <libpartition_map/lib.hpp>
 
 int main() {

@@ -60,7 +60,6 @@ public:
 
   std::unique_ptr<PartitionMap::Builder> partitionTables;
   std::string logFile;
-  std::set<std::string> extraTablePaths;
 
   bool onLogical;
   bool quietProcess;

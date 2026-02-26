@@ -15,21 +15,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBHELPER_LIB_HPP
-#define LIBHELPER_LIB_HPP
+#ifndef LIBHELPER_ANDROID_HPP
+#define LIBHELPER_ANDROID_HPP
 
-#if __cplusplus < 202002L
-#error "libhelper/lib.hpp is requires C++20 or higher C++ standarts."
-#endif
+#include <string>
+#include <string_view>
 
-#include <libhelper/macros.hpp>
-#include <libhelper/management.hpp>
-#include <libhelper/error.hpp>
-#include <libhelper/logging.hpp>
-#include <libhelper/android.hpp>
-#include <libhelper/capsule.hpp>
-#include <libhelper/functions.hpp>
-#include <libhelper/pure_tuple.hpp>
-#include <libhelper/random.hpp>
+namespace Helper {
+// -------------------------------
+// Android - not throws Helper::Error
+// -------------------------------
+#ifdef __ANDROID__
+/**
+ * Get input property as string (for Android).
+ * Returns "ERROR" on any error.
+ */
+std::string getProperty(std::string_view prop);
 
-#endif // #ifndef LIBHELPER_LIB_HPP
+/**
+ * Reboot device to input mode (for Android).
+ */
+bool androidReboot(std::string_view arg);
+#endif // #ifdef __ANDROID__
+
+} // namespace Helper
+
+#endif // #ifndef LIBHELPER_ANDROID_HPP

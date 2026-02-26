@@ -18,7 +18,6 @@
 # Sources
 set(LIBHELPER_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Checkers.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/Classes.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/FileUtil.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Sha256.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Utilities.cpp

@@ -27,7 +27,8 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <libhelper/lib.hpp>
+#include <libhelper/functions.hpp>
+#include <libhelper/management.hpp>
 #ifndef ANDROID_BUILD
 #include <sys/_system_properties.h>
 #include <generated/buildInfo.hpp>
@@ -71,24 +72,6 @@ int android_reboot(const unsigned cmd, int /*flags*/, const char *arg) {
 #endif
 
 namespace Helper {
-namespace LoggingProperties {
-std::string_view FILE = "last_logs.log", NAME = "main";
-bool PRINT = NO, DISABLE = NO;
-
-void reset() {
-  FILE = "last_logs.log";
-  NAME = "main";
-  PRINT = NO;
-}
-
-void set(const std::filesystem::path &file, std::string_view name) {
-  if (!file.string().empty()) FILE = file.c_str();
-  if (name.data() != nullptr) NAME = name;
-}
-
-void setProgramName(const std::string_view name) { NAME = name; }
-void setLogFile(std::string_view file) { FILE = file; }
-} // namespace LoggingProperties
 
 bool runCommand(const std::string_view cmd) {
   LOGN(HELPER, INFO) << "run command request: " << cmd << std::endl;

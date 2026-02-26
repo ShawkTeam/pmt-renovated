@@ -17,20 +17,7 @@
 
 set(PLUGINS ${CMAKE_CURRENT_SOURCE_DIR}/plugins)
 
-# Define sources
-set(PLUGIN_SOURCES
-		${PLUGINS}/BackupPlugin.cpp
-		${PLUGINS}/CleanLogPlugin.cpp
-		${PLUGINS}/ErasePlugin.cpp
-		${PLUGINS}/FlashPlugin.cpp
-		${PLUGINS}/InfoPlugin.cpp
-		${PLUGINS}/MemoryTestPlugin.cpp
-		${PLUGINS}/PartitionSizePlugin.cpp
-		${PLUGINS}/RealPathPlugin.cpp
-		${PLUGINS}/RebootPlugin.cpp
-		${PLUGINS}/TypePlugin.cpp
-)
-
+# Define pmt sources.
 set(PMT_SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/PartitionManager.cpp
 		${CMAKE_CURRENT_SOURCE_DIR}/Main.cpp

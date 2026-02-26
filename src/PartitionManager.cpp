@@ -24,7 +24,7 @@
 namespace PartitionManager {
 
 BasicFlags::BasicFlags()
-    : logFile(Helper::LoggingProperties::FILE), onLogical(false), quietProcess(false), verboseMode(false), viewVersion(false),
+    : logFile(Helper::Logger::Properties::FILE), onLogical(false), quietProcess(false), verboseMode(false), viewVersion(false),
       viewLicense(false), forceProcess(false), noWorkOnUsed(false) {
   try {
     partitionTables = std::make_unique<PartitionMap::Builder>();
@@ -33,9 +33,9 @@ BasicFlags::BasicFlags()
 }
 
 __attribute__((constructor)) void init() {
-  Helper::LoggingProperties::setLoggingState<YES>();
-  Helper::LoggingProperties::setProgramName("pmt");
-  Helper::LoggingProperties::setLogFile("/sdcard/Documents/last_pmt_logs.log");
+  Helper::Logger::Properties::setLogging(true);
+  Helper::Logger::Properties::setName("pmt");
+  Helper::Logger::Properties::setFile("/sdcard/Documents/last_pmt_logs.log");
 }
 
 std::string getAppVersion() { MKVERSION("pmt"); }
