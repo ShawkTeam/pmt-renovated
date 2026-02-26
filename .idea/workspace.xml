@@ -64,39 +64,17 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libpartition_map: Remove/rename some functions. Improvements.&#10; - The function names in Partition_t and Builder should be rebranded more appropriately.&#10; - Improve the builder, remove unnecessary elements, and provide a better structure.&#10; - Improve the test and adapt the plugins to the new functions.">
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/capsule.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/error.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/macros.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/pure_tuple.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/random.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libs: STL-like additions and significant improvements.&#10; - libhelper properties were separated into individual header files. Everything that was a class was rewritten to be header-only.&#10; - The logging system has been improved.&#10; - The AsyncManager class has been improved.&#10; - Overloads have been added to the Partition_t class in libpartition_map that, unlike in STL, do not throw errors but instead provide std::error_code.&#10; - Plugins, etc., have been adapted.&#10; - Some logic errors have been corrected.">
+      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/builder.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/functions.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/super.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/PartitionManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/PartitionManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Checkers.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Checkers.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Classes.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Magic.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Magic.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -170,7 +148,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Shell Script.Start Test">
+  <component name="RunManager" selected="Shell Script.Cleanup">
     <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="CLION.EXTERNAL.BUILD" enabled="true" />
@@ -497,7 +475,7 @@
       <workItem from="1771531028662" duration="4574000" />
       <workItem from="1771772385366" duration="180000" />
       <workItem from="1772042041557" duration="6138000" />
-      <workItem from="1772124441434" duration="10603000" />
+      <workItem from="1772124441434" duration="12579000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -715,7 +693,15 @@
       <option name="project" value="LOCAL" />
       <updated>1771266432700</updated>
     </task>
-    <option name="localTasksCounter" value="28" />
+    <task id="LOCAL-00028" summary="libs: STL-like additions and significant improvements.&#10; - libhelper properties were separated into individual header files. Everything that was a class was rewritten to be header-only.&#10; - The logging system has been improved.&#10; - The AsyncManager class has been improved.&#10; - Overloads have been added to the Partition_t class in libpartition_map that, unlike in STL, do not throw errors but instead provide std::error_code.&#10; - Plugins, etc., have been adapted.&#10; - Some logic errors have been corrected.">
+      <option name="closed" value="true" />
+      <created>1772137262182</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1772137262182</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -750,7 +736,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: Fix code issues caused by the confusion in Git." />
     <MESSAGE value="pmt: Add more information about license and reformat code." />
     <MESSAGE value="pmt: fix license flag." />
     <MESSAGE value="pmt: If the log file is a new file, a text entry about its origin is added." />
@@ -775,7 +760,8 @@
     <MESSAGE value="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable." />
     <MESSAGE value="pmt/external: Add license notify for Android Build System" />
     <MESSAGE value="libpartition_map: Remove/rename some functions. Improvements.&#10; - The function names in Partition_t and Builder should be rebranded more appropriately.&#10; - Improve the builder, remove unnecessary elements, and provide a better structure.&#10; - Improve the test and adapt the plugins to the new functions." />
-    <option name="LAST_COMMIT_MESSAGE" value="libpartition_map: Remove/rename some functions. Improvements.&#10; - The function names in Partition_t and Builder should be rebranded more appropriately.&#10; - Improve the builder, remove unnecessary elements, and provide a better structure.&#10; - Improve the test and adapt the plugins to the new functions." />
+    <MESSAGE value="libs: STL-like additions and significant improvements.&#10; - libhelper properties were separated into individual header files. Everything that was a class was rewritten to be header-only.&#10; - The logging system has been improved.&#10; - The AsyncManager class has been improved.&#10; - Overloads have been added to the Partition_t class in libpartition_map that, unlike in STL, do not throw errors but instead provide std::error_code.&#10; - Plugins, etc., have been adapted.&#10; - Some logic errors have been corrected." />
+    <option name="LAST_COMMIT_MESSAGE" value="libs: STL-like additions and significant improvements.&#10; - libhelper properties were separated into individual header files. Everything that was a class was rewritten to be header-only.&#10; - The logging system has been improved.&#10; - The AsyncManager class has been improved.&#10; - Overloads have been added to the Partition_t class in libpartition_map that, unlike in STL, do not throw errors but instead provide std::error_code.&#10; - Plugins, etc., have been adapted.&#10; - Some logic errors have been corrected." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

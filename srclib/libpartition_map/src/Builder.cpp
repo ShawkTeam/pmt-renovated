@@ -22,7 +22,7 @@
 #include <utility>
 #include <libhelper/management.hpp>
 #include <libhelper/functions.hpp>
-#include <libpartition_map/lib.hpp>
+#include <libpartition_map/builder.hpp>
 #include <libpartition_map/redefine_logging_macros.hpp>
 
 namespace PartitionMap {

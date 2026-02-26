@@ -15,17 +15,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBPARTITION_MAP_LIB_HPP
-#define LIBPARTITION_MAP_LIB_HPP
+#ifndef LIBPARTITION_MAP_FUNCTIONS_HPP
+#define LIBPARTITION_MAP_FUNCTIONS_HPP
 
 #if __cplusplus < 202002L
-#error "libpartition_map is requires C++20 or higher C++ standarts."
+#error "libpartition_map/functions.hpp is requires C++20 or higher C++ standarts."
 #endif
 
-#include <libpartition_map/functions.hpp>
+#include <string>
 #include <libpartition_map/definations.hpp>
-#include <libpartition_map/partition.hpp>
-#include <libpartition_map/builder.hpp>
-#include <libpartition_map/super.hpp>
 
-#endif // #ifndef LIBPARTITION_MAP_LIB_HPP
+namespace PartitionMap {
+
+std::string getLibVersion(); // Get version string of library.
+
+namespace Extra {
+
+size_t getMagicLength(uint64_t magic);
+bool hasMagic(uint64_t magic, ssize_t buf, const std::string &path);
+std::string formatMagic(uint64_t magic);
+std::string getSizeUnitAsString(SizeUnit size);
+
+} // namespace Extra
+} // namespace PartitionMap
+
+#endif // #ifndef LIBPARTITION_MAP_FUNCTIONS_HPP

@@ -22,7 +22,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <libhelper/lib.hpp>
-#include <libpartition_map/lib.hpp>
+#include <libpartition_map/definations.hpp>
+#include <libpartition_map/functions.hpp>
 #include <libpartition_map/redefine_logging_macros.hpp>
 
 namespace PartitionMap::Extra {
