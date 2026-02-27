@@ -37,7 +37,6 @@ license {
     name: "pmt_license",
     visibility: [":__subpackages__"],
     license_kinds: [
-
         "SPDX-license-identifier-GPL-3.0",
     ],
     license_text: ["LICENSE"],
@@ -66,7 +65,6 @@ filegroup {
     name: "libhelper_srcs",
     srcs: [
         "srclib/libhelper/src/Checkers.cpp",
-        "srclib/libhelper/src/Classes.cpp",
         "srclib/libhelper/src/FileUtil.cpp",
         "srclib/libhelper/src/Sha256.cpp",
         "srclib/libhelper/src/Utilities.cpp",
