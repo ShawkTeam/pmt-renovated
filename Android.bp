@@ -34,7 +34,7 @@ license {
 }
 
 license {
-    name: "pmt_license",
+    name: "external_pmt_license",
     visibility: [":__subpackages__"],
     license_kinds: [
         "SPDX-license-identifier-GPL-3.0",
@@ -123,6 +123,7 @@ cc_library {
     name: "libhelper",
     defaults: ["pmt_defaults"],
     srcs: [":libhelper_srcs"],
+    licenses: ["external_pmt_license"],
 }
 
 // libpartition_map library target
@@ -139,6 +140,7 @@ cc_library {
         "libgptf",
     ],
     cflags: ["-D_FILE_OFFSET_BITS=64"],
+    licenses: ["external_pmt_license"],
 }
 
 // pmt executable target
@@ -149,5 +151,10 @@ cc_binary {
     shared_libs: [
         "libhelper",
         "libpartition_map",
+    ],
+    licenses: [
+        "external_pmt_license",
+        "external_cli11_license",
+        "external_nlohmann_json_license",
     ],
 }
