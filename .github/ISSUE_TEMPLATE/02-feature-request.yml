@@ -3,14 +3,6 @@ description: Suggest a new idea or enhancement for PMT
 title: "[FEATURE] "
 labels: ["enhancement"]
 body:
-  - type: input
-    id: feature-title
-    attributes:
-      label: "📝 Feature Title"
-      placeholder: "Example: Add support for ext4 resize"
-    validations:
-      required: true
-
   - type: textarea
     id: feature-description
     attributes:

@@ -49,7 +49,7 @@ body:
     id: pmt-version
     attributes:
       label: "💻 PMT Version"
-      placeholder: "Example: v2.3.1"
+      placeholder: "Example: v1.5.0"
     validations:
       required: true
 
@@ -57,7 +57,7 @@ body:
     id: android-version
     attributes:
       label: "📱 Android Version"
-      placeholder: "Example: Android 13"
+      placeholder: "Example: Android 16"
     validations:
       required: true
 
