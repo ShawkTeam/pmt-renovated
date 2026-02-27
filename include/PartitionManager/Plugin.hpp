@@ -49,7 +49,6 @@
 #endif // #ifdef BUILTIN_PLUGINS
 // clang-format on
 
-#include <concepts>
 #include <functional>
 #include <memory>
 #include <unordered_set>

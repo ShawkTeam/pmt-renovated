@@ -64,24 +64,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="github: cleanup issue templates">
-      <change afterPath="$PROJECT_DIR$/build/ld/builtin_modules.ld" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/ld/module.ld" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/jsonSchemas.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsonSchemas.xml" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="android: update license configuration">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/build/cmake/functions.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -725,7 +712,23 @@
       <option name="project" value="LOCAL" />
       <updated>1772218061807</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="android: update libhelper sources in Android.bp (2)">
+      <option name="closed" value="true" />
+      <created>1772226700048</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1772226700048</updated>
+    </task>
+    <task id="LOCAL-00032" summary="android: update license configuration">
+      <option name="closed" value="true" />
+      <created>1772227355825</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1772227355825</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -760,8 +763,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: If the log file is a new file, a text entry about its origin is added." />
-    <MESSAGE value="libhelper: New method for asynchronous operations and some improvements.&#10; - A helper class called `AsyncManager` has been added.&#10; - Where `std::enable_if` was used, a feature left over from C++17, it has been replaced with C++20 `requires`.&#10; - Some improvements in the `Capsule` class." />
     <MESSAGE value="pmt: Use exit() instead of _exit() for memory safety." />
     <MESSAGE value="pmt: Improve the build system according to the new plugin system.&#10; - Even if plugins are not compiled built-in, pmt_static is always configured to be built-in.&#10; - The build script and GitHub workflow have been adapted.&#10; - Other improvements..." />
     <MESSAGE value="github: remove unnecessary workflow." />
@@ -785,7 +786,9 @@
     <MESSAGE value="libs: STL-like additions and significant improvements.&#10; - libhelper properties were separated into individual header files. Everything that was a class was rewritten to be header-only.&#10; - The logging system has been improved.&#10; - The AsyncManager class has been improved.&#10; - Overloads have been added to the Partition_t class in libpartition_map that, unlike in STL, do not throw errors but instead provide std::error_code.&#10; - Plugins, etc., have been adapted.&#10; - Some logic errors have been corrected." />
     <MESSAGE value="libpartition_map: parse the library headers&#10; - libpartition_map properties were separated into individual header files." />
     <MESSAGE value="github: cleanup issue templates" />
-    <option name="LAST_COMMIT_MESSAGE" value="github: cleanup issue templates" />
+    <MESSAGE value="android: update libhelper sources in Android.bp (2)" />
+    <MESSAGE value="android: update license configuration" />
+    <option name="LAST_COMMIT_MESSAGE" value="android: update license configuration" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -1,8 +1,9 @@
 # Dont'd add IDE-generated temporary files
 cmake-build-*
 
-# Don't add generated headers
+# Don't add generated headers and linker scripts
 include/generated
+build/ld/generated
 
 # Dont't add temporary build directories
 build_*
