@@ -64,17 +64,24 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libs: STL-like additions and significant improvements.&#10; - libhelper properties were separated into individual header files. Everything that was a class was rewritten to be header-only.&#10; - The logging system has been improved.&#10; - The AsyncManager class has been improved.&#10; - Overloads have been added to the Partition_t class in libpartition_map that, unlike in STL, do not throw errors but instead provide std::error_code.&#10; - Plugins, etc., have been adapted.&#10; - Some logic errors have been corrected.">
-      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/builder.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/functions.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/super.hpp" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="github: cleanup issue templates">
+      <change afterPath="$PROJECT_DIR$/build/ld/builtin_modules.ld" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/ld/module.ld" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/jsonSchemas.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/jsonSchemas.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Magic.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Magic.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/functions.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,49 +124,49 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.west.config.association.type.startup.service&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;SHELLCHECK.PATH&quot;: &quot;/home/yzbruh/.local/share/JetBrains/CLion2025.2/Shell Script/shellcheck&quot;,
-    &quot;Shell Script.Build (Debug).executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Build (Debug, with built-in plugins).executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Build (Release).executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Cleanup.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Reformat Code.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Start Test.executor&quot;: &quot;Run&quot;,
-    &quot;cf.advertisement.text.overridden&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/Masaüstü/Projects/pmt-renovated-github/.github/workflows&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.RadMigrateCodeStyle": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.west.config.association.type.startup.service": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "SHELLCHECK.PATH": "/home/yzbruh/.local/share/JetBrains/CLion2025.2/Shell Script/shellcheck",
+    "Shell Script.Build (Debug).executor": "Run",
+    "Shell Script.Build (Debug, with built-in plugins).executor": "Run",
+    "Shell Script.Build (Release).executor": "Run",
+    "Shell Script.Cleanup.executor": "Run",
+    "Shell Script.Reformat Code.executor": "Run",
+    "Shell Script.Start Test.executor": "Run",
+    "cf.advertisement.text.overridden": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/yzbruh/Masaüstü/Projects/pmt-renovated-github/.github/workflows",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "CMakeSettings",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected="Shell Script.Cleanup">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -475,7 +482,8 @@
       <workItem from="1771531028662" duration="4574000" />
       <workItem from="1771772385366" duration="180000" />
       <workItem from="1772042041557" duration="6138000" />
-      <workItem from="1772124441434" duration="12579000" />
+      <workItem from="1772124441434" duration="12892000" />
+      <workItem from="1772217851395" duration="7002000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -701,7 +709,23 @@
       <option name="project" value="LOCAL" />
       <updated>1772137262182</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="libpartition_map: parse the library headers&#10; - libpartition_map properties were separated into individual header files.">
+      <option name="closed" value="true" />
+      <created>1772139058449</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1772139058449</updated>
+    </task>
+    <task id="LOCAL-00030" summary="github: cleanup issue templates">
+      <option name="closed" value="true" />
+      <created>1772218061807</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1772218061807</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -736,8 +760,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: Add more information about license and reformat code." />
-    <MESSAGE value="pmt: fix license flag." />
     <MESSAGE value="pmt: If the log file is a new file, a text entry about its origin is added." />
     <MESSAGE value="libhelper: New method for asynchronous operations and some improvements.&#10; - A helper class called `AsyncManager` has been added.&#10; - Where `std::enable_if` was used, a feature left over from C++17, it has been replaced with C++20 `requires`.&#10; - Some improvements in the `Capsule` class." />
     <MESSAGE value="pmt: Use exit() instead of _exit() for memory safety." />
@@ -761,7 +783,9 @@
     <MESSAGE value="pmt/external: Add license notify for Android Build System" />
     <MESSAGE value="libpartition_map: Remove/rename some functions. Improvements.&#10; - The function names in Partition_t and Builder should be rebranded more appropriately.&#10; - Improve the builder, remove unnecessary elements, and provide a better structure.&#10; - Improve the test and adapt the plugins to the new functions." />
     <MESSAGE value="libs: STL-like additions and significant improvements.&#10; - libhelper properties were separated into individual header files. Everything that was a class was rewritten to be header-only.&#10; - The logging system has been improved.&#10; - The AsyncManager class has been improved.&#10; - Overloads have been added to the Partition_t class in libpartition_map that, unlike in STL, do not throw errors but instead provide std::error_code.&#10; - Plugins, etc., have been adapted.&#10; - Some logic errors have been corrected." />
-    <option name="LAST_COMMIT_MESSAGE" value="libs: STL-like additions and significant improvements.&#10; - libhelper properties were separated into individual header files. Everything that was a class was rewritten to be header-only.&#10; - The logging system has been improved.&#10; - The AsyncManager class has been improved.&#10; - Overloads have been added to the Partition_t class in libpartition_map that, unlike in STL, do not throw errors but instead provide std::error_code.&#10; - Plugins, etc., have been adapted.&#10; - Some logic errors have been corrected." />
+    <MESSAGE value="libpartition_map: parse the library headers&#10; - libpartition_map properties were separated into individual header files." />
+    <MESSAGE value="github: cleanup issue templates" />
+    <option name="LAST_COMMIT_MESSAGE" value="github: cleanup issue templates" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

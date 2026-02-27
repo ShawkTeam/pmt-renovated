@@ -132,6 +132,7 @@ function(add_plugin PLUGIN_NAME)
         add_library(${TARGET_NAME} SHARED ${ARG_SOURCES})
         set_target_properties(${TARGET_NAME} PROPERTIES PREFIX "" OUTPUT_NAME ${TARGET_NAME})
         target_link_libraries(${TARGET_NAME} PRIVATE pmt::interface::shared)
+        target_link_options(${TARGET_NAME} PRIVATE "-Wl,-T,${CMAKE_SOURCE_DIR}/build/ld/module.ld")
 
         if(ARG_LIBS)
             target_link_libraries(${TARGET_NAME} PRIVATE ${ARG_LIBS})

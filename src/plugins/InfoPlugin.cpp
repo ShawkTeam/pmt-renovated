@@ -41,7 +41,7 @@ public:
 
   ~InfoPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("info", "Tell info(s) of input partition list")
               ->footer("Use get-all or getvar-all as partition name for getting "
@@ -67,15 +67,15 @@ public:
     return true;
   }
 
-  bool onUnload() override {
+  PLUGIN_SECTION bool onUnload() override {
     LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
     cmd = nullptr;
     return true;
   }
 
-  bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
-  bool run() override {
+  PLUGIN_SECTION bool run() override {
     std::vector<PartitionMap::Partition_t> jParts;
     PartitionMap::SizeUnit multiple;
     if (asByte) multiple = PartitionMap::BYTE;
@@ -121,15 +121,11 @@ public:
     return true;
   }
 
-  std::string getName() override { return PLUGIN; }
+  PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
-  std::string getVersion() override { return PLUGIN_VERSION; }
+  PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 
 } // namespace PartitionManager
 
-#ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, InfoPlugin)
-#else
-REGISTER_DYNAMIC_PLUGIN(PartitionManager::InfoPlugin)
-#endif // #ifdef BUILTIN_PLUGINS
+REGISTER_PLUGIN(PartitionManager, InfoPlugin)

@@ -25,6 +25,30 @@
 #define PM "PluginManager"
 #define PM_VERSION "1.0"
 
+// clang-format off
+#define FLAGS          (*flags)
+#define TABLES         (*FLAGS.partitionTables)
+#define TABLES_REF     *flags->partitionTables
+
+#ifdef BUILTIN_PLUGINS
+#define PLUGIN_SECTION __attribute__((section(".builtin_modules")))
+#define REGISTER_PLUGIN(__namespace, __class)                                               \
+  struct __class##_AutoRegister {                                                           \
+    __class##_AutoRegister() {                                                              \
+      PartitionManager::BuiltinPluginRegistry<PartitionManager::BasicPlugin>::getInstance() \
+        .registerPlugin([]() {                                                              \
+          return new __namespace::__class();                                                \
+        });                                                                                 \
+    }                                                                                       \
+  };                                                                                        \
+  static __class##_AutoRegister _reg;
+#else
+#define PLUGIN_SECTION __attribute__((section(".pmt_module")))
+#define REGISTER_PLUGIN(__namespace, __class) \
+  extern "C" PLUGIN_SECTION PartitionManager::BasicPlugin *create_plugin() { return new __namespace::__class(); }
+#endif // #ifdef BUILTIN_PLUGINS
+// clang-format on
+
 #include <concepts>
 #include <functional>
 #include <memory>
@@ -44,15 +68,15 @@ public:
   FlagsBase flags;
   const char *logPath;
 
-  virtual ~BasicPlugin() = default;
+  virtual PLUGIN_SECTION ~BasicPlugin() = default;
 
-  virtual bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) = 0;
-  virtual bool onUnload() = 0;
-  virtual bool used() = 0;
-  virtual bool run() = 0;
+  virtual PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) = 0;
+  virtual PLUGIN_SECTION bool onUnload() = 0;
+  virtual PLUGIN_SECTION bool used() = 0;
+  virtual PLUGIN_SECTION bool run() = 0;
 
-  virtual std::string getName() = 0;
-  virtual std::string getVersion() = 0;
+  virtual PLUGIN_SECTION std::string getName() = 0;
+  virtual PLUGIN_SECTION std::string getVersion() = 0;
 }; // class BasicPlugin
 
 using PluginError = Helper::Error;
@@ -190,26 +214,6 @@ private:
 
 using BasicManager = PluginManager<BasicPlugin>;
 using BasicBuiltinPluginRegistry = BuiltinPluginRegistry<BasicPlugin>;
-
-// clang-format off
-#define REGISTER_BUILTIN_PLUGIN(__namespace, __class)                                               \
-        struct __class##_AutoRegister {                                                             \
-            __class##_AutoRegister() {                                                              \
-              PartitionManager::BuiltinPluginRegistry<PartitionManager::BasicPlugin>::getInstance() \
-                .registerPlugin([]() {                                                              \
-                    return new __namespace::__class();                                              \
-                });                                                                                 \
-            }                                                                                       \
-        };                                                                                          \
-        static __class##_AutoRegister _reg;
-
-#define REGISTER_DYNAMIC_PLUGIN(__class) \
-  extern "C" PartitionManager::BasicPlugin *create_plugin() { return new __class(); }
-#define FLAGS (*flags)
-#define TABLES (*FLAGS.partitionTables)
-#define TABLES_REF *flags->partitionTables
-// clang-format on
-
 using resultPair = std::pair<std::string, bool>;
 
 __attribute__((format(printf, 1, 2))) inline resultPair PairError(const char *format, ...) {

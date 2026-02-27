@@ -37,6 +37,12 @@ endif()
 target_link_libraries(pmt PRIVATE pmt::interface::shared)
 target_link_libraries(pmt_static PRIVATE pmt::interface::static)
 
+# Apply custom linker script
+if(BUILTIN_PLUGINS)
+	target_link_options(pmt PRIVATE "-Wl,-T,${CMAKE_SOURCE_DIR}/build/ld/builtin_modules.ld")
+endif()
+target_link_options(pmt_static PRIVATE "-Wl,-T,${CMAKE_SOURCE_DIR}/build/ld/builtin_modules.ld")
+
 # Add plugins
 add_plugin(backup SOURCES ${PLUGINS}/BackupPlugin.cpp)
 add_plugin(clean_log SOURCES ${PLUGINS}/CleanLogPlugin.cpp)

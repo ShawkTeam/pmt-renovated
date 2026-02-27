@@ -35,7 +35,7 @@ public:
 
   ~RealPathPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("real-path", "Tell real paths of partition(s)");
@@ -46,15 +46,15 @@ public:
     return true;
   }
 
-  bool onUnload() override {
+  PLUGIN_SECTION bool onUnload() override {
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
     cmd = nullptr;
     return true;
   }
 
-  bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
-  bool run() override {
+  PLUGIN_SECTION bool run() override {
     for (const auto &partition : partitions) {
       if (!TABLES.hasPartition(partition)) throw ERR << "Couldn't find partition: " << partition;
 
@@ -76,15 +76,11 @@ public:
     return true;
   }
 
-  std::string getName() override { return PLUGIN; }
+  PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
-  std::string getVersion() override { return PLUGIN_VERSION; }
+  PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 
 } // namespace PartitionManager
 
-#ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, RealPathPlugin)
-#else
-REGISTER_DYNAMIC_PLUGIN(PartitionManager::RealPathPlugin)
-#endif // #ifdef BUILTIN_PLUGINS
+REGISTER_PLUGIN(PartitionManager, RealPathPlugin)

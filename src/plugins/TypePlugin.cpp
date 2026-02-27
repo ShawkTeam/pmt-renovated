@@ -37,7 +37,7 @@ public:
 
   ~TypePlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("type", "Get type of the partition(s) or image(s)");
@@ -53,15 +53,15 @@ public:
     return true;
   }
 
-  bool onUnload() override {
+  PLUGIN_SECTION bool onUnload() override {
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
     cmd = nullptr;
     return true;
   }
 
-  bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
-  bool run() override {
+  PLUGIN_SECTION bool run() override {
     std::map<uint64_t, std::string> magics;
     if (onlyCheckAndroidMagics)
       magics.merge(PartitionMap::Extra::AndroidMagics);
@@ -92,15 +92,11 @@ public:
     return true;
   }
 
-  std::string getName() override { return PLUGIN; }
+  PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
-  std::string getVersion() override { return PLUGIN_VERSION; }
+  PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 
 } // namespace PartitionManager
 
-#ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, TypePlugin)
-#else
-REGISTER_DYNAMIC_PLUGIN(PartitionManager::TypePlugin)
-#endif // #ifdef BUILTIN_PLUGINS
+REGISTER_PLUGIN(PartitionManager, TypePlugin)

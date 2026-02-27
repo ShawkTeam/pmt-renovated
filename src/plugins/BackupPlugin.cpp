@@ -42,9 +42,9 @@ public:
   FlagsBase flags;
   const char *logPath = nullptr;
 
-  ~BackupPlugin() override = default;
+  PLUGIN_SECTION ~BackupPlugin() override = default;
 
-  bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = mainFlags;
@@ -61,15 +61,15 @@ public:
     return true;
   }
 
-  bool onUnload() override {
+  PLUGIN_SECTION bool onUnload() override {
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
     cmd = nullptr;
     return true;
   }
 
-  bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
-  resultPair runAsync(const std::string &partitionName, const std::string &outputName) const {
+  PLUGIN_SECTION resultPair runAsync(const std::string &partitionName, const std::string &outputName) const {
     if (!TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
     const auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
     const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
@@ -107,7 +107,7 @@ public:
     return PairSuccess("%s partition successfully back upped to %s", partitionName.data(), outputName.data());
   }
 
-  bool run() override {
+  PLUGIN_SECTION bool run() override {
     processCommandLine(partitions, outputNames, rawPartitions, rawOutputNames, ',', true);
     if (!outputNames.empty() && partitions.size() != outputNames.size())
       throw CLI::ValidationError("You must provide an output name(s) as long as the partition name(s)");
@@ -125,15 +125,11 @@ public:
     return manager();
   }
 
-  std::string getName() override { return PLUGIN; }
+  PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
-  std::string getVersion() override { return PLUGIN_VERSION; }
+  PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 
 } // namespace PartitionManager
 
-#ifdef BUILTIN_PLUGINS
-REGISTER_BUILTIN_PLUGIN(PartitionManager, BackupPlugin)
-#else
-REGISTER_DYNAMIC_PLUGIN(PartitionManager::BackupPlugin)
-#endif // #ifdef BUILTIN_PLUGINS
+REGISTER_PLUGIN(PartitionManager, BackupPlugin)
