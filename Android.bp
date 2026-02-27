@@ -66,7 +66,6 @@ filegroup {
     name: "libhelper_srcs",
     srcs: [
         "srclib/libhelper/src/Checkers.cpp",
-        "srclib/libhelper/src/Classes.cpp",
         "srclib/libhelper/src/FileUtil.cpp",
         "srclib/libhelper/src/Sha256.cpp",
         "srclib/libhelper/src/Utilities.cpp",
