@@ -115,9 +115,10 @@ function(add_super_library TARGET_NAME)
 endfunction()
 
 function(add_plugin PLUGIN_NAME)
+    set(options NO_MODULE_LINKER_SCRIPT)
     set(oneValueArgs LINKER_SCRIPT)
     set(multiValueArgs SOURCES LIBS COMPILE_OPTIONS LINKER_OPTIONS DEFINATIONS)
-    cmake_parse_arguments(ARG "" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+    cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
     if(NOT ARG_SOURCES)
         message(FATAL_ERROR "Please specify sources of '${PLUGIN_NAME}' plugin")
@@ -139,12 +140,16 @@ function(add_plugin PLUGIN_NAME)
         target_link_libraries(${TARGET_NAME} PRIVATE pmt::interface::shared)
 
         if(ARG_LINKER_SCRIPT)
-            execute_process(COMMAND bash -c "mkdir -p ${CMAKE_SOURCE_DIR}/build/ld/generated")
-            file(GENERATE
-                    OUTPUT "${CMAKE_BINARY_DIR}/ld/generated/${TARGET_NAME}.ld"
-                    CONTENT "INCLUDE ${CMAKE_SOURCE_DIR}/build/ld/module.ld\nINCLUDE ${ARG_LINKER_SCRIPT}")
-            target_link_options(${TARGET_NAME} PRIVATE "-Wl,-T,${CMAKE_SOURCE_DIR}/build/ld/generated/${TARGET_NAME}.ld")
-        else()
+            if(ARG_NO_MODULE_LINKER_SCRIPT)
+                target_link_options(${TARGET_NAME} PRIVATE "-Wl,-T,${ARG_LINKER_SCRIPT}")
+            else()
+                execute_process(COMMAND bash -c "mkdir -p ${CMAKE_SOURCE_DIR}/build/ld/generated")
+                file(GENERATE
+                        OUTPUT "${CMAKE_BINARY_DIR}/ld/generated/${TARGET_NAME}.ld"
+                        CONTENT "INCLUDE ${CMAKE_SOURCE_DIR}/build/ld/module.ld\nINCLUDE ${ARG_LINKER_SCRIPT}")
+                target_link_options(${TARGET_NAME} PRIVATE "-Wl,-T,${CMAKE_SOURCE_DIR}/build/ld/generated/${TARGET_NAME}.ld")
+            endif()
+        elseif(NOT ARG_NO_MODULE_LINKER_SCRIPT)
             target_link_options(${TARGET_NAME} PRIVATE "-Wl,-T,${CMAKE_SOURCE_DIR}/build/ld/module.ld")
         endif()
 
