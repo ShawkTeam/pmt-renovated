@@ -42,6 +42,7 @@ public:
   FlagsBase flags;
   const char *logPath = nullptr;
 
+  PLUGIN_SECTION BackupPlugin() = default;
   PLUGIN_SECTION ~BackupPlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
@@ -56,8 +57,7 @@ public:
     cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")
         ->transform(CLI::AsSizeValue(false))
         ->default_val("1MB");
-    cmd->add_flag("-n,--no-set-perms", noSetPermissions, "Don't change permission and owner after progress")
-        ->default_val(false);
+    cmd->add_flag("-n,--no-set-perms", noSetPermissions, "Don't change permission and owner after progress")->default_val(false);
     return true;
   }
 

@@ -19,24 +19,32 @@
 #define LIBHELPER_LOGGING_HPP
 
 #define LOG(level)                                                                                                                    \
-  Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), Helper::Logger::Properties::NAME.c_str(), __FILE__, __LINE__)
+  Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), Helper::Logger::Properties::NAME.c_str(), __FILE__,       \
+                 __LINE__)
 #define LOGF(file, level) Helper::Logger(level, __func__, file, Helper::Logger::Properties::NAME.c_str(), __FILE__, __LINE__)
 #define LOGN(name, level) Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), name, __FILE__, __LINE__)
 #define LOGNF(name, file, level) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
 #define LOG_IF(level, condition)                                                                                                      \
-  if (condition)                                                                                                                      \
-  Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), Helper::Logger::Properties::NAME.c_str(), __FILE__, __LINE__)
+  if (!(condition)) {                                                                                                                 \
+  } else                                                                                                                              \
+    Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), Helper::Logger::Properties::NAME.c_str(), __FILE__,     \
+                   __LINE__)
 #define LOGF_IF(file, level, condition)                                                                                               \
-  if (condition) Helper::Logger(level, __func__, file, Helper::Logger::Properties::NAME.c_str(), __FILE__, __LINE__)
+  if (!(condition)) {                                                                                                                 \
+  } else                                                                                                                              \
+    Helper::Logger(level, __func__, file, Helper::Logger::Properties::NAME.c_str(), __FILE__, __LINE__)
 #define LOGN_IF(name, level, condition)                                                                                               \
-  if (condition) Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), name, __FILE__, __LINE__)
+  if (!(condition)) {                                                                                                                 \
+  } else                                                                                                                              \
+    Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), name, __FILE__, __LINE__)
 #define LOGNF_IF(name, file, level, condition)                                                                                        \
-  if (condition) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
+  if (!(condition)) {                                                                                                                 \
+  } else                                                                                                                              \
+    Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
 #include <sstream>
 #include <string>
-#include <iostream>
 #include <fstream>
 #include <libhelper/macros.hpp>
 
@@ -50,7 +58,7 @@ enum LogLevels {
 };
 
 // Logger class for logging
-class Logger final {
+class Logger {
   LogLevels level;
   std::ostringstream oss;
   std::string function, logFile, name, file;
@@ -62,8 +70,8 @@ public:
     inline static std::string FILE = "last_logs.log", NAME = "main";
     inline static bool PRINT_TO_STDOUT = false, DISABLE = false;
 
-    static void setFile(const std::string& file) { FILE = file; }
-    static void setName(const std::string& name) { NAME = name; }
+    static void setFile(const std::string &file) { FILE = file; }
+    static void setName(const std::string &name) { NAME = name; }
     static void setPrinting(bool state) { PRINT_TO_STDOUT = state; }
     static void setLogging(bool state) { DISABLE = !state; }
 
@@ -82,28 +90,17 @@ public:
     const tm *date = localtime(&t);
     std::ostringstream __oss;
     __oss << "<" << static_cast<char>(level) << "> [ "
-        << "<prog " << name << "> "
-        << "<on " << std::filesystem::path(file).filename() << ":" << line << "> "
-        << date->tm_mday << "/" << date->tm_mon + 1 << "/" << date->tm_year + 1900 << " "
-        << date->tm_hour << ":" << date->tm_min << ":" << date->tm_sec << "] " << function
-        << "(): " << oss.str();
+          << "<prog " << name << "> "
+          << "<on " << std::filesystem::path(file).filename() << ":" << line << "> " << date->tm_mday << "/" << date->tm_mon + 1 << "/"
+          << date->tm_year + 1900 << " " << date->tm_hour << ":" << date->tm_min << ":" << date->tm_sec << "] " << function
+          << "(): " << oss.str();
     std::string logLine = __oss.str();
 
     if (!std::filesystem::exists(logFile)) {
       if (std::ofstream tempFile(logFile, std::ios::out); !tempFile) {
-#ifdef ANDROID_BUILD
-        Properties::setFile("/tmp/last_pmt_logs.log")
-#else
-        Properties::setFile("/sdcard/last_logs.log");
-#endif
-        LOGN(HELPER, INFO)
-    << "Cannot create log file: " << logFile << ": " << strerror(errno)
-#ifdef ANDROID_BUILD
-    << " New logging file: /tmp/last_pmt_logs.log (this file)."
-#else
-    << " New logging file: last_logs.log (this file)."
-#endif
-    << std::endl;
+        Properties::setFile("last_logs.log");
+        LOGN(HELPER, INFO) << "Cannot create log file: " << logFile << ": " << strerror(errno) << std::endl;
+        LOGN(HELPER, INFO) << "New logging file: last_logs.log" << std::endl;
       }
     }
 
@@ -116,15 +113,16 @@ public:
     } else {
       Properties::setFile("last_logs.log");
       LOGN(HELPER, INFO) << "Cannot write logs to log file: " << logFile << ": " << strerror(errno)
-                         << " Logging file setting up as: last_logs.log (this file)." << std::endl;
+                         << " Logging file setting up as: last_logs.log." << std::endl;
     }
 
-    if (Properties::PRINT_TO_STDOUT) std::cout << logLine;
+    if (Properties::PRINT_TO_STDOUT) fprintf(stdout, "%s", logLine.c_str());
   }
 
   Logger() = delete;
-  Logger(LogLevels level, std::string function, std::string logFile, std::string name, std::string file, int line)
-    : level(level), function(std::move(function)), logFile(std::move(logFile)), name(std::move(name)), file(std::move(file)), line(line) {}
+  Logger(const LogLevels level, std::string function, std::string logFile, std::string name, std::string file, int line)
+      : level(level), function(std::move(function)), logFile(std::move(logFile)), name(std::move(name)), file(std::move(file)),
+        line(line) {}
 
   template <typename T> Logger &operator<<(const T &msg) {
     oss << msg;

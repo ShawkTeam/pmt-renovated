@@ -40,7 +40,8 @@ public:
   FlagsBase flags;
   const char *logPath = nullptr;
 
-  ~FlashPlugin() override = default;
+  PLUGIN_SECTION FlashPlugin() = default;
+  PLUGIN_SECTION ~FlashPlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();

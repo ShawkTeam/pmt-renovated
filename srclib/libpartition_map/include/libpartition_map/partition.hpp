@@ -29,8 +29,7 @@
 
 namespace PartitionMap {
 class Partition_t {
-  std::filesystem::path localTablePath;       // The table path to which the partition
-  // belongs (like /dev/block/sdc).
+  std::filesystem::path localTablePath;       // The table path to which the partition belongs (like /dev/block/sdc).
   std::filesystem::path logicalPartitionPath; // Path of logical partition.
   uint32_t localIndex = 0;                    // The actual index of the partition within the table.
   mutable GPTPart gptPart;                    // Complete data for the partition.

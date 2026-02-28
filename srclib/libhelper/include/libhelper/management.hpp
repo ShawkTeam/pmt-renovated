@@ -74,9 +74,7 @@ public:
 
   std::vector<__return_type> getResults() {
     if (!get) {
-      std::ranges::for_each(futures, [&](auto& future) {
-        results.push_back(future.get());
-      });
+      std::ranges::for_each(futures, [&](auto &future) { results.push_back(future.get()); });
       get = true;
     }
     return results;
@@ -84,14 +82,18 @@ public:
 
   bool resultsReceived() const { return get; }
 
-  bool finalize() const requires std::same_as<std::pair<std::string, bool>, __return_type> {
+  bool finalize() const
+    requires std::same_as<std::pair<std::string, bool>, __return_type>
+  {
     if (!get) return false;
     std::ostringstream oss;
     bool ret = true;
 
-    for (const auto& res : results) {
-      if (!res.second) oss << res.first << std::endl;
-      else std::cout << res.first << std::endl;
+    for (const auto &res : results) {
+      if (!res.second)
+        oss << res.first << std::endl;
+      else
+        std::cout << res.first << std::endl;
       ret &= res.second;
     }
 
@@ -145,7 +147,9 @@ public:
   }
 
   void closeAfterProgress(int fd) {
-    __cleaners.emplace_back([fd] { if (fd >= 0) close(fd); });
+    __cleaners.emplace_back([fd] {
+      if (fd >= 0) close(fd);
+    });
   }
 
   garbageCollector &operator=(const garbageCollector &) = delete;
@@ -156,7 +160,9 @@ class Silencer {
 
 public:
   Silencer() { silenceAgain(); }
-  ~Silencer() { if (saved_stdout != -1 && dev_null != -1) stop(); }
+  ~Silencer() {
+    if (saved_stdout != -1 && dev_null != -1) stop();
+  }
 
   void stop() {
     if (saved_stdout == -1 && saved_stderr == -1 && dev_null == -1) return;

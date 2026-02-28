@@ -1,5 +1,5 @@
 /*
-* Copyright (C) 2026 Yağız Zengin
+ * Copyright (C) 2026 Yağız Zengin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ enum sizeCastTypes { B = static_cast<int>('B'), KB = static_cast<int>('K'), MB =
 #define HELPER "libhelper"
 #define ERR Helper::Error()
 
-#define B(x)  (static_cast<uint64_t(x)> * 8)    // B(4)  = 32 (4 * 8) (bit)
+#define B(x) (static_cast<uint64_t(x)> * 8)     // B(4)  = 32 (4 * 8) (bit)
 #define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)
 #define MB(x) (KB(x) * 1024)                    // MB(4) = 4194304 (KB(4) * 1024)
 #define GB(x) (MB(x) * 1024)                    // GB(1) = 1073741824 (MB(1) * 1024)

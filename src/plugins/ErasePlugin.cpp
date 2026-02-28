@@ -37,7 +37,8 @@ public:
   FlagsBase flags;
   const char *logPath = nullptr;
 
-  ~ErasePlugin() override = default;
+  PLUGIN_SECTION ErasePlugin() = default;
+  PLUGIN_SECTION ~ErasePlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();

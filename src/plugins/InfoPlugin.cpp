@@ -39,7 +39,8 @@ public:
   FlagsBase flags;
   const char *logPath = nullptr;
 
-  ~InfoPlugin() override = default;
+  PLUGIN_SECTION InfoPlugin() = default;
+  PLUGIN_SECTION ~InfoPlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;

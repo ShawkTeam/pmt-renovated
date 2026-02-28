@@ -29,4 +29,4 @@
 #define LOGE Helper::Logger(Helper::LogLevels::ERROR, __func__, Helper::Logger::Properties::FILE.c_str(), MAP, __FILE__, __LINE__)
 #define LOGA Helper::Logger(Helper::LogLevels::ABORT, __func__, Helper::Logger::Properties::FILE.c_str(), MAP, __FILE__, __LINE__)
 
-#endif // LIBPARTITION_MAP_REDEFINE_LOGGING_MACROS_HPP
+#endif // #ifndef LIBPARTITION_MAP_REDEFINE_LOGGING_MACROS_HPP

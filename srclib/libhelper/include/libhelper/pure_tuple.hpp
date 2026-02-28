@@ -22,7 +22,6 @@
 #error "libhelper/pure_tuple.hpp is requires C++20 or higher C++ standarts."
 #endif
 
-#include <string>
 #include <tuple>
 #include <initializer_list>
 #include <algorithm>
@@ -30,10 +29,13 @@
 
 namespace Helper {
 template <typename _Type1, typename _Type2, typename _Type3>
-requires requires(_Type1 v1, _Type2 v2, _Type3 v3) {
-  v1 = v1; v2 = v2; v3 = v3;
-  v1 == v1 && v2 == v2 && v3 == v3;
-} class PureTuple {
+  requires requires(_Type1 v1, _Type2 v2, _Type3 v3) {
+    v1 = v1;
+    v2 = v2;
+    v3 = v3;
+    v1 == v1 && v2 == v2 && v3 == v3;
+  }
+class PureTuple {
   void expand_if_needed() {
     if (count == capacity) {
       capacity *= 2;

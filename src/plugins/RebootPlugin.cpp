@@ -32,7 +32,8 @@ public:
   FlagsBase flags;
   const char *logPath = nullptr;
 
-  ~RebootPlugin() override = default;
+  PLUGIN_SECTION RebootPlugin() = default;
+  PLUGIN_SECTION ~RebootPlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();

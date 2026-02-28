@@ -40,7 +40,8 @@ public:
   FlagsBase flags;
   const char *logPath = nullptr;
 
-  ~MemoryTestPlugin() override = default;
+  PLUGIN_SECTION MemoryTestPlugin() = default;
+  PLUGIN_SECTION ~MemoryTestPlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();

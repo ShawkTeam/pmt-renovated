@@ -113,7 +113,8 @@ int main(int argc, char **argv) {
     bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
     bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
     bootstrap.add_option("-L,--log-file", FLAGS.logFile, "Set log file.");
-    bootstrap.add_flag("-V,--verbose", FLAGS.verboseMode, "Detailed information is written on the screen while the transaction is being carried out.");
+    bootstrap.add_flag("-V,--verbose", FLAGS.verboseMode,
+                       "Detailed information is written on the screen while the transaction is being carried out.");
 
     bootstrap.parse(argc, argv);
 

@@ -33,7 +33,8 @@ public:
   FlagsBase flags;
   const char *logPath = nullptr;
 
-  ~RealPathPlugin() override = default;
+  PLUGIN_SECTION RealPathPlugin() = default;
+  PLUGIN_SECTION ~RealPathPlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
     logPath = logpath.c_str();
