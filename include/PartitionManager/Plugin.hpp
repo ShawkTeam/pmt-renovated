@@ -211,6 +211,59 @@ private:
   FlagsBase &mainFlags;
 };
 
+class AsyncResult_t {
+public:
+  std::string message;
+  std::string &first = message; // std::pair imitation.
+  bool result = true;           // True = success, false = error.
+  bool &second = result;
+
+  AsyncResult_t() = default;
+  AsyncResult_t(const AsyncResult_t &other) = default;
+  AsyncResult_t(AsyncResult_t &&other) noexcept : message(std::move(other.message)), result(other.result) {}
+
+  std::string getMessage() const { return message; }
+  bool getResult() const { return result; }
+  bool isError() const { return result == false; }
+  bool isSuccess() const { return result == true; }
+
+  template <typename... Args> static AsyncResult_t Error(std::format_string<Args...> fmt, Args &&...args) {
+    AsyncResult_t result;
+    result.message = std::format(fmt, std::forward<Args>(args)...);
+    result.result = false;
+    return result;
+  }
+
+  static AsyncResult_t Error(const std::string &message = "") {
+    AsyncResult_t result;
+    result.message = message;
+    result.result = false;
+    return result;
+  }
+
+  template <typename... Args> static AsyncResult_t Success(std::format_string<Args...> fmt, Args &&...args) {
+    AsyncResult_t result;
+    result.message = std::format(fmt, std::forward<Args>(args)...);
+    result.result = true;
+    return result;
+  }
+
+  static AsyncResult_t Success(const std::string &message = "") {
+    AsyncResult_t result;
+    result.message = message;
+    result.result = true;
+    return result;
+  }
+
+  AsyncResult_t &operator=(AsyncResult_t &&other) noexcept {
+    message = std::move(other.message);
+    result = other.result;
+    return *this;
+  }
+
+  std::pair<std::string, bool> operator()() const { return std::make_pair(message, result); }
+};
+
 using BasicManager = PluginManager<BasicPlugin>;
 using BasicBuiltinPluginRegistry = BuiltinPluginRegistry<BasicPlugin>;
 using resultPair = std::pair<std::string, bool>;
