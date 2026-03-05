@@ -138,31 +138,31 @@ if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
     add_library(libcrypto SHARED IMPORTED)
     set_target_properties(libcrypto PROPERTIES IMPORTED_LOCATION "${PREBUILTS}/libcrypto.so")
 
-    add_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
+    add_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX DISABLE
             SOURCES ${FMTLIB_SOURCES}
             COMPILE_OPTIONS -fno-exceptions -UNDEBUG
     )
-    add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS
+    add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
             SOURCES ${LIBBASE_SOURCES}
             COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
             DEFINATIONS _FILE_OFFSET_BITS=64
             LIBS fmtlib log
     )
-    add_super_library(crypto_utils USE_INTERFACE_NOLIBS_NOFLAGS
+    add_super_library(crypto_utils USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
             SOURCES ${LIBCRYPTO_UTILS_SOURCES}
             LIBS libcrypto
     )
-    add_super_library(sparse USE_INTERFACE_NOLIBS_NOFLAGS
+    add_super_library(sparse USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
             SOURCES ${LIBSPARSE_SOURCES}
             LIBS base z
     )
-    add_super_library(ext4_utils USE_INTERFACE_NOLIBS_NOFLAGS
+    add_super_library(ext4_utils USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
             SOURCES ${LIBEXT4_UTILS_SOURCES}
             COMPILE_OPTIONS -fno-strict-aliasing
             DEFINATIONS _FILE_OFFSET_BITS=64 REAL_UUID
             LIBS base ext2_uuid
     )
-    add_super_library(lp USE_INTERFACE_NOLIBS_NOFLAGS
+    add_super_library(lp USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
             SOURCES ${LIBLP_SOURCES}
             COMPILE_OPTIONS -Wno-error
             DEFINATIONS _FILE_OFFSET_BITS=64
