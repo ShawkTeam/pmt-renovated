@@ -149,11 +149,11 @@ function(add_plugin PLUGIN_NAME)
             if(ARG_NO_MODULE_LINKER_SCRIPT)
                 target_link_options(${TARGET_NAME} PRIVATE "-Wl,-T,${ARG_LINKER_SCRIPT}")
             else()
-                file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/generated/ld")
+                file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/generated/ld")
                 file(GENERATE
-                        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/generated/ld/${TARGET_NAME}.ld"
-                        CONTENT "INCLUDE ${CMAKE_SOURCE_DIR}/build/ld/module.ld\nINCLUDE ${ARG_LINKER_SCRIPT}")
-                target_link_options(${TARGET_NAME} PRIVATE "-Wl,-T,${CMAKE_CURRENT_BINARY_DIR}/generated/ld/${TARGET_NAME}.ld")
+                        OUTPUT "${CMAKE_BINARY_DIR}/include/generated/ld/${TARGET_NAME}.ld"
+                        CONTENT "INCLUDE \"${CMAKE_SOURCE_DIR}/build/ld/module.ld\"\nINCLUDE \"${ARG_LINKER_SCRIPT}\"")
+                target_link_options(${TARGET_NAME} PRIVATE "-Wl,-T,${CMAKE_BINARY_DIR}/include/generated/ld/${TARGET_NAME}.ld")
             endif()
         elseif(NOT ARG_NO_MODULE_LINKER_SCRIPT)
             target_link_options(${TARGET_NAME} PRIVATE "-Wl,-T,${CMAKE_SOURCE_DIR}/build/ld/module.ld")
