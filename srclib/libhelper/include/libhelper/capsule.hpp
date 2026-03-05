@@ -22,7 +22,12 @@
 
 namespace Helper {
 // Provides a capsule structure to store variable references and values.
-template <typename _Type> class Capsule : public garbageCollector {
+template <typename _Type>
+  requires requires(_Type v) {
+    v = v;
+    v == v;
+  }
+class Capsule : public garbageCollector {
 public:
   _Type &value;
 
