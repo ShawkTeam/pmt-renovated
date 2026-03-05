@@ -61,15 +61,15 @@ public:
 
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
-  PLUGIN_SECTION resultPair runAsync(const std::string &partitionName) const {
-    if (!TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
+  PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName) const {
+    if (!TABLES.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
 
     if (FLAGS.onLogical && !TABLES.isLogical(partitionName)) {
       if (FLAGS.forceProcess)
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                                         << std::endl;
       else
-        return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
+        return AsyncResult_t::Error("Used --logical (-l) flag but is not logical partition: {}", partitionName);
     }
 
     uint64_t buf = bufferSize;
@@ -79,10 +79,10 @@ public:
 
     // Automatically close file descriptors and delete allocated memories (arrays)
     Helper::garbageCollector collector;
-    auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
+    const auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
 
     const int pfd = Helper::openAndAddToCloseList(partition.absolutePath(), collector, O_WRONLY);
-    if (pfd < 0) return PairError("Can't open partition: %s: %s", partitionName.data(), strerror(errno));
+    if (pfd < 0) return AsyncResult_t::Error("Can't open partition: {}: {}", partitionName, strerror(errno));
 
     if (!FLAGS.forceProcess) {
       if (!Helper::confirmPropt("Are you sure you want to continue? This could render your device "
@@ -104,16 +104,16 @@ public:
       if (partitionSize - bytesWritten < sizeof(buffer)) toWrite = partitionSize - bytesWritten;
 
       if (const ssize_t result = write(pfd, buffer, toWrite); result == -1)
-        return PairError("Can't write zero bytes to partition: %s: %s", partitionName.data(), strerror(errno));
+        return AsyncResult_t::Error("Can't write zero bytes to partition: {}: {}", partitionName, strerror(errno));
       else
         bytesWritten += result;
     }
 
-    return PairSuccess("Successfully wrote zero bytes to the %s partition", partitionName.data());
+    return AsyncResult_t::Success("Successfully wrote zero bytes to the %s partition", partitionName);
   }
 
   PLUGIN_SECTION bool run() override {
-    Helper::AsyncManager<resultPair> manager;
+    Helper::AsyncManager<AsyncResult_t> manager;
     for (const auto &partitionName : partitions) {
       manager.addProcess(&ErasePlugin::runAsync, this, partitionName);
       LOGNF(PLUGIN, logPath, INFO) << "Created thread for writing zero bytes to " << partitionName << std::endl;

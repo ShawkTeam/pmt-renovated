@@ -15,9 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cerrno>
 #include <chrono>
-#include <cstdlib>
 #include <fcntl.h>
 #include <future>
 #include <unistd.h>
@@ -69,8 +67,8 @@ public:
 
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
-  PLUGIN_SECTION resultPair runAsync(const std::string &partitionName, const std::string &outputName) const {
-    if (!TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
+  PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &outputName) const {
+    if (!TABLES.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
     const auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
     const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
 
@@ -81,18 +79,18 @@ public:
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                                         << std::endl;
       else
-        return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
+        return AsyncResult_t::Error("Used --logical (-l) flag but is not logical partition: {}", partitionName);
     }
 
     if (Helper::fileIsExists(outputName) && !FLAGS.forceProcess)
-      return PairError("%s is exists. Remove it, or use --force (-f) flag.", outputName.data());
+      return AsyncResult_t::Error("{} is exists. Remove it, or use --force (-f) flag.", outputName);
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for back upping " << partitionName << "): " << buf << std::endl;
 
     try {
       (void)partition.dump(outputName, buf);
     } catch (Helper::Error &error) {
-      return PairError("Failed to write %s partition to %s image: %s", partitionName.c_str(), outputName.c_str(), error.what());
+      return AsyncResult_t::Error("Failed to write {} partition to {} image: {}", partitionName, outputName, error.what());
     }
 
     if (!noSetPermissions) {
@@ -104,7 +102,7 @@ public:
                                         << ". Access problems maybe occur in non-root mode" << std::endl;
     }
 
-    return PairSuccess("%s partition successfully back upped to %s", partitionName.data(), outputName.data());
+    return AsyncResult_t::Success("{} partition successfully back upped to {}", partitionName, outputName);
   }
 
   PLUGIN_SECTION bool run() override {
@@ -112,7 +110,7 @@ public:
     if (!outputNames.empty() && partitions.size() != outputNames.size())
       throw CLI::ValidationError("You must provide an output name(s) as long as the partition name(s)");
 
-    Helper::AsyncManager<resultPair> manager;
+    Helper::AsyncManager<AsyncResult_t> manager;
     for (size_t i = 0; i < partitions.size(); i++) {
       std::string partitionName = partitions[i];
       std::string outputName = outputNames.empty() ? partitionName + ".img" : outputNames[i];

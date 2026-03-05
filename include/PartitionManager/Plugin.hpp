@@ -54,6 +54,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
+#include <format>
 #include <dlfcn.h>
 #include <libhelper/logging.hpp>
 #include <libpartition_map/lib.hpp>
@@ -266,25 +267,6 @@ public:
 
 using BasicManager = PluginManager<BasicPlugin>;
 using BasicBuiltinPluginRegistry = BuiltinPluginRegistry<BasicPlugin>;
-using resultPair = std::pair<std::string, bool>;
-
-__attribute__((format(printf, 1, 2))) inline resultPair PairError(const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  char str[1024];
-  vsnprintf(str, sizeof(str), format, args);
-  va_end(args);
-  return {str, false};
-}
-
-__attribute__((format(printf, 1, 2))) inline resultPair PairSuccess(const char *format, ...) {
-  va_list args;
-  va_start(args, format);
-  char str[1024];
-  vsnprintf(str, sizeof(str), format, args);
-  va_end(args);
-  return {str, true};
-}
 
 // If there is a delimiter in the string, CLI::detail::split (std::vector<std::string>) returns; if not, an empty vector is returned.
 // And checks duplicate arguments.

@@ -67,11 +67,11 @@ public:
 
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
-  PLUGIN_SECTION resultPair runAsync(const std::string &partitionName, const std::string &imageName) const {
-    if (!Helper::fileIsExists(imageName)) return PairError("Couldn't find image file: %s", imageName.data());
-    if (!TABLES.hasPartition(partitionName)) return PairError("Couldn't find partition: %s", partitionName.data());
+  PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &imageName) const {
+    if (!Helper::fileIsExists(imageName)) return AsyncResult_t::Error("Couldn't find image file: {}", imageName);
+    if (!TABLES.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
     if (Helper::fileSize(imageName) > TABLES.partition(partitionName).size())
-      return PairError("%s is larger than %s partition size!", imageName.data(), partitionName.data());
+      return AsyncResult_t::Error("{} is larger than {} partition size!", imageName, partitionName);
 
     auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
     const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
@@ -83,7 +83,7 @@ public:
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                                         << std::endl;
       else
-        return PairError("Used --logical (-l) flag but is not logical partition: %s", partitionName.data());
+        return AsyncResult_t::Error("Used --logical (-l) flag but is not logical partition: {}", partitionName);
     }
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
@@ -91,7 +91,7 @@ public:
     try {
       (void)partition.write(imageName, buf);
     } catch (Helper::Error &error) {
-      return PairError("Failed to write %s image to %s partition: %s", imageName.c_str(), partitionName.c_str(), error.what());
+      return AsyncResult_t::Error("Failed to write {} image to {} partition: {}", imageName, partitionName, error.what());
     }
 
     if (deleteAfterProgress) {
@@ -100,7 +100,7 @@ public:
         WARNING(std::string("Cannot erase flash file: " + imageName + "\n").data());
     }
 
-    return PairSuccess("%s is successfully wrote to %s partition", imageName.data(), partitionName.data());
+    return AsyncResult_t::Success("{} is successfully wrote to {} partition", imageName, partitionName);
   }
 
   PLUGIN_SECTION bool run() override {
@@ -112,7 +112,7 @@ public:
       if (!imageDirectory.empty()) imageNames[i].insert(0, imageDirectory + '/');
     }
 
-    Helper::AsyncManager<resultPair> manager;
+    Helper::AsyncManager<AsyncResult_t> manager;
     for (size_t i = 0; i < partitions.size(); i++) {
       manager.addProcess(&FlashPlugin::runAsync, this, partitions[i], imageNames[i]);
       LOGNF(PLUGIN, logPath, INFO) << "Created thread for flashing image to " << partitions[i] << std::endl;
