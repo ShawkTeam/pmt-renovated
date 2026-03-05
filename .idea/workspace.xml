@@ -35,6 +35,7 @@
       <config projectName="pmt" targetName="reboot_plugin" />
       <config projectName="pmt" targetName="libext2_uuid_shared" />
       <config projectName="pmt" targetName="type_plugin" />
+      <config projectName="pmt" targetName="generate_build_info" />
       <config projectName="pmt" targetName="libpartition_map_shared" />
       <config projectName="pmt" targetName="libpartition_map_static" />
       <config projectName="pmt" targetName="clean_log_plugin" />
@@ -52,13 +53,14 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper/management: Instead of directly checking for the existence of the std::pair type in finalize() and the () operator, check for the existence of the first and second variables.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="plugins: Adapt the new AsyncResult_t type.">
+      <change afterPath="$PROJECT_DIR$/build/cmake/generate_headers_helper.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/functions.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/generate_headers.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/generate_headers.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/buildInfo.hpp.in" beforeDir="false" afterPath="$PROJECT_DIR$/include/buildInfo.hpp.in" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,6 +78,8 @@
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/include/PartitionManager/Plugin.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/src/plugins/ErasePlugin.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/src/plugins/ErasePlugin.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/capsule.hpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/include/libpartition_map/definations.hpp" root0="SKIP_HIGHLIGHTING" />
@@ -133,7 +137,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Shell Script.Start Test">
+  <component name="RunManager" selected="Shell Script.Cleanup">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -165,6 +169,11 @@
       </method>
     </configuration>
     <configuration name="flash_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="flash_plugin" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="generate_build_info" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="generate_build_info" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -342,6 +351,7 @@
       <item itemvalue="CMake Application.erase_plugin" />
       <item itemvalue="CMake Application.flash_plugin" />
       <item itemvalue="CMake Application.info_plugin" />
+      <item itemvalue="CMake Application.generate_build_info" />
       <item itemvalue="CMake Application.libext2_uuid_shared" />
       <item itemvalue="CMake Application.libext2_uuid_static" />
       <item itemvalue="CMake Application.libgptf_shared" />
@@ -395,7 +405,7 @@
       <workItem from="1772372472562" duration="2143000" />
       <workItem from="1772559952627" duration="2318000" />
       <workItem from="1772739385092" duration="46000" />
-      <workItem from="1772746325240" duration="4779000" />
+      <workItem from="1772746325240" duration="7169000" />
     </task>
     <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
       <option name="closed" value="true" />
@@ -717,7 +727,23 @@
       <option name="project" value="LOCAL" />
       <updated>1772751077260</updated>
     </task>
-    <option name="localTasksCounter" value="41" />
+    <task id="LOCAL-00041" summary="libpartition_map/definations: Correct the naming error in the title definition.">
+      <option name="closed" value="true" />
+      <created>1772751140078</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1772751140078</updated>
+    </task>
+    <task id="LOCAL-00042" summary="plugins: Adapt the new AsyncResult_t type.">
+      <option name="closed" value="true" />
+      <created>1772751246460</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1772751246460</updated>
+    </task>
+    <option name="localTasksCounter" value="43" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -752,8 +778,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="manager: fixup installing libraries" />
-    <MESSAGE value="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary." />
     <MESSAGE value="libpartition_map: fix tests and constructors of classes." />
     <MESSAGE value="libpartition_map: add * operators to classes, etc." />
     <MESSAGE value="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code." />
@@ -777,7 +801,9 @@
     <MESSAGE value="reformat.sh: apply shellcheck suggests." />
     <MESSAGE value="libhelper/capsule: Check the requirements with concepts." />
     <MESSAGE value="libhelper/management: Instead of directly checking for the existence of the std::pair type in finalize() and the () operator, check for the existence of the first and second variables." />
-    <option name="LAST_COMMIT_MESSAGE" value="libhelper/management: Instead of directly checking for the existence of the std::pair type in finalize() and the () operator, check for the existence of the first and second variables." />
+    <MESSAGE value="libpartition_map/definations: Correct the naming error in the title definition." />
+    <MESSAGE value="plugins: Adapt the new AsyncResult_t type." />
+    <option name="LAST_COMMIT_MESSAGE" value="plugins: Adapt the new AsyncResult_t type." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

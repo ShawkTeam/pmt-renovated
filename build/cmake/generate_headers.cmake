@@ -16,19 +16,33 @@
 #
 
 # Generate build info (buildInfo.hpp.in)
-function(generateBuildInfo BUILD_FLAGS)
-	string(TIMESTAMP BUILD_DATE "%Y-%m-%d")
-	string(TIMESTAMP BUILD_TIME "%H:%M:%S")
+function(generate_build_info BUILD_FLAGS)
+	set(GENERATED_DIR "${CMAKE_CURRENT_BINARY_DIR}/include/generated")
+	file(MAKE_DIRECTORY ${GENERATED_DIR})
 
-	execute_process(COMMAND bash -c "mkdir -p ${CMAKE_SOURCE_DIR}/include/generated &>/dev/null")
-	execute_process(COMMAND bash -c "${CMAKE_CXX_COMPILER} --version | head -n 1"
-		OUTPUT_VARIABLE COMPILER_VERSION_STRING
-		OUTPUT_STRIP_TRAILING_WHITESPACE)
-	execute_process(COMMAND bash -c "if which git &>/dev/null; then git rev-parse --short HEAD; else echo xxxxxxx; fi"
-		OUTPUT_VARIABLE COMMIT_ID
-		OUTPUT_STRIP_TRAILING_WHITESPACE)
+	set(OUTPUT_FILE "${GENERATED_DIR}/buildInfo.hpp")
+	set(INPUT_FILE "${CMAKE_SOURCE_DIR}/include/buildInfo.hpp.in")
 
-	configure_file(${CMAKE_SOURCE_DIR}/include/buildInfo.hpp.in ${CMAKE_SOURCE_DIR}/include/generated/buildInfo.hpp @ONLY)
+	add_custom_command(
+			OUTPUT ${OUTPUT_FILE}
+			COMMAND ${CMAKE_COMMAND} -DOUTPUT_FILE=${OUTPUT_FILE}
+			-DPROJECT_VERSION="${PROJECT_VERSION}"
+			-DBUILD_FLAGS="${BUILD_FLAGS}"
+			-DCMAKE_CXX_COMPILER="${CMAKE_CXX_COMPILER}"
+			-DCMAKE_BUILD_TYPE="${CMAKE_BUILD_TYPE}"
+			-P "${CMAKE_SOURCE_DIR}/build/cmake/generate_headers_helper.cmake"
+			VERBATIM
+	)
 
-	message(STATUS "Generated header: ${CMAKE_SOURCE_DIR}/include/generated/buildInfo.hpp")
+	add_custom_target(
+			generate_build_info ALL
+			DEPENDS ${OUTPUT_FILE}
+	)
+
+	include_directories(${GENERATED_DIR}/..)
+
+	get_property(ALL_TARGETS DIRECTORY ${CMAKE_SOURCE_DIR} PROPERTY BUILDSYSTEM_TARGETS)
+	foreach(tgt IN LISTS ALL_TARGETS)
+		add_dependencies(${tgt} generate_build_info)
+	endforeach()
 endfunction()

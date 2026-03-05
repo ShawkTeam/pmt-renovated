@@ -40,7 +40,7 @@ include(build/cmake/functions.cmake)
 
 # Generate header(s)
 get_property(FLAGS DIRECTORY PROPERTY COMPILE_OPTIONS)
-generateBuildInfo("${FLAGS}")
+generate_build_info("${FLAGS}")
 
 # Add libraries and executables
 add_subdirectory(external)
