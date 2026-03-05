@@ -83,25 +83,33 @@ public:
   bool resultsReceived() const { return get; }
 
   bool finalize() const
-    requires std::same_as<std::pair<std::string, bool>, __return_type>
+    requires requires(__return_type v) {
+      { v.first } -> std::convertible_to<std::string>;
+      { v.second } -> std::convertible_to<bool>;
+    }
   {
     if (!get) return false;
     std::ostringstream oss;
     bool ret = true;
 
     for (const auto &res : results) {
-      if (!res.second)
-        oss << res.first << std::endl;
+      if (!static_cast<bool>(res.second))
+        oss << std::string(res.first) << std::endl;
       else
-        std::cout << res.first << std::endl;
-      ret &= res.second;
+        std::cout << std::string(res.first) << std::endl;
+      ret &= static_cast<bool>(res.second);
     }
 
     if (!oss.str().empty()) throw Error("%s", oss.str().c_str());
     return ret;
   }
 
-  bool operator()() {
+  bool operator()()
+    requires requires(__return_type v) {
+      { v.first } -> std::convertible_to<std::string>;
+      { v.second } -> std::convertible_to<bool>;
+    }
+  {
     getResults();
     return finalize();
   }
