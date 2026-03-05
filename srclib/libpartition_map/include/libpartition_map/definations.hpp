@@ -15,8 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBPARTITION_MAP_DEFINATONS_HPP
-#define LIBPARTITION_MAP_DEFINATONS_HPP
+#ifndef LIBPARTITION_MAP_DEFINATIONS_HPP
+#define LIBPARTITION_MAP_DEFINATIONS_HPP
 
 #if __cplusplus < 202002L
 #error "libpartition_map/definations.hpp is requires C++20 or higher C++ standarts."
@@ -120,4 +120,4 @@ extern std::map<uint64_t, std::string> Magics;
 #define FOREACH_GPT_DATA_LAMBDA_PARAMETERS_CONST     (const std::filesystem::path &path, const std::shared_ptr<GPTData> &gptData)
 // clang-format on
 
-#endif // #ifndef LIBPARTITION_MAP_DEFINATONS_HPP
+#endif // #ifndef LIBPARTITION_MAP_DEFINATIONS_HPP
