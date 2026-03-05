@@ -16,9 +16,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-IGNORE_FILE=".clang-format-ignore"
+[ -z "$IGNORE_FILE" ] && IGNORE_FILE=".clang-format-ignore"
 
-if [ ! -f $IGNORE_FILE ]; then
+if [ ! -f "$IGNORE_FILE" ]; then
   echo "Cannot find $IGNORE_FILE file!"
   exit 1;
 fi
