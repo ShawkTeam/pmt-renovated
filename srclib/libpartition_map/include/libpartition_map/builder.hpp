@@ -41,6 +41,8 @@ class Builder {
   void findTablePaths();
 
 public:
+  using list_t = std::vector<Partition_t *>;
+  using const_list_t = std::vector<const Partition_t *>;
   using iterator = std::vector<Partition_t>::iterator;
   using const_iterator = std::vector<Partition_t>::const_iterator;
 
@@ -65,15 +67,14 @@ public:
     other.isUFS = false;
   }
 
-  std::vector<Partition_t *> allPartitions();             // Get references of all partitions (std::vector<Partition_t*>, non-const).
-  std::vector<const Partition_t *> allPartitions() const; // Get references of all partitions (std::vector<Partition_t*>, const).
-  std::vector<Partition_t *> partitions();                // Get references of partitions (std::vector<Partition_t*>, non-const).
-  std::vector<const Partition_t *> partitions() const;    // Get references of partitions (std::vector<const Partition_t*>, const).
-  std::vector<Partition_t *> logicalPartitions();         // Get references of logical partitions (non-const).
-  std::vector<const Partition_t *> logicalPartitions() const;            // Get references of logical partitions (const).
-  std::vector<Partition_t *> partitionsByTable(const std::string &name); // Get references of partitions of table by name (non-const).
-  std::vector<const Partition_t *>
-  partitionsByTable(const std::string &name) const; // Get references of partitions of table by name (const).
+  list_t allPartitions();                            // Get references of all partitions (std::vector<Partition_t*>, non-const).
+  const_list_t allPartitions() const;                // Get references of all partitions (std::vector<Partition_t*>, const).
+  list_t partitions();                               // Get references of partitions (std::vector<Partition_t*>, non-const).
+  const_list_t partitions() const;                   // Get references of partitions (std::vector<const Partition_t*>, const).
+  list_t logicalPartitions();                        // Get references of logical partitions (non-const).
+  const_list_t logicalPartitions() const;            // Get references of logical partitions (const).
+  list_t partitionsByTable(const std::string &name); // Get references of partitions of table by name (non-const).
+  const_list_t partitionsByTable(const std::string &name) const; // Get references of partitions of table by name (const).
 
   std::vector<std::pair<bool, std::string>> duplicatePartitionPositions(const std::string &name) const;
 
@@ -97,7 +98,7 @@ public:
   const Partition_t &partitionWithDupCheck(const std::string &name, bool check = true) const;
   Partition_t &partitionWithDupCheck(const std::string &name, bool check = true);
 
-  uint64_t freeSpaceOf(const std::string &name = "mmcblk0") const; // Get free space of <name> table.
+  uint64_t freeSpaceOf(const std::string &name) const; // Get free space of <name> table.
 
   int hasDuplicateNamedPartition(const std::string &name) const; // Check <name> named partitions are duplicate.
 
@@ -174,8 +175,8 @@ public:
   explicit operator bool() const;              // if (pd) { ... } (equals to valid())
   bool operator!() const;                      // if (!pd) { ... } (equals to !valid())
 
-  std::vector<const Partition_t *> operator*() const;                        // std::vector<const Partition_t *> = *pd
-  std::vector<Partition_t *> operator*();                                    // std::vector<Partition_t *> = *pd
+  const_list_t operator*() const;                                            // std::vector<const Partition_t *> = *pd
+  list_t operator*();                                                        // std::vector<Partition_t *> = *pd
   const std::shared_ptr<GPTData> &operator[](const std::string &name) const; // const std::shared_ptr<GPTData> data = pd["sda"]
   std::shared_ptr<GPTData> &operator[](const std::string &name);             // std::shared_ptr<GPTData> data = pd["sda"]
   const GPTPart *operator()(const std::string &name, uint32_t index) const;  // const GPTPart* part = pd("sda", 3);

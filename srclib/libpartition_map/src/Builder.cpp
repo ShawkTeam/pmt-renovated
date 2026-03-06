@@ -111,9 +111,9 @@ void Builder::findTablePaths() {
   if (localTableNames.empty()) throw ERR << "Can't find any disk or partition table in " << std::quoted("/dev/block");
 }
 
-std::vector<Partition_t *> Builder::allPartitions() {
+Builder::list_t Builder::allPartitions() {
   LOGI << "Providing references of all partitions." << std::endl;
-  std::vector<Partition_t *> parts;
+  list_t parts;
   parts.reserve(logicalPartitions().size());
   for (auto &part : localPartitions)
     parts.push_back(&part);
@@ -121,9 +121,9 @@ std::vector<Partition_t *> Builder::allPartitions() {
   return parts;
 }
 
-std::vector<const Partition_t *> Builder::allPartitions() const {
+Builder::const_list_t Builder::allPartitions() const {
   LOGI << "Providing references of all partitions." << std::endl;
-  std::vector<const Partition_t *> parts;
+  const_list_t parts;
   parts.reserve(localPartitions.size());
   for (auto &part : localPartitions)
     parts.push_back(&part);
@@ -131,9 +131,9 @@ std::vector<const Partition_t *> Builder::allPartitions() const {
   return parts;
 }
 
-std::vector<Partition_t *> Builder::partitions() {
+Builder::list_t Builder::partitions() {
   LOGI << "Providing references of all normal partitions." << std::endl;
-  std::vector<Partition_t *> parts;
+  list_t parts;
   for (auto &part : localPartitions) {
     if (!part.isLogicalPartition()) parts.push_back(&part);
   }
@@ -141,9 +141,9 @@ std::vector<Partition_t *> Builder::partitions() {
   return parts;
 }
 
-std::vector<const Partition_t *> Builder::partitions() const {
+Builder::const_list_t Builder::partitions() const {
   LOGI << "Providing references of all normal partitions." << std::endl;
-  std::vector<const Partition_t *> parts;
+  const_list_t parts;
   for (auto &part : localPartitions) {
     if (!part.isLogicalPartition()) parts.push_back(&part);
   }
@@ -151,9 +151,9 @@ std::vector<const Partition_t *> Builder::partitions() const {
   return parts;
 }
 
-std::vector<Partition_t *> Builder::logicalPartitions() {
+Builder::list_t Builder::logicalPartitions() {
   LOGI << "Providing references of only logical partitions." << std::endl;
-  std::vector<Partition_t *> parts;
+  list_t parts;
   for (auto &part : localPartitions) {
     if (part.isLogicalPartition()) parts.push_back(&part);
   }
@@ -161,9 +161,9 @@ std::vector<Partition_t *> Builder::logicalPartitions() {
   return parts;
 }
 
-std::vector<const Partition_t *> Builder::logicalPartitions() const {
+Builder::const_list_t Builder::logicalPartitions() const {
   LOGI << "Providing references of only logical partitions." << std::endl;
-  std::vector<const Partition_t *> parts;
+  const_list_t parts;
   for (auto &part : localPartitions) {
     if (part.isLogicalPartition()) parts.push_back(&part);
   }
@@ -171,11 +171,11 @@ std::vector<const Partition_t *> Builder::logicalPartitions() const {
   return parts;
 }
 
-std::vector<Partition_t *> Builder::partitionsByTable(const std::string &name) {
+Builder::list_t Builder::partitionsByTable(const std::string &name) {
   LOGI << "Providing partitions of " << std::quoted(name) << " table." << std::endl;
   if (!localTableNames.contains(name)) return {};
 
-  std::vector<Partition_t *> parts;
+  list_t parts;
   for (auto &part : localPartitions)
     if (!part.isLogicalPartition())
       if (part.tableName() == name) parts.push_back(&part);
@@ -183,11 +183,11 @@ std::vector<Partition_t *> Builder::partitionsByTable(const std::string &name) {
   return parts;
 }
 
-std::vector<const Partition_t *> Builder::partitionsByTable(const std::string &name) const {
+Builder::const_list_t Builder::partitionsByTable(const std::string &name) const {
   LOGI << "Providing partitions of " << std::quoted(name) << " table." << std::endl;
   if (!localTableNames.contains(name)) return {};
 
-  std::vector<const Partition_t *> parts;
+  const_list_t parts;
   for (auto &part : localPartitions)
     if (!part.isLogicalPartition())
       if (part.tableName() == name) parts.push_back(&part);
@@ -655,8 +655,8 @@ Builder::operator bool() const { return valid(); }
 
 bool Builder::operator!() const { return !valid(); }
 
-std::vector<const Partition_t *> Builder::operator*() const {
-  std::vector<const Partition_t *> parts;
+Builder::const_list_t Builder::operator*() const {
+  const_list_t parts;
   parts.reserve(localPartitions.size());
   for (const auto &part : localPartitions)
     parts.push_back(&part);
@@ -664,8 +664,8 @@ std::vector<const Partition_t *> Builder::operator*() const {
   return parts;
 }
 
-std::vector<Partition_t *> Builder::operator*() {
-  std::vector<Partition_t *> parts;
+Builder::list_t Builder::operator*() {
+  list_t parts;
   parts.reserve(localPartitions.size());
   for (auto &part : localPartitions)
     parts.push_back(&part);
