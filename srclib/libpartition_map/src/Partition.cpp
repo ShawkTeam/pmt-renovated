@@ -64,6 +64,19 @@ Partition_t &Partition_t::AsLogicalPartition(Partition_t &orig, const std::files
   return orig;
 }
 
+Partition_t::Partition_t() : gptPart(GPTPart()) {}
+
+Partition_t::Partition_t(Partition_t &&other) noexcept
+    : localTablePath(std::move(other.localTablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)),
+      localIndex(other.localIndex), gptPart(other.gptPart), isLogical(other.isLogical) {
+  other.localIndex = 0;
+  other.gptPart = GPTPart();
+  other.isLogical = false;
+}
+
+Partition_t::Partition_t(const BasicData &input) : localTablePath(input.tablePath), localIndex(input.index), gptPart(input.gptPart) {}
+Partition_t::Partition_t(const std::filesystem::path &path) : logicalPartitionPath(path), gptPart(GPTPart()), isLogical(true) {}
+
 GPTPart Partition_t::getGPTPart() const {
   std::error_code ec;
   auto result = getGPTPart(ec);

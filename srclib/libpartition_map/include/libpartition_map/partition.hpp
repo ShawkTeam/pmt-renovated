@@ -63,22 +63,12 @@ public:
 
   static Partition_t &AsLogicalPartition(Partition_t &orig, const std::filesystem::path &path);
 
-  Partition_t() : gptPart(GPTPart()) {}            // Partition_t partititon
+  Partition_t();                                   // Partition_t partititon
   Partition_t(const Partition_t &other) = default; // Partition_t partition(otherPartition)
-  Partition_t(Partition_t &&other) noexcept
-      : localTablePath(std::move(other.localTablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)),
-        localIndex(other.localIndex), gptPart(other.gptPart),
-        isLogical(other.isLogical) { // Partition_t partition(std::move(otherPartition))
-    other.localIndex = 0;
-    other.gptPart = GPTPart();
-    other.isLogical = false;
-  }
-  explicit Partition_t(const BasicData &input)
-      : localTablePath(input.tablePath), localIndex(input.index), gptPart(input.gptPart) {
-  } // Partition_t partition({myGptPart, 4, "/dev/block/sda"}); For normal partitions.
-  explicit Partition_t(const std::filesystem::path &path) /* NOLINT(modernize-pass-by-value) */
-      : logicalPartitionPath(path), gptPart(GPTPart()), isLogical(true) {
-  } // Partition_t logicalPartition("/dev/block/mapper/system"); For logical partitions.
+  Partition_t(Partition_t &&other) noexcept;       // Partition_t partition(std::move(otherPartition))
+  explicit Partition_t(const BasicData &input);    // Partition_t partition({myGptPart, 4, "/dev/block/sda"}); For normal partitions.
+  explicit Partition_t(const std::filesystem::path &path); /* NOLINT(modernize-pass-by-value) */
+  // Partition_t logicalPartition("/dev/block/mapper/system"); For logical partitions.
 
   GPTPart getGPTPart() const;                                       // Get copy of GPTPart data.
   GPTPart getGPTPart(std::error_code &ec) const noexcept;           // Get copy of GPTPart data.
