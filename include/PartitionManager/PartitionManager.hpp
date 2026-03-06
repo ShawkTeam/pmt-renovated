@@ -35,14 +35,12 @@
 
 namespace Out {
 
-template <typename... Args>
-static void print(std::format_string<Args...> fmt, Args&&... args) {
+template <typename... Args> static void print(std::format_string<Args...> fmt, Args &&...args) {
   const std::string message = std::format(fmt, std::forward<Args>(args)...);
   fprintf(stdout, "%s", message.c_str());
 }
 
-template <typename... Args>
-static void println(std::format_string<Args...> fmt, Args&&... args) {
+template <typename... Args> static void println(std::format_string<Args...> fmt, Args &&...args) {
   const std::string message = std::format(fmt, std::forward<Args>(args)...);
   fprintf(stdout, "%s\n", message.c_str());
 }

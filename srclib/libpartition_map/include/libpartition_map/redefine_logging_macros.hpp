@@ -23,10 +23,10 @@
 #define MAP "libpartition_map"
 
 #undef LOG
-#define LOG(level) Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), MAP, __FILE__, __LINE__)
-#define LOGI Helper::Logger(Helper::LogLevels::INFO, __func__, Helper::Logger::Properties::FILE.c_str(), MAP, __FILE__, __LINE__)
-#define LOGW Helper::Logger(Helper::LogLevels::WARNING, __func__, Helper::Logger::Properties::FILE.c_str(), MAP, __FILE__, __LINE__)
-#define LOGE Helper::Logger(Helper::LogLevels::ERROR, __func__, Helper::Logger::Properties::FILE.c_str(), MAP, __FILE__, __LINE__)
-#define LOGA Helper::Logger(Helper::LogLevels::ABORT, __func__, Helper::Logger::Properties::FILE.c_str(), MAP, __FILE__, __LINE__)
+#define LOG(level) Helper::Logger(level, __func__, Helper::Logger::Properties::FILE, MAP, __FILE__, __LINE__)
+#define LOGI Helper::Logger(Helper::LogLevels::INFO, __func__, Helper::Logger::Properties::FILE, MAP, __FILE__, __LINE__)
+#define LOGW Helper::Logger(Helper::LogLevels::WARNING, __func__, Helper::Logger::Properties::FILE, MAP, __FILE__, __LINE__)
+#define LOGE Helper::Logger(Helper::LogLevels::ERROR, __func__, Helper::Logger::Properties::FILE, MAP, __FILE__, __LINE__)
+#define LOGA Helper::Logger(Helper::LogLevels::ABORT, __func__, Helper::Logger::Properties::FILE, MAP, __FILE__, __LINE__)
 
 #endif // #ifndef LIBPARTITION_MAP_REDEFINE_LOGGING_MACROS_HPP

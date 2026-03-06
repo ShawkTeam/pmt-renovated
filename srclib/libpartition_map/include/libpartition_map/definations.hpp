@@ -38,16 +38,24 @@
 namespace PartitionMap {
 enum SizeUnit : int { BYTE = 1, KiB = 2, MiB = 3, GiB = 4 };
 
-struct BasicData {
+template <typename slot_type = uint32_t>
+  requires std::is_integral_v<slot_type>
+struct basic_data_base {
   GPTPart gptPart;
-  uint32_t index;
+  slot_type index;
   std::filesystem::path tablePath;
 };
-struct BasicInfo {
+
+template <typename size_type = uint64_t>
+  requires std::is_integral_v<size_type>
+struct basic_info_base {
   std::string name;
   uint64_t size;
   bool isLogical;
 };
+
+using BasicData = basic_data_base<uint32_t>;
+using BasicInfo = basic_info_base<uint64_t>;
 
 template <typename __class>
 concept minimumPartitionClass = requires(__class cls, __class cls2, GUIDData gdata, SizeUnit unit, uint32_t sector, bool no_throw,

@@ -228,8 +228,7 @@ std::string multipleToString(sizeCastTypes type);
 /**
  * Format it input and return as std::string.
  */
-template <typename... Args>
-std::string format(std::format_string<Args...> fmt, Args&&... args) {
+template <typename... Args> std::string format(std::format_string<Args...> fmt, Args &&...args) {
   const std::string message = std::format(fmt, std::forward<Args>(args)...);
   return message;
 }
