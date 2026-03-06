@@ -20,6 +20,7 @@
 
 #include <optional>
 #include <string>
+#include <format>
 #include <__filesystem/path.h>
 #include <libhelper/macros.hpp>
 #include <libhelper/management.hpp>
@@ -227,7 +228,11 @@ std::string multipleToString(sizeCastTypes type);
 /**
  * Format it input and return as std::string.
  */
-__printflike(1, 2) std::string format(const char *format, ...);
+template <typename... Args>
+std::string format(std::format_string<Args...> fmt, Args&&... args) {
+  const std::string message = std::format(fmt, std::forward<Args>(args)...);
+  return message;
+}
 
 /**
  * Convert input size to input multiple

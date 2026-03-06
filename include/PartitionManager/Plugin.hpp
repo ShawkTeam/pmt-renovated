@@ -217,7 +217,7 @@ public:
   std::string message;
   std::string &first = message; // std::pair imitation.
   bool result = true;           // True = success, false = error.
-  bool &second = result;
+  bool &second = result;        // std::pair imitation.
 
   AsyncResult_t() = default;
   AsyncResult_t(const AsyncResult_t &other) = default;
@@ -301,16 +301,16 @@ inline auto setupBufferSize = [](uint64_t &size, const std::filesystem::path &en
     const uint64_t psize = builder.partition(entry.filename().string()).size();
 
     if (psize % size != 0) {
-      Out::println("%sWARNING%s: Specified buffer size is invalid for %s! Using "
-                   "different buffer size for %s.",
-                   YELLOW, STYLE_RESET, entry.string().c_str(), entry.string().c_str());
+      Out::println("{}WARNING{}: Specified buffer size is invalid for {}! Using "
+                   "different buffer size for {}.",
+                   YELLOW, STYLE_RESET, entry.string(), entry.string());
       size = psize % 4096 == 0 ? 4096 : 1;
     }
   } else if (Helper::fileIsExists(entry)) {
     if (Helper::fileSize(entry) % size != 0) {
-      Out::println("%sWARNING%s: Specified buffer size is invalid for %s! using "
-                   "different buffer size for %s.",
-                   YELLOW, STYLE_RESET, entry.string().c_str(), entry.string().c_str());
+      Out::println("{}WARNING{}: Specified buffer size is invalid for {}! Using "
+                   "different buffer size for {}.",
+                   YELLOW, STYLE_RESET, entry.string(), entry.string());
       size = Helper::fileSize(entry) % 4096 == 0 ? 4096 : 1;
     }
   }

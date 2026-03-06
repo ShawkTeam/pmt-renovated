@@ -25,6 +25,7 @@
 #include <memory>
 #include <string>
 #include <set>
+#include <format>
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
 #ifdef ERR
@@ -32,23 +33,21 @@
 #define ERR PartitionManager::Error()
 #endif
 
-class Out {
-public:
-  static __printflike(1, 2) void print(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    vfprintf(stdout, format, args);
-    va_end(args);
-  }
+namespace Out {
 
-  static __printflike(1, 2) void println(const char *format, ...) {
-    va_list args;
-    va_start(args, format);
-    vfprintf(stdout, format, args);
-    print("\n");
-    va_end(args);
-  }
-};
+template <typename... Args>
+static void print(std::format_string<Args...> fmt, Args&&... args) {
+  const std::string message = std::format(fmt, std::forward<Args>(args)...);
+  fprintf(stdout, "%s", message.c_str());
+}
+
+template <typename... Args>
+static void println(std::format_string<Args...> fmt, Args&&... args) {
+  const std::string message = std::format(fmt, std::forward<Args>(args)...);
+  fprintf(stdout, "%s\n", message.c_str());
+}
+
+} // namespace Out
 
 namespace PartitionManager {
 std::string getAppVersion(); // Not Android app version (an Android app is

@@ -81,7 +81,7 @@ public:
                                           Helper::fileIsExists(content)
                                               ? content
                                               : TABLES.partitionWithDupCheck(content, FLAGS.noWorkOnUsed).absolutePath().c_str())) {
-          Out::println("%s contains %s magic (%s)", content.data(), name.data(), PartitionMap::Extra::formatMagic(magic).data());
+          Out::println("{} contains {} magic ({})", content, name, PartitionMap::Extra::formatMagic(magic));
           found = true;
           break;
         }

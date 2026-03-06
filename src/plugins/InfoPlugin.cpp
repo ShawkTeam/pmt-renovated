@@ -116,7 +116,7 @@ public:
                                    {jNameSize, std::stoull(part.formattedSizeString(multiple, true))},
                                    {jNameLogical, part.isLogicalPartition()}});
 
-      Out::println("%s", j.dump(jIndentSize).data());
+      Out::println("{}", j.dump(jIndentSize));
     }
 
     return true;

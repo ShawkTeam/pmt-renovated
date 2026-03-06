@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
     AppMain.parse(argc, argv);
 
     if (argc < 2 || (argc == 3 && (!plugins.empty() || !pluginPath.empty()))) {
-      Out::println("Usage: %s [OPTIONS] [SUBCOMMAND]\nUse --help for more information.", argv[0]);
+      Out::println("Usage: {} [OPTIONS] [SUBCOMMAND]\nUse --help for more information.", argv[0]);
       return EXIT_FAILURE;
     }
 
