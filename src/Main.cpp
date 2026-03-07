@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
   CLI::App bootstrap{"Partition Manager Bootstrap"};
   std::vector<char *> argvStorage;
   auto Flags = std::make_shared<PartitionManager::BasicFlags>(); // Generate flag structure.
+  Helper::Silencer silencer(false); // It suppresses stdout and stderr. It redirects them to /dev/null. One of the best ways to run silently.
 
   try {
     // try-catch start
@@ -104,7 +105,7 @@ int main(int argc, char **argv) {
                      "Select partition for work if has input named duplicate partitions.");
     AppMain.add_flag("-f,--force", FLAGS.forceProcess, "Force process to be processed.");
     AppMain.add_flag("-l,--logical", FLAGS.onLogical, "Specify that the target partition is logical.");
-    AppMain.add_flag("-q,--quiet", FLAGS.quietProcess, "Quiet process.");
+    AppMain.add_flag("-q,--quiet", FLAGS.quietProcess, "Quiet process."); // Dummy option for help message.
     AppMain.add_flag("-V,--verbose", FLAGS.verboseMode,
                      "Detailed information is written on the screen while the transaction is being carried out.");
     AppMain.add_flag("-v,--version", FLAGS.viewVersion, "Print version and exit.");
@@ -113,13 +114,14 @@ int main(int argc, char **argv) {
     bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
     bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
     bootstrap.add_option("-L,--log-file", FLAGS.logFile, "Set log file.");
+    bootstrap.add_flag("-q,--quiet", FLAGS.quietProcess, "Quiet process.");
     bootstrap.add_flag("-V,--verbose", FLAGS.verboseMode,
                        "Detailed information is written on the screen while the transaction is being carried out.");
 
     bootstrap.parse(argc, argv);
 
     Helper::Logger::Properties::setPrinting(FLAGS.verboseMode);
-    Helper::Logger::Properties::setFile(FLAGS.logFile);
+    Helper::Logger::Properties::setFile(FLAGS.logFile, true);
     PartitionManager::BasicManager manager(AppMain, FLAGS.logFile, Flags);
 
     manager.loadBuiltinPlugins(); // Load built-in plugins if existed.
@@ -140,9 +142,7 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
     }
 
-    Helper::Silencer
-        silencer; // It suppresses stdout and stderr. It redirects them to /dev/null. One of the best ways to run silently.
-    if (!FLAGS.quietProcess) silencer.stop();
+    if (FLAGS.quietProcess) silencer.silenceAgain();
     if (FLAGS.viewLicense) {
       Out::println("Copyright (C) 2026 Yağız Zengin\n\nThis program is free software: you can redistribute it and/or modify\nit under "
                    "the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of "
@@ -167,7 +167,10 @@ int main(int argc, char **argv) {
                      "used -l (--logical) flag.";
     }
 
-    return !manager.runUsed();
+    if (manager.getUsed().empty()) throw ERR << "Unknown main command speficied! Use --help for more information.";
+
+    return !manager.runUsed(); // If the operation is successful, it returns true, which is equal to 1. Therefore, the opposite result
+                               // should be obtained.
   } catch (CLI::CallForHelp &) {
     // catch CLI::CallForHelp for printing help texts.
 

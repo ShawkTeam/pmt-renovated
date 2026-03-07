@@ -54,15 +54,16 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libpartition_map: Create a cleaner Builder structure using type name abbreviations.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper/logging: improve it.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Partition.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -80,11 +81,10 @@
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/include/PartitionManager/PartitionManager.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/functions.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/include/libpartition_map/builder.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/include/libpartition_map/partition.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/src/Builder.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -139,18 +139,13 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Shell Script.Reformat Code">
+  <component name="RunManager" selected="Shell Script.Cleanup">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -409,47 +404,9 @@
       <workItem from="1772739385092" duration="46000" />
       <workItem from="1772746325240" duration="7346000" />
       <workItem from="1772753932041" duration="582000" />
-      <workItem from="1772815295103" duration="10515000" />
-    </task>
-    <task id="LOCAL-00001" summary="pmt: fix project settings and CMake errors.">
-      <option name="closed" value="true" />
-      <created>1770327800351</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1770327800351</updated>
-    </task>
-    <task id="LOCAL-00002" summary="pmt: Fix code issues caused by the confusion in Git.">
-      <option name="closed" value="true" />
-      <created>1770329675787</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1770329675787</updated>
-    </task>
-    <task id="LOCAL-00003" summary="pmt: Add more information about license and reformat code.">
-      <option name="closed" value="true" />
-      <created>1770330659715</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1770330659715</updated>
-    </task>
-    <task id="LOCAL-00004" summary="pmt: fix license flag.">
-      <option name="closed" value="true" />
-      <created>1770330895727</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1770330895727</updated>
-    </task>
-    <task id="LOCAL-00005" summary="pmt: If the log file is a new file, a text entry about its origin is added.">
-      <option name="closed" value="true" />
-      <created>1770408916427</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1770408916427</updated>
+      <workItem from="1772815295103" duration="10878000" />
+      <workItem from="1772885081005" duration="925000" />
+      <workItem from="1772901032965" duration="10249000" />
     </task>
     <task id="LOCAL-00006" summary="libhelper: New method for asynchronous operations and some improvements.&#10; - A helper class called `AsyncManager` has been added.&#10; - Where `std::enable_if` was used, a feature left over from C++17, it has been replaced with C++20 `requires`.&#10; - Some improvements in the `Capsule` class.">
       <option name="closed" value="true" />
@@ -787,7 +744,63 @@
       <option name="project" value="LOCAL" />
       <updated>1772817923128</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="libpartition_map: make Partition_t type as header-only class.">
+      <option name="closed" value="true" />
+      <created>1772828516407</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1772828516407</updated>
+    </task>
+    <task id="LOCAL-00049" summary="info_plugin: fixup plugin.">
+      <option name="closed" value="true" />
+      <created>1772903061409</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1772903061409</updated>
+    </task>
+    <task id="LOCAL-00050" summary="info_plugin: Include the partition table names in the information as well.">
+      <option name="closed" value="true" />
+      <created>1772907612646</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1772907612648</updated>
+    </task>
+    <task id="LOCAL-00051" summary="libpartition_map/partition: The template allows input to be taken in a random order in the constructor using variadic arguments.">
+      <option name="closed" value="true" />
+      <created>1772907690598</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1772907690598</updated>
+    </task>
+    <task id="LOCAL-00052" summary="libhelper/logging: Allows the transfer of old log content.">
+      <option name="closed" value="true" />
+      <created>1772910375399</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1772910375399</updated>
+    </task>
+    <task id="LOCAL-00053" summary="libhelper/logging: improve it.">
+      <option name="closed" value="true" />
+      <created>1772910417554</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1772910417554</updated>
+    </task>
+    <task id="LOCAL-00054" summary="libhelper/logging: improve log content mover.">
+      <option name="closed" value="true" />
+      <created>1772911324319</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1772911324320</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -825,13 +838,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: Preparations for liblp, improvements, etc." />
-    <MESSAGE value="clang-format: update ignore list (for reformat.sh)" />
-    <MESSAGE value="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable." />
-    <MESSAGE value="pmt/external: Add license notify for Android Build System" />
-    <MESSAGE value="libpartition_map: Remove/rename some functions. Improvements.&#10; - The function names in Partition_t and Builder should be rebranded more appropriately.&#10; - Improve the builder, remove unnecessary elements, and provide a better structure.&#10; - Improve the test and adapt the plugins to the new functions." />
-    <MESSAGE value="libs: STL-like additions and significant improvements.&#10; - libhelper properties were separated into individual header files. Everything that was a class was rewritten to be header-only.&#10; - The logging system has been improved.&#10; - The AsyncManager class has been improved.&#10; - Overloads have been added to the Partition_t class in libpartition_map that, unlike in STL, do not throw errors but instead provide std::error_code.&#10; - Plugins, etc., have been adapted.&#10; - Some logic errors have been corrected." />
-    <MESSAGE value="libpartition_map: parse the library headers&#10; - libpartition_map properties were separated into individual header files." />
     <MESSAGE value="github: cleanup issue templates" />
     <MESSAGE value="android: update libhelper sources in Android.bp (2)" />
     <MESSAGE value="android: update license configuration" />
@@ -850,7 +856,14 @@
     <MESSAGE value="libhelper &amp; pmt: use std::format instead of C-style formatting." />
     <MESSAGE value="libpartition_map: move Partition_t constructors in partition.hpp to Partition.cpp." />
     <MESSAGE value="libpartition_map: Create a cleaner Builder structure using type name abbreviations." />
-    <option name="LAST_COMMIT_MESSAGE" value="libpartition_map: Create a cleaner Builder structure using type name abbreviations." />
+    <MESSAGE value="libpartition_map: make Partition_t type as header-only class." />
+    <MESSAGE value="info_plugin: fixup plugin." />
+    <MESSAGE value="info_plugin: Include the partition table names in the information as well." />
+    <MESSAGE value="libpartition_map/partition: The template allows input to be taken in a random order in the constructor using variadic arguments." />
+    <MESSAGE value="libhelper/logging: Allows the transfer of old log content." />
+    <MESSAGE value="libhelper/logging: improve it." />
+    <MESSAGE value="libhelper/logging: improve log content mover." />
+    <option name="LAST_COMMIT_MESSAGE" value="libhelper/logging: improve log content mover." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

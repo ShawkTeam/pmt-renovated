@@ -195,6 +195,16 @@ public:
     return false;
   }
 
+  std::string getUsed() const {
+    for (auto &plugin : plugins)
+      if (plugin.instance->used()) return plugin.instance->getName();
+    for (auto &plugin : builtinPlugins)
+      if (plugin->used()) return plugin->getName();
+
+    LOGN(PM, INFO) << "Don't used any used main command...." << std::endl;
+    return {};
+  }
+
   std::string getVersion() const { return PM_VERSION; }
 
 private:

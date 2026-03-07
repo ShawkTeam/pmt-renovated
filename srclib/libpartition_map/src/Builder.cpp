@@ -37,7 +37,7 @@ void Builder::scan() {
     std::filesystem::path p("/dev/block");
     p /= name; // Append device.
 
-    LOGI << "Silencing stdout..." << std::endl << std::flush;
+    LOGI << "Silencing stdout and stderr for scanning " << std::quoted(p.string()) << "..." << std::endl << std::flush;
     Helper::Silencer silencer;
     if (auto gpt = std::make_shared<GPTData>(); gpt->LoadPartitions(p)) {
       gptDataCollection[p] = std::move(gpt); // Add to GPT data list.
@@ -45,7 +45,7 @@ void Builder::scan() {
       auto &storedGpt = *gptDataCollection[p];
       for (uint32_t i = 0; i < storedGpt.GetNumParts(); ++i) {
         if (GPTPart part = storedGpt[i]; part.IsUsed()) {
-          localPartitions.push_back(Partition_t({part, i, p})); // Add to partition list.
+          localPartitions.emplace_back(p, part, i); // Add to partition list.
           silencer.stop();
           LOGI << "Registered partition: " << part.GetDescription() << std::endl << std::flush;
           silencer.silenceAgain();
