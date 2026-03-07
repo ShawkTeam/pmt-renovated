@@ -84,8 +84,8 @@ public:
     inline static std::string FILE = "last_logs.log", NAME = "main";
     inline static bool PRINT_TO_STDOUT = false, DISABLE = false;
 
-    static void setFile(const std::string &file) {
-      moveOldLogs(FILE, file);
+    static void setFile(const std::string &file, bool remove = false) {
+      moveOldLogs(FILE, file, remove);
       FILE = file;
     }
     static void setName(const std::string &name) { NAME = name; }
