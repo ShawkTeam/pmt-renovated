@@ -88,8 +88,8 @@ public:
       if (jsonFormat)
         jParts.push_back(partition);
       else
-        Out::println("partition=%s size=%s isLogical=%s", partition.name().c_str(),
-                     partition.formattedSizeString(multiple, true).c_str(), partition.isLogicalPartition() ? "true" : "false");
+        Out::println("partition={} size={} isLogical={}", partition.name(),
+                     partition.formattedSizeString(multiple, true), partition.isLogicalPartition());
 
       return true;
     };
