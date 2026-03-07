@@ -72,6 +72,7 @@ public:
     std::ofstream n_LogFile(newLogFile);
     if (!n_LogFile) return false;
 
+    n_LogFile.clear();
     n_LogFile << o_LogFile.rdbuf();
     o_LogFile.close();
     if (remove) std::filesystem::remove(oldLogFile);
