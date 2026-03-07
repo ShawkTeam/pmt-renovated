@@ -25,6 +25,7 @@
 #include <filesystem>
 #include <string>
 #include <map>
+#include <type_traits>
 #include <gpt.h>
 
 #ifdef NONE
@@ -50,12 +51,54 @@ template <typename size_type = uint64_t>
   requires std::is_integral_v<size_type>
 struct basic_info_base {
   std::string name;
-  uint64_t size;
-  bool isLogical;
+  uint64_t size{};
+  bool isLogical = false;
 };
 
 using BasicData = basic_data_base<uint32_t>;
 using BasicInfo = basic_info_base<uint64_t>;
+
+template <typename T>
+concept IsStringOrPath = std::is_same_v<T, std::filesystem::path> || std::is_same_v<T, std::string>;
+
+template <typename T>
+concept IsSizeType = std::is_unsigned_v<T> && (std::is_integral_v<T> || std::is_floating_point_v<T>);
+
+template <typename T>
+concept IsSlotType = std::is_integral_v<T> && !std::is_floating_point_v<T>;
+
+template <typename T, typename U>
+concept is_size_type_decay = std::is_same_v<std::decay_t<T>, std::decay_t<U>> && IsSizeType<std::decay_t<T>>;
+
+template <typename T, typename U>
+concept is_slot_type_decay = std::is_same_v<std::decay_t<T>, std::decay_t<U>> && std::is_integral_v<std::decay_t<T>> &&
+                             !std::is_floating_point_v<std::decay_t<T>>;
+
+template <typename T, typename U>
+concept is_string_or_path_decay = std::is_same_v<std::decay_t<T>, std::decay_t<U>> && IsStringOrPath<std::decay_t<T>>;
+
+template <typename T>
+concept is_gptpart_decay = std::is_same_v<std::decay_t<T>, GPTPart>;
+
+template <typename T>
+concept IsPathTypeLike = requires(T v1, T v2, std::string s, const char *cp) {
+  v1.append(s);
+  v1.append(cp);
+  { v1.filename() } -> IsStringOrPath;
+  requires(std::same_as<T, std::filesystem::path>) || requires {
+    { v1.string() } -> std::convertible_to<std::string>;
+  };
+
+  T{};
+  T{s};
+  T{cp};
+  T(std::move(v2));
+
+  v1 = v2;
+  v1 == v2;
+  v1 != v2;
+  v1 = std::move(v2);
+};
 
 template <typename __class>
 concept minimumPartitionClass = requires(__class cls, __class cls2, GUIDData gdata, SizeUnit unit, uint32_t sector, bool no_throw,

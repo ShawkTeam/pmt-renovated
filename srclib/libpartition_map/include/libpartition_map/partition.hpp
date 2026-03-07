@@ -25,6 +25,7 @@
 
 #include <filesystem>
 #include <ostream>
+#include <tuple>
 #include <unistd.h>
 #include <asm-generic/fcntl.h>
 #include <gpt.h>
@@ -36,27 +37,6 @@
 #include <libpartition_map/redefine_logging_macros.hpp>
 
 namespace PartitionMap {
-template <typename T>
-concept IsStringOrPath = std::same_as<T, std::filesystem::path> || std::same_as<T, std::string>;
-
-template <typename T>
-concept IsPathTypeLike = requires(T v1, T v2, std::string s, const char* cp) {
-  v1.append(s);
-  v1.append(cp);
-  { v1.filename() } -> IsStringOrPath;
-  requires (std::same_as<T, std::filesystem::path>) || requires { { v1.string() } -> std::convertible_to<std::string>; };
-
-  T{};
-  T{s};
-  T{cp};
-  T(std::move(v2));
-
-  v1 = v2;
-  v1 == v2;
-  v1 != v2;
-  v1 = std::move(v2);
-};
-
 enum class Errors {
   Success = 0,
   IsNotLogicalObject = 1,
@@ -96,14 +76,26 @@ template <> struct std::is_error_code_enum<PartitionMap::Errors> : std::true_typ
 
 namespace PartitionMap {
 template <typename slot_type = uint32_t, typename size_type = uint64_t, typename path_type = std::filesystem::path>
-  requires std::is_integral_v<slot_type> && std::is_integral_v<size_type> && std::is_unsigned_v<size_type> && IsPathTypeLike<path_type>
+  requires IsSlotType<slot_type> && IsSizeType<size_type> && IsPathTypeLike<path_type>
 class BasicPartition_t {
   path_type localTablePath;       // The table path to which the partition belongs (like /dev/block/sdc).
   path_type logicalPartitionPath; // Path of logical partition.
-  slot_type localIndex = 0;                   // The actual index of the partition within the table.
-  mutable GPTPart gptPart;                    // Complete data for the partition.
+  slot_type localIndex = 0;       // The actual index of the partition within the table.
+  mutable GPTPart gptPart;        // Complete data for the partition.
 
   bool isLogical = false; // This class contains a logical partition?
+
+  template <typename Tuple, std::size_t... I> void assign_from_tuple_impl(Tuple &&t, std::index_sequence<I...>) {
+    (process_ctor(std::get<I>(t)), ...);
+  }
+
+  template <typename Tuple> void assign_from_tuple(Tuple &&t) {
+    assign_from_tuple_impl(std::forward<Tuple>(t), std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<Tuple>>>{});
+  }
+
+  void process_ctor(const slot_type &index) { localIndex = index; }
+  void process_ctor(const GPTPart &part) { gptPart = part; }
+  void process_ctor(const path_type &path) { localTablePath = path; }
 
 public:
   class Extra {
@@ -134,6 +126,15 @@ public:
     other.localIndex = 0;
     other.gptPart = GPTPart();
     other.isLogical = false;
+  }
+
+  template <typename... Args>
+    requires(sizeof...(Args) == 3) &&
+            ((is_gptpart_decay<Args> || is_slot_type_decay<Args, slot_type> || is_string_or_path_decay<Args, path_type>) && ...)
+  explicit BasicPartition_t(Args &&...args) { // BasicPartition_t<...> partition({myGptPart, 4, "/dev/block/sda"}); For normal
+                                              // partitions. The order of arguments may differ from the example.
+    auto tuple = std::make_tuple(std::forward<Args>(args)...);
+    assign_from_tuple(tuple);
   }
 
   explicit BasicPartition_t(const basic_data_base<slot_type>
@@ -210,8 +211,7 @@ public:
   // Get partition path (like /dev/block/sdc4).
   path_type path(std::error_code &ec) const noexcept {
     const std::string suffix = isdigit(localTablePath.string().back()) ? "p" : "";
-    path_type path =
-        isLogical ? logicalPartitionPath : path_type(localTablePath.string() + suffix + std::to_string(localIndex + 1));
+    path_type path = isLogical ? logicalPartitionPath : path_type(localTablePath.string() + suffix + std::to_string(localIndex + 1));
     ec = Errors::Success;
     return path;
   }
@@ -480,8 +480,7 @@ public:
   }
 
   // Dump image of partition.
-  [[maybe_unused]] bool dump(std::error_code &ec, const path_type &destination = "",
-                             size_type bufsize = MB(1)) const noexcept {
+  [[maybe_unused]] bool dump(std::error_code &ec, const path_type &destination = "", size_type bufsize = MB(1)) const noexcept {
     ec.clear();
     Helper::garbageCollector collector;
     const path_type dest = destination.empty() ? (path_type("./") += name() + ".img") : destination;
