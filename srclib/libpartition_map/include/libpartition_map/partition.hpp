@@ -131,7 +131,7 @@ public:
   template <typename... Args>
     requires(sizeof...(Args) == 3) &&
             ((is_gptpart_decay<Args> || is_slot_type_decay<Args, slot_type> || is_string_or_path_decay<Args, path_type>) && ...)
-  explicit BasicPartition_t(Args &&...args) { // BasicPartition_t<...> partition({myGptPart, 4, "/dev/block/sda"}); For normal
+  explicit BasicPartition_t(Args &&...args) { // BasicPartition_t<...> partition(myGptPart, "/dev/block/sda", 4); For normal
                                               // partitions. The order of arguments may differ from the example.
     auto tuple = std::make_tuple(std::forward<Args>(args)...);
     assign_from_tuple(tuple);

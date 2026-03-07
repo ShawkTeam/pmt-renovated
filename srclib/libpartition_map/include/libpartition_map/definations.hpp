@@ -59,20 +59,19 @@ using BasicData = basic_data_base<uint32_t>;
 using BasicInfo = basic_info_base<uint64_t>;
 
 template <typename T>
-concept IsStringOrPath = std::is_same_v<T, std::filesystem::path> || std::is_same_v<T, std::string>;
+concept IsStringOrPath = !std::is_reference_v<T> && (std::is_same_v<T, std::filesystem::path> || std::is_same_v<T, std::string>);
 
 template <typename T>
-concept IsSizeType = std::is_unsigned_v<T> && (std::is_integral_v<T> || std::is_floating_point_v<T>);
+concept IsSizeType = !std::is_reference_v<T> && std::is_unsigned_v<T> && (std::is_integral_v<T> || std::is_floating_point_v<T>);
 
 template <typename T>
-concept IsSlotType = std::is_integral_v<T> && !std::is_floating_point_v<T>;
+concept IsSlotType = !std::is_reference_v<T> && std::is_integral_v<T> && !std::is_floating_point_v<T>;
 
 template <typename T, typename U>
 concept is_size_type_decay = std::is_same_v<std::decay_t<T>, std::decay_t<U>> && IsSizeType<std::decay_t<T>>;
 
 template <typename T, typename U>
-concept is_slot_type_decay = std::is_same_v<std::decay_t<T>, std::decay_t<U>> && std::is_integral_v<std::decay_t<T>> &&
-                             !std::is_floating_point_v<std::decay_t<T>>;
+concept is_slot_type_decay = std::is_same_v<std::decay_t<T>, std::decay_t<U>> && IsSlotType<std::decay_t<T>>;
 
 template <typename T, typename U>
 concept is_string_or_path_decay = std::is_same_v<std::decay_t<T>, std::decay_t<U>> && IsStringOrPath<std::decay_t<T>>;
@@ -85,7 +84,7 @@ concept IsPathTypeLike = requires(T v1, T v2, std::string s, const char *cp) {
   v1.append(s);
   v1.append(cp);
   { v1.filename() } -> IsStringOrPath;
-  requires(std::same_as<T, std::filesystem::path>) || requires {
+  requires(std::same_as<std::decay_t<T>, std::filesystem::path>) || requires {
     { v1.string() } -> std::convertible_to<std::string>;
   };
 

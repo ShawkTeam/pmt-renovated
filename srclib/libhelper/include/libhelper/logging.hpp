@@ -65,19 +65,18 @@ class Logger {
   int line;
 
 public:
-  static bool moveOldLogs(const std::filesystem::path& oldLogFile, const std::filesystem::path& newLogFile, bool remove = false) {
+  static bool moveOldLogs(const std::filesystem::path &oldLogFile, const std::filesystem::path &newLogFile, bool remove = false) {
     std::ifstream o_LogFile(oldLogFile);
     if (!o_LogFile) return false;
 
-    std::ofstream n_LogFile(newLogFile);
+    std::fstream n_LogFile(newLogFile, std::ios::app);
     if (!n_LogFile) return false;
 
-    n_LogFile.clear();
     n_LogFile << o_LogFile.rdbuf();
-    o_LogFile.close();
+    if (n_LogFile.fail()) return false;
     if (remove) std::filesystem::remove(oldLogFile);
 
-    return !n_LogFile.fail();
+    return true;
   }
 
   class Properties final {
