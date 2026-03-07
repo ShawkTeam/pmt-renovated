@@ -65,12 +65,29 @@ class Logger {
   int line;
 
 public:
+  static bool moveOldLogs(const std::filesystem::path& oldLogFile, const std::filesystem::path& newLogFile, bool remove = false) {
+    std::ifstream o_LogFile(oldLogFile);
+    if (!o_LogFile) return false;
+
+    std::ofstream n_LogFile(newLogFile);
+    if (!n_LogFile) return false;
+
+    n_LogFile << o_LogFile.rdbuf();
+    o_LogFile.close();
+    if (remove) std::filesystem::remove(oldLogFile);
+
+    return !n_LogFile.fail();
+  }
+
   class Properties final {
   public:
     inline static std::string FILE = "last_logs.log", NAME = "main";
     inline static bool PRINT_TO_STDOUT = false, DISABLE = false;
 
-    static void setFile(const std::string &file) { FILE = file; }
+    static void setFile(const std::string &file) {
+      moveOldLogs(FILE, file);
+      FILE = file;
+    }
     static void setName(const std::string &name) { NAME = name; }
     static void setPrinting(bool state) { PRINT_TO_STDOUT = state; }
     static void setLogging(bool state) { DISABLE = !state; }
