@@ -30,7 +30,7 @@ namespace PartitionManager {
 
 class InfoPlugin final : public BasicPlugin {
   std::vector<std::string> partitions;
-  std::string jNamePartition, jNameSize, jNameLogical;
+  std::string jNamePartition, jNameTable, jNameSize, jNameLogical;
   int jIndentSize = 2;
   bool jsonFormat = false, asByte = true, asKiloBytes = false, asMega = false, asGiga = false;
 
@@ -61,6 +61,7 @@ public:
     cmd->add_flag("--as-megabyte", asMega, "View sizes as megabyte.")->default_val(false);
     cmd->add_flag("--as-gigabyte", asGiga, "View sizes as gigabyte.")->default_val(false);
     cmd->add_option("--json-partition-name", jNamePartition, "Specify partition name element for JSON body")->default_val("name");
+    cmd->add_option("--json-table-name", jNameTable, "Specify table elemtn name for JSON body")->default_val("table");
     cmd->add_option("--json-size-name", jNameSize, "Specify size element name for JSON body")->default_val("size");
     cmd->add_option("--json-logical-name", jNameLogical, "Specify logical element name for JSON body")->default_val("isLogical");
     cmd->add_option("--json-indent-size", jIndentSize, "Set JSON indent size for printing to screen")->default_val(2);
@@ -88,7 +89,7 @@ public:
       if (jsonFormat)
         jParts.push_back(partition);
       else
-        Out::println("partition={} size={} isLogical={}", partition.name(),
+        Out::println("partition={} table={} size={} isLogical={}", partition.name(), partition.tableName(),
                      partition.formattedSizeString(multiple, true), partition.isLogicalPartition());
 
       return true;
@@ -113,6 +114,7 @@ public:
       j["partitions"] = nlohmann::json::array();
       for (auto &part : jParts)
         j["partitions"].push_back({{jNamePartition, part.name()},
+                                   {jNameTable, part.tableName()},
                                    {jNameSize, std::stoull(part.formattedSizeString(multiple, true))},
                                    {jNameLogical, part.isLogicalPartition()}});
 
