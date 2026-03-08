@@ -48,46 +48,16 @@ filegroup {
     srcs: [
         "src/Main.cpp",
         "src/PartitionManager.cpp",
-        "src/plugins/BackupPlugin.cpp",
-        "src/plugins/ErasePlugin.cpp",
-        "src/plugins/FlashPlugin.cpp",
-        "src/plugins/InfoPlugin.cpp",
-        "src/plugins/MemoryTestPlugin.cpp",
-        "src/plugins/PartitionSizePlugin.cpp",
-        "src/plugins/RealPathPlugin.cpp",
-        "src/plugins/RebootPlugin.cpp",
-        "src/plugins/TypePlugin.cpp",
-    ],
-}
-
-// libhelper source list
-filegroup {
-    name: "libhelper_srcs",
-    srcs: [
-        "srclib/libhelper/src/Checkers.cpp",
-        "srclib/libhelper/src/FileUtil.cpp",
-        "srclib/libhelper/src/Sha256.cpp",
-        "srclib/libhelper/src/Utilities.cpp",
-    ],
-}
-
-// libpartition_map source list
-filegroup {
-    name: "libpartition_map_srcs",
-    srcs: [
-        "srclib/libpartition_map/src/Getters.cpp",
-        "srclib/libpartition_map/src/Magic.cpp",
-        "srclib/libpartition_map/src/PartitionMap.cpp",
-        "srclib/libpartition_map/src/Type.cpp",
+        "src/plugins/*.cpp",
     ],
 }
 
 // Add genrule for generating buildInfo.hpp
-genrule {
+cc_genrule {
     name: "buildInfoHpp_gen",
-    tools: ["android_genrule.sh"],
-    out: ["include/generated/buildInfo.hpp"],
-    cmd: "mkdir -p $$(dirname $(out)) || true; cmake --version | head -n 1 | cut -d' ' -f 3 > .cmake_version && $(location android_genrule.sh) > $(out)",
+    tool_files: ["android_genrule.sh"],
+    out: ["generated/buildInfo.hpp"],
+    cmd: "mkdir -p $$(dirname $(out)) || true && $(location android_genrule.sh) /usr/bin/cmake $(location $$(dirname $(out)/../..)) > $(out)",
 }
 
 // Default configurations of pmt
@@ -96,6 +66,7 @@ cc_defaults {
     recovery_available: true,
     generated_headers : ["buildInfoHpp_gen"],
     export_generated_headers : ["buildInfoHpp_gen"],
+    cpp_std: "c++20",
     cflags: [
         "-Wall",
         "-Werror",
@@ -105,52 +76,27 @@ cc_defaults {
         "-DBUILTIN_PLUGINS",
     ],
     ldflags: ["-Wl,-s"],
-    local_include_dirs: [
-        "include",
-        "srclib/libhelper/include",
-        "srclib/libpartition_map/include",
-    ],
-    export_include_dirs: [
-        "include",
-        "srclib/libhelper/include",
-        "srclib/libpartition_map/include",
-    ],
+    local_include_dirs: ["include"],
+    export_include_dirs: ["include"],
     shared_libs: ["libbase"],
 }
 
-// libhelper library target
-cc_library {
-    name: "libhelper",
-    defaults: ["pmt_defaults"],
-    srcs: [":libhelper_srcs"],
-    licenses: ["external_pmt_license"],
-}
-
-// libpartition_map library target
-cc_library {
-    name: "libpartition_map",
-    defaults: ["pmt_defaults"],
-    srcs: [":libpartition_map_srcs"],
-    shared_libs: [
-        "libhelper",
-        "libext2_uuid",
-    ],
-    static_libs: [
-        "libc++fs",
-        "libgptf",
-    ],
-    cflags: ["-D_FILE_OFFSET_BITS=64"],
-    licenses: ["external_pmt_license"],
-}
+// Add libraries
+subdirs = [
+    "srclib/libhelper",
+    "srclib/libpartition_map"
+]
 
 // pmt executable target
 cc_binary {
     name: "pmt",
     defaults: ["pmt_defaults"],
     srcs: [":pmt_srcs"],
+    ldflags: ["-Wl,-T,build/ld/builtin_modules.ld"],
     shared_libs: [
         "libhelper",
         "libpartition_map",
+        "libbase",
     ],
     licenses: [
         "external_pmt_license",

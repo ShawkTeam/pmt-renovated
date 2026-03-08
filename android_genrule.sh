@@ -20,12 +20,12 @@ echo -ne "
 #ifndef BUILD_INFO_HPP
 #define BUILD_INFO_HPP
 
-#define BUILD_VERSION          \"$(sed -n 's/.*VERSION \([0-9.]*\).*/\1/p' CMakeLists.txt | tail -n 1)\"
+#define BUILD_VERSION          \"$(sed -n 's/.*VERSION \([0-9.]*\).*/\1/p' "$2/CMakeLists.txt" | tail -n 1)\"
 #define BUILD_TYPE             \"Release\"
 #define BUILD_DATE             \"$(date +%Y-%m-%d)\"
 #define BUILD_TIME             \"$(date +%H:%M:%S)\"
 #define BUILD_FLAGS            \"-Wall;-Werror;-Wno-deprecated-declarations;-Os;-fexceptions;-DANDROID_BUILD\"
-#define BUILD_CMAKE_VERSION    \"$(if [ -f .cmake_version ]; then cat .cmake_version; else echo unknown; fi)\"
+#define BUILD_CMAKE_VERSION    \"$($1 --version | head -n 1 | cut -d' ' -f 3)\"
 #define BUILD_COMPILER_VERSION \"android-clang-unknown\"
 #define COMMIT_ID              \"$(if which git &>/dev/null; then git rev-parse --short HEAD; else echo xxxxxxx; fi)\"
 

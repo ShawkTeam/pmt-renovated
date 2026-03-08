@@ -27,11 +27,13 @@
       <config projectName="pmt" targetName="backup_plugin" />
       <config projectName="pmt" targetName="flash_plugin" />
       <config projectName="pmt" targetName="libgptf_shared" />
+      <config projectName="pmt" targetName="fmtlib_static" />
       <config projectName="pmt" targetName="pmt" />
       <config projectName="pmt" targetName="libhelper_shared" />
       <config projectName="pmt" targetName="libhelper_static" />
       <config projectName="pmt" targetName="libgptf_static" />
       <config projectName="pmt" targetName="pmt_static" />
+      <config projectName="pmt" targetName="fmt" />
       <config projectName="pmt" targetName="CLI11" />
       <config projectName="pmt" targetName="reboot_plugin" />
       <config projectName="pmt" targetName="libext2_uuid_shared" />
@@ -41,6 +43,7 @@
       <config projectName="pmt" targetName="libpartition_map_static" />
       <config projectName="pmt" targetName="clean_log_plugin" />
       <config projectName="pmt" targetName="erase_plugin" />
+      <config projectName="pmt" targetName="fmtlib_shared" />
       <config projectName="pmt" targetName="real_path_plugin" />
       <config projectName="pmt" targetName="CLI11-generate-single-file" />
       <config projectName="pmt" targetName="libpartition_map_test" />
@@ -54,10 +57,14 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt &amp; pmt plugins: improve it.">
-      <change afterPath="$PROJECT_DIR$/src/plugins/CMakeLists.txt" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper: include &lt;filesystem&gt; directly instead &lt;__filesystem/path.h&gt;">
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/Android.bp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/srclib/libpartition_map/Android.bp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Android.bp" beforeDir="false" afterPath="$PROJECT_DIR$/Android.bp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android_genrule.sh" beforeDir="false" afterPath="$PROJECT_DIR$/android_genrule.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -82,10 +89,14 @@
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/include/PartitionManager/PartitionManager.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/include/PartitionManager/PartitionManager.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/functions.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/functions.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/management.hpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/include/libpartition_map/partition.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/src/Builder.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -141,17 +152,17 @@
   }
 }</component>
   <component name="RunManager" selected="Shell Script.Build (Debug)">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -413,23 +424,9 @@
       <workItem from="1772815295103" duration="10878000" />
       <workItem from="1772885081005" duration="925000" />
       <workItem from="1772901032965" duration="10368000" />
-      <workItem from="1772965779214" duration="889000" />
-    </task>
-    <task id="LOCAL-00008" summary="pmt: Improve the build system according to the new plugin system.&#10; - Even if plugins are not compiled built-in, pmt_static is always configured to be built-in.&#10; - The build script and GitHub workflow have been adapted.&#10; - Other improvements...">
-      <option name="closed" value="true" />
-      <created>1770461073768</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1770461073768</updated>
-    </task>
-    <task id="LOCAL-00009" summary="github: remove unnecessary workflow.">
-      <option name="closed" value="true" />
-      <created>1770461311926</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1770461311926</updated>
+      <workItem from="1772965779214" duration="1423000" />
+      <workItem from="1772967225996" duration="4879000" />
+      <workItem from="1772981720293" duration="3757000" />
     </task>
     <task id="LOCAL-00010" summary="github: fixup builder workflow.&#10; - Initialize submodules of pmt repository.">
       <option name="closed" value="true" />
@@ -807,7 +804,23 @@
       <option name="project" value="LOCAL" />
       <updated>1772914838347</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="plugins: Use a separate CMakeLists for plugins and automatically identify plugins.">
+      <option name="closed" value="true" />
+      <created>1772966856082</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1772966856083</updated>
+    </task>
+    <task id="LOCAL-00058" summary="libhelper: include &lt;filesystem&gt; directly instead &lt;__filesystem/path.h&gt;">
+      <option name="closed" value="true" />
+      <created>1772971329628</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1772971329629</updated>
+    </task>
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -845,8 +858,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="android: update license configuration" />
-    <MESSAGE value="cmake: functions: add linker script flag and remove unnecessary include directive in PLugin.hpp" />
     <MESSAGE value="cmake: functions: Allow the default plugin linker script not to be included." />
     <MESSAGE value="pmt: apply custom sections to plugin destructors and reformat code, etc." />
     <MESSAGE value="plugins: Instead of std::pair, create and use a custom result holder class." />
@@ -870,7 +881,9 @@
     <MESSAGE value="libhelper/logging: improve log content mover." />
     <MESSAGE value="libs: improve libhelper and libpartition_map" />
     <MESSAGE value="pmt &amp; pmt plugins: improve it." />
-    <option name="LAST_COMMIT_MESSAGE" value="pmt &amp; pmt plugins: improve it." />
+    <MESSAGE value="plugins: Use a separate CMakeLists for plugins and automatically identify plugins." />
+    <MESSAGE value="libhelper: include &lt;filesystem&gt; directly instead &lt;__filesystem/path.h&gt;" />
+    <option name="LAST_COMMIT_MESSAGE" value="libhelper: include &lt;filesystem&gt; directly instead &lt;__filesystem/path.h&gt;" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
