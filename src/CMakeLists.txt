@@ -15,8 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-set(PLUGINS ${CMAKE_CURRENT_SOURCE_DIR}/plugins)
-
 # Define pmt sources.
 set(PMT_SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/PartitionManager.cpp
@@ -43,14 +41,5 @@ if(BUILTIN_PLUGINS)
 endif()
 target_link_options(pmt_static PRIVATE "-Wl,-T,${CMAKE_SOURCE_DIR}/build/ld/builtin_modules.ld")
 
-# Add plugins
-add_plugin(backup SOURCES ${PLUGINS}/BackupPlugin.cpp)
-add_plugin(clean_log SOURCES ${PLUGINS}/CleanLogPlugin.cpp)
-add_plugin(erase SOURCES ${PLUGINS}/ErasePlugin.cpp)
-add_plugin(flash SOURCES ${PLUGINS}/FlashPlugin.cpp)
-add_plugin(info SOURCES ${PLUGINS}/InfoPlugin.cpp)
-add_plugin(memory_test SOURCES ${PLUGINS}/MemoryTestPlugin.cpp)
-add_plugin(partition_size SOURCES ${PLUGINS}/PartitionSizePlugin.cpp)
-add_plugin(real_path SOURCES ${PLUGINS}/RealPathPlugin.cpp)
-add_plugin(reboot SOURCES ${PLUGINS}/RebootPlugin.cpp)
-add_plugin(type SOURCES ${PLUGINS}/TypePlugin.cpp)
+# Include plugins.
+add_subdirectory(plugins)

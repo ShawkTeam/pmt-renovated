@@ -54,16 +54,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper/logging: improve it.">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt &amp; pmt plugins: improve it.">
+      <change afterPath="$PROJECT_DIR$/src/plugins/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -71,6 +65,13 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CMakeLists.txt" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
@@ -139,7 +140,12 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Shell Script.Cleanup">
+  <component name="RunManager" selected="Shell Script.Build (Debug)">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -406,23 +412,8 @@
       <workItem from="1772753932041" duration="582000" />
       <workItem from="1772815295103" duration="10878000" />
       <workItem from="1772885081005" duration="925000" />
-      <workItem from="1772901032965" duration="10249000" />
-    </task>
-    <task id="LOCAL-00006" summary="libhelper: New method for asynchronous operations and some improvements.&#10; - A helper class called `AsyncManager` has been added.&#10; - Where `std::enable_if` was used, a feature left over from C++17, it has been replaced with C++20 `requires`.&#10; - Some improvements in the `Capsule` class.">
-      <option name="closed" value="true" />
-      <created>1770416852212</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1770416852212</updated>
-    </task>
-    <task id="LOCAL-00007" summary="pmt: Use exit() instead of _exit() for memory safety.">
-      <option name="closed" value="true" />
-      <created>1770417327557</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1770417327557</updated>
+      <workItem from="1772901032965" duration="10368000" />
+      <workItem from="1772965779214" duration="889000" />
     </task>
     <task id="LOCAL-00008" summary="pmt: Improve the build system according to the new plugin system.&#10; - Even if plugins are not compiled built-in, pmt_static is always configured to be built-in.&#10; - The build script and GitHub workflow have been adapted.&#10; - Other improvements...">
       <option name="closed" value="true" />
@@ -800,7 +791,23 @@
       <option name="project" value="LOCAL" />
       <updated>1772911324320</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="libs: improve libhelper and libpartition_map">
+      <option name="closed" value="true" />
+      <created>1772914816088</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1772914816089</updated>
+    </task>
+    <task id="LOCAL-00056" summary="pmt &amp; pmt plugins: improve it.">
+      <option name="closed" value="true" />
+      <created>1772914838347</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1772914838347</updated>
+    </task>
+    <option name="localTasksCounter" value="57" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -838,8 +845,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="github: cleanup issue templates" />
-    <MESSAGE value="android: update libhelper sources in Android.bp (2)" />
     <MESSAGE value="android: update license configuration" />
     <MESSAGE value="cmake: functions: add linker script flag and remove unnecessary include directive in PLugin.hpp" />
     <MESSAGE value="cmake: functions: Allow the default plugin linker script not to be included." />
@@ -863,7 +868,9 @@
     <MESSAGE value="libhelper/logging: Allows the transfer of old log content." />
     <MESSAGE value="libhelper/logging: improve it." />
     <MESSAGE value="libhelper/logging: improve log content mover." />
-    <option name="LAST_COMMIT_MESSAGE" value="libhelper/logging: improve log content mover." />
+    <MESSAGE value="libs: improve libhelper and libpartition_map" />
+    <MESSAGE value="pmt &amp; pmt plugins: improve it." />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt &amp; pmt plugins: improve it." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
