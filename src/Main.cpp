@@ -51,7 +51,8 @@ int main(int argc, char **argv) {
   CLI::App bootstrap{"Partition Manager Bootstrap"};
   std::vector<char *> argvStorage;
   auto Flags = std::make_shared<PartitionManager::BasicFlags>(); // Generate flag structure.
-  Helper::Silencer silencer(false); // It suppresses stdout and stderr. It redirects them to /dev/null. One of the best ways to run silently.
+  Helper::Silencer silencer(
+      false); // It suppresses stdout and stderr. It redirects them to /dev/null. One of the best ways to run silently.
 
   try {
     // try-catch start

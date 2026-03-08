@@ -167,7 +167,9 @@ class Silencer {
   int saved_stdout = -1, saved_stderr = -1, dev_null = -1;
 
 public:
-  explicit Silencer(bool silence = true) { if (silence) silenceAgain(); }
+  explicit Silencer(bool silence = true) {
+    if (silence) silenceAgain();
+  }
   ~Silencer() {
     if (saved_stdout != -1 && dev_null != -1) stop();
   }
