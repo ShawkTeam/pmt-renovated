@@ -69,7 +69,7 @@ public:
     std::ifstream o_LogFile(oldLogFile);
     if (!o_LogFile) return false;
 
-    std::fstream n_LogFile(newLogFile, std::ios::app);
+    std::fstream n_LogFile(newLogFile, std::ios::in | std::ios::out);
     if (!n_LogFile) return false;
 
     n_LogFile << o_LogFile.rdbuf();
