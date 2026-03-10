@@ -148,9 +148,9 @@ public:
   BasicUniqueFD() = default;
   BasicUniqueFD(const BasicUniqueFD &) = delete;
   BasicUniqueFD(BasicUniqueFD &&other) noexcept : fd_(other.fd_), closer_(other.closer_) { other.fd_ = -1; }
-  BasicUniqueFD(std::filesystem::path path, int flags) : fd_(::open(path.c_str(), flags)), flags_(flags), path_(std::move(path)) {}
-  BasicUniqueFD(std::filesystem::path path, int flags, mode_t mode)
-      : fd_(::open(path.c_str(), flags, mode)), flags_(flags), mode_(mode), path_(std::move(path)) {}
+  BasicUniqueFD(const std::filesystem::path& path, int flags) : fd_(::open(path.c_str(), flags)), flags_(flags), path_(path) {}
+  BasicUniqueFD(const std::filesystem::path& path, int flags, mode_t mode)
+      : fd_(::open(path.c_str(), flags, mode)), flags_(flags), mode_(mode), path_(path) {}
 
   explicit BasicUniqueFD(int fd) : fd_(fd) {
     if (fd_ < 0) return;
