@@ -66,17 +66,15 @@ class Logger {
 
 public:
   static bool moveOldLogs(const std::filesystem::path &oldLogFile, const std::filesystem::path &newLogFile, bool remove = false) {
-    std::ifstream o_LogFile(oldLogFile);
-    if (!o_LogFile) return false;
+    try {
+      if (!std::filesystem::exists(oldLogFile)) return false;
+      std::filesystem::copy_file(oldLogFile, newLogFile, std::filesystem::copy_options::overwrite_existing);
+      if (remove) std::filesystem::remove(oldLogFile);
 
-    std::fstream n_LogFile(newLogFile, std::ios::in | std::ios::out);
-    if (!n_LogFile) return false;
-
-    n_LogFile << o_LogFile.rdbuf();
-    if (n_LogFile.fail()) return false;
-    if (remove) std::filesystem::remove(oldLogFile);
-
-    return true;
+      return true;
+    } catch (...) {
+      return false;
+    }
   }
 
   class Properties final {

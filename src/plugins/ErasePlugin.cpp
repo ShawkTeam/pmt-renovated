@@ -81,8 +81,8 @@ public:
     Helper::garbageCollector collector;
     const auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
 
-    const int pfd = Helper::openAndAddToCloseList(partition.absolutePath(), collector, O_WRONLY);
-    if (pfd < 0) return AsyncResult_t::Error("Can't open partition: {}: {}", partitionName, strerror(errno));
+    auto pfd = Helper::UniqueFD(partition.absolutePath(), O_WRONLY);
+    if (!pfd) return AsyncResult_t::Error("Can't open partition: {}: {}", partitionName, strerror(errno));
 
     if (!FLAGS.forceProcess) {
       if (!Helper::confirmPropt("Are you sure you want to continue? This could render your device "
@@ -103,7 +103,7 @@ public:
       size_t toWrite = sizeof(buffer);
       if (partitionSize - bytesWritten < sizeof(buffer)) toWrite = partitionSize - bytesWritten;
 
-      if (const ssize_t result = write(pfd, buffer, toWrite); result == -1)
+      if (const ssize_t result = pfd.write(buffer, toWrite); result == -1)
         return AsyncResult_t::Error("Can't write zero bytes to partition: {}: {}", partitionName, strerror(errno));
       else
         bytesWritten += result;

@@ -92,14 +92,14 @@ public:
 
     collector.delFileAfterProgress(test);
 
-    const int wfd = Helper::openAndAddToCloseList(test, collector, O_WRONLY | O_CREAT | O_TRUNC | O_SYNC, 0644);
-    if (wfd < 0) throw ERR << "Can't open/create test file: " << strerror(errno);
+    auto wfd = Helper::UniqueFD(test, O_WRONLY | O_CREAT | O_TRUNC | O_SYNC, 0644);
+    if (!wfd) throw ERR << "Can't open/create test file: " << strerror(errno);
 
     LOGNF(PLUGIN, logPath, INFO) << "Sequential write test started!" << std::endl;
     const auto startWrite = std::chrono::high_resolution_clock::now();
     ssize_t bytesWritten = 0;
     while (bytesWritten < testFileSize) {
-      const ssize_t ret = write(wfd, buffer, bufferSize);
+      const ssize_t ret = wfd.write(buffer, bufferSize);
       if (ret < 0) throw ERR << "Can't write to test file: " << strerror(errno);
       bytesWritten += ret;
     }
@@ -107,27 +107,27 @@ public:
     const auto endWrite = std::chrono::high_resolution_clock::now();
 
     const double writeTime = std::chrono::duration<double>(endWrite - startWrite).count();
-    Out::println("Sequential write speed: %3.f MB/s", (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / writeTime);
+    Out::println("Sequential write speed: {:3.0f} MB/s", (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / writeTime);
     LOGNF(PLUGIN, logPath, INFO) << "Sequential write test done!" << std::endl;
 
     if (!doNotReadTest) {
-      auto *rawBuffer = new char[bufferSize + 4096];
+      auto *rawBuffer = new (std::nothrow) char[bufferSize + 4096];
       collector.delAfterProgress(rawBuffer);
       auto *bufferRead = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(rawBuffer) + 4096 - 1) & ~(4096 - 1));
-      const int rfd = Helper::openAndAddToCloseList(test, collector, O_RDONLY | O_DIRECT);
+      auto rfd = Helper::UniqueFD(test, O_RDONLY | O_DIRECT);
       if (rfd < 0) throw ERR << "Can't open test file: " << strerror(errno);
 
       LOGNF(PLUGIN, logPath, INFO) << "Sequential read test started!" << std::endl;
       const auto startRead = std::chrono::high_resolution_clock::now();
       size_t total = 0;
       ssize_t bytesRead;
-      while ((bytesRead = read(rfd, bufferRead, bufferSize)) > 0) {
+      while ((bytesRead = rfd.read(bufferRead, bufferSize)) > 0) {
         total += bytesRead;
       }
       const auto endRead = std::chrono::high_resolution_clock::now();
 
       const double read_time = std::chrono::duration<double>(endRead - startRead).count();
-      Out::println("Sequential read speed: %3.f MB/s", (static_cast<double>(total) / (1024.0 * 1024.0)) / read_time);
+      Out::println("Sequential read speed: {:3.0f} MB/s", (static_cast<double>(total) / (1024.0 * 1024.0)) / read_time);
       LOGNF(PLUGIN, logPath, INFO) << "Sequential read test done!" << std::endl;
     }
 

@@ -392,17 +392,16 @@ public:
   // Get partition size in bytes.
   size_type size(size_type sectorSize = 4096) const {
     if (isLogical) {
-      Helper::garbageCollector collector;
-      int fd = Helper::openAndAddToCloseList(std::filesystem::read_symlink(logicalPartitionPath).string(), collector, O_RDONLY);
+      auto fd = Helper::UniqueFD(std::filesystem::read_symlink(logicalPartitionPath).string(), O_RDONLY);
 
-      if (fd < 0) {
+      if (!fd) {
         LOGE << "Cannot open partition file path: " << std::quoted(logicalPartitionPath.string()) << ": " << strerror(errno)
              << std::endl;
         return 0;
       }
 
       size_type size = 0;
-      if (ioctl(fd, static_cast<unsigned int>(BLKGETSIZE64), &size) != 0) {
+      if (fd.ioctl(static_cast<unsigned int>(BLKGETSIZE64), &size) != 0) {
         LOGE << "ioctl(BLKGETSIZE64) failed for " << std::quoted(logicalPartitionPath.string()) << ": " << strerror(errno)
              << std::endl;
         return 0;
@@ -486,14 +485,14 @@ public:
     const path_type dest = destination.empty() ? (path_type("./") += name() + ".img") : destination;
     const path_type toOpen = isLogical ? absolutePath() : path();
 
-    const int partitionfd = Helper::openAndAddToCloseList(toOpen, collector, O_RDONLY);
-    if (partitionfd < 0) {
+    const auto partitionfd = Helper::UniqueFD(toOpen, O_RDONLY);
+    if (!partitionfd) {
       ec = std::make_error_code(std::errc::io_error);
       return false;
     }
 
-    const int outfd = Helper::openAndAddToCloseList(dest, collector, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (outfd < 1) {
+    auto outfd = Helper::UniqueFD(dest, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+    if (!outfd) {
       if (errno == EPERM || errno == EACCES)
         ec = std::make_error_code(std::errc::permission_denied);
       else
@@ -510,7 +509,7 @@ public:
     while (bytesReadSoFar < totalBytesToRead) {
       uint64_t toRead = std::min(bufferSize, totalBytesToRead - bytesReadSoFar);
 
-      ssize_t bytesRead = read(partitionfd, buffer.data(), toRead);
+      ssize_t bytesRead = partitionfd.read(buffer.data(), toRead);
       if (bytesRead <= 0) {
         if (errno == EPERM)
           ec = std::make_error_code(std::errc::permission_denied);
@@ -519,7 +518,7 @@ public:
         return false;
       }
 
-      if (const ssize_t bytesWritten = ::write(outfd, buffer.data(), bytesRead); bytesWritten != bytesRead) {
+      if (const ssize_t bytesWritten = outfd.write(buffer.data(), bytesRead); bytesWritten != bytesRead) {
         if (errno == EPERM)
           ec = std::make_error_code(std::errc::permission_denied);
         else
@@ -549,8 +548,8 @@ public:
     }
 
     const path_type toWrite = isLogical ? absolutePath() : path();
-    const int partitionfd = Helper::openAndAddToCloseList(toWrite, collector, O_WRONLY);
-    if (partitionfd < 0) {
+    auto partitionfd = Helper::UniqueFD(toWrite, O_WRONLY);
+    if (!partitionfd) {
       if (errno == EPERM || errno == EACCES)
         ec = std::make_error_code(std::errc::permission_denied);
       else
@@ -558,8 +557,8 @@ public:
       return false;
     }
 
-    const int imagefd = Helper::openAndAddToCloseList(image, collector, O_RDONLY);
-    if (imagefd < 0) {
+    auto imagefd = Helper::UniqueFD(image, O_RDONLY);
+    if (!imagefd) {
       if (errno == EPERM || errno == EACCES)
         ec = std::make_error_code(std::errc::permission_denied);
       else
@@ -574,7 +573,7 @@ public:
     while (bytesWrittenSoFar < imageSize) {
       uint64_t toRead = std::min(bufferSize, imageSize - bytesWrittenSoFar);
 
-      ssize_t bytesRead = read(imagefd, buffer.data(), toRead);
+      ssize_t bytesRead = imagefd.read(buffer.data(), toRead);
       if (bytesRead <= 0) {
         if (errno == EPERM)
           ec = std::make_error_code(std::errc::permission_denied);
@@ -583,7 +582,7 @@ public:
         return false;
       }
 
-      if (const ssize_t bytesWritten = ::write(partitionfd, buffer.data(), bytesRead); bytesWritten != bytesRead) {
+      if (const ssize_t bytesWritten = partitionfd.write(buffer.data(), bytesRead); bytesWritten != bytesRead) {
         if (errno == EPERM)
           ec = std::make_error_code(std::errc::permission_denied);
         else
@@ -600,7 +599,7 @@ public:
 
       while (remainingBytes > 0) {
         uint64_t toWriteSize = std::min<uint64_t>(buffer.size(), remainingBytes);
-        ssize_t written = ::write(partitionfd, buffer.data(), toWriteSize);
+        ssize_t written = partitionfd.write(buffer.data(), toWriteSize);
 
         if (written <= 0) {
           LOGE << "Cannot fill the outside of partition (of image file): " << strerror(errno);
@@ -614,7 +613,7 @@ public:
       }
     }
 
-    fsync(partitionfd);
+    partitionfd.fsync();
     return bytesWrittenSoFar == imageSize;
   }
 

@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="BackendCodeEditorMiscSettings">
-    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="18" type="long" />
+    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="10" type="long" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/GlobalSettingsUpgraded/IsUpgraded/@EntryValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/RefactoringsMru/RenameRefactoring/DoSearchForTextInStrings/@EntryValue" value="true" type="bool" />
@@ -54,11 +54,17 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="android: fixup soong files.">
-      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper: reformat code, fixup log mover and use new UniqueFD class.">
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Magic.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Magic.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -117,6 +123,7 @@
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
     &quot;CMake Application.backup_plugin.executor&quot;: &quot;Run&quot;,
+    &quot;KEY_ANDROID_SOURCE_PATH/home/yzbruh/Masaüstü/Projects/pmt-renovated-github&quot;: &quot;/home/yzbruh/Masaüstü/Development/twrp&quot;,
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
@@ -136,7 +143,7 @@
     &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/Masaüstü/Projects/pmt-renovated-github/CMakeLists.txt&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/Masaüstü/Development/twrp&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
@@ -146,18 +153,13 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Shell Script.Reformat Code">
+  <component name="RunManager" selected="Shell Script.Build (Debug)">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -359,8 +361,8 @@
       <item itemvalue="CMake Application.clean_log_plugin" />
       <item itemvalue="CMake Application.erase_plugin" />
       <item itemvalue="CMake Application.flash_plugin" />
-      <item itemvalue="CMake Application.info_plugin" />
       <item itemvalue="CMake Application.generate_build_info" />
+      <item itemvalue="CMake Application.info_plugin" />
       <item itemvalue="CMake Application.libext2_uuid_shared" />
       <item itemvalue="CMake Application.libext2_uuid_static" />
       <item itemvalue="CMake Application.libgptf_shared" />
@@ -421,47 +423,10 @@
       <workItem from="1772901032965" duration="10368000" />
       <workItem from="1772965779214" duration="1423000" />
       <workItem from="1772967225996" duration="4879000" />
-      <workItem from="1772981720293" duration="4172000" />
-    </task>
-    <task id="LOCAL-00011" summary="github: Fix an issue where the Builder workflow wasn't printing commits correctly.">
-      <option name="closed" value="true" />
-      <created>1770467276889</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1770467276889</updated>
-    </task>
-    <task id="LOCAL-00012" summary="manager: update installer for 1.5.0 release.">
-      <option name="closed" value="true" />
-      <created>1770467733862</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1770467733862</updated>
-    </task>
-    <task id="LOCAL-00013" summary="pmt: fixup termux link directories.">
-      <option name="closed" value="true" />
-      <created>1770469378265</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1770469378265</updated>
-    </task>
-    <task id="LOCAL-00014" summary="pmt: fixup manager and termux issue.">
-      <option name="closed" value="true" />
-      <created>1770470784072</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1770470784073</updated>
-    </task>
-    <task id="LOCAL-00015" summary="manager: fixup installing libraries">
-      <option name="closed" value="true" />
-      <created>1770472351224</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1770472351224</updated>
+      <workItem from="1772981720293" duration="4228000" />
+      <workItem from="1773172279518" duration="351000" />
+      <workItem from="1773172633984" duration="11444000" />
+      <workItem from="1773186164277" duration="10000" />
     </task>
     <task id="LOCAL-00016" summary="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary.">
       <option name="closed" value="true" />
@@ -815,7 +780,47 @@
       <option name="project" value="LOCAL" />
       <updated>1772985663147</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="pmt: reformat code and optimise includes">
+      <option name="closed" value="true" />
+      <created>1772985920419</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1772985920419</updated>
+    </task>
+    <task id="LOCAL-00061" summary="libhelper/logging: fixup log mover">
+      <option name="closed" value="true" />
+      <created>1773184031934</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1773184031935</updated>
+    </task>
+    <task id="LOCAL-00062" summary="libhelper/management: Create a class for easy file descriptor management.">
+      <option name="closed" value="true" />
+      <created>1773184086114</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1773184086119</updated>
+    </task>
+    <task id="LOCAL-00063" summary="libhelper/management: Add == and != operators to BasicUniqueFD">
+      <option name="closed" value="true" />
+      <created>1773184908007</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1773184908007</updated>
+    </task>
+    <task id="LOCAL-00064" summary="libhelper/management: Use const references for path inputs on constructors.">
+      <option name="closed" value="true" />
+      <created>1773185240053</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1773185240053</updated>
+    </task>
+    <option name="localTasksCounter" value="65" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -853,11 +858,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: apply custom sections to plugin destructors and reformat code, etc." />
-    <MESSAGE value="plugins: Instead of std::pair, create and use a custom result holder class." />
-    <MESSAGE value="cmake: Enable disabling libraries created with functions.&#10; - Deferr the building of libraries that are not currently needed." />
-    <MESSAGE value="reformat.sh: apply shellcheck suggests." />
-    <MESSAGE value="libhelper/capsule: Check the requirements with concepts." />
     <MESSAGE value="libhelper/management: Instead of directly checking for the existence of the std::pair type in finalize() and the () operator, check for the existence of the first and second variables." />
     <MESSAGE value="libpartition_map/definations: Correct the naming error in the title definition." />
     <MESSAGE value="plugins: Adapt the new AsyncResult_t type." />
@@ -878,7 +878,12 @@
     <MESSAGE value="plugins: Use a separate CMakeLists for plugins and automatically identify plugins." />
     <MESSAGE value="libhelper: include &lt;filesystem&gt; directly instead &lt;__filesystem/path.h&gt;" />
     <MESSAGE value="android: fixup soong files." />
-    <option name="LAST_COMMIT_MESSAGE" value="android: fixup soong files." />
+    <MESSAGE value="pmt: reformat code and optimise includes" />
+    <MESSAGE value="libhelper/logging: fixup log mover" />
+    <MESSAGE value="libhelper/management: Create a class for easy file descriptor management." />
+    <MESSAGE value="libhelper/management: Add == and != operators to BasicUniqueFD" />
+    <MESSAGE value="libhelper/management: Use const references for path inputs on constructors." />
+    <option name="LAST_COMMIT_MESSAGE" value="libhelper/management: Use const references for path inputs on constructors." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

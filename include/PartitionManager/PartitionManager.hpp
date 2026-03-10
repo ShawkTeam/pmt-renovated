@@ -24,7 +24,6 @@
 
 #include <memory>
 #include <string>
-#include <set>
 #include <format>
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>

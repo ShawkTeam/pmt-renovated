@@ -74,8 +74,8 @@ bool hasMagic(const uint64_t magic, const ssize_t buf, const std::string &path) 
        << std::endl;
   Helper::garbageCollector collector;
 
-  const int fd = Helper::openAndAddToCloseList(path, collector, O_RDONLY);
-  if (fd < 0) return false;
+  const auto fd = Helper::UniqueFD(path, O_RDONLY);
+  if (!fd) return false;
   if (buf < 1) {
     LOGE << "Buffer size is older than 1" << std::endl;
     return false;
@@ -84,7 +84,7 @@ bool hasMagic(const uint64_t magic, const ssize_t buf, const std::string &path) 
   auto *buffer = new (std::nothrow) uint8_t[buf];
   collector.delAfterProgress(buffer);
 
-  const ssize_t bytesRead = read(fd, buffer, buf);
+  const ssize_t bytesRead = fd.read(buffer, buf);
   if (bytesRead < 0) return false;
 
   const size_t magicLength = getMagicLength(magic);

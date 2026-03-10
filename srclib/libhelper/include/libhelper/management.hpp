@@ -23,6 +23,7 @@
 #endif
 
 #include <type_traits>
+#include <utility>
 #include <vector>
 #include <functional>
 #include <future>
@@ -34,8 +35,10 @@
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/stat.h>
 
 namespace Helper {
+
 template <typename T> struct CleanupTraits {
   static void cleanup(const T *ptr) { delete ptr; }
 };
@@ -148,8 +151,8 @@ public:
   BasicUniqueFD() = default;
   BasicUniqueFD(const BasicUniqueFD &) = delete;
   BasicUniqueFD(BasicUniqueFD &&other) noexcept : fd_(other.fd_), closer_(other.closer_) { other.fd_ = -1; }
-  BasicUniqueFD(const std::filesystem::path& path, int flags) : fd_(::open(path.c_str(), flags)), flags_(flags), path_(path) {}
-  BasicUniqueFD(const std::filesystem::path& path, int flags, mode_t mode)
+  BasicUniqueFD(const std::filesystem::path &path, int flags) : fd_(::open(path.c_str(), flags)), flags_(flags), path_(path) {}
+  BasicUniqueFD(const std::filesystem::path &path, int flags, mode_t mode)
       : fd_(::open(path.c_str(), flags, mode)), flags_(flags), mode_(mode), path_(path) {}
 
   explicit BasicUniqueFD(int fd) : fd_(fd) {

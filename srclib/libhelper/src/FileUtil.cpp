@@ -56,18 +56,17 @@ std::optional<std::string> readFile(const std::filesystem::path &file) {
 
 bool copyFile(const std::filesystem::path &file, const std::filesystem::path &dest) {
   LOGN(HELPER, INFO) << "copy " << std::quoted(file.string()) << " to " << std::quoted(dest.string()) << " requested." << std::endl;
-  garbageCollector collector;
 
-  const int src_fd = openAndAddToCloseList(file, collector, O_RDONLY);
-  if (src_fd == -1) return false;
+  const auto src_fd = UniqueFD(file, O_RDONLY);
+  if (!src_fd) return false;
 
-  const int dst_fd = openAndAddToCloseList(dest, collector, O_WRONLY | O_CREAT | O_TRUNC, DEFAULT_FILE_PERMS);
-  if (dst_fd == -1) return false;
+  auto dst_fd = UniqueFD(dest, O_WRONLY | O_CREAT | O_TRUNC, DEFAULT_FILE_PERMS);
+  if (!dst_fd) return false;
 
   char buffer[512];
   ssize_t br;
-  while ((br = read(src_fd, buffer, 512)) > 0) {
-    if (const ssize_t bw = write(dst_fd, buffer, br); bw != br) return false;
+  while ((br = src_fd.read(buffer, 512)) > 0) {
+    if (const ssize_t bw = dst_fd.write(buffer, br); bw != br) return false;
   }
 
   if (br == -1) return false;
@@ -112,10 +111,9 @@ bool createFile(const std::filesystem::path &path) {
 
   if (isExists(path)) return false;
 
-  const int fd = open(path.c_str(), O_RDONLY | O_CREAT, DEFAULT_FILE_PERMS);
-  if (fd == -1) return false;
+  const auto fd = UniqueFD(path.c_str(), O_RDONLY | O_CREAT, DEFAULT_FILE_PERMS);
+  if (!fd) return false;
 
-  close(fd);
   LOGN(HELPER, INFO) << "create file " << std::quoted(path.string()) << " successfull." << std::endl;
   return true;
 }
