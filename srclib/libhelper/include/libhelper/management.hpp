@@ -279,6 +279,18 @@ public:
     return fd_ >= fd;
   }
 
+  template <typename T>
+    requires std::is_integral_v<T>
+  bool operator==(T fd) const noexcept {
+    return fd_ == fd;
+  }
+
+  template <typename T>
+    requires std::is_integral_v<T>
+  bool operator!=(T fd) const noexcept {
+    return fd_ != fd;
+  }
+
   BasicUniqueFD &operator=(const BasicUniqueFD &) = delete;
   BasicUniqueFD &operator=(BasicUniqueFD &&other) noexcept {
     if (this != &other) {
