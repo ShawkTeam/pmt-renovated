@@ -119,18 +119,30 @@ public:
 };
 
 template <typename T>
-concept IsCloser = requires(T t, int fd) {
+concept IsCloser_FD = requires(T t, int fd) {
   { t(fd) } -> std::same_as<void>;
 } || requires(T t, int fd) {
   { t.close(fd) } -> std::same_as<void>;
 };
 
 template <typename T>
-concept CloserHasOperator = requires(T t, int fd) {
+concept IsCloser_FP = requires(T t, FILE* fp) {
+  { t(fp) } -> std::same_as<void>;
+} || requires(T t, FILE* fp) {
+  { t.close(fp) } -> std::same_as<void>;
+};
+
+template <typename T>
+concept CloserHasOperator_FD = requires(T t, int fd) {
   { t(fd) } -> std::same_as<void>;
 };
 
-class DefaultCloser {
+template <typename T>
+concept CloserHasOperator_FP = requires(T t, FILE* fp) {
+  { t(fp) } -> std::same_as<void>;
+};
+
+class DefaultCloser_FD {
 public:
   void operator()(int fd) const noexcept {
     if (fd >= 0) ::close(fd);
@@ -141,16 +153,31 @@ public:
   }
 };
 
-template <typename Closer> class BasicUniqueFD {
+class DefaultCloser_FP {
+public:
+  void operator()(FILE* fp) const noexcept {
+    if (fp != nullptr) fclose(fp);
+  }
+
+  void close(FILE* fp) const noexcept {
+    if (fp != nullptr) fclose(fp);
+  }
+};
+
+template <typename Closer>
+requires IsCloser_FD<Closer>
+class BasicUniqueFD {
   int fd_ = -1, flags_ = 0;
   std::optional<mode_t> mode_ = std::nullopt;
   std::filesystem::path path_;
   [[no_unique_address]] Closer closer_;
 
 public:
+  bool syncOnClose = true;
+
   BasicUniqueFD() = default;
   BasicUniqueFD(const BasicUniqueFD &) = delete;
-  BasicUniqueFD(BasicUniqueFD &&other) noexcept : fd_(other.fd_), closer_(other.closer_) { other.fd_ = -1; }
+  BasicUniqueFD(BasicUniqueFD &&other) noexcept : fd_(other.fd_), flags_(other.flags_), mode_(other.mode_), path_(other.path_), closer_(other.closer_) { other.fd_ = -1; }
   BasicUniqueFD(const std::filesystem::path &path, int flags) : fd_(::open(path.c_str(), flags)), flags_(flags), path_(path) {}
   BasicUniqueFD(const std::filesystem::path &path, int flags, mode_t mode)
       : fd_(::open(path.c_str(), flags, mode)), flags_(flags), mode_(mode), path_(path) {}
@@ -174,7 +201,7 @@ public:
   }
 
   ~BasicUniqueFD() {
-    if constexpr (CloserHasOperator<Closer>)
+    if constexpr (CloserHasOperator_FD<Closer>)
       closer_(fd_);
     else
       closer_.close(fd_);
@@ -194,6 +221,7 @@ public:
   std::filesystem::path path() const { return path_; }
 
   BasicUniqueFD &open(bool withMode = false) {
+    if (fd_ >= 0) return *this;
     if (withMode && mode_.has_value())
       fd_ = ::open(path_.c_str(), flags_, *mode_);
     else
@@ -202,6 +230,8 @@ public:
   }
 
   BasicUniqueFD &open(const std::filesystem::path &path, int flags) {
+    if (fd_ >= 0) return *this;
+
     path_ = path;
     flags_ = flags;
     fd_ = ::open(path.c_str(), flags);
@@ -210,6 +240,8 @@ public:
   }
 
   BasicUniqueFD &open(const std::filesystem::path &path, int flags, mode_t mode) {
+    if (fd_ >= 0) return *this;
+
     path_ = path;
     flags_ = flags;
     mode_ = mode;
@@ -229,13 +261,13 @@ public:
   }
 
   void close() noexcept {
-    if (fd_ >= 0) {
-      if constexpr (CloserHasOperator<Closer>)
-        closer_(fd_);
-      else
-        closer_.close(fd_);
-      fd_ = -1;
-    }
+    if constexpr (CloserHasOperator_FD<Closer>)
+      closer_(fd_);
+    else
+      closer_.close(fd_);
+
+    if (fd_ >= 0 && syncOnClose) fsync();
+    fd_ = -1;
   }
 
   ssize_t read(void *buf, size_t count) const { return ::read(fd_, buf, count); }

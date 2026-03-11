@@ -28,11 +28,10 @@
 namespace Helper {
 bool writeFile(const std::filesystem::path &file, const std::string_view text) {
   LOGN(HELPER, INFO) << "write " << std::quoted(text) << " to " << std::quoted(file.c_str()) << "requested." << std::endl;
-  garbageCollector collector;
 
-  FILE *fp = openAndAddToCloseList(file, collector, "a");
-  if (fp == nullptr) return false;
-  fprintf(fp, "%s", text.data());
+  auto fp = UniqueFP(file, "a");
+  if (!fp) return false;
+  fp.printf("{}", text.data());
 
   LOGN(HELPER, INFO) << "write " << std::quoted(file.string()) << " successfully." << std::endl;
   return true;
@@ -40,14 +39,13 @@ bool writeFile(const std::filesystem::path &file, const std::string_view text) {
 
 std::optional<std::string> readFile(const std::filesystem::path &file) {
   LOGN(HELPER, INFO) << "read " << std::quoted(file.string()) << " requested." << std::endl;
-  garbageCollector collector;
 
-  FILE *fp = openAndAddToCloseList(file, collector, "r");
-  if (fp == nullptr) return std::nullopt;
+  auto fp = UniqueFP(file, "r");
+  if (!fp) return std::nullopt;
 
   char buffer[1024];
   std::string str;
-  while (fgets(buffer, sizeof(buffer), fp))
+  while (fp.gets(buffer, sizeof(buffer)))
     str += buffer;
 
   LOGN(HELPER, INFO) << "read " << file << " successfully, read text: " << std::quoted(str) << std::endl;

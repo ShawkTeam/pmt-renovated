@@ -54,17 +54,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper: reformat code, fixup log mover and use new UniqueFD class.">
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper: reformat code, fixups and use new UniqueFD class.">
+      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/logging.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Magic.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Magic.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -153,7 +148,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Shell Script.Build (Debug)">
+  <component name="RunManager" selected="Shell Script.Cleanup">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -426,23 +421,8 @@
       <workItem from="1772981720293" duration="4228000" />
       <workItem from="1773172279518" duration="351000" />
       <workItem from="1773172633984" duration="11444000" />
-      <workItem from="1773186164277" duration="10000" />
-    </task>
-    <task id="LOCAL-00016" summary="libpartition_map: Add const/non-const functions and move constructors/operators.&#10; - Start working for 1.6.0 version.&#10; - Many functions have been overloaded with const/non-const variants to provide better usability.&#10; - Memory saving opportunities were offered by adding the move constructor and the move `=` operator to `Partition_t` and `Builder`.&#10; - Necessary macro definitions and other things have been done. Improvements, etc. Constant lambdas were used in the main binary.">
-      <option name="closed" value="true" />
-      <created>1770669433973</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1770669433974</updated>
-    </task>
-    <task id="LOCAL-00017" summary="libpartition_map: fix tests and constructors of classes.">
-      <option name="closed" value="true" />
-      <created>1770670068415</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1770670068415</updated>
+      <workItem from="1773186164277" duration="43000" />
+      <workItem from="1773248533698" duration="4613000" />
     </task>
     <task id="LOCAL-00018" summary="libpartition_map: add * operators to classes, etc.">
       <option name="closed" value="true" />
@@ -820,7 +800,23 @@
       <option name="project" value="LOCAL" />
       <updated>1773185240053</updated>
     </task>
-    <option name="localTasksCounter" value="65" />
+    <task id="LOCAL-00065" summary="libhelper: reformat code, fixups and use new UniqueFD class.">
+      <option name="closed" value="true" />
+      <created>1773186190732</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1773186190732</updated>
+    </task>
+    <task id="LOCAL-00066" summary="libhelper/management: Create a class for easy file pointer management.">
+      <option name="closed" value="true" />
+      <created>1773252885054</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1773252885054</updated>
+    </task>
+    <option name="localTasksCounter" value="67" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -858,8 +854,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="libhelper/management: Instead of directly checking for the existence of the std::pair type in finalize() and the () operator, check for the existence of the first and second variables." />
-    <MESSAGE value="libpartition_map/definations: Correct the naming error in the title definition." />
     <MESSAGE value="plugins: Adapt the new AsyncResult_t type." />
     <MESSAGE value="cmake: Improve header and linker script generation at compile-time." />
     <MESSAGE value="cmake: fixup add_plugin()" />
@@ -883,7 +877,9 @@
     <MESSAGE value="libhelper/management: Create a class for easy file descriptor management." />
     <MESSAGE value="libhelper/management: Add == and != operators to BasicUniqueFD" />
     <MESSAGE value="libhelper/management: Use const references for path inputs on constructors." />
-    <option name="LAST_COMMIT_MESSAGE" value="libhelper/management: Use const references for path inputs on constructors." />
+    <MESSAGE value="libhelper: reformat code, fixups and use new UniqueFD class." />
+    <MESSAGE value="libhelper/management: Create a class for easy file pointer management." />
+    <option name="LAST_COMMIT_MESSAGE" value="libhelper/management: Create a class for easy file pointer management." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
