@@ -309,7 +309,162 @@ public:
   }
 };
 
-using UniqueFD = BasicUniqueFD<DefaultCloser>;
+template <typename Closer>
+requires IsCloser_FP<Closer>
+class BasicUniqueFP {
+  FILE* fp_ = nullptr;
+  std::string_view flags_;
+  std::filesystem::path path_;
+  [[no_unique_address]] Closer closer_;
+
+  std::string_view get_flags(FILE* fp) const {
+    if (fp == nullptr) return {};
+
+    int flags = fcntl(fileno(fp), F_GETFL);
+    if (flags == -1) return {};
+
+    int acc = flags & O_ACCMODE;
+
+    if (flags & O_APPEND) return (acc == O_RDWR) ? "a+" : "a";
+    else {
+      if (acc == O_RDONLY) return "r";
+      if (acc == O_WRONLY) return "w";
+      if (acc == O_RDWR) return "r+";
+    }
+
+    return {};
+  }
+
+public:
+  bool flushOnClose = true;
+
+  BasicUniqueFP() = default;
+  BasicUniqueFP(const BasicUniqueFP &) = delete;
+  BasicUniqueFP(BasicUniqueFP &&other) noexcept : fp_(other.fp_), flags_(other.flags_), path_(other.path_), closer_(other.closer_) { other.fp_ = nullptr; }
+  BasicUniqueFP(const std::filesystem::path &path, const std::string_view& flags) : fp_(fopen(path.c_str(), flags.data())), flags_(flags), path_(path) {}
+
+  explicit BasicUniqueFP(FILE* fp) : fp_(fp) {
+    if (fp_ == nullptr) return;
+
+    int fd_ = fileno(fp_);
+    flags_ = get_flags(fp);
+
+    char buf[PATH_MAX];
+    std::string proc = "/proc/self/fd/" + std::to_string(fd_);
+    ssize_t len = readlink(proc.c_str(), buf, sizeof(buf) - 1);
+    if (len != -1) {
+      buf[len] = '\0';
+      path_ = std::filesystem::path(buf);
+    }
+  }
+
+  ~BasicUniqueFP() {
+    if constexpr (CloserHasOperator_FP<Closer>)
+      closer_(fp_);
+    else
+      closer_.close(fp_);
+  }
+
+  static BasicUniqueFP getOwnership(FILE* fp) { return BasicUniqueFP(fp); }
+
+  int rawFd() const noexcept { return fileno(fp_); }
+
+  FILE* fp() noexcept { return fp_; }
+  const FILE* fp() const noexcept { return fp_; }
+
+  std::string_view flags() noexcept { return flags_; }
+  std::string_view flags() const noexcept { return flags_; }
+
+  mode_t mode() const noexcept {
+    struct stat st{};
+    if (fstat(rawFd(), &st) == 0) return st.st_mode;
+    return 0;
+  }
+
+  std::filesystem::path path() noexcept { return path_; }
+  std::filesystem::path path() const noexcept { return path_; }
+
+  BasicUniqueFP& open(const std::filesystem::path& path, const std::string_view& flags) noexcept {
+    if (fp_ == nullptr) return *this;
+
+    path_ = path;
+    flags_ = flags;
+    fp_ = fopen(path.c_str(), flags.data());
+
+    return *this;
+  }
+
+  bool reOpen() {
+    close();
+    fp_ = fopen(path_.c_str(), flags_.data());
+
+    return fp_ != nullptr;
+  }
+
+  void close() noexcept {
+    if constexpr (CloserHasOperator_FP<Closer>)
+      closer_(fp_);
+    else
+      closer_.close(fp_);
+
+    if (fp_ != nullptr && flushOnClose) flush();
+    fp_ = nullptr;
+  }
+
+  int putc(int c) noexcept { return fputc(c, fp_); }
+  int puts(const std::string& s) noexcept { return fputs(s.c_str(), fp_); }
+
+  template <typename... Args>
+  int printf(std::format_string<Args...> fmt, Args &&...args) noexcept {
+    std::string end = std::format(fmt, std::forward<Args>(args)...);
+    return fprintf(fp_, end.c_str());
+  }
+
+  size_t write(const void* buf, size_t size, size_t nmemb) noexcept { return fwrite(buf, size, nmemb, fp_); }
+
+  int getc() noexcept { return fgetc(fp_); }
+  char* gets(char* str, int size) noexcept { return fgets(str, size, fp_); }
+
+  size_t read(void* buf, size_t size, size_t count) noexcept { return fread(buf, size, count, fp_); }
+
+  template <typename... Args>
+  int scanf(const char* fmt, Args &&...args) noexcept { return fscanf(fp_, fmt, args...); }
+
+  int seek(long offset, int whence) noexcept { return fseek(fp_, offset, whence); }
+  long tell() noexcept { return ftell(fp_); }
+
+  void rewind() noexcept { return rewind(fp_); }
+  void clearerr() noexcept { return ::clearerr(fp_); }
+
+  int eof() noexcept { return feof(fp_); }
+  int error() noexcept { return ferror(fp_); }
+
+  int flush() noexcept { return fflush(fp_); }
+
+  bool operator!() const noexcept { return fp_ == nullptr; }
+  explicit operator bool() const noexcept { return fp_ != nullptr; }
+  FILE* operator()() noexcept { return fp_; }
+  FILE* operator()() const noexcept { return fp_; }
+
+  bool operator==(const FILE* fp) const noexcept { return fp_ == fp; }
+  bool operator!=(const FILE* fp) const noexcept { return fp_ != fp; }
+
+  BasicUniqueFP &operator=(const BasicUniqueFP &) = delete;
+  BasicUniqueFP &operator=(BasicUniqueFP &&other) noexcept {
+    if (this != &other) {
+      close();
+      fp_ = other.fp_;
+      flags_ = other.flags_;
+      path_ = std::move(other.path_);
+      closer_ = std::move(other.closer_);
+      other.fp_ = nullptr;
+    }
+    return *this;
+  }
+};
+
+using UniqueFD = BasicUniqueFD<DefaultCloser_FD>;
+using UniqueFP = BasicUniqueFP<DefaultCloser_FP>;
 
 class garbageCollector {
   std::vector<std::function<void()>> __cleaners;
