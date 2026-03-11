@@ -449,7 +449,7 @@ public:
   template <typename... Args>
   int printf(std::format_string<Args...> fmt, Args &&...args) noexcept {
     std::string end = std::format(fmt, std::forward<Args>(args)...);
-    return fprintf(fp_, end.c_str());
+    return fprintf(fp_, "%s", end.c_str());
   }
 
   size_t write(const void* buf, size_t size, size_t nmemb) noexcept { return fwrite(buf, size, nmemb, fp_); }
