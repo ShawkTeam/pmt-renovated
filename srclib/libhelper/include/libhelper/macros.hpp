@@ -79,8 +79,8 @@ enum sizeCastTypes { B = static_cast<int>('B'), KB = static_cast<int>('K'), MB =
 #define MKVERSION(name)                                                                                                               \
   char vinfo[512];                                                                                                                    \
   sprintf(vinfo,                                                                                                                      \
-          "%s %s-%s [%s %s]\nBuildType: %s\nCMakeVersion: %s\nCompilerVersion: "                                                      \
-          "%s\nBuildFlags: %s",                                                                                                       \
+          "%s %s-%s [%s %s]\nBuild type: %s\nCMake version: %s\nCompiler version: "                                                   \
+          "%s\nCompiler flags: %s",                                                                                                   \
           name, BUILD_VERSION, COMMIT_ID, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION,            \
           BUILD_FLAGS);                                                                                                               \
   return std::string(vinfo)
