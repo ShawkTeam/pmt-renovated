@@ -32,17 +32,17 @@ class TypePlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath = nullptr;
 
-  PLUGIN_SECTION TypePlugin() = default;
+  PLUGIN_SECTION TypePlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
   PLUGIN_SECTION ~TypePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("type", "Get type of the partition(s) or image(s)");
-    flags = mainFlags;
+    flags = &mainFlags;
     cmd->add_option("content(s)", contents, "Content(s)")->required()->delimiter(',');
     cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for max seek depth")
         ->transform(CLI::AsSizeValue(false))
@@ -72,7 +72,7 @@ public:
       magics.merge(PartitionMap::Extra::Magics);
 
     for (const auto &content : contents) {
-      if (!TABLES.hasPartition(content) && !Helper::fileIsExists(content))
+      if (!Tables.hasPartition(content) && !Helper::fileIsExists(content))
         throw ERR << "Couldn't find partition or image file: " << content;
 
       bool found = false;
@@ -80,7 +80,7 @@ public:
         if (PartitionMap::Extra::hasMagic(magic, static_cast<ssize_t>(bufferSize),
                                           Helper::fileIsExists(content)
                                               ? content
-                                              : TABLES.partitionWithDupCheck(content, FLAGS.noWorkOnUsed).absolutePath().c_str())) {
+                                              : Tables.partitionWithDupCheck(content, Flags.noWorkOnUsed).absolutePath().c_str())) {
           Out::println("{} contains {} magic ({})", content, name, PartitionMap::Extra::formatMagic(magic));
           found = true;
           break;

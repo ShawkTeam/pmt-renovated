@@ -37,16 +37,16 @@ class FlashPlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath = nullptr;
 
-  PLUGIN_SECTION FlashPlugin() = default;
+  PLUGIN_SECTION FlashPlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
   PLUGIN_SECTION ~FlashPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
-    flags = mainFlags;
+    flags = &mainFlags;
     cmd = mainApp.add_subcommand("flash", "Flash image(s) to partition(s)");
     cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
     cmd->add_option("imageFile(s)", rawImageNames, "Name(s) of image file(s)")->required();
@@ -69,17 +69,17 @@ public:
 
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &imageName) const {
     if (!Helper::fileIsExists(imageName)) return AsyncResult_t::Error("Couldn't find image file: {}", imageName);
-    if (!TABLES.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
-    if (Helper::fileSize(imageName) > TABLES.partition(partitionName).size())
+    if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
+    if (Helper::fileSize(imageName) > Tables.partition(partitionName).size())
       return AsyncResult_t::Error("{} is larger than {} partition size!", imageName, partitionName);
 
-    auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
+    auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed);
     const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
 
     LOGNF(PLUGIN, logPath, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;
 
-    if (FLAGS.onLogical && !TABLES.isLogical(partitionName)) {
-      if (FLAGS.forceProcess)
+    if (Flags.onLogical && !Tables.isLogical(partitionName)) {
+      if (Flags.forceProcess)
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                                         << std::endl;
       else
@@ -96,7 +96,7 @@ public:
 
     if (deleteAfterProgress) {
       LOGNF(PLUGIN, logPath, INFO) << "Deleting flash file: " << imageName << std::endl;
-      if (!Helper::eraseEntry(imageName) && !FLAGS.quietProcess)
+      if (!Helper::eraseEntry(imageName) && !Flags.quietProcess)
         WARNING(std::string("Cannot erase flash file: " + imageName + "\n").data());
     }
 

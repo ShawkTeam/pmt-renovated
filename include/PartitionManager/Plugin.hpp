@@ -26,9 +26,9 @@
 #define PM_VERSION "1.0"
 
 // clang-format off
-#define FLAGS          (*flags)
-#define TABLES         (*FLAGS.partitionTables)
-#define TABLES_REF     *flags->partitionTables
+#define Flags          (*flags)
+#define Tables         (*Flags.partitionTables)
+#define DEFAULT_PLUGIN_CONSTRUCTOR : flags(nullptr) {}
 
 #ifdef BUILTIN_PLUGINS
 #define PLUGIN_SECTION __attribute__((section(".builtin_modules")))
@@ -65,12 +65,13 @@ namespace PartitionManager {
 class BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath;
 
+  PLUGIN_SECTION BasicPlugin() : flags(nullptr), logPath(nullptr) {}
   virtual PLUGIN_SECTION ~BasicPlugin() = default;
 
-  virtual PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) = 0;
+  virtual PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) = 0;
   virtual PLUGIN_SECTION bool onUnload() = 0;
   virtual PLUGIN_SECTION bool used() = 0;
   virtual PLUGIN_SECTION bool run() = 0;
@@ -109,7 +110,8 @@ template <typename __class>
   requires minimumPluginClass<__class>
 class PluginManager {
 public:
-  explicit PluginManager(CLI::App &cmd, std::string logpath, FlagsBase &flags)
+  PluginManager() = delete;
+  explicit PluginManager(CLI::App &cmd, std::string logpath, BasicFlags &flags)
       : logPath(std::move(logpath)), mainApp(cmd), mainFlags(flags) {}
 
   ~PluginManager() {
@@ -219,7 +221,7 @@ private:
   std::vector<Plugin> plugins;
   std::string logPath;
   CLI::App &mainApp;
-  FlagsBase &mainFlags;
+  BasicFlags &mainFlags;
 };
 
 class AsyncResult_t {

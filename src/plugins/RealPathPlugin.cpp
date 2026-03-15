@@ -30,17 +30,17 @@ class RealPathPlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath = nullptr;
 
-  PLUGIN_SECTION RealPathPlugin() = default;
+  PLUGIN_SECTION RealPathPlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
   PLUGIN_SECTION ~RealPathPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("real-path", "Tell real paths of partition(s)");
-    flags = mainFlags;
+    flags = &mainFlags;
     cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
     cmd->add_flag("--by-name", byName, "Print by-name path(s)")->default_val(false);
 
@@ -57,11 +57,11 @@ public:
 
   PLUGIN_SECTION bool run() override {
     for (const auto &partition : partitions) {
-      if (!TABLES.hasPartition(partition)) throw ERR << "Couldn't find partition: " << partition;
+      if (!Tables.hasPartition(partition)) throw ERR << "Couldn't find partition: " << partition;
 
-      auto &part = TABLES.partitionWithDupCheck(partition, FLAGS.noWorkOnUsed);
-      if (FLAGS.onLogical && !part.isLogicalPartition()) {
-        if (FLAGS.forceProcess)
+      auto &part = Tables.partitionWithDupCheck(partition, Flags.noWorkOnUsed);
+      if (Flags.onLogical && !part.isLogicalPartition()) {
+        if (Flags.forceProcess)
           LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
                                           << std::endl;
         else

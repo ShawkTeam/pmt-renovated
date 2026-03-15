@@ -67,7 +67,7 @@ public:
 };
 
 using Error = Helper::Error;
-using FlagsBase = std::shared_ptr<BasicFlags>;
+// using FlagsBase = std::shared_ptr<BasicFlags>;
 } // namespace PartitionManager
 
 #endif // #ifndef PARTITION_MANAGER__PARTITION_MANAGER_HPP

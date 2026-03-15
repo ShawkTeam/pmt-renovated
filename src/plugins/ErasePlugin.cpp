@@ -34,17 +34,17 @@ class ErasePlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath = nullptr;
 
-  PLUGIN_SECTION ErasePlugin() = default;
+  PLUGIN_SECTION ErasePlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
   PLUGIN_SECTION ~ErasePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("erase", "Writes zero bytes to partition(s)");
-    flags = mainFlags;
+    flags = &mainFlags;
     cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
     cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for writing zero bytes to partition(s)")
         ->transform(CLI::AsSizeValue(false))
@@ -62,10 +62,10 @@ public:
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName) const {
-    if (!TABLES.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
+    if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
 
-    if (FLAGS.onLogical && !TABLES.isLogical(partitionName)) {
-      if (FLAGS.forceProcess)
+    if (Flags.onLogical && !Tables.isLogical(partitionName)) {
+      if (Flags.forceProcess)
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                                         << std::endl;
       else
@@ -73,18 +73,18 @@ public:
     }
 
     uint64_t buf = bufferSize;
-    setupBufferSize(buf, partitionName, TABLES_REF);
+    setupBufferSize(buf, partitionName, Tables);
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf;
 
     // Automatically close file descriptors and delete allocated memories (arrays)
     Helper::garbageCollector collector;
-    const auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
+    const auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed);
 
     auto pfd = Helper::UniqueFD(partition.absolutePath(), O_WRONLY);
     if (!pfd) return AsyncResult_t::Error("Can't open partition: {}: {}", partitionName, strerror(errno));
 
-    if (!FLAGS.forceProcess) {
+    if (!Flags.forceProcess) {
       if (!Helper::confirmPropt("Are you sure you want to continue? This could render your device "
                                 "unusable! Do not continue if you "
                                 "do not know what you are doing!"))

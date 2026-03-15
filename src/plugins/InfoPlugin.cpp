@@ -36,13 +36,13 @@ class InfoPlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath = nullptr;
 
-  PLUGIN_SECTION InfoPlugin() = default;
+  PLUGIN_SECTION InfoPlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
   PLUGIN_SECTION ~InfoPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("info", "Tell info(s) of input partition list")
               ->footer("Use get-all or getvar-all as partition name for getting "
@@ -50,7 +50,7 @@ public:
                        "name for getting info's of logical partitions.\n"
                        "Use get-physical as partition name for getting info's of "
                        "physical partitions.");
-    flags = mainFlags;
+    flags = &mainFlags;
     cmd->add_option("partition(s)", partitions, "Partition name(s).")->required()->delimiter(',');
     cmd->add_flag("-J,--json", jsonFormat,
                   "Print info(s) as JSON body. The body of each partition will "
@@ -96,16 +96,16 @@ public:
     };
 
     if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
-      TABLES.foreach (getter);
+      Tables.foreach (getter);
     else if (partitions.back() == "get-logicals")
-      TABLES.foreachLogicalPartitions(getter);
+      Tables.foreachLogicalPartitions(getter);
     else if (partitions.back() == "get-physicals")
-      TABLES.foreachPartitions(getter);
+      Tables.foreachPartitions(getter);
     else {
       for (const auto &partition : partitions) {
-        if (!TABLES.hasPartition(partition)) throw ERR << "Couldn't find partition: " << partition;
+        if (!Tables.hasPartition(partition)) throw ERR << "Couldn't find partition: " << partition;
       }
-      TABLES.foreachFor(partitions, getter);
+      Tables.foreachFor(partitions, getter);
     }
 
     if (jsonFormat) {

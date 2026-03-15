@@ -25,10 +25,7 @@
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 
-#undef FLAGS
-#undef TABLES
-#define FLAGS (*Flags)
-#define TABLES (*FLAGS.partitionTables)
+#undef Flags
 
 namespace {
 constexpr char kInterruptedMessage[] = "\nInterrupted.\n";
@@ -48,9 +45,9 @@ static void sigHandler(int sig) {
 
 int main(int argc, char **argv) {
   CLI::App AppMain{"Partition Manager Tool"};
-  CLI::App bootstrap{"Partition Manager Bootstrap"};
+  CLI::App bootstrap{"Partition Manager Tool (Bootstrap)"};
   std::vector<char *> argvStorage;
-  auto Flags = std::make_shared<PartitionManager::BasicFlags>(); // Generate flag structure.
+  std::vector<std::string> args;
   Helper::Silencer silencer(
       false); // It suppresses stdout and stderr. It redirects them to /dev/null. One of the best ways to run silently.
 
@@ -60,7 +57,6 @@ int main(int argc, char **argv) {
     signal(SIGINT, sigHandler);  // Trap CTRL+C.
     signal(SIGABRT, sigHandler); // Trap abort signals.
 
-    std::vector<std::string> args;
     args.reserve(static_cast<size_t>(argc));
     for (int i = 0; i < argc; ++i)
       args.emplace_back(argv[i]);
@@ -81,6 +77,7 @@ int main(int argc, char **argv) {
     argc = static_cast<int>(argvStorage.size());
     argv = argvStorage.data();
 
+    PartitionManager::BasicFlags Flags;
     std::vector<std::string> plugins;
     std::string pluginPath;
 
@@ -90,40 +87,38 @@ int main(int argc, char **argv) {
     bootstrap.set_help_flag();
     bootstrap.set_help_all_flag();
 
-    AppMain.allow_extras();
-    AppMain.fallthrough(true);
     AppMain.set_help_all_flag("--help-all", "Print full help message and exit");
     AppMain.footer(
         "Copyright (C) 2026 Yağız Zengin\nPartition Manager Tool is written by Yağız Zengin, licensed under GNU GPLv3 license.\nThis "
         "program comes with ABSOLUTELY NO "
         "WARRANTY. Use --license for more information.\nReport "
         "bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
-    AppMain.add_option("-L,--log-file", FLAGS.logFile, "Set log file.");
+    AppMain.add_option("-L,--log-file", Flags.logFile, "Set log file.");
     AppMain.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(','); // Dummy option for help message.
     AppMain.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")
         ->check(CLI::ExistingDirectory); // Dummy option for help message.
-    AppMain.add_flag("-s,--select-on-duplicate", FLAGS.noWorkOnUsed,
+    AppMain.add_flag("-s,--select-on-duplicate", Flags.noWorkOnUsed,
                      "Select partition for work if has input named duplicate partitions.");
-    AppMain.add_flag("-f,--force", FLAGS.forceProcess, "Force process to be processed.");
-    AppMain.add_flag("-l,--logical", FLAGS.onLogical, "Specify that the target partition is logical.");
-    AppMain.add_flag("-q,--quiet", FLAGS.quietProcess, "Quiet process."); // Dummy option for help message.
-    AppMain.add_flag("-V,--verbose", FLAGS.verboseMode,
+    AppMain.add_flag("-f,--force", Flags.forceProcess, "Force process to be processed.");
+    AppMain.add_flag("-l,--logical", Flags.onLogical, "Specify that the target partition is logical.");
+    AppMain.add_flag("-q,--quiet", Flags.quietProcess, "Quiet process."); // Dummy option for help message.
+    AppMain.add_flag("-V,--verbose", Flags.verboseMode,
                      "Detailed information is written on the screen while the transaction is being carried out.");
-    AppMain.add_flag("-v,--version", FLAGS.viewVersion, "Print version and exit.");
-    AppMain.add_flag("--license", FLAGS.viewLicense, "Print license and exit.");
+    AppMain.add_flag("-v,--version", Flags.viewVersion, "Print version and exit.");
+    AppMain.add_flag("--license", Flags.viewLicense, "Print license and exit.");
 
     bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
     bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
-    bootstrap.add_option("-L,--log-file", FLAGS.logFile, "Set log file.");
-    bootstrap.add_flag("-q,--quiet", FLAGS.quietProcess, "Quiet process.");
-    bootstrap.add_flag("-V,--verbose", FLAGS.verboseMode,
+    bootstrap.add_option("-L,--log-file", Flags.logFile, "Set log file.");
+    bootstrap.add_flag("-q,--quiet", Flags.quietProcess, "Quiet process.");
+    bootstrap.add_flag("-V,--verbose", Flags.verboseMode,
                        "Detailed information is written on the screen while the transaction is being carried out.");
 
     bootstrap.parse(argc, argv);
 
-    Helper::Logger::Properties::setPrinting(FLAGS.verboseMode);
-    Helper::Logger::Properties::setFile(FLAGS.logFile, true);
-    PartitionManager::BasicManager manager(AppMain, FLAGS.logFile, Flags);
+    Helper::Logger::Properties::setPrinting(Flags.verboseMode);
+    Helper::Logger::Properties::setFile(Flags.logFile, true);
+    PartitionManager::BasicManager manager(AppMain, Flags.logFile, Flags);
 
     manager.loadBuiltinPlugins(); // Load built-in plugins if existed.
     if (!plugins.empty()) {
@@ -143,8 +138,8 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
     }
 
-    if (FLAGS.quietProcess) silencer.silenceAgain();
-    if (FLAGS.viewLicense) {
+    if (Flags.quietProcess) silencer.silenceAgain();
+    if (Flags.viewLicense) {
       Out::println("Copyright (C) 2026 Yağız Zengin\n\nThis program is free software: you can redistribute it and/or modify\nit under "
                    "the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of "
                    "the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be "
@@ -153,17 +148,17 @@ int main(int argc, char **argv) {
                    "the GNU General Public License\nalong with this program.  If not, see <https://www.gnu.org/licenses/>.");
       return EXIT_SUCCESS;
     }
-    if (FLAGS.viewVersion) {
+    if (Flags.viewVersion) {
       Out::println("%s", PartitionManager::getAppVersion().data());
       return EXIT_SUCCESS;
     }
 
     if (!Helper::hasSuperUser()) // Root access is a fundamental requirement for this program.
       throw ERR << "This program requires super-user privileges.";
-    if (!TABLES) throw ERR << "Can't found any partition table in /dev/block.";
+    if (!Tables) throw ERR << "Can't found any partition table in /dev/block.";
 
-    if (FLAGS.onLogical) {
-      if (!TABLES.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
+    if (Flags.onLogical) {
+      if (!Tables.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
         throw ERR << "This device doesn't contains logical partitions. But you "
                      "used -l (--logical) flag.";
     }

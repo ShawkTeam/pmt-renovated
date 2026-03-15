@@ -54,12 +54,24 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="libhelper: reformat code, fixups and use new UniqueFD class.">
-      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -84,15 +96,10 @@
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/include/PartitionManager/PartitionManager.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/include/PartitionManager/PartitionManager.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/functions.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/functions.hpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/src/plugins/BackupPlugin.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/management.hpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" root0="FORCE_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/include/libpartition_map/partition.hpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libpartition_map/src/Builder.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -144,17 +151,22 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;CMakeSettings&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Shell Script.Cleanup">
+  <component name="RunManager" selected="Shell Script.Reformat Code">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -422,23 +434,22 @@
       <workItem from="1773172279518" duration="351000" />
       <workItem from="1773172633984" duration="11444000" />
       <workItem from="1773186164277" duration="43000" />
-      <workItem from="1773248533698" duration="4613000" />
-    </task>
-    <task id="LOCAL-00018" summary="libpartition_map: add * operators to classes, etc.">
-      <option name="closed" value="true" />
-      <created>1770671044740</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1770671044740</updated>
-    </task>
-    <task id="LOCAL-00019" summary="libhelper: Add the modern &lt;&lt; operator to the Error class and apply the adaptation where it is used in the code.">
-      <option name="closed" value="true" />
-      <created>1770675941406</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1770675941406</updated>
+      <workItem from="1773248533698" duration="5783000" />
+      <workItem from="1773258415209" duration="3551000" />
+      <workItem from="1773420027870" duration="6829000" />
+      <workItem from="1773576887199" duration="8000" />
+      <workItem from="1773577021314" duration="302000" />
+      <workItem from="1773577343775" duration="148000" />
+      <workItem from="1773577507086" duration="34000" />
+      <workItem from="1773577561581" duration="24000" />
+      <workItem from="1773577605217" duration="47000" />
+      <workItem from="1773577667609" duration="14000" />
+      <workItem from="1773577767841" duration="52000" />
+      <workItem from="1773577899887" duration="7000" />
+      <workItem from="1773577919678" duration="362000" />
+      <workItem from="1773578295900" duration="9000" />
+      <workItem from="1773578353106" duration="29000" />
+      <workItem from="1773582704766" duration="5396000" />
     </task>
     <task id="LOCAL-00020" summary="pmt: Improve libraries, add standard checks, etc.&#10; - Functions for writing/reading images to/from partitions have been added to the `Partition_t` class. And adaptation was made.&#10;  - Minor additions have been made to libhelper's garbage collector.&#10;  - Macro controls were added to prevent operation below the C++20 standard.&#10;  - Some improvements (fixing memory leaks, etc.).">
       <option name="closed" value="true" />
@@ -816,7 +827,23 @@
       <option name="project" value="LOCAL" />
       <updated>1773252885054</updated>
     </task>
-    <option name="localTasksCounter" value="67" />
+    <task id="LOCAL-00067" summary="libhelper: add new required concepts, adapt new UniqueFP to code.">
+      <option name="closed" value="true" />
+      <created>1773253186208</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1773253186208</updated>
+    </task>
+    <task id="LOCAL-00068" summary="libhelper/management: BasicUniqueFP: fixup compile-time error.&#10;&#10;`srclib/libhelper/include/libhelper/management.hpp:452:25: error: format string is not a string literal (potentially insecure) [-Werror,-Wformat-security]`">
+      <option name="closed" value="true" />
+      <created>1773253331252</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1773253331252</updated>
+    </task>
+    <option name="localTasksCounter" value="69" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -854,8 +881,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="plugins: Adapt the new AsyncResult_t type." />
-    <MESSAGE value="cmake: Improve header and linker script generation at compile-time." />
     <MESSAGE value="cmake: fixup add_plugin()" />
     <MESSAGE value="libhelper &amp; pmt: use std::format instead of C-style formatting." />
     <MESSAGE value="libpartition_map: move Partition_t constructors in partition.hpp to Partition.cpp." />
@@ -879,7 +904,9 @@
     <MESSAGE value="libhelper/management: Use const references for path inputs on constructors." />
     <MESSAGE value="libhelper: reformat code, fixups and use new UniqueFD class." />
     <MESSAGE value="libhelper/management: Create a class for easy file pointer management." />
-    <option name="LAST_COMMIT_MESSAGE" value="libhelper/management: Create a class for easy file pointer management." />
+    <MESSAGE value="libhelper: add new required concepts, adapt new UniqueFP to code." />
+    <MESSAGE value="libhelper/management: BasicUniqueFP: fixup compile-time error.&#10;&#10;`srclib/libhelper/include/libhelper/management.hpp:452:25: error: format string is not a string literal (potentially insecure) [-Werror,-Wformat-security]`" />
+    <option name="LAST_COMMIT_MESSAGE" value="libhelper/management: BasicUniqueFP: fixup compile-time error.&#10;&#10;`srclib/libhelper/include/libhelper/management.hpp:452:25: error: format string is not a string literal (potentially insecure) [-Werror,-Wformat-security]`" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

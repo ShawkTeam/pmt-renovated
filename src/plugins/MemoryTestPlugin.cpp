@@ -37,17 +37,17 @@ class MemoryTestPlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath = nullptr;
 
-  PLUGIN_SECTION MemoryTestPlugin() = default;
+  PLUGIN_SECTION MemoryTestPlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
   PLUGIN_SECTION ~MemoryTestPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("memtest", "Test your write/read speed of device.");
-    flags = mainFlags;
+    flags = &mainFlags;
     cmd->add_option("testDirectory", testPath, "Path to test directory")
         ->default_val("/data/local/tmp")
         ->check([&](const std::string &val) {
@@ -75,7 +75,7 @@ public:
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
   PLUGIN_SECTION bool run() override {
-    if (testFileSize > GB(2) && !FLAGS.forceProcess)
+    if (testFileSize > GB(2) && !Flags.forceProcess)
       throw ERR << "File size is more than 2GB! Sizes over 2GB may not give accurate "
                    "results in the write test. Use -f (--force) for skip this error.";
 

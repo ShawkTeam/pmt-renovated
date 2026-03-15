@@ -35,8 +35,7 @@ checks() {
 clean() {
     echo "Cleaning workspace."
     for a in "${TARGET_ABI_LIST[@]}"; do rm -rf "build_$a" && rm -rf "build_$a-builtin"; done
-    rm -rf include/generated \
-        srclib/libhelper/tests/dir \
+    rm -rf srclib/libhelper/tests/dir \
         srclib/libhelper/tests/linkdir \
         srclib/libhelper/tests/file.txt
 }

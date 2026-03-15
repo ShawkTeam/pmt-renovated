@@ -37,16 +37,16 @@ class BackupPlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath = nullptr;
 
-  PLUGIN_SECTION BackupPlugin() = default;
+  PLUGIN_SECTION BackupPlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
   PLUGIN_SECTION ~BackupPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
-    flags = mainFlags;
+    flags = &mainFlags;
     cmd = mainApp.add_subcommand("backup", "Backup partition(s) to file(s)");
     cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
     cmd->add_option("output(s)", rawOutputNames, "File name(s) (or path(s)) to save the partition image(s)");
@@ -68,21 +68,21 @@ public:
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &outputName) const {
-    if (!TABLES.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
-    const auto &partition = TABLES.partitionWithDupCheck(partitionName, FLAGS.noWorkOnUsed);
+    if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
+    const auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed);
     const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
 
     LOGNF(PLUGIN, logPath, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
 
-    if (FLAGS.onLogical && !TABLES.isLogical(partitionName)) {
-      if (FLAGS.forceProcess)
+    if (Flags.onLogical && !Tables.isLogical(partitionName)) {
+      if (Flags.forceProcess)
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                                         << std::endl;
       else
         return AsyncResult_t::Error("Used --logical (-l) flag but is not logical partition: {}", partitionName);
     }
 
-    if (Helper::fileIsExists(outputName) && !FLAGS.forceProcess)
+    if (Helper::fileIsExists(outputName) && !Flags.forceProcess)
       return AsyncResult_t::Error("{} is exists. Remove it, or use --force (-f) flag.", outputName);
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for back upping " << partitionName << "): " << buf << std::endl;

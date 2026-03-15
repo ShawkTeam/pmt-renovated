@@ -30,13 +30,13 @@ class PartitionSizePlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath = nullptr;
 
-  PLUGIN_SECTION PartitionSizePlugin() = default;
+  PLUGIN_SECTION PartitionSizePlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
   PLUGIN_SECTION ~PartitionSizePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("sizeof", "Tell size(s) of input partition list")
@@ -45,7 +45,7 @@ public:
                        "name for getting sizes of logical partitions.\n"
                        "Use get-physical as partition name for getting sizes of "
                        "physical partitions.");
-    flags = mainFlags;
+    flags = &mainFlags;
     cmd->add_option("partition(s)", partitions, "Partition name(s).")->required()->delimiter(',');
     cmd->add_flag("--as-byte", asByte, "Tell input size of partition list as byte.")->default_val(false);
     cmd->add_flag("--as-kilobyte", asKiloBytes, "Tell input size of partition list as kilobyte.")->default_val(false);
@@ -83,16 +83,16 @@ public:
     };
 
     if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
-      TABLES.foreach (getter);
+      Tables.foreach (getter);
     else if (partitions.back() == "get-logicals")
-      TABLES.foreachLogicalPartitions(getter);
+      Tables.foreachLogicalPartitions(getter);
     else if (partitions.back() == "get-physicals")
-      TABLES.foreachPartitions(getter);
+      Tables.foreachPartitions(getter);
     else {
       for (const auto &partition : partitions) {
-        if (!TABLES.hasPartition(partition)) throw Error("Couldn't find partition: %s", partition.c_str());
+        if (!Tables.hasPartition(partition)) throw Error("Couldn't find partition: %s", partition.c_str());
       }
-      TABLES.foreachFor(partitions, getter);
+      Tables.foreachFor(partitions, getter);
     }
 
     return true;

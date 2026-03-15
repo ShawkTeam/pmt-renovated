@@ -27,17 +27,17 @@ namespace PartitionManager {
 class CleanLogPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
-  FlagsBase flags;
+  BasicFlags *flags;
   const char *logPath = nullptr;
 
-  PLUGIN_SECTION CleanLogPlugin() = default;
+  PLUGIN_SECTION CleanLogPlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
   PLUGIN_SECTION ~CleanLogPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, FlagsBase &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath.c_str();
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("clean-logs", "Clean PMT logs.");
-    flags = mainFlags;
+    flags = &mainFlags;
     return true;
   }
 
@@ -50,9 +50,9 @@ public:
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
   PLUGIN_SECTION bool run() override {
-    LOGNF(PLUGIN, logPath, INFO) << "Removing log file: " << FLAGS.logFile << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Removing log file: " << Flags.logFile << std::endl;
     Helper::Logger::Properties::setLogging(true); // eraseEntry writes log!
-    return Helper::eraseEntry(FLAGS.logFile);
+    return Helper::eraseEntry(Flags.logFile);
   }
 
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }

@@ -126,9 +126,9 @@ concept IsCloser_FD = requires(T t, int fd) {
 };
 
 template <typename T>
-concept IsCloser_FP = requires(T t, FILE* fp) {
+concept IsCloser_FP = requires(T t, FILE *fp) {
   { t(fp) } -> std::same_as<void>;
-} || requires(T t, FILE* fp) {
+} || requires(T t, FILE *fp) {
   { t.close(fp) } -> std::same_as<void>;
 };
 
@@ -138,7 +138,7 @@ concept CloserHasOperator_FD = requires(T t, int fd) {
 };
 
 template <typename T>
-concept CloserHasOperator_FP = requires(T t, FILE* fp) {
+concept CloserHasOperator_FP = requires(T t, FILE *fp) {
   { t(fp) } -> std::same_as<void>;
 };
 
@@ -155,17 +155,17 @@ public:
 
 class DefaultCloser_FP {
 public:
-  void operator()(FILE* fp) const noexcept {
+  void operator()(FILE *fp) const noexcept {
     if (fp != nullptr) fclose(fp);
   }
 
-  void close(FILE* fp) const noexcept {
+  void close(FILE *fp) const noexcept {
     if (fp != nullptr) fclose(fp);
   }
 };
 
 template <typename Closer>
-requires IsCloser_FD<Closer>
+  requires IsCloser_FD<Closer>
 class BasicUniqueFD {
   int fd_ = -1, flags_ = 0;
   std::optional<mode_t> mode_ = std::nullopt;
@@ -177,7 +177,10 @@ public:
 
   BasicUniqueFD() = default;
   BasicUniqueFD(const BasicUniqueFD &) = delete;
-  BasicUniqueFD(BasicUniqueFD &&other) noexcept : fd_(other.fd_), flags_(other.flags_), mode_(other.mode_), path_(other.path_), closer_(other.closer_) { other.fd_ = -1; }
+  BasicUniqueFD(BasicUniqueFD &&other) noexcept
+      : fd_(other.fd_), flags_(other.flags_), mode_(other.mode_), path_(other.path_), closer_(other.closer_) {
+    other.fd_ = -1;
+  }
   BasicUniqueFD(const std::filesystem::path &path, int flags) : fd_(::open(path.c_str(), flags)), flags_(flags), path_(path) {}
   BasicUniqueFD(const std::filesystem::path &path, int flags, mode_t mode)
       : fd_(::open(path.c_str(), flags, mode)), flags_(flags), mode_(mode), path_(path) {}
@@ -293,37 +296,37 @@ public:
   template <typename T>
     requires std::is_integral_v<T>
   bool operator<(T fd) const noexcept {
-    return fd_ < fd;
+    return fd_ < static_cast<int>(fd);
   }
 
   template <typename T>
     requires std::is_integral_v<T>
   bool operator>(T fd) const noexcept {
-    return fd_ > fd;
+    return fd_ > static_cast<int>(fd);
   }
 
   template <typename T>
     requires std::is_integral_v<T>
   bool operator<=(T fd) const noexcept {
-    return fd_ <= fd;
+    return fd_ <= static_cast<int>(fd);
   }
 
   template <typename T>
     requires std::is_integral_v<T>
   bool operator>=(T fd) const noexcept {
-    return fd_ >= fd;
+    return fd_ >= static_cast<int>(fd);
   }
 
   template <typename T>
     requires std::is_integral_v<T>
   bool operator==(T fd) const noexcept {
-    return fd_ == fd;
+    return fd_ == static_cast<int>(fd);
   }
 
   template <typename T>
     requires std::is_integral_v<T>
   bool operator!=(T fd) const noexcept {
-    return fd_ != fd;
+    return fd_ != static_cast<int>(fd);
   }
 
   BasicUniqueFD &operator=(const BasicUniqueFD &) = delete;
@@ -342,14 +345,14 @@ public:
 };
 
 template <typename Closer>
-requires IsCloser_FP<Closer>
+  requires IsCloser_FP<Closer>
 class BasicUniqueFP {
-  FILE* fp_ = nullptr;
+  FILE *fp_ = nullptr;
   std::string_view flags_;
   std::filesystem::path path_;
   [[no_unique_address]] Closer closer_;
 
-  std::string_view get_flags(FILE* fp) const {
+  std::string_view get_flags(FILE *fp) const {
     if (fp == nullptr) return {};
 
     int flags = fcntl(fileno(fp), F_GETFL);
@@ -357,7 +360,8 @@ class BasicUniqueFP {
 
     int acc = flags & O_ACCMODE;
 
-    if (flags & O_APPEND) return (acc == O_RDWR) ? "a+" : "a";
+    if (flags & O_APPEND)
+      return (acc == O_RDWR) ? "a+" : "a";
     else {
       if (acc == O_RDONLY) return "r";
       if (acc == O_WRONLY) return "w";
@@ -372,10 +376,13 @@ public:
 
   BasicUniqueFP() = default;
   BasicUniqueFP(const BasicUniqueFP &) = delete;
-  BasicUniqueFP(BasicUniqueFP &&other) noexcept : fp_(other.fp_), flags_(other.flags_), path_(other.path_), closer_(other.closer_) { other.fp_ = nullptr; }
-  BasicUniqueFP(const std::filesystem::path &path, const std::string_view& flags) : fp_(fopen(path.c_str(), flags.data())), flags_(flags), path_(path) {}
+  BasicUniqueFP(BasicUniqueFP &&other) noexcept : fp_(other.fp_), flags_(other.flags_), path_(other.path_), closer_(other.closer_) {
+    other.fp_ = nullptr;
+  }
+  BasicUniqueFP(const std::filesystem::path &path, const std::string_view &flags)
+      : fp_(fopen(path.c_str(), flags.data())), flags_(flags), path_(path) {}
 
-  explicit BasicUniqueFP(FILE* fp) : fp_(fp) {
+  explicit BasicUniqueFP(FILE *fp) : fp_(fp) {
     if (fp_ == nullptr) return;
 
     int fd_ = fileno(fp_);
@@ -397,12 +404,12 @@ public:
       closer_.close(fp_);
   }
 
-  static BasicUniqueFP getOwnership(FILE* fp) { return BasicUniqueFP(fp); }
+  static BasicUniqueFP getOwnership(FILE *fp) { return BasicUniqueFP(fp); }
 
   int rawFd() const noexcept { return fileno(fp_); }
 
-  FILE* fp() noexcept { return fp_; }
-  const FILE* fp() const noexcept { return fp_; }
+  FILE *fp() noexcept { return fp_; }
+  const FILE *fp() const noexcept { return fp_; }
 
   std::string_view flags() noexcept { return flags_; }
   std::string_view flags() const noexcept { return flags_; }
@@ -416,7 +423,7 @@ public:
   std::filesystem::path path() noexcept { return path_; }
   std::filesystem::path path() const noexcept { return path_; }
 
-  BasicUniqueFP& open(const std::filesystem::path& path, const std::string_view& flags) noexcept {
+  BasicUniqueFP &open(const std::filesystem::path &path, const std::string_view &flags) noexcept {
     if (fp_ == nullptr) return *this;
 
     path_ = path;
@@ -444,23 +451,21 @@ public:
   }
 
   int putc(int c) noexcept { return fputc(c, fp_); }
-  int puts(const std::string& s) noexcept { return fputs(s.c_str(), fp_); }
+  int puts(const std::string &s) noexcept { return fputs(s.c_str(), fp_); }
 
-  template <typename... Args>
-  int printf(std::format_string<Args...> fmt, Args &&...args) noexcept {
+  template <typename... Args> int printf(std::format_string<Args...> fmt, Args &&...args) noexcept {
     std::string end = std::format(fmt, std::forward<Args>(args)...);
     return fprintf(fp_, "%s", end.c_str());
   }
 
-  size_t write(const void* buf, size_t size, size_t nmemb) noexcept { return fwrite(buf, size, nmemb, fp_); }
+  size_t write(const void *buf, size_t size, size_t nmemb) noexcept { return fwrite(buf, size, nmemb, fp_); }
 
   int getc() noexcept { return fgetc(fp_); }
-  char* gets(char* str, int size) noexcept { return fgets(str, size, fp_); }
+  char *gets(char *str, int size) noexcept { return fgets(str, size, fp_); }
 
-  size_t read(void* buf, size_t size, size_t count) noexcept { return fread(buf, size, count, fp_); }
+  size_t read(void *buf, size_t size, size_t count) noexcept { return fread(buf, size, count, fp_); }
 
-  template <typename... Args>
-  int scanf(const char* fmt, Args &&...args) noexcept { return fscanf(fp_, fmt, args...); }
+  template <typename... Args> int scanf(const char *fmt, Args &&...args) noexcept { return fscanf(fp_, fmt, args...); }
 
   int seek(long offset, int whence) noexcept { return fseek(fp_, offset, whence); }
   long tell() noexcept { return ftell(fp_); }
@@ -475,11 +480,11 @@ public:
 
   bool operator!() const noexcept { return fp_ == nullptr; }
   explicit operator bool() const noexcept { return fp_ != nullptr; }
-  FILE* operator()() noexcept { return fp_; }
-  FILE* operator()() const noexcept { return fp_; }
+  FILE *operator()() noexcept { return fp_; }
+  FILE *operator()() const noexcept { return fp_; }
 
-  bool operator==(const FILE* fp) const noexcept { return fp_ == fp; }
-  bool operator!=(const FILE* fp) const noexcept { return fp_ != fp; }
+  bool operator==(const FILE *fp) const noexcept { return fp_ == fp; }
+  bool operator!=(const FILE *fp) const noexcept { return fp_ != fp; }
 
   BasicUniqueFP &operator=(const BasicUniqueFP &) = delete;
   BasicUniqueFP &operator=(BasicUniqueFP &&other) noexcept {
