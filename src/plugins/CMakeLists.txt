@@ -16,7 +16,7 @@
 #
 
 # Get list of .cpp files.
-file(GLOB PLUGIN_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*.cpp")
+file(GLOB PLUGIN_FILES RELATIVE ${CMAKE_CURRENT_SOURCE_DIR} "*Plugin.cpp")
 
 # Automatically plugin defination.
 foreach(SOURCE_FILE ${PLUGIN_FILES})
