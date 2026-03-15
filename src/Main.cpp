@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
       return EXIT_SUCCESS;
     }
     if (Flags.viewVersion) {
-      Out::println("%s", PartitionManager::getAppVersion().data());
+      Out::println("{}", PartitionManager::getAppVersion().data());
       return EXIT_SUCCESS;
     }
 
