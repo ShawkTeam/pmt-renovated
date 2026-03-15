@@ -18,6 +18,9 @@
 #ifndef LIBPARTITION_MAP_SUPER_HPP
 #define LIBPARTITION_MAP_SUPER_HPP
 
+/*
+#if __ANDROID_API__ >= 30 // The current libbase version requires a minimum API level of 30.
+
 #if __cplusplus < 202002L
 #error "libpartition_map/super.hpp is requires C++20 or higher C++ standarts."
 #endif
@@ -30,12 +33,9 @@
 #include <liblp/builder.h>
 #include <android-base/properties.h>
 
-namespace PartitionMap {
-
-/*
-#if __ANDROID_API__ >= 30 // The current libbase version requires a minimum API level of 30.
 using namespace android::fs_mgr;
 
+namespace PartitionMap {
 class SuperManager {
   uint32_t slot;
   std::error_code error;
@@ -91,9 +91,9 @@ public:
   SuperManager &operator=(SuperManager &&other) noexcept; // Move operator.
 }; // class SuperManager
 
+} // namespace PartitionMap
+
 #endif // #if __ANDROID_API__ >= 30
 */
-
-} // namespace PartitionMap
 
 #endif // #ifndef LIBPARTITION_MAP_SUPER_HPP
