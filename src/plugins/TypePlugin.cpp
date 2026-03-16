@@ -73,7 +73,7 @@ public:
 
     for (const auto &content : contents) {
       if (!Tables.hasPartition(content) && !Helper::fileIsExists(content))
-        throw ERR << "Couldn't find partition or image file: " << content;
+        throw Error("Couldn't find partition or image file: {}", content);
 
       bool found = false;
       for (const auto &[magic, name] : magics) {
@@ -87,7 +87,7 @@ public:
         }
       }
 
-      if (!found) throw ERR << "Couldn't determine type of " << content << (content == "userdata" ? " (encrypted filesystem?)" : "");
+      if (!found) throw Error("Couldn't determine type of {}", content) << (content == "userdata" ? " (encrypted filesystem?)" : "");
     }
 
     return true;

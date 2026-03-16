@@ -54,24 +54,24 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="">
+    <list default="true" id="13563c44-bfea-4caf-9f73-b2b73501b894" name="Changes" comment="pmt: fixup version string printing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/error.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/error.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/macros.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/macros.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -96,8 +96,6 @@
     <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="HighlightingSettingsPerFile">
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/src/plugins/BackupPlugin.cpp" root0="SKIP_HIGHLIGHTING" />
-    <setting file="mock:///home/yzbruh/Masaüstü/Projects/pmt-renovated-github/srclib/libhelper/include/libhelper/management.hpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" root0="FORCE_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" root0="FORCE_HIGHLIGHTING" />
   </component>
@@ -155,18 +153,13 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Shell Script.Reformat Code">
+  <component name="RunManager" selected="Shell Script.Start Test">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -449,47 +442,8 @@
       <workItem from="1773577919678" duration="362000" />
       <workItem from="1773578295900" duration="9000" />
       <workItem from="1773578353106" duration="29000" />
-      <workItem from="1773582704766" duration="5396000" />
-    </task>
-    <task id="LOCAL-00020" summary="pmt: Improve libraries, add standard checks, etc.&#10; - Functions for writing/reading images to/from partitions have been added to the `Partition_t` class. And adaptation was made.&#10;  - Minor additions have been made to libhelper's garbage collector.&#10;  - Macro controls were added to prevent operation below the C++20 standard.&#10;  - Some improvements (fixing memory leaks, etc.).">
-      <option name="closed" value="true" />
-      <created>1770760088928</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1770760088928</updated>
-    </task>
-    <task id="LOCAL-00021" summary="pmt: reformat code">
-      <option name="closed" value="true" />
-      <created>1770838071033</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1770838071033</updated>
-    </task>
-    <task id="LOCAL-00022" summary="pmt: Preparations for liblp, improvements, etc.">
-      <option name="closed" value="true" />
-      <created>1770848355773</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1770848355773</updated>
-    </task>
-    <task id="LOCAL-00023" summary="clang-format: update ignore list (for reformat.sh)">
-      <option name="closed" value="true" />
-      <created>1770848563611</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1770848563611</updated>
-    </task>
-    <task id="LOCAL-00024" summary="clang-format: update ignore list (for reformat.sh)">
-      <option name="closed" value="true" />
-      <created>1770848704013</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1770848704013</updated>
+      <workItem from="1773582704766" duration="11545000" />
+      <workItem from="1773690805367" duration="3380000" />
     </task>
     <task id="LOCAL-00025" summary="pmt: Compile external libs from source instead of using prebuilt libraries.&#10; - libcrypto is not included in this; there's no valid reason to build it separately.&#10; - Set the Android API level to 30 for libbase target.&#10; - CMake functions significantly shortened and made the code more understandable.">
       <option name="closed" value="true" />
@@ -843,7 +797,47 @@
       <option name="project" value="LOCAL" />
       <updated>1773253331252</updated>
     </task>
-    <option name="localTasksCounter" value="69" />
+    <task id="LOCAL-00069" summary="pmt: Eliminate unnecessary smart pointer usage, fix memory leaks, reformat code, etc.">
+      <option name="closed" value="true" />
+      <created>1773588138507</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1773588138508</updated>
+    </task>
+    <task id="LOCAL-00070" summary="libpartition_map/super: Prevent unnecessary includes.">
+      <option name="closed" value="true" />
+      <created>1773589462634</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1773589462634</updated>
+    </task>
+    <task id="LOCAL-00071" summary="cmake: Instead of directly reading files with the .cpp extension, reading files in the *Plugin.cpp format.">
+      <option name="closed" value="true" />
+      <created>1773591066663</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1773591066663</updated>
+    </task>
+    <task id="LOCAL-00072" summary="libhelper/macros: simplify the version text.">
+      <option name="closed" value="true" />
+      <created>1773593899602</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1773593899602</updated>
+    </task>
+    <task id="LOCAL-00073" summary="pmt: fixup version string printing">
+      <option name="closed" value="true" />
+      <created>1773594092705</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1773594092705</updated>
+    </task>
+    <option name="localTasksCounter" value="74" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -881,11 +875,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="cmake: fixup add_plugin()" />
-    <MESSAGE value="libhelper &amp; pmt: use std::format instead of C-style formatting." />
-    <MESSAGE value="libpartition_map: move Partition_t constructors in partition.hpp to Partition.cpp." />
-    <MESSAGE value="libpartition_map: Create a cleaner Builder structure using type name abbreviations." />
-    <MESSAGE value="libpartition_map: make Partition_t type as header-only class." />
     <MESSAGE value="info_plugin: fixup plugin." />
     <MESSAGE value="info_plugin: Include the partition table names in the information as well." />
     <MESSAGE value="libpartition_map/partition: The template allows input to be taken in a random order in the constructor using variadic arguments." />
@@ -906,7 +895,12 @@
     <MESSAGE value="libhelper/management: Create a class for easy file pointer management." />
     <MESSAGE value="libhelper: add new required concepts, adapt new UniqueFP to code." />
     <MESSAGE value="libhelper/management: BasicUniqueFP: fixup compile-time error.&#10;&#10;`srclib/libhelper/include/libhelper/management.hpp:452:25: error: format string is not a string literal (potentially insecure) [-Werror,-Wformat-security]`" />
-    <option name="LAST_COMMIT_MESSAGE" value="libhelper/management: BasicUniqueFP: fixup compile-time error.&#10;&#10;`srclib/libhelper/include/libhelper/management.hpp:452:25: error: format string is not a string literal (potentially insecure) [-Werror,-Wformat-security]`" />
+    <MESSAGE value="pmt: Eliminate unnecessary smart pointer usage, fix memory leaks, reformat code, etc." />
+    <MESSAGE value="libpartition_map/super: Prevent unnecessary includes." />
+    <MESSAGE value="cmake: Instead of directly reading files with the .cpp extension, reading files in the *Plugin.cpp format." />
+    <MESSAGE value="libhelper/macros: simplify the version text." />
+    <MESSAGE value="pmt: fixup version string printing" />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt: fixup version string printing" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

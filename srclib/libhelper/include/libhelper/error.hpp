@@ -21,7 +21,7 @@
 #include <exception>
 #include <sstream>
 #include <string>
-#include <libhelper/macros.hpp>
+#include <format>
 #include <libhelper/logging.hpp>
 
 namespace Helper {
@@ -33,23 +33,11 @@ class Error final : public std::exception {
 public:
   Error() = default;
   Error(const Error &other) noexcept : message(other.message) {}
-  __printflike(2, 3) explicit Error(const char *format, ...) {
-    va_list args;
 
-    va_start(args, format);
-    int size = vsnprintf(nullptr, 0, format, args);
-    va_end(args);
-
-    if (size > 0) {
-      std::vector<char> buf(size + 1);
-      va_start(args, format);
-      vsnprintf(buf.data(), buf.size(), format, args);
-      va_end(args);
-
-      message = std::string(buf.data());
-    }
-
-    LOGN(HELPER, ERROR) << message << std::endl;
+  template <typename... Args>
+  explicit Error(std::format_string<Args...> fmt, Args &&...args) {
+    oss << std::format(fmt, std::forward<Args>(args)...);
+    message = oss.str();
   }
 
   template <typename T> Error &&operator<<(const T &msg) && {
@@ -68,5 +56,19 @@ public:
 };
 
 } // namespace Helper
+
+namespace std {
+
+// For printing using the std::format style, a `quoted_string`
+// function that returns std::string is absolutely necessary.
+template <typename _CharT>
+  requires std::__is_char_type<_CharT>
+std::string quoted_string(const _CharT *s) {
+  std::ostringstream oss;
+  oss << std::quoted(s);
+  return oss.str();
+}
+
+} // namespace std
 
 #endif // #ifndef LIBHELPER_ERROR_HPP

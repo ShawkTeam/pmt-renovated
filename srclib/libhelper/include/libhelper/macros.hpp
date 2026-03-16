@@ -29,7 +29,6 @@ constexpr int NO = 0;
 enum sizeCastTypes { B = static_cast<int>('B'), KB = static_cast<int>('K'), MB = static_cast<int>('M'), GB = static_cast<int>('G') };
 
 #define HELPER "libhelper"
-#define ERR Helper::Error()
 
 #define B(x) (static_cast<uint64_t(x)> * 8)     // B(4)  = 32 (4 * 8) (bit)
 #define KB(x) (static_cast<uint64_t>(x) * 1024) // KB(8) = 8192 (8 * 1024)

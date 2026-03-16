@@ -154,16 +154,15 @@ int main(int argc, char **argv) {
     }
 
     if (!Helper::hasSuperUser()) // Root access is a fundamental requirement for this program.
-      throw ERR << "This program requires super-user privileges.";
-    if (!Tables) throw ERR << "Can't found any partition table in /dev/block.";
+      throw PartitionManager::Error("This program requires super-user privileges.");
+    if (!Tables) throw PartitionManager::Error("Can't found any partition table in /dev/block.");
 
     if (Flags.onLogical) {
       if (!Tables.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
-        throw ERR << "This device doesn't contains logical partitions. But you "
-                     "used -l (--logical) flag.";
+        throw PartitionManager::Error("This device doesn't contains logical partitions. But you used -l (--logical) flag.");
     }
 
-    if (manager.getUsed().empty()) throw ERR << "Unknown main command speficied! Use --help for more information.";
+    if (manager.getUsed().empty()) throw PartitionManager::Error("Unknown main command speficied! Use --help for more information.");
 
     return !manager.runUsed(); // If the operation is successful, it returns true, which is equal to 1. Therefore, the opposite result
                                // should be obtained.

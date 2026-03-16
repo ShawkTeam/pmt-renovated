@@ -31,10 +31,6 @@
 #ifdef NONE
 #undef NONE
 #endif
-#ifdef ERR
-#undef ERR
-#define ERR PartitionMap::Error()
-#endif
 
 namespace PartitionMap {
 enum SizeUnit : int { BYTE = 1, KiB = 2, MiB = 3, GiB = 4 };

@@ -103,7 +103,7 @@ public:
       Tables.foreachPartitions(getter);
     else {
       for (const auto &partition : partitions) {
-        if (!Tables.hasPartition(partition)) throw ERR << "Couldn't find partition: " << partition;
+        if (!Tables.hasPartition(partition)) throw Error("Couldn't find partition: {}", partition);
       }
       Tables.foreachFor(partitions, getter);
     }

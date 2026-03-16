@@ -28,7 +28,7 @@
 namespace PartitionMap {
 
 void Builder::scan() {
-  if (localTableNames.empty()) throw ERR << "Empty disk path.";
+  if (localTableNames.empty()) throw Error("Empty disk path.");
   LOGI << "Cleaning current data and scanning partitions..." << std::endl;
   localPartitions.clear();
   gptDataCollection.clear();
@@ -103,12 +103,12 @@ void Builder::findTablePaths() {
       }
     }
   } catch (const std::filesystem::filesystem_error &e) {
-    throw ERR << e.what();
+    throw Error("{}", e.what());
   }
 
   LOGI << "Find complete!" << std::endl;
   if (localTableNames.size() > 1) isUFS = true;
-  if (localTableNames.empty()) throw ERR << "Can't find any disk or partition table in " << std::quoted("/dev/block");
+  if (localTableNames.empty()) throw Error("Can't find any disk or partition table in {}", std::quoted_string("/dev/block"));
 }
 
 Builder::list_t Builder::allPartitions() {
@@ -239,7 +239,7 @@ const std::map<std::filesystem::path, std::shared_ptr<GPTData>> &Builder::allGPT
 const std::shared_ptr<GPTData> &Builder::GPTDataOf(const std::string &name) const {
   std::filesystem::path p("/dev/block");
   p /= name;
-  if (!gptDataCollection.contains(p)) throw ERR << "Can't find GPT data of " << name;
+  if (!gptDataCollection.contains(p)) throw Error("Can't find GPT data of {}", name);
   LOGI << "Providing GPTData of " << std::quoted(name) << " table." << std::endl;
   return gptDataCollection.at(p);
 }
@@ -247,7 +247,7 @@ const std::shared_ptr<GPTData> &Builder::GPTDataOf(const std::string &name) cons
 std::shared_ptr<GPTData> &Builder::GPTDataOf(const std::string &name) {
   std::filesystem::path p("/dev/block");
   p /= name;
-  if (!gptDataCollection.contains(p)) throw ERR << "Can't find GPT data of " << name;
+  if (!gptDataCollection.contains(p)) throw Error("Can't find GPT data of {}", name);
   LOGI << "Providing GPTData of " << std::quoted(name) << " table." << std::endl;
   return gptDataCollection.at(p);
 }
@@ -284,7 +284,7 @@ Partition_t &Builder::partition(const std::string &name, const std::string &from
     if (p.isLogicalPartition()) return p.name() == name;
     return from.empty() ? p.name() == name : p.name() == name && p.tableName() == from;
   });
-  if (it == localPartitions.end()) throw ERR << "Can't find partition with name " << name;
+  if (it == localPartitions.end()) throw Error("Can't find partition with name {}", name);
 
   LOGI << "Providing Partition_t object of " << std::quoted(name) << " partition." << std::endl;
   return *it;
@@ -295,7 +295,7 @@ const Partition_t &Builder::partition(const std::string &name, const std::string
     if (p.isLogicalPartition()) return p.name() == name;
     return from.empty() ? p.name() == name : p.name() == name && p.tableName() == from;
   });
-  if (it == localPartitions.end()) throw ERR << "Can't find partition with name " << name;
+  if (it == localPartitions.end()) throw Error( "Can't find partition with name {}", name);
 
   LOGI << "Providing Partition_t object of " << std::quoted(name) << " partition." << std::endl;
   return *it;
@@ -675,13 +675,13 @@ Builder::list_t Builder::operator*() {
 
 const std::shared_ptr<GPTData> &Builder::operator[](const std::string &name) const {
   const std::filesystem::path p("/dev/block/" + name);
-  if (!gptDataCollection.contains(p)) throw ERR << "Can't find GPT data of " << name;
+  if (!gptDataCollection.contains(p)) throw Error("Can't find GPT data of {}", name);
   return gptDataCollection.at(p);
 }
 
 std::shared_ptr<GPTData> &Builder::operator[](const std::string &name) {
   const std::filesystem::path p("/dev/block/" + name);
-  if (!gptDataCollection.contains(p)) throw ERR << "Can't find GPT data of " << name;
+  if (!gptDataCollection.contains(p)) throw Error("Can't find GPT data of {}", name);
   return gptDataCollection.at(p);
 }
 

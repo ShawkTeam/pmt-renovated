@@ -150,7 +150,7 @@ public:
     std::error_code ec;
     auto result = getGPTPart(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -169,7 +169,7 @@ public:
     std::error_code ec;
     auto result = getGPTPartRef(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -188,7 +188,7 @@ public:
     std::error_code ec;
     const auto result = getGPTPartRef(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -221,7 +221,7 @@ public:
     std::error_code ec;
     const auto result = absolutePath(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -237,7 +237,7 @@ public:
     std::error_code ec;
     auto &result = tablePath(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -256,7 +256,7 @@ public:
     std::error_code ec;
     auto &result = tablePath(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -275,7 +275,7 @@ public:
     std::error_code ec;
     auto result = pathByName(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -301,7 +301,7 @@ public:
     std::error_code ec;
     auto result = tableName(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -337,7 +337,7 @@ public:
     std::error_code ec;
     auto result = GUIDAsString(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -356,7 +356,7 @@ public:
     std::error_code ec;
     auto &result = index(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -375,7 +375,7 @@ public:
     std::error_code ec;
     auto &result = index(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -428,7 +428,7 @@ public:
     std::error_code ec;
     const auto result = start(ec, sectorSize);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -447,7 +447,7 @@ public:
     std::error_code ec;
     const auto result = end(ec, sectorSize);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -456,7 +456,7 @@ public:
     std::error_code ec;
     const auto result = GUID(ec);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -474,7 +474,7 @@ public:
     std::error_code ec;
     const auto result = dump(ec, destination, bufsize);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
@@ -622,13 +622,13 @@ public:
     std::error_code ec;
     const auto result = write(ec, image, bufsize);
 
-    if (ec) throw ERR << ec.message();
+    if (ec) throw Error("{}", ec.message());
     return result;
   }
 
   // Set GPTPart object, index and table path.
   void set(const basic_data_base<slot_type> &data) {
-    if (isLogical) throw ERR << "This is not a normal partition object!";
+    if (isLogical) throw Error("This is not a normal partition object!");
     gptPart = data.gptPart;
     localTablePath = data.tablePath;
     localIndex = data.index;
@@ -636,25 +636,25 @@ public:
 
   // Set partition path. Only for logical partitions.
   void setPartitionPath(const path_type &path) {
-    if (!isLogical) throw ERR << "This is not a logical partition object!";
+    if (!isLogical) throw Error("This is not a logical partition object!");
     logicalPartitionPath = path;
   }
 
   // Set partition index.
   void setIndex(slot_type new_index) {
-    if (isLogical) throw ERR << "This is not a normal partition object!";
+    if (isLogical) throw Error("This is not a normal partition object!");
     localIndex = new_index;
   }
 
   // Set table path.
   void setDiskPath(const path_type &path) {
-    if (isLogical) throw ERR << "This is not a normal partition object!";
+    if (isLogical) throw Error("This is not a normal partition object!");
     localTablePath = path;
   }
 
   // Set table name (automatically adds /dev/block and uses setDiskPath()).
   void setDiskName(const std::string &name) {
-    if (isLogical) throw ERR << "This is not a normal partition object!";
+    if (isLogical) throw Error("This is not a normal partition object!");
     path_type p("/dev/block");
     p.append(name); // Add name
     setDiskPath(p);
@@ -662,13 +662,13 @@ public:
 
   // Set GPTPart object.
   void setGptPart(const GPTPart &otherGptPart) {
-    if (isLogical) throw ERR << "This is not a normal partition object!";
+    if (isLogical) throw Error("This is not a normal partition object!");
     gptPart = otherGptPart;
   }
 
   // Checks whether the partition is dynamic or not.
   bool isSuperPartition() const {
-    if (isLogical) throw ERR << "This is not a normal partition object!";
+    if (isLogical) throw Error("This is not a normal partition object!");
     return GUID() == GUIDData("89A12DE1-5E41-4CB3-8B4C-B1441EB5DA38");
   }
 
@@ -687,7 +687,7 @@ public:
 
   // p1 == guid
   bool operator==(const GUIDData &other) const {
-    if (isLogical) throw ERR << "This is not a normal partition object!";
+    if (isLogical) throw Error("This is not a normal partition object!");
     return gptPart.GetUniqueGUID() == other;
   }
 

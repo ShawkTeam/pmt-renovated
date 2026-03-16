@@ -115,7 +115,7 @@ public:
       : logPath(std::move(logpath)), mainApp(cmd), mainFlags(flags) {}
 
   ~PluginManager() {
-    LOGN(PM, INFO) << "Unloading all loaded plugins." << std::endl;
+    LOGN(PM, INFO) << "Destructing all loaded plugins." << std::endl;
 
     for (auto &plugin : plugins) {
       plugin.instance->onUnload();
@@ -141,12 +141,12 @@ public:
     LOGN(PM, INFO) << "Loading external plugin: " << pluginPath << std::endl;
 
     void *handle = dlopen(pluginPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
-    if (!handle) throw PluginError() << "dlopen failed: " << pluginPath << ": " << dlerror();
+    if (!handle) throw PluginError("dlopen failed: {}: {}", pluginPath, dlerror());
 
     auto create = (Creator)(dlsym(handle, "create_plugin"));
     if (!create) {
       dlclose(handle);
-      throw PluginError() << "dlsym failed: " << pluginPath << ": create_plugin: " << dlerror();
+      throw PluginError("dlsym failed: {}: create_plugin: {}", pluginPath, dlerror());
     }
 
     auto plugin = std::unique_ptr<__class>(create());

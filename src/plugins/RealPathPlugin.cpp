@@ -57,7 +57,7 @@ public:
 
   PLUGIN_SECTION bool run() override {
     for (const auto &partition : partitions) {
-      if (!Tables.hasPartition(partition)) throw ERR << "Couldn't find partition: " << partition;
+      if (!Tables.hasPartition(partition)) throw Error("Couldn't find partition: {}", partition);
 
       auto &part = Tables.partitionWithDupCheck(partition, Flags.noWorkOnUsed);
       if (Flags.onLogical && !part.isLogicalPartition()) {
@@ -65,7 +65,7 @@ public:
           LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
                                           << std::endl;
         else
-          throw ERR << "Used --logical (-l) flag but is not logical partition: " << partition;
+          throw Error("Used --logical (-l) flag but is not logical partition: {}", partition);
       }
 
       if (byName)

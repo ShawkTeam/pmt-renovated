@@ -103,7 +103,7 @@ public:
       ret &= static_cast<bool>(res.second);
     }
 
-    if (!oss.str().empty()) throw Error("%s", oss.str().c_str());
+    if (!oss.str().empty()) throw Error("{}", oss.str());
     return ret;
   }
 
