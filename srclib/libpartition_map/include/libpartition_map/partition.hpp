@@ -26,7 +26,6 @@
 #include <filesystem>
 #include <ostream>
 #include <tuple>
-#include <unistd.h>
 #include <asm-generic/fcntl.h>
 #include <gpt.h>
 #include <libhelper/management.hpp>
@@ -110,6 +109,106 @@ public:
 
   using BasicData = PartitionMap::basic_data_base<slot_type>;
   using ErrorCategory = basic_partition_t_errors;
+  using IOCallback = std::function<void(size_type, size_type)>; // First = written/readed size, second = total size.
+
+  struct Progress_t {
+    const std::string name;
+    const size_type total;
+    std::atomic<size_type> done{0};
+    std::atomic<bool> finished{false};
+    std::atomic<bool> failed{false};
+
+    Progress_t() = default;
+    Progress_t(std::string name, size_type total) : name(std::move(name)), total(total) {}
+
+    Progress_t(const Progress_t &) = delete;
+    Progress_t &operator=(const Progress_t &) = delete;
+  };
+
+  class ProgressRenderer {
+    std::vector<std::shared_ptr<Progress_t>> _entries;
+    std::thread _thread;
+    std::atomic<bool> _running{false};
+    std::mutex _mutex;
+    size_t _drawnCount = 0;
+
+    void _render() {
+      while (_running.load(std::memory_order_relaxed)) {
+        _draw();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      }
+    }
+
+    void _draw() {
+      std::lock_guard lock(_mutex);
+      const size_t count = _entries.size();
+      if (count == 0) return;
+
+      if (_drawnCount > 0) std::cout << "\033[" << _drawnCount << "A";
+      _drawnCount = 0;
+
+      for (const auto &p : _entries) {
+        const size_type done = p->done.load(std::memory_order_relaxed);
+        const size_type total = p->total;
+        const bool failed = p->failed.load(std::memory_order_relaxed);
+
+        if (failed) {
+          std::cout << "\033[2K\r\n";
+          _drawnCount++;
+          continue;
+        }
+
+        const float pct = total > 0 ? static_cast<float>(done) / static_cast<float>(total) : 0.0f;
+        const int filled = static_cast<int>(pct * 20.0f);
+
+        std::string bar;
+        bar.reserve(20 * 3);
+        for (int i = 0; i < filled; i++)
+          bar += "━";
+        for (int i = filled; i < 20; i++)
+          bar += "╌";
+
+        std::cout << std::left << std::setw(16) << p->name << " [" << bar << "] " << std::right << std::setw(3)
+                  << static_cast<int>(pct * 100) << "%"
+                  << "\033[K"
+                  << "\r\n";
+        _drawnCount++;
+      }
+
+      std::cout.flush();
+    }
+
+  public:
+    ~ProgressRenderer() { stop(); }
+
+    std::shared_ptr<Progress_t> add(const std::string &name, size_type total) {
+      std::lock_guard lock(_mutex);
+      auto p = std::make_shared<Progress_t>(name, total);
+      _entries.push_back(p);
+      return p;
+    }
+
+    void start() {
+      {
+        std::lock_guard lock(_mutex);
+        for (size_t i = 0; i < _entries.size(); i++)
+          std::cout << "\n";
+        std::cout.flush();
+      }
+      _running.store(true, std::memory_order_relaxed);
+      _thread = std::thread(&ProgressRenderer::_render, this);
+    }
+
+    void stop() {
+      _running.store(false, std::memory_order_relaxed);
+      if (_thread.joinable()) _thread.join();
+      _draw();
+    }
+
+    ProgressRenderer() = default;
+    ProgressRenderer(const ProgressRenderer &) = delete;
+    ProgressRenderer &operator=(const ProgressRenderer &) = delete;
+  };
 
   static BasicPartition_t &AsLogicalPartition(BasicPartition_t &orig, const path_type &path) {
     orig.isLogical = true;
@@ -470,18 +569,20 @@ public:
   }
 
   // Dump image of partition.
-  [[maybe_unused]] bool dump(const path_type &destination = "", size_type bufsize = MB(1)) const {
+  [[maybe_unused]] bool dump(const path_type &destination = "", size_type bufsize = MB(1), IOCallback callback = nullptr) const {
+
     std::error_code ec;
-    const auto result = dump(ec, destination, bufsize);
+    const auto result = dump(ec, destination, bufsize, callback);
 
     if (ec) throw Error("{}", ec.message());
     return result;
   }
 
   // Dump image of partition.
-  [[maybe_unused]] bool dump(std::error_code &ec, const path_type &destination = "", size_type bufsize = MB(1)) const noexcept {
+  [[maybe_unused]] bool dump(std::error_code &ec, const path_type &destination = "", size_type bufsize = MB(1),
+                             IOCallback callback = nullptr) const noexcept {
+
     ec.clear();
-    Helper::garbageCollector collector;
     const path_type dest = destination.empty() ? (path_type("./") += name() + ".img") : destination;
     const path_type toOpen = isLogical ? absolutePath() : path();
 
@@ -527,15 +628,17 @@ public:
       }
 
       bytesReadSoFar += bytesRead;
+      if (callback) callback(bytesReadSoFar, totalBytesToRead);
     }
 
     return bytesReadSoFar == totalBytesToRead;
   }
 
   // Write input image to partition.
-  [[maybe_unused]] bool write(std::error_code &ec, const path_type &image, size_type bufsize = MB(1)) noexcept {
+  [[maybe_unused]] bool write(std::error_code &ec, const path_type &image, size_type bufsize = MB(1),
+                              IOCallback callback = nullptr) noexcept {
+
     ec.clear();
-    Helper::garbageCollector collector;
 
     const int64_t imageSize = Helper::fileSize(image);
     if (imageSize < 0) {
@@ -591,6 +694,7 @@ public:
       }
 
       bytesWrittenSoFar += bytesRead;
+      if (callback) callback(bytesWrittenSoFar, imageSize);
     }
 
     if (bytesWrittenSoFar < size()) {
@@ -618,9 +722,9 @@ public:
   }
 
   // Write input image to partition.
-  [[maybe_unused]] bool write(const path_type &image, size_type bufsize = MB(1)) {
+  [[maybe_unused]] bool write(const path_type &image, size_type bufsize = MB(1), IOCallback callback = nullptr) {
     std::error_code ec;
-    const auto result = write(ec, image, bufsize);
+    const auto result = write(ec, image, bufsize, callback);
 
     if (ec) throw Error("{}", ec.message());
     return result;

@@ -72,7 +72,6 @@ size_t getMagicLength(const uint64_t magic) {
 bool hasMagic(const uint64_t magic, const ssize_t buf, const std::string &path) {
   LOGI << "Checking magic of " << path << " with using " << buf << " byte buffer size (has magic 0x" << std::hex << magic << "?)"
        << std::endl;
-  Helper::garbageCollector collector;
 
   const auto fd = Helper::UniqueFD(path, O_RDONLY);
   if (!fd) return false;
@@ -81,10 +80,9 @@ bool hasMagic(const uint64_t magic, const ssize_t buf, const std::string &path) 
     return false;
   }
 
-  auto *buffer = new (std::nothrow) uint8_t[buf];
-  collector.delAfterProgress(buffer);
+  auto buffer = std::make_unique<uint8_t[]>(buf);
 
-  const ssize_t bytesRead = fd.read(buffer, buf);
+  const ssize_t bytesRead = fd.read(buffer.get(), buf);
   if (bytesRead < 0) return false;
 
   const size_t magicLength = getMagicLength(magic);

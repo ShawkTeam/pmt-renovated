@@ -295,7 +295,7 @@ const Partition_t &Builder::partition(const std::string &name, const std::string
     if (p.isLogicalPartition()) return p.name() == name;
     return from.empty() ? p.name() == name : p.name() == name && p.tableName() == from;
   });
-  if (it == localPartitions.end()) throw Error( "Can't find partition with name {}", name);
+  if (it == localPartitions.end()) throw Error("Can't find partition with name {}", name);
 
   LOGI << "Providing Partition_t object of " << std::quoted(name) << " partition." << std::endl;
   return *it;
