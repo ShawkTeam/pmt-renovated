@@ -78,7 +78,6 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf;
 
     // Automatically close file descriptors and delete allocated memories (arrays)
-    Helper::garbageCollector collector;
     const auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed);
 
     auto pfd = Helper::UniqueFD(partition.absolutePath(), O_WRONLY);
@@ -92,9 +91,7 @@ public:
     }
 
     LOGNF(PLUGIN, logPath, INFO) << "Writing zero bytes to partition: " << partitionName << std::endl;
-    auto *buffer = new (std::nothrow) char[buf];
-    collector.delAfterProgress(buffer);
-    memset(buffer, 0x00, buf);
+    auto buffer = std::make_unique<char[]>(buf);
 
     ssize_t bytesWritten = 0;
     const uint64_t partitionSize = partition.size();
@@ -103,7 +100,7 @@ public:
       size_t toWrite = sizeof(buffer);
       if (partitionSize - bytesWritten < sizeof(buffer)) toWrite = partitionSize - bytesWritten;
 
-      if (const ssize_t result = pfd.write(buffer, toWrite); result == -1)
+      if (const ssize_t result = pfd.write(buffer.get(), toWrite); result == -1)
         return AsyncResult_t::Error("Can't write zero bytes to partition: {}: {}", partitionName, strerror(errno));
       else
         bytesWritten += result;

@@ -77,20 +77,18 @@ public:
   PLUGIN_SECTION bool run() override {
     if (testFileSize > GB(2) && !Flags.forceProcess)
       throw Error("File size is more than 2GB! Sizes over 2GB may not give accurate "
-                   "results in the write test. Use -f (--force) for skip this error.");
+                  "results in the write test. Use -f (--force) for skip this error.");
 
     LOGNF(PLUGIN, logPath, INFO) << "Starting memory test on " << testPath << std::endl;
-    Helper::garbageCollector collector;
     const std::string test = Helper::pathJoin(testPath, "test.bin");
 
     LOGNF(PLUGIN, logPath, INFO) << "Generating random data for testing" << std::endl;
-    auto *buffer = new (std::nothrow) char[bufferSize];
-    collector.delAfterProgress(buffer);
+    auto buffer = std::make_unique<char[]>(bufferSize);
 
     for (size_t i = 0; i < bufferSize; i++)
       buffer[i] = static_cast<char>(Helper::Random<1024>::getNumber());
 
-    collector.delFileAfterProgress(test);
+    auto guard = Helper::makeScopeGuard([test] { std::filesystem::remove(test); });
 
     auto wfd = Helper::UniqueFD(test, O_WRONLY | O_CREAT | O_TRUNC | O_SYNC, 0644);
     if (!wfd) throw Error("Can't open/create test file: {}", strerror(errno));
@@ -99,7 +97,7 @@ public:
     const auto startWrite = std::chrono::high_resolution_clock::now();
     ssize_t bytesWritten = 0;
     while (bytesWritten < testFileSize) {
-      const ssize_t ret = wfd.write(buffer, bufferSize);
+      const ssize_t ret = wfd.write(buffer.get(), bufferSize);
       if (ret < 0) throw Error("Can't write to test file: {}", strerror(errno));
       bytesWritten += ret;
     }
@@ -111,9 +109,8 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << "Sequential write test done!" << std::endl;
 
     if (!doNotReadTest) {
-      auto *rawBuffer = new (std::nothrow) char[bufferSize + 4096];
-      collector.delAfterProgress(rawBuffer);
-      auto *bufferRead = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(rawBuffer) + 4096 - 1) & ~(4096 - 1));
+      auto rawBuffer = std::make_unique<char[]>(bufferSize + 4096);
+      auto *bufferRead = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(rawBuffer.get()) + 4096 - 1) & ~(4096 - 1));
       auto rfd = Helper::UniqueFD(test, O_RDONLY | O_DIRECT);
       if (rfd < 0) throw Error("Can't open test file: {}", strerror(errno));
 

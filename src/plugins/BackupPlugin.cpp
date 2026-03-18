@@ -33,7 +33,7 @@ class BackupPlugin final : public BasicPlugin {
   std::vector<std::string> partitions, outputNames;
   std::string rawPartitions, rawOutputNames, outputDirectory;
   uint64_t bufferSize = 0;
-  bool noSetPermissions = false;
+  bool noSetPermissions = false, verify = false;
 
 public:
   CLI::App *cmd = nullptr;
@@ -48,6 +48,7 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = &mainFlags;
     cmd = mainApp.add_subcommand("backup", "Backup partition(s) to file(s)");
+    cmd->fallthrough();
     cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
     cmd->add_option("output(s)", rawOutputNames, "File name(s) (or path(s)) to save the partition image(s)");
     cmd->add_option("-O,--output-directory", outputDirectory, "Directory to save the partition image(s)")
@@ -56,6 +57,7 @@ public:
         ->transform(CLI::AsSizeValue(false))
         ->default_val("1MB");
     cmd->add_flag("-n,--no-set-perms", noSetPermissions, "Don't change permission and owner after progress")->default_val(false);
+    cmd->add_flag("-S,--verify", verify, "Verify SHA-256 of the backup image(s)")->default_val(false);
     return true;
   }
 
@@ -67,9 +69,11 @@ public:
 
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
-  PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &outputName) const {
+  PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &outputName,
+                                        PartitionMap::Partition_t::ProgressRenderer *renderer) const {
     if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
-    const auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed);
+
+    const auto &partition = Tables.partitionWithDupCheck(partitionName);
     const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
 
     LOGNF(PLUGIN, logPath, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
@@ -87,10 +91,24 @@ public:
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for back upping " << partitionName << "): " << buf << std::endl;
 
-    try {
-      (void)partition.dump(outputName, buf);
-    } catch (Helper::Error &error) {
-      return AsyncResult_t::Error("Failed to write {} partition to {} image: {}", partitionName, outputName, error.what());
+    std::shared_ptr<PartitionMap::Partition_t::Progress_t> progress;
+    if (renderer) progress = renderer->add(partitionName, partition.size());
+
+    std::error_code ec;
+    PartitionMap::Partition_t::IOCallback cb = nullptr;
+    if (progress) {
+      cb = [&progress](uint64_t done, uint64_t) { progress->done.store(done, std::memory_order_relaxed); };
+    }
+
+    if (!partition.dump(ec, outputName, buf, cb)) {
+      if (progress) progress->failed.store(true, std::memory_order_relaxed);
+      return AsyncResult_t::Error("Failed to write {} partition to {} image: {}", partitionName, outputName, ec.message());
+    }
+    if (progress) progress->finished.store(true, std::memory_order_relaxed);
+
+    if (verify) {
+      if (!Helper::sha256Compare(partition.absolutePath(), outputName))
+        return AsyncResult_t::Error("{} and {} is not contains same SHA-256.", partition.absolutePath().string(), outputName);
     }
 
     if (!noSetPermissions) {
@@ -111,16 +129,20 @@ public:
       throw CLI::ValidationError("You must provide an output name(s) as long as the partition name(s)");
 
     Helper::AsyncManager<AsyncResult_t> manager;
+    manager.print = false;
+    std::unique_ptr<PartitionMap::Partition_t::ProgressRenderer> renderer;
+    if (!Flags.quietProcess) renderer = std::make_unique<PartitionMap::Partition_t::ProgressRenderer>();
+
     for (size_t i = 0; i < partitions.size(); i++) {
       std::string partitionName = partitions[i];
       std::string outputName = outputNames.empty() ? partitionName + ".img" : outputNames[i];
       if (!outputDirectory.empty()) outputName.insert(0, outputDirectory + '/');
 
-      manager.addProcess(&BackupPlugin::runAsync, this, partitionName, outputName);
+      manager.addProcess(&BackupPlugin::runAsync, this, partitionName, outputName, renderer.get());
       LOGNF(PLUGIN, logPath, INFO) << "Created thread backup upping " << partitionName << std::endl;
     }
 
-    return manager();
+    PLUGIN_END_WITH_RENDERER(renderer, manager);
   }
 
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }

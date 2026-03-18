@@ -29,6 +29,12 @@
 #define Flags          (*flags)
 #define Tables         (*Flags.partitionTables)
 #define DEFAULT_PLUGIN_CONSTRUCTOR : flags(nullptr) {}
+#define PLUGIN_END_WITH_RENDERER(r, m) \
+  if (r) { r->start(); } \
+  m.startAll(); \
+  m.getResults(); \
+  if (r) { r->stop(); } \
+  return m.finalize()
 
 #ifdef BUILTIN_PLUGINS
 #define PLUGIN_SECTION __attribute__((section(".builtin_modules")))

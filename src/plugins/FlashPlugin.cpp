@@ -48,6 +48,7 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = &mainFlags;
     cmd = mainApp.add_subcommand("flash", "Flash image(s) to partition(s)");
+    cmd->fallthrough();
     cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
     cmd->add_option("imageFile(s)", rawImageNames, "Name(s) of image file(s)")->required();
     cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading image(s) and writing to partition(s)")
@@ -67,7 +68,8 @@ public:
 
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
-  PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &imageName) const {
+  PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &imageName,
+                                        PartitionMap::Partition_t::ProgressRenderer *renderer) const {
     if (!Helper::fileIsExists(imageName)) return AsyncResult_t::Error("Couldn't find image file: {}", imageName);
     if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
     if (Helper::fileSize(imageName) > Tables.partition(partitionName).size())
@@ -88,11 +90,20 @@ public:
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
 
-    try {
-      (void)partition.write(imageName, buf);
-    } catch (Helper::Error &error) {
-      return AsyncResult_t::Error("Failed to write {} image to {} partition: {}", imageName, partitionName, error.what());
+    std::shared_ptr<PartitionMap::Partition_t::Progress_t> progress;
+    if (renderer) progress = renderer->add(partitionName, partition.size());
+
+    std::error_code ec;
+    PartitionMap::Partition_t::IOCallback cb = nullptr;
+    if (progress) {
+      cb = [&progress](uint64_t done, uint64_t) { progress->done.store(done, std::memory_order_relaxed); };
     }
+
+    if (!partition.write(ec, imageName, buf, cb)) {
+      if (progress) progress->failed.store(true, std::memory_order_relaxed);
+      return AsyncResult_t::Error("Failed to write {} image to {} partition: {}", imageName, partitionName, ec.message());
+    }
+    if (progress) progress->finished.store(true, std::memory_order_relaxed);
 
     if (deleteAfterProgress) {
       LOGNF(PLUGIN, logPath, INFO) << "Deleting flash file: " << imageName << std::endl;
@@ -113,12 +124,16 @@ public:
     }
 
     Helper::AsyncManager<AsyncResult_t> manager;
+    manager.print = false;
+    std::unique_ptr<PartitionMap::Partition_t::ProgressRenderer> renderer;
+    if (!Flags.quietProcess) renderer = std::make_unique<PartitionMap::Partition_t::ProgressRenderer>();
+
     for (size_t i = 0; i < partitions.size(); i++) {
-      manager.addProcess(&FlashPlugin::runAsync, this, partitions[i], imageNames[i]);
+      manager.addProcess(&FlashPlugin::runAsync, this, partitions[i], imageNames[i], renderer.get());
       LOGNF(PLUGIN, logPath, INFO) << "Created thread for flashing image to " << partitions[i] << std::endl;
     }
 
-    return manager();
+    PLUGIN_END_WITH_RENDERER(renderer, manager);
   }
 
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
