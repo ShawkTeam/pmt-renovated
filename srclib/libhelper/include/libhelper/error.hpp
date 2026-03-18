@@ -34,8 +34,7 @@ public:
   Error() = default;
   Error(const Error &other) noexcept : message(other.message) {}
 
-  template <typename... Args>
-  explicit Error(std::format_string<Args...> fmt, Args &&...args) {
+  template <typename... Args> explicit Error(std::format_string<Args...> fmt, Args &&...args) {
     oss << std::format(fmt, std::forward<Args>(args)...);
     message = oss.str();
   }

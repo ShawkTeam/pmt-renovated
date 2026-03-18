@@ -18,8 +18,6 @@
 #ifndef LIBHELPER_CAPSULE_HPP
 #define LIBHELPER_CAPSULE_HPP
 
-#include <libhelper/management.hpp>
-
 namespace Helper {
 // Provides a capsule structure to store variable references and values.
 template <typename _Type>
@@ -27,7 +25,7 @@ template <typename _Type>
     v = v;
     v == v;
   }
-class Capsule : public garbageCollector {
+class Capsule {
 public:
   _Type &value;
 
@@ -48,10 +46,7 @@ public:
   explicit operator _Type *() noexcept { return &this->value; }
 
   // The value of another capsule is taken.
-  Capsule &operator=(const Capsule &other) noexcept {
-    this->value = other.value;
-    return *this;
-  }
+  Capsule &operator=(const Capsule &other) noexcept = default;
 
   // Assign another value.
   Capsule &operator=(const _Type &_value) noexcept {

@@ -30,6 +30,7 @@
 #include <sstream>
 #include <iostream>
 #include <ranges>
+#include <latch>
 #include <libhelper/error.hpp>
 #include <filesystem>
 #include <dirent.h>
@@ -66,13 +67,25 @@ template <typename T>
 concept ArrayDeletable = !std::is_void_v<T> && requires(T *p) { CleanupTraits<T[]>::cleanup(p); };
 
 template <typename __return_type> class AsyncManager {
+  std::vector<std::packaged_task<__return_type()>> tasks;
   std::vector<std::future<__return_type>> futures;
   std::vector<__return_type> results;
   bool get = false;
 
 public:
+  bool print = true;
+
   template <typename... Args> void addProcess(Args &&...args) {
-    futures.push_back(std::async(std::launch::async, std::forward<Args>(args)...));
+    auto bound = std::bind(std::forward<Args>(args)...);
+    tasks.emplace_back([bound = std::move(bound)]() mutable { return bound(); });
+  }
+
+  void startAll() {
+    for (auto &task : tasks) {
+      futures.push_back(task.get_future());
+      std::thread(std::move(task)).detach();
+    }
+    tasks.clear();
   }
 
   std::vector<__return_type> getResults() {
@@ -98,7 +111,7 @@ public:
     for (const auto &res : results) {
       if (!static_cast<bool>(res.second))
         oss << std::string(res.first) << std::endl;
-      else
+      else if (print)
         std::cout << std::string(res.first) << std::endl;
       ret &= static_cast<bool>(res.second);
     }
@@ -503,53 +516,62 @@ public:
 using UniqueFD = BasicUniqueFD<DefaultCloser_FD>;
 using UniqueFP = BasicUniqueFP<DefaultCloser_FP>;
 
-class garbageCollector {
-  std::vector<std::function<void()>> __cleaners;
+template <std::invocable F> class ScopeGuard {
+  F _fn;
+  bool _active = true;
 
 public:
-  garbageCollector() = default;
-  garbageCollector(const garbageCollector &) = delete;
+  explicit ScopeGuard(F &&fn) : _fn(std::forward<F>(fn)) {}
+  ScopeGuard(const ScopeGuard &) = delete;
+  ScopeGuard(ScopeGuard &&other) noexcept : _fn(std::move(other._fn)), _active(other._active) { other.dismiss(); }
 
-  ~garbageCollector() {
-    for (auto &__cleaner : std::ranges::reverse_view(__cleaners))
-      __cleaner();
+  ~ScopeGuard() {
+    if (_active) _fn();
   }
 
-  template <typename T> T *allocateArray(const size_t size) {
-    T *ptr = new T[size];
-    delArrayAfterProgress(ptr);
-    return ptr;
+  void now() noexcept {
+    if (_active) _fn();
+  }
+  void dismiss() noexcept { _active = false; }
+  auto release() noexcept {
+    dismiss();
+    return std::move(_fn);
   }
 
-  template <Deletable T> void delAfterProgress(T *ptr) {
-    static_assert(!std::is_array_v<T>, "Use delArrayAfterProgress for arrays");
-    __cleaners.push_back([ptr] { CleanupTraits<T>::cleanup(ptr); });
-  }
-
-  template <ArrayDeletable T> void delArrayAfterProgress(T *ptr) {
-    __cleaners.push_back([ptr] { CleanupTraits<T[]>::cleanup(ptr); });
-  }
-
-  void delFileAfterProgress(const std::filesystem::path &path) {
-    __cleaners.emplace_back([path] { std::filesystem::remove(path); });
-  }
-
-  void closeAfterProgress(FILE *fp) {
-    __cleaners.emplace_back([fp] { CleanupTraits<FILE>::cleanup(fp); });
-  }
-
-  void closeAfterProgress(DIR *dp) {
-    __cleaners.emplace_back([dp] { CleanupTraits<DIR>::cleanup(dp); });
-  }
-
-  void closeAfterProgress(int fd) {
-    __cleaners.emplace_back([fd] {
-      if (fd >= 0) close(fd);
-    });
-  }
-
-  garbageCollector &operator=(const garbageCollector &) = delete;
+  ScopeGuard &operator=(const ScopeGuard &) = delete;
 };
+
+template <std::invocable F> [[nodiscard]] static auto makeScopeGuard(F &&fn) noexcept {
+  return ScopeGuard<std::decay_t<F>>(std::forward<F>(fn));
+}
+
+inline auto openFd(const std::filesystem::path &path, int flags) noexcept {
+  int fd = open(path.c_str(), flags);
+  return std::pair{fd, makeScopeGuard([fd] {
+                     if (fd >= 0) close(fd);
+                   })};
+}
+
+inline auto openFd(const std::filesystem::path &path, int flags, mode_t mode) noexcept {
+  int fd = open(path.c_str(), flags, mode);
+  return std::pair{fd, makeScopeGuard([fd] {
+                     if (fd >= 0) close(fd);
+                   })};
+}
+
+inline auto openFp(const std::filesystem::path &path, const char *mode) noexcept {
+  FILE *fp = fopen(path.c_str(), mode);
+  return std::pair{fp, makeScopeGuard([fp] {
+                     if (fp != nullptr) fclose(fp);
+                   })};
+}
+
+inline auto openDir(const std::filesystem::path &path) noexcept {
+  DIR *dir = opendir(path.c_str());
+  return std::pair{dir, makeScopeGuard([dir] {
+                     if (dir != nullptr) closedir(dir);
+                   })};
+}
 
 class Silencer {
   int saved_stdout = -1, saved_stderr = -1, dev_null = -1;

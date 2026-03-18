@@ -135,7 +135,7 @@ int64_t fileSize(const std::filesystem::path &file);
 std::string readSymlink(const std::filesystem::path &entry);
 
 /**
- * Compare SHA-256 values SHA-256 of files.
+ * Compare SHA-256 values of files.
  * Throws Helper::Error on error occurred.
  */
 bool sha256Compare(const std::filesystem::path &file1, const std::filesystem::path &file2);
@@ -247,23 +247,6 @@ template <uint64_t size> int convertTo(const sizeCastTypes type) {
  * Get libhelper library version string.
  */
 std::string getLibVersion();
-
-/**
- * Open input path with flags and add to integrity list.
- * And returns file descriptor.
- */
-[[nodiscard]] int openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector, int flags, mode_t mode = 0000);
-/**
- * Open input path with flags and add to integrity list.
- * And returns file pointer.
- */
-[[nodiscard]] FILE *openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector, const char *mode);
-/**
- * Open input directory and add to integrity list.
- * And returns directory pointer.
- */
-[[nodiscard]] DIR *openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector);
-
 } // namespace Helper
 
 #endif // #ifndef LIBHELPER_FUNCTIONS_HPP

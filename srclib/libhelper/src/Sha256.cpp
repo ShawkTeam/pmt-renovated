@@ -31,7 +31,7 @@ std::optional<std::string> sha256Of(const std::filesystem::path &path) {
                      << std::endl;
   const std::string fp = (isLink(path)) ? readSymlink(path) : std::string(path);
 
-  if (!fileIsExists(fp)) throw Error("Is not exists or not file: {}", fp);
+  if (!isExists(fp)) throw Error("Is not exists or not file: {}", fp);
 
   if (const std::ifstream file(fp, std::ios::binary); !file) throw Error("Cannot open file: {}", fp);
 

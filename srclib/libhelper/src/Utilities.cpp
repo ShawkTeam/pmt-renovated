@@ -23,6 +23,7 @@
 #include <string>
 #include <string_view>
 #include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
 #include <fcntl.h>
 #include <libhelper/functions.hpp>
@@ -73,7 +74,26 @@ namespace Helper {
 
 bool runCommand(const std::string_view cmd) {
   LOGN(HELPER, INFO) << "run command request: " << cmd << std::endl;
-  return (system(cmd.data()) == 0) ? true : false;
+
+  const std::array<const char *, 4> args = {
+#ifdef __ANDROID__
+      "/system/bin/sh",
+#else
+      "/bin/sh",
+#endif
+      "-c", cmd.data(), nullptr};
+  pid_t pid = fork();
+
+  if (pid < 0) return false;
+  if (pid == 0) {
+    execvp(args[0], const_cast<char *const *>(args.data()));
+    _exit(127);
+  }
+
+  int status = 0;
+  if (waitpid(pid, &status, 0) < 0) return false;
+
+  return WIFEXITED(status) && (WEXITSTATUS(status) == 0);
 }
 
 bool confirmPropt(const std::string_view message) {
@@ -116,19 +136,48 @@ std::string currentTime() {
 std::pair<std::string, int> runCommandWithOutput(const std::string_view cmd) {
   LOGN(HELPER, INFO) << "run command and catch out request: " << cmd << std::endl;
 
-  FILE *pipe = popen(cmd.data(), "r");
-  if (!pipe) return {};
+  int pipefd[2];
+  if (pipe(pipefd) < 0) return {{}, -1};
 
-  std::unique_ptr<FILE, decltype(&pclose)> pipe_holder(pipe, pclose);
+  auto closePipe = makeScopeGuard([&] {
+    close(pipefd[0]);
+    close(pipefd[1]);
+  });
+
+  const pid_t pid = fork();
+  if (pid < 0) return {{}, -1};
+
+  if (pid == 0) {
+    close(pipefd[0]);
+    dup2(pipefd[1], STDOUT_FILENO);
+    dup2(pipefd[1], STDERR_FILENO);
+    close(pipefd[1]);
+
+    const std::array<const char *, 4> args = {
+#ifdef __ANDROID__
+        "/system/bin/sh",
+#else
+        "/bin/sh",
+#endif
+        "-c", cmd.data(), nullptr};
+    execvp(args[0], const_cast<char *const *>(args.data()));
+    _exit(127);
+  }
+
+  close(pipefd[1]);
+  auto closeWrite = makeScopeGuard([&] { close(pipefd[0]); });
+  closePipe.dismiss();
 
   std::string output;
-  char buffer[1024];
+  auto buffer = std::make_unique<char[]>(1024);
 
-  while (fgets(buffer, sizeof(buffer), pipe_holder.get()) != nullptr)
-    output += buffer;
+  ssize_t n;
+  while ((n = read(pipefd[0], buffer.get(), 1024)) > 0)
+    output.append(buffer.get(), n);
 
-  FILE *raw = pipe_holder.release();
-  const int status = pclose(raw);
+  int status = 0;
+  if (waitpid(pid, &status, 0) < 0) return {output, -1};
+
   return {output, (WIFEXITED(status) ? WEXITSTATUS(status) : -1)};
 }
 
@@ -149,24 +198,6 @@ bool changeMode(const std::filesystem::path &file, const mode_t mode) {
 bool changeOwner(const std::filesystem::path &file, const uid_t uid, const gid_t gid) {
   LOGN(HELPER, INFO) << "change owner request: " << file << ". As owner:group: " << uid << ":" << gid << std::endl;
   return chown(file.c_str(), uid, gid) == 0;
-}
-
-int openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector, const int flags, const mode_t mode) {
-  const int fd = mode == 0 ? open(path.c_str(), flags) : open(path.c_str(), flags, mode);
-  collector.closeAfterProgress(fd);
-  return fd;
-}
-
-FILE *openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector, const char *mode) {
-  FILE *fp = fopen(path.c_str(), mode);
-  collector.closeAfterProgress(fp);
-  return fp;
-}
-
-DIR *openAndAddToCloseList(const std::filesystem::path &path, garbageCollector &collector) {
-  DIR *dp = opendir(path.c_str());
-  collector.closeAfterProgress(dp);
-  return dp;
 }
 
 #ifdef __ANDROID__

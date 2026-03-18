@@ -138,9 +138,8 @@ bool eraseDirectoryRecursive(const std::filesystem::path &directory) {
   LOGN(HELPER, INFO) << "erase recursive requested: " << std::quoted(directory.string()) << std::endl;
   struct stat buf{};
   dirent *entry;
-  garbageCollector collector;
 
-  DIR *dir = openAndAddToCloseList(directory, collector);
+  auto [dir, guard] = openDir(directory);
   if (dir == nullptr) return false;
 
   while ((entry = readdir(dir)) != nullptr) {
