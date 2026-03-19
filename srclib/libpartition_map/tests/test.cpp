@@ -24,28 +24,30 @@
 #include <libhelper/functions.hpp>
 #include <libpartition_map/lib.hpp>
 
+using namespace Helper;
+
 int main() {
-  if (!Helper::hasSuperUser()) return 2; // Check root access.
+  if (!hasSuperUser()) return 2; // Check root access.
 
   try {
     PartitionMap::Builder partitions;
 
-    if (!partitions.valid() && !partitions) throw Helper::Error("Tables not valid (UNEXPECTED?)");
+    if (!partitions.valid() && !partitions) throw Error("Tables not valid (UNEXPECTED?)");
 
-    if (partitions.empty()) throw Helper::Error("Class is empty (UNEXPECTED)");
+    if (partitions.empty()) throw Error("Class is empty (UNEXPECTED)");
 
     PartitionMap::Builder partitions2 = partitions;
     if (partitions2 == partitions)
       std::cout << "partitions2 and partitions is same" << std::endl;
     else
-      throw Helper::Error("partitions2 and partitions are different (UNEXPECTED)");
+      throw Error("partitions2 and partitions are different (UNEXPECTED)");
 
     partitions2.clear();
 
     std::string tableName = partitions.hasTable("mmcblk0") ? "mmcblk0" : "sda";
-    if (!partitions.hasTable(tableName)) throw Helper::Error("Can't find mmcblk0 or sda (UNEXPECTED?)");
+    if (!partitions.hasTable(tableName)) throw Error("Can't find mmcblk0 or sda (UNEXPECTED?)");
     auto data = partitions.hasTable("mmcblk0") ? partitions["mmcblk0"] : partitions["sda"];
-    if (data->GetNumParts() == 0) throw Helper::Error("Can't get total partition number of mmcblk0 or sda (UNEXPECTED?)");
+    if (data->GetNumParts() == 0) throw Error("Can't get total partition number of mmcblk0 or sda (UNEXPECTED?)");
 
     if (auto part = partitions(tableName, 0); !part->IsUsed())
       std::cerr << "WARNING: (GPTPart part = partitions[0]) check failed "
@@ -55,19 +57,19 @@ int main() {
     auto partition_list = partitions.partitions();
     std::cout << "Listing partitions (data is getted from getPartitions()):" << std::endl;
     for (auto &part : partition_list)
-      std::cout << std::setw(16) << part->name() << std::endl;
+      std::cout << std::setw(16) << part.get().name() << std::endl;
 
     auto partitions_of_disk = partitions.partitionsByTable(tableName);
     std::cout << "Listing partitions of table (data is getted from "
                  "getPartitionsByTable()):"
               << std::endl;
     for (auto &part : partitions_of_disk)
-      std::cout << std::setw(16) << part->name() << std::endl;
+      std::cout << std::setw(16) << part.get().name() << std::endl;
 
     auto logical_partitions = partitions.logicalPartitions();
     std::cout << "Listing logical partitions:" << std::endl;
     for (auto &part : logical_partitions)
-      std::cout << std::setw(10) << part->name() << std::endl;
+      std::cout << std::setw(10) << part.get().name() << std::endl;
 
     auto readed_gpt_data_collection = partitions.allGPTData();
     std::cout << "Listing readed gpt data paths:" << std::endl;
@@ -75,7 +77,7 @@ int main() {
     std::cout << std::endl;
 
     auto data2 = partitions.hasTable("mmcblk0") ? partitions.GPTDataOf("mmcblk0") : partitions.GPTDataOf("sda");
-    if (data2->GetNumParts() == 0) throw Helper::Error("Can't get gpt data of mmcblk0 or sda (UNEXPECTED?)");
+    if (data2->GetNumParts() == 0) throw Error("Can't get gpt data of mmcblk0 or sda (UNEXPECTED?)");
 
     if (auto logical_partition_data = partitions.dataOfLogicalPartitions(); logical_partition_data.empty())
       std::cerr << "WARNING: Can't get data of logical partitions" << std::endl;
@@ -123,15 +125,15 @@ int main() {
       std::cout << "    Block size: " << gptData->GetBlockSize() << std::endl;
       return true;
     };
-    partitions.foreachLogicalPartitions(logicalPartTest);
-    partitions.foreachPartitions(partitionTest);
-    partitions.foreachGptData(gptDataTest);
+    partitions.forEachLogicalPartitions(logicalPartTest);
+    partitions.forEachPartitions(partitionTest);
+    partitions.forEachGptData(gptDataTest);
 
     partitions.reScan();
-    if (partitions.empty()) throw Helper::Error("Class was empty after reScan() (UNEXPECTED)");
+    if (partitions.empty()) throw Error("Class was empty after reScan() (UNEXPECTED)");
 
     partitions.clear();
-    if (!partitions.empty()) throw Helper::Error("Class was not empty after clear() (UNEXPECTED)");
+    if (!partitions.empty()) throw Error("Class was not empty after clear() (UNEXPECTED)");
   } catch (std::exception &error) {
     std::cerr << error.what() << std::endl;
     return 1;

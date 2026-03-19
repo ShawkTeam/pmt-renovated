@@ -78,7 +78,7 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf;
 
     // Automatically close file descriptors and delete allocated memories (arrays)
-    const auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed);
+    const auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed)->get();
 
     auto pfd = Helper::UniqueFD(partition.absolutePath(), O_WRONLY);
     if (!pfd) return AsyncResult_t::Error("Can't open partition: {}: {}", partitionName, strerror(errno));

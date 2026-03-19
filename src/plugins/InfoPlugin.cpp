@@ -97,16 +97,16 @@ public:
     };
 
     if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
-      Tables.foreach (getter);
+      Tables.forEach(getter);
     else if (partitions.back() == "get-logicals")
-      Tables.foreachLogicalPartitions(getter);
+      Tables.forEachLogicalPartitions(getter);
     else if (partitions.back() == "get-physicals")
-      Tables.foreachPartitions(getter);
+      Tables.forEachPartitions(getter);
     else {
       for (const auto &partition : partitions) {
         if (!Tables.hasPartition(partition)) throw Error("Couldn't find partition: {}", partition);
       }
-      Tables.foreachFor(partitions, getter);
+      Tables.forEachFor(partitions, getter);
     }
 
     if (jsonFormat) {

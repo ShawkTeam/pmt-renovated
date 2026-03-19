@@ -56,18 +56,4 @@ public:
 
 } // namespace Helper
 
-namespace std {
-
-// For printing using the std::format style, a `quoted_string`
-// function that returns std::string is absolutely necessary.
-template <typename _CharT>
-  requires std::__is_char_type<_CharT>
-std::string quoted_string(const _CharT *s) {
-  std::ostringstream oss;
-  oss << std::quoted(s);
-  return oss.str();
-}
-
-} // namespace std
-
 #endif // #ifndef LIBHELPER_ERROR_HPP

@@ -70,10 +70,10 @@ public:
   PLUGIN_SECTION bool used() override { return cmd->parsed(); }
 
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &outputName,
-                                        PartitionMap::Partition_t::ProgressRenderer *renderer) const {
+                                        PartitionMap::ProgressRenderer *renderer) const {
     if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
 
-    const auto &partition = Tables.partitionWithDupCheck(partitionName);
+    const auto &partition = Tables.partitionWithDupCheck(partitionName)->get();
     const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
 
     LOGNF(PLUGIN, logPath, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
@@ -91,7 +91,7 @@ public:
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for back upping " << partitionName << "): " << buf << std::endl;
 
-    std::shared_ptr<PartitionMap::Partition_t::Progress_t> progress;
+    std::shared_ptr<PartitionMap::Progress_t> progress;
     if (renderer) progress = renderer->add(partitionName, partition.size());
 
     std::error_code ec;
@@ -130,8 +130,8 @@ public:
 
     Helper::AsyncManager<AsyncResult_t> manager;
     manager.print = false;
-    std::unique_ptr<PartitionMap::Partition_t::ProgressRenderer> renderer;
-    if (!Flags.quietProcess) renderer = std::make_unique<PartitionMap::Partition_t::ProgressRenderer>();
+    std::unique_ptr<PartitionMap::ProgressRenderer> renderer;
+    if (!Flags.quietProcess) renderer = std::make_unique<PartitionMap::ProgressRenderer>();
 
     for (size_t i = 0; i < partitions.size(); i++) {
       std::string partitionName = partitions[i];

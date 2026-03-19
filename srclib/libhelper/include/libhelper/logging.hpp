@@ -48,6 +48,20 @@
 #include <fstream>
 #include <libhelper/macros.hpp>
 
+namespace std {
+
+// For printing using the std::format style, a `quoted_string`
+// function that returns std::string is absolutely necessary.
+template <typename _CharT>
+  requires std::__is_char_type<_CharT>
+std::string quoted_string(const _CharT *s) {
+  std::ostringstream oss;
+  oss << std::quoted(s);
+  return oss.str();
+}
+
+} // namespace std
+
 namespace Helper {
 
 enum LogLevels {
@@ -135,6 +149,7 @@ public:
   }
 
   Logger() = delete;
+  Logger(const Logger &) = delete;
   Logger(const LogLevels level, std::string function, std::string logFile, std::string name, std::string file, int line)
       : level(level), function(std::move(function)), logFile(std::move(logFile)), name(std::move(name)), file(std::move(file)),
         line(line) {}
@@ -146,6 +161,13 @@ public:
 
   Logger &operator<<(std::ostream &(*msg)(std::ostream &)) {
     oss << msg;
+    return *this;
+  }
+
+  Logger &operator=(const Logger &) = delete;
+
+  template <typename... Args> Logger &write(std::format_string<Args...> fmt, Args &&...args) {
+    oss << std::format(fmt, std::forward<Args>(args)...);
     return *this;
   }
 };

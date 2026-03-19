@@ -27,8 +27,6 @@
 
 namespace PartitionMap {
 
-// template <typename __class>
-// requires minimumPartitionClass<__class>
 class Builder {
   std::vector<Partition_t> localPartitions;
   std::map<std::filesystem::path, std::shared_ptr<GPTData>> gptDataCollection;
@@ -39,10 +37,11 @@ class Builder {
   void scan();
   void scanLogicalPartitions();
   void findTablePaths();
+  void reScan(bool auto_toggled);
 
 public:
-  using list_t = std::vector<Partition_t *>;
-  using const_list_t = std::vector<const Partition_t *>;
+  using list_t = std::vector<std::reference_wrapper<Partition_t>>;
+  using const_list_t = std::vector<std::reference_wrapper<const Partition_t>>;
   using iterator = std::vector<Partition_t>::iterator;
   using const_iterator = std::vector<Partition_t>::const_iterator;
 
@@ -89,21 +88,20 @@ public:
   std::shared_ptr<GPTData> &
   GPTDataOf(const std::string &name); // Get gpt data of table by name (retrieve it as std::shared_ptr as it is stored, non-const).
 
-  std::vector<std::pair<std::string, uint64_t>> dataOfLogicalPartitions(); // Get logical partition information.
-  std::vector<BasicInfo> dataOfPartitions();                               // Get information about partitions.
-  std::vector<BasicInfo> dataOfPartitionsByTable(const std::string &name); // Get information about partitions by table name.
+  std::vector<std::pair<std::string, uint64_t>> dataOfLogicalPartitions() const; // Get logical partition information.
+  std::vector<BasicInfo> dataOfPartitions() const;                               // Get information about partitions.
+  std::vector<BasicInfo> dataOfPartitionsByTable(const std::string &name) const; // Get information about partitions by table name.
 
-  const Partition_t &partition(const std::string &name, const std::string &from = "") const;
-  Partition_t &partition(const std::string &name, const std::string &from = "");
-  const Partition_t &partitionWithDupCheck(const std::string &name, bool check = true) const;
-  Partition_t &partitionWithDupCheck(const std::string &name, bool check = true);
+  std::optional<std::reference_wrapper<const Partition_t>> partition(const std::string &name, const std::string &from = "") const;
+  std::optional<std::reference_wrapper<Partition_t>> partition(const std::string &name, const std::string &from = "");
+  std::optional<std::reference_wrapper<const Partition_t>> partitionWithDupCheck(const std::string &name, bool check = true) const;
+  std::optional<std::reference_wrapper<Partition_t>> partitionWithDupCheck(const std::string &name, bool check = true);
 
   uint64_t freeSpaceOf(const std::string &name) const; // Get free space of <name> table.
 
   int hasDuplicateNamedPartition(const std::string &name) const; // Check <name> named partitions are duplicate.
 
-  bool
-  hasPartition(const std::string &name) const; // Check <name> partition is existing or not (checks partitions and logicalPartitions).
+  bool hasPartition(const std::string &name) const;        // Check <name> partition is existing or not (checks all).
   bool hasLogicalPartition(const std::string &name) const; // Check <name> logical partition is existing or not.
   bool hasTable(const std::string &name) const;            // Check <name> table name is existing or not.
   bool isUsesUFS() const;                                  // Get the device uses UFS or not.
@@ -119,49 +117,168 @@ public:
   bool valid() const; // Validate GPTData collection integrity. Checks with
                       // GPTData::Verify() and GPTData::CheckHeaderValidity().
 
-  bool foreach (const std::function<bool(const Partition_t &)> &function) const; // For-each input function for all partitions (const).
-  bool foreach (const std::function<bool(Partition_t &)> &function); // For-each input function for all partitions (non-const).
-  bool
-  foreachPartitions(const std::function<bool(const Partition_t &)> &function) const; // For-each input function for partitions (const).
-  bool foreachPartitions(const std::function<bool(Partition_t &)> &function); // For-each input function for partitions (non-const).
-  bool foreachLogicalPartitions(
-      const std::function<bool(const Partition_t &)> &function) const; // For-each input function for logical partitions (const).
-  bool foreachLogicalPartitions(
-      const std::function<bool(Partition_t &)> &function); // For-each input function for logical partitions (non-const).
-  bool foreachGptData(const std::function<bool(const std::filesystem::path &path,
-                                               const std::shared_ptr<GPTData> &)> &function)
-      const; // For-each input function for gpt data collection (const).
-  bool foreachGptData(
-      const std::function<bool(const std::filesystem::path &path,
-                               std::shared_ptr<GPTData> &)> &function); // For-each input function for gpt data collection (non-const).
-  bool foreachFor(const std::vector<std::string> &list,
-                  const std::function<bool(const Partition_t &)> &function)
-      const; // For-each input function for input partition list (all types, const).
-  bool foreachFor(
-      const std::vector<std::string> &list,
-      const std::function<bool(Partition_t &)> &function); // For-each input function for input partition list (all types, non-const).
-  bool foreachForLogicalPartitions(const std::vector<std::string> &list,
-                                   const std::function<bool(const Partition_t &)> &function)
-      const; // For-each input function for input partition list (only normal partitions, const).
-  bool foreachForLogicalPartitions(const std::vector<std::string> &list,
-                                   const std::function<bool(Partition_t &)> &function); // For-each input function for input partition
-                                                                                        // list (only normal partitions, non-const).
-  bool foreachForPartitions(const std::vector<std::string> &list,
-                            const std::function<bool(const Partition_t &)> &function)
-      const; // For-each input function for input partition list (only normal partitions, const).
-  bool foreachForPartitions(const std::vector<std::string> &list,
-                            const std::function<bool(Partition_t &)>
-                                &function); // For-each input function for input partition list (only normal partitions, non-const).
+  // For-each input function for all partitions (const).
+  template <std::invocable<const Partition_t &> F> bool forEach(F &&function) const {
+    LOGI << "Foreaching input function for all partitions." << std::endl;
+    bool isSuccess = true;
+    for (auto &part : localPartitions)
+      isSuccess &= function(part);
 
-  void reScan(bool auto_toggled = false);    // Rescan tables. DO NOT USE `reScan(true)` MANUALLY!
+    return isSuccess;
+  }
+
+  // For-each input function for all partitions (non-const).
+  template <std::invocable<Partition_t &> F> bool forEach(F &&function) {
+    LOGI << "Foreaching input function for all partitions." << std::endl;
+    bool isSuccess = true;
+    for (auto &part : localPartitions)
+      isSuccess &= function(part);
+
+    return isSuccess;
+  }
+
+  // For-each input function for partitions (const).
+  template <std::invocable<const Partition_t &> F> bool forEachPartitions(F &&function) const {
+    LOGI << "Foreaching input function for normal partitions." << std::endl;
+    bool isSuccess = true;
+    for (auto &part : partitions())
+      isSuccess &= function(part);
+
+    return isSuccess;
+  }
+
+  // For-each input function for partitions (non-const).
+  template <std::invocable<Partition_t &> F> bool forEachPartitions(F &&function) {
+    LOGI << "Foreaching input function for normal partitions." << std::endl;
+    bool isSuccess = true;
+    for (auto &part : partitions())
+      isSuccess &= function(part);
+
+    return isSuccess;
+  }
+
+  // For-each input function for logical partitions (const).
+  template <std::invocable<const Partition_t &> F> bool forEachLogicalPartitions(F &&function) const {
+    LOGI << "Foreaching input function for logical partitions." << std::endl;
+    bool isSuccess = true;
+    for (auto &part : logicalPartitions())
+      isSuccess &= function(part);
+
+    return isSuccess;
+  }
+
+  // For-each input function for logical partitions (non-const).
+  template <std::invocable<Partition_t &> F> bool forEachLogicalPartitions(F &&function) {
+    LOGI << "Foreaching input function for logical partitions." << std::endl;
+    bool isSuccess = true;
+    for (auto &part : logicalPartitions())
+      isSuccess &= function(part);
+
+    return isSuccess;
+  }
+
+  // For-each input function for gpt data collection (const).
+  template <std::invocable<const std::filesystem::path &, const std::shared_ptr<GPTData> &> F>
+  bool forEachGptData(F &&function) const {
+    LOGI << "Foreaching input function for all GPTData data." << std::endl;
+    bool isSuccess = true;
+    for (auto &[path, gptData] : gptDataCollection)
+      isSuccess &= function(path, gptData);
+
+    return isSuccess;
+  }
+
+  // For-each input function for gpt data collection (non-const).
+  template <std::invocable<const std::filesystem::path &, std::shared_ptr<GPTData> &> F> bool forEachGptData(F &&function) {
+    LOGI << "Foreaching input function for all GPTData data." << std::endl;
+    bool isSuccess = true;
+    for (auto &[path, gptData] : gptDataCollection)
+      isSuccess &= function(path, gptData);
+
+    return isSuccess;
+  }
+
+  // For-each input function for input partition list (all types, const).
+  template <std::invocable<const Partition_t &> F> bool forEachFor(const std::vector<std::string> &list, F &&function) const {
+    LOGI << "Foreaching input function for input list." << std::endl;
+    bool isSuccess = true;
+    for (auto &name : list) {
+      if (hasPartition(name) || hasLogicalPartition(name)) isSuccess &= function(partition(name)->get());
+    }
+
+    return isSuccess;
+  }
+
+  // For-each input function for input partition list (all types, non-const).
+  template <std::invocable<Partition_t &> F> bool forEachFor(const std::vector<std::string> &list, F &&function) {
+    LOGI << "Foreaching input function for input list." << std::endl;
+    bool isSuccess = true;
+    for (auto &name : list) {
+      if (hasPartition(name) || hasLogicalPartition(name)) isSuccess &= function(partition(name)->get());
+    }
+
+    return isSuccess;
+  }
+
+  // For-each input function for input partition list (only logical partitions, const).
+  template <std::invocable<const Partition_t &> F>
+  bool forEachForLogicalPartitions(const std::vector<std::string> &list, F &&function) const {
+    LOGI << "Foreaching input function for input list (only for logical partitions)." << std::endl;
+    bool isSuccess = true;
+    for (auto &name : list) {
+      if (hasLogicalPartition(name)) isSuccess &= function(partition(name));
+    }
+
+    return isSuccess;
+  }
+
+  // For-each input function for input partition list (only logical partitions, non-const).
+  template <std::invocable<Partition_t &> F> bool forEachForLogicalPartitions(const std::vector<std::string> &list, F &&function) {
+    LOGI << "Foreaching input function for input list (only for logical partitions)." << std::endl;
+    bool isSuccess = true;
+    for (auto &name : list) {
+      if (hasLogicalPartition(name)) isSuccess &= function(partition(name));
+    }
+
+    return isSuccess;
+  }
+
+  // For-each input function for input partition list (only normal partitions, const).
+  template <std::invocable<const Partition_t &> F> bool forEachPartitions(const std::vector<std::string> &list, F &&function) const {
+    LOGI << "Foreaching input function for input list (only normal partitions)." << std::endl;
+    bool isSuccess = true;
+    for (auto &name : list) {
+      if (hasPartition(name)) isSuccess &= function(partition(name));
+    }
+
+    return isSuccess;
+  }
+
+  // For-each input function for input partition list (only normal partitions, non-const).
+  template <std::invocable<Partition_t &> F> bool forEachPartitions(const std::vector<std::string> &list, F &&function) {
+    LOGI << "Foreaching input function for input list (only normal partitions)." << std::endl;
+    bool isSuccess = true;
+    for (auto &name : list) {
+      if (hasPartition(name)) isSuccess &= function(partition(name));
+    }
+
+    return isSuccess;
+  }
+
+  void reScan();                             // Rescan tables.
   void removeTable(const std::string &name); // Remove table.
 
-  void setTables(std::unordered_set<std::string> names); // Set tables. By names (like sda, sdc, sdg).
+  void setTables(const std::unordered_set<std::string> &tables);      // Set tables. By names (like sda, sdc, sdg).
+  Builder &withTables(const std::unordered_set<std::string> &tables); // Set tables (chain). By names (like sda, sdc, sdg).
+
+  void setAutoScan(bool state);      // Set auto scanning as <state>.
+  Builder &withAutoScan(bool state); // Set auto scanning as <state>.
+
   void setGPTDataOf(const std::string &name,
                     std::shared_ptr<GPTData> data); // Set GPTData of <name> table.
-  void setAutoScanOnTableChanges(bool state);       // Set auto scanning as <state>.
-  void clear();                                     // Cleanup data (excepts auto scan state and seek name).
-  void reset();                                     // Cleanup (clear()) and reset variables.
+
+  void clear(); // Cleanup data (excepts auto scan state and seek name).
+  void reset(); // Cleanup (clear()) and reset variables.
 
   iterator begin();              // Non-const begin iterator for range-based loop.
   iterator end();                // Non-const end iterator for range-based loop.
@@ -184,7 +301,7 @@ public:
 
   Builder &operator=(const Builder &other) = default; // pd2 = pd1
   Builder &operator=(Builder &&other) noexcept;       // pd2 = std::move(p1)
-};
+}; // class Builder
 
 } // namespace PartitionMap
 

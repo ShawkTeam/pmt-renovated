@@ -77,10 +77,11 @@ public:
 
       bool found = false;
       for (const auto &[magic, name] : magics) {
-        if (PartitionMap::Extra::hasMagic(magic, static_cast<ssize_t>(bufferSize),
-                                          Helper::fileIsExists(content)
-                                              ? content
-                                              : Tables.partitionWithDupCheck(content, Flags.noWorkOnUsed).absolutePath().c_str())) {
+        if (PartitionMap::Extra::hasMagic(
+                magic, static_cast<ssize_t>(bufferSize),
+                Helper::fileIsExists(content)
+                    ? content
+                    : Tables.partitionWithDupCheck(content, Flags.noWorkOnUsed)->get().absolutePath().c_str())) {
           Out::println("{} contains {} magic ({})", content, name, PartitionMap::Extra::formatMagic(magic));
           found = true;
           break;

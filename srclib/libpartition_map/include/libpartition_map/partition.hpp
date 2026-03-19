@@ -17,7 +17,6 @@
 
 #ifndef LIBPARTITION_MAP_PARTITION_HPP
 #define LIBPARTITION_MAP_PARTITION_HPP
-#include "definations.hpp"
 
 #if __cplusplus < 202002L
 #error "libpartition_map/partition.hpp is requires C++20 or higher C++ standarts."
@@ -31,8 +30,9 @@
 #include <libhelper/management.hpp>
 #include <libhelper/functions.hpp>
 #include <libhelper/error.hpp>
+#include <libhelper/logging.hpp>
 #include <libhelper/macros.hpp>
-#include <libpartition_map/partition.hpp>
+#include <libpartition_map/definations.hpp>
 #include <libpartition_map/redefine_logging_macros.hpp>
 
 namespace PartitionMap {
@@ -74,7 +74,7 @@ public:
 template <> struct std::is_error_code_enum<PartitionMap::Errors> : std::true_type {};
 
 namespace PartitionMap {
-template <typename slot_type = uint32_t, typename size_type = uint64_t, typename path_type = std::filesystem::path>
+template <typename slot_type, typename size_type, typename path_type>
   requires IsSlotType<slot_type> && IsSizeType<size_type> && IsPathTypeLike<path_type>
 class BasicPartition_t {
   path_type localTablePath;       // The table path to which the partition belongs (like /dev/block/sdc).
@@ -107,108 +107,9 @@ public:
     return instance;
   }
 
-  using BasicData = PartitionMap::basic_data_base<slot_type>;
+  using BasicData = basic_data_base<slot_type>;
   using ErrorCategory = basic_partition_t_errors;
   using IOCallback = std::function<void(size_type, size_type)>; // First = written/readed size, second = total size.
-
-  struct Progress_t {
-    const std::string name;
-    const size_type total;
-    std::atomic<size_type> done{0};
-    std::atomic<bool> finished{false};
-    std::atomic<bool> failed{false};
-
-    Progress_t() = default;
-    Progress_t(std::string name, size_type total) : name(std::move(name)), total(total) {}
-
-    Progress_t(const Progress_t &) = delete;
-    Progress_t &operator=(const Progress_t &) = delete;
-  };
-
-  class ProgressRenderer {
-    std::vector<std::shared_ptr<Progress_t>> _entries;
-    std::thread _thread;
-    std::atomic<bool> _running{false};
-    std::mutex _mutex;
-    size_t _drawnCount = 0;
-
-    void _render() {
-      while (_running.load(std::memory_order_relaxed)) {
-        _draw();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
-      }
-    }
-
-    void _draw() {
-      std::lock_guard lock(_mutex);
-      const size_t count = _entries.size();
-      if (count == 0) return;
-
-      if (_drawnCount > 0) std::cout << "\033[" << _drawnCount << "A";
-      _drawnCount = 0;
-
-      for (const auto &p : _entries) {
-        const size_type done = p->done.load(std::memory_order_relaxed);
-        const size_type total = p->total;
-        const bool failed = p->failed.load(std::memory_order_relaxed);
-
-        if (failed) {
-          std::cout << "\033[2K\r\n";
-          _drawnCount++;
-          continue;
-        }
-
-        const float pct = total > 0 ? static_cast<float>(done) / static_cast<float>(total) : 0.0f;
-        const int filled = static_cast<int>(pct * 20.0f);
-
-        std::string bar;
-        bar.reserve(20 * 3);
-        for (int i = 0; i < filled; i++)
-          bar += "━";
-        for (int i = filled; i < 20; i++)
-          bar += "╌";
-
-        std::cout << std::left << std::setw(16) << p->name << " [" << bar << "] " << std::right << std::setw(3)
-                  << static_cast<int>(pct * 100) << "%"
-                  << "\033[K"
-                  << "\r\n";
-        _drawnCount++;
-      }
-
-      std::cout.flush();
-    }
-
-  public:
-    ~ProgressRenderer() { stop(); }
-
-    std::shared_ptr<Progress_t> add(const std::string &name, size_type total) {
-      std::lock_guard lock(_mutex);
-      auto p = std::make_shared<Progress_t>(name, total);
-      _entries.push_back(p);
-      return p;
-    }
-
-    void start() {
-      {
-        std::lock_guard lock(_mutex);
-        for (size_t i = 0; i < _entries.size(); i++)
-          std::cout << "\n";
-        std::cout.flush();
-      }
-      _running.store(true, std::memory_order_relaxed);
-      _thread = std::thread(&ProgressRenderer::_render, this);
-    }
-
-    void stop() {
-      _running.store(false, std::memory_order_relaxed);
-      if (_thread.joinable()) _thread.join();
-      _draw();
-    }
-
-    ProgressRenderer() = default;
-    ProgressRenderer(const ProgressRenderer &) = delete;
-    ProgressRenderer &operator=(const ProgressRenderer &) = delete;
-  };
 
   static BasicPartition_t &AsLogicalPartition(BasicPartition_t &orig, const path_type &path) {
     orig.isLogical = true;
@@ -493,18 +394,12 @@ public:
     if (isLogical) {
       auto fd = Helper::UniqueFD(std::filesystem::read_symlink(logicalPartitionPath).string(), O_RDONLY);
 
-      if (!fd) {
-        LOGE << "Cannot open partition file path: " << std::quoted(logicalPartitionPath.string()) << ": " << strerror(errno)
-             << std::endl;
-        return 0;
-      }
+      if (!fd)
+        throw Error("Cannot open partition file path: {}: {}", std::quoted_string(logicalPartitionPath.c_str()), std::strerror(errno));
 
       size_type size = 0;
-      if (fd.ioctl(static_cast<unsigned int>(BLKGETSIZE64), &size) != 0) {
-        LOGE << "ioctl(BLKGETSIZE64) failed for " << std::quoted(logicalPartitionPath.string()) << ": " << strerror(errno)
-             << std::endl;
-        return 0;
-      }
+      if (fd.ioctl(static_cast<unsigned int>(BLKGETSIZE64), &size) != 0)
+        throw Error("ioctl(BLKGETSIZE64) failed: {}: {}", std::quoted_string(logicalPartitionPath.c_str()), std::strerror(errno));
 
       return size;
     }
@@ -807,11 +702,11 @@ public:
   // !p (returns empty())
   bool operator!() const { return empty(); }
 
-  // const GPTPart* part = *p1
-  const GPTPart *operator*() const { return getGPTPartRef(); }
+  // const GPTPart part = *p1
+  const GPTPart *operator*() const { return getGPTPart(); }
 
-  // GPTPart* part = *pd1
-  GPTPart *operator*() { return getGPTPartRef(); }
+  // GPTPart part = *pd1
+  GPTPart *operator*() { return getGPTPart(); }
 
   // p1 = p2
   BasicPartition_t &operator=(const BasicPartition_t &other) = default;
@@ -846,13 +741,111 @@ public:
 
     return os;
   }
-}; // class basic_partition_t
-
-static_assert(minimumPartitionClass<BasicPartition_t<>>, "BasicPartition_t is doesn't meet requirements of minimumPartitionClass");
-
-inline std::error_code make_error_code(Errors ec) { return {static_cast<int>(ec), BasicPartition_t<>::getErrorCategory()}; }
+}; // class BasicPartition_t
 
 using Partition_t = BasicPartition_t<uint32_t, uint64_t, std::filesystem::path>;
+
+static_assert(minimumPartitionClass<Partition_t>, "BasicPartition_t is doesn't meet requirements of minimumPartitionClass");
+
+inline std::error_code make_error_code(Errors ec) { return {static_cast<int>(ec), Partition_t::getErrorCategory()}; }
+
+struct Progress_t {
+  const std::string name;
+  const uint64_t total;
+  std::atomic<uint64_t> done{0};
+  std::atomic<bool> finished{false};
+  std::atomic<bool> failed{false};
+
+  Progress_t() = delete;
+  Progress_t(std::string name, uint64_t total) : name(std::move(name)), total(total) {}
+
+  Progress_t(const Progress_t &) = delete;
+  Progress_t &operator=(const Progress_t &) = delete;
+};
+
+class ProgressRenderer {
+    std::vector<std::shared_ptr<Progress_t>> _entries;
+    std::thread _thread;
+    std::atomic<bool> _running{false};
+    std::mutex _mutex;
+    size_t _drawnCount = 0;
+
+    void render() {
+      while (_running.load(std::memory_order_relaxed)) {
+        draw();
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      }
+    }
+
+    void draw() {
+      std::lock_guard lock(_mutex);
+      const size_t count = _entries.size();
+      if (count == 0) return;
+
+      if (_drawnCount > 0) std::cout << "\033[" << _drawnCount << "A";
+      _drawnCount = 0;
+
+      for (const auto &p : _entries) {
+        const uint64_t done = p->done.load(std::memory_order_relaxed);
+        const uint64_t total = p->total;
+
+        if (p->failed.load(std::memory_order_relaxed)) {
+          std::cout << "\033[2K\r\n";
+          _drawnCount++;
+          continue;
+        }
+
+        const float pct = total > 0 ? static_cast<float>(done) / static_cast<float>(total) : 0.0f;
+        const int filled = static_cast<int>(pct * 20.0f);
+
+        std::string bar;
+        bar.reserve(20 * 3);
+        for (int i = 0; i < filled; i++)
+          bar += "━";
+        for (int i = filled; i < 20; i++)
+          bar += "╌";
+
+        std::cout << std::left << std::setw(16) << p->name << " [" << bar << "] " << std::right << std::setw(3)
+                  << static_cast<int>(pct * 100) << "%"
+                  << "\033[K"
+                  << "\r\n";
+        _drawnCount++;
+      }
+
+      std::cout.flush();
+    }
+
+  public:
+    ~ProgressRenderer() { stop(); }
+
+    std::shared_ptr<Progress_t> add(const std::string &name, uint64_t total) {
+      std::lock_guard lock(_mutex);
+      auto p = std::make_shared<Progress_t>(name, total);
+      _entries.push_back(p);
+      return p;
+    }
+
+    void start() {
+      {
+        std::lock_guard lock(_mutex);
+        for (size_t i = 0; i < _entries.size(); i++)
+          std::cout << "\n";
+        std::cout.flush();
+      }
+      _running.store(true, std::memory_order_relaxed);
+      _thread = std::thread(&ProgressRenderer::render, this);
+    }
+
+    void stop() {
+      _running.store(false, std::memory_order_relaxed);
+      if (_thread.joinable()) _thread.join();
+      draw();
+    }
+
+    ProgressRenderer() = default;
+    ProgressRenderer(const ProgressRenderer &) = delete;
+    ProgressRenderer &operator=(const ProgressRenderer &) = delete;
+};
 
 } // namespace PartitionMap
 

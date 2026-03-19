@@ -59,7 +59,7 @@ public:
     for (const auto &partition : partitions) {
       if (!Tables.hasPartition(partition)) throw Error("Couldn't find partition: {}", partition);
 
-      auto &part = Tables.partitionWithDupCheck(partition, Flags.noWorkOnUsed);
+      auto &part = Tables.partitionWithDupCheck(partition, Flags.noWorkOnUsed)->get();
       if (Flags.onLogical && !part.isLogicalPartition()) {
         if (Flags.forceProcess)
           LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."

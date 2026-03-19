@@ -23,6 +23,7 @@
 #include <libhelper/management.hpp>
 #include <libhelper/functions.hpp>
 #include <libpartition_map/builder.hpp>
+#include <libpartition_map/definations.hpp>
 #include <libpartition_map/redefine_logging_macros.hpp>
 
 namespace PartitionMap {
@@ -116,7 +117,7 @@ Builder::list_t Builder::allPartitions() {
   list_t parts;
   parts.reserve(logicalPartitions().size());
   for (auto &part : localPartitions)
-    parts.push_back(&part);
+    parts.push_back(std::ref(part));
 
   return parts;
 }
@@ -126,7 +127,7 @@ Builder::const_list_t Builder::allPartitions() const {
   const_list_t parts;
   parts.reserve(localPartitions.size());
   for (auto &part : localPartitions)
-    parts.push_back(&part);
+    parts.push_back(std::cref(part));
 
   return parts;
 }
@@ -135,7 +136,7 @@ Builder::list_t Builder::partitions() {
   LOGI << "Providing references of all normal partitions." << std::endl;
   list_t parts;
   for (auto &part : localPartitions) {
-    if (!part.isLogicalPartition()) parts.push_back(&part);
+    if (!part.isLogicalPartition()) parts.push_back(std::ref(part));
   }
 
   return parts;
@@ -145,7 +146,7 @@ Builder::const_list_t Builder::partitions() const {
   LOGI << "Providing references of all normal partitions." << std::endl;
   const_list_t parts;
   for (auto &part : localPartitions) {
-    if (!part.isLogicalPartition()) parts.push_back(&part);
+    if (!part.isLogicalPartition()) parts.push_back(std::cref(part));
   }
 
   return parts;
@@ -155,7 +156,7 @@ Builder::list_t Builder::logicalPartitions() {
   LOGI << "Providing references of only logical partitions." << std::endl;
   list_t parts;
   for (auto &part : localPartitions) {
-    if (part.isLogicalPartition()) parts.push_back(&part);
+    if (part.isLogicalPartition()) parts.push_back(std::ref(part));
   }
 
   return parts;
@@ -165,7 +166,7 @@ Builder::const_list_t Builder::logicalPartitions() const {
   LOGI << "Providing references of only logical partitions." << std::endl;
   const_list_t parts;
   for (auto &part : localPartitions) {
-    if (part.isLogicalPartition()) parts.push_back(&part);
+    if (part.isLogicalPartition()) parts.push_back(std::cref(part));
   }
 
   return parts;
@@ -178,7 +179,7 @@ Builder::list_t Builder::partitionsByTable(const std::string &name) {
   list_t parts;
   for (auto &part : localPartitions)
     if (!part.isLogicalPartition())
-      if (part.tableName() == name) parts.push_back(&part);
+      if (part.tableName() == name) parts.push_back(std::ref(part));
 
   return parts;
 }
@@ -190,7 +191,7 @@ Builder::const_list_t Builder::partitionsByTable(const std::string &name) const 
   const_list_t parts;
   for (auto &part : localPartitions)
     if (!part.isLogicalPartition())
-      if (part.tableName() == name) parts.push_back(&part);
+      if (part.tableName() == name) parts.push_back(std::cref(part));
 
   return parts;
 }
@@ -252,56 +253,62 @@ std::shared_ptr<GPTData> &Builder::GPTDataOf(const std::string &name) {
   return gptDataCollection.at(p);
 }
 
-std::vector<std::pair<std::string, uint64_t>> Builder::dataOfLogicalPartitions() {
+std::vector<std::pair<std::string, uint64_t>> Builder::dataOfLogicalPartitions() const {
   LOGI << "Providing data of logical partitions." << std::endl;
   std::vector<std::pair<std::string, uint64_t>> parts;
-  for (const auto &part : logicalPartitions())
-    parts.emplace_back(part->name(), part->size());
+  for (const auto &p : logicalPartitions()) {
+    const Partition_t &part = p;
+    parts.emplace_back(part.name(), part.size());
+  }
 
   return parts;
 }
 
-std::vector<BasicInfo> Builder::dataOfPartitions() {
+std::vector<BasicInfo> Builder::dataOfPartitions() const {
   LOGI << "Providing data of partitions." << std::endl;
   std::vector<BasicInfo> parts;
-  for (const auto &part : partitions())
-    parts.emplace_back(part->name(), part->size(), part->isSuperPartition());
+  for (const auto &p : partitions()) {
+    const Partition_t &part = p;
+    parts.emplace_back(part.name(), part.size(), part.isSuperPartition());
+  }
 
   return parts;
 }
 
-std::vector<BasicInfo> Builder::dataOfPartitionsByTable(const std::string &name) {
+std::vector<BasicInfo> Builder::dataOfPartitionsByTable(const std::string &name) const {
   LOGI << "Providing data of table " << std::quoted(name) << " partitions." << std::endl;
   std::vector<BasicInfo> parts;
-  for (const auto &part : partitions())
-    if (part->tableName() == name) parts.emplace_back(part->name(), part->size(), part->isSuperPartition());
+  for (const auto &p : partitions()) {
+    const Partition_t &part = p;
+    if (part.tableName() == name) parts.emplace_back(part.name(), part.size(), part.isSuperPartition());
+  }
 
   return parts;
 }
 
-Partition_t &Builder::partition(const std::string &name, const std::string &from) {
+std::optional<std::reference_wrapper<Partition_t>> Builder::partition(const std::string &name, const std::string &from) {
   auto it = std::ranges::find_if(localPartitions, [&](const Partition_t &p) {
     if (p.isLogicalPartition()) return p.name() == name;
     return from.empty() ? p.name() == name : p.name() == name && p.tableName() == from;
   });
-  if (it == localPartitions.end()) throw Error("Can't find partition with name {}", name);
+  if (it == localPartitions.end()) return std::nullopt;
 
   LOGI << "Providing Partition_t object of " << std::quoted(name) << " partition." << std::endl;
-  return *it;
+  return std::ref(*it);
 }
 
-const Partition_t &Builder::partition(const std::string &name, const std::string &from) const {
+std::optional<std::reference_wrapper<const Partition_t>> Builder::partition(const std::string &name, const std::string &from) const {
   auto it = std::ranges::find_if(localPartitions, [&](const Partition_t &p) {
     if (p.isLogicalPartition()) return p.name() == name;
     return from.empty() ? p.name() == name : p.name() == name && p.tableName() == from;
   });
-  if (it == localPartitions.end()) throw Error("Can't find partition with name {}", name);
+  if (it == localPartitions.end()) return std::nullopt;
 
   LOGI << "Providing Partition_t object of " << std::quoted(name) << " partition." << std::endl;
-  return *it;
+  return std::cref(*it);
 }
 
-Partition_t &Builder::partitionWithDupCheck(const std::string &name, bool check) {
+std::optional<std::reference_wrapper<Partition_t>> Builder::partitionWithDupCheck(const std::string &name, bool check) {
   LOGI << "Providing Partition_t object of " << std::quoted(name) << " partition with duplicate checks." << std::endl;
   auto parts = duplicatePartitionPositions(name);
   if (hasDuplicateNamedPartition(name) > 1 && check) {
@@ -335,7 +342,7 @@ Partition_t &Builder::partitionWithDupCheck(const std::string &name, bool check)
   return partition(name, parts[0].second);
 }
 
-const Partition_t &Builder::partitionWithDupCheck(const std::string &name, bool check) const {
+std::optional<std::reference_wrapper<const Partition_t>> Builder::partitionWithDupCheck(const std::string &name, bool check) const {
   LOGI << "Providing Partition_t object of " << std::quoted(name) << " partition with duplicate checks." << std::endl;
   auto parts = duplicatePartitionPositions(name);
   if (hasDuplicateNamedPartition(name) > 1 && check) {
@@ -382,8 +389,8 @@ bool Builder::hasPartition(const std::string &name) const {
 bool Builder::hasLogicalPartition(const std::string &name) const {
   LOGI << "Checking " << std::quoted(name) << " logical partition is exists." << std::endl;
   bool found = false;
-  std::ranges::for_each(logicalPartitions(), [&](auto &part) {
-    if (part->name() == name) found = true;
+  std::ranges::for_each(logicalPartitions(), [&](const Partition_t &part) {
+    if (part.name() == name) found = true;
   });
 
   return found;
@@ -447,146 +454,17 @@ bool Builder::valid() const {
   return !hasGptProblems;
 }
 
-bool Builder::foreach (const std::function<bool(Partition_t &)> &function) {
-  LOGI << "Foreaching input function for all partitions." << std::endl;
-  bool isSuccess = true;
-  for (auto &part : localPartitions)
-    isSuccess &= function(part);
-
-  return isSuccess;
-}
-
-bool Builder::foreach (const std::function<bool(const Partition_t &)> &function) const {
-  LOGI << "Foreaching input function for all partitions." << std::endl;
-  bool isSuccess = true;
-  for (const auto &part : localPartitions)
-    isSuccess &= function(part);
-
-  return isSuccess;
-}
-
-bool Builder::foreachPartitions(const std::function<bool(Partition_t &)> &function) {
-  LOGI << "Foreaching input function for normal partitions." << std::endl;
-  bool isSuccess = true;
-  for (auto &part : partitions())
-    isSuccess &= function(*part);
-
-  return isSuccess;
-}
-
-bool Builder::foreachPartitions(const std::function<bool(const Partition_t &)> &function) const {
-  LOGI << "Foreaching input function for normal partitions." << std::endl;
-  bool isSuccess = true;
-  for (const auto &part : partitions())
-    isSuccess &= function(*part);
-
-  return isSuccess;
-}
-
-bool Builder::foreachLogicalPartitions(const std::function<bool(Partition_t &)> &function) {
-  LOGI << "Foreaching input function for logical partitions." << std::endl;
-  bool isSuccess = true;
-  for (auto &part : logicalPartitions())
-    isSuccess &= function(*part);
-
-  return isSuccess;
-}
-
-bool Builder::foreachLogicalPartitions(const std::function<bool(const Partition_t &)> &function) const {
-  LOGI << "Foreaching input function for logical partitions." << std::endl;
-  bool isSuccess = true;
-  for (const auto &part : logicalPartitions())
-    isSuccess &= function(*part);
-
-  return isSuccess;
-}
-
-bool Builder::foreachGptData(const std::function<bool(const std::filesystem::path &, std::shared_ptr<GPTData> &)> &function) {
-  LOGI << "Foreaching input function for all GPTData data." << std::endl;
-  bool isSuccess = true;
-  for (auto &[path, gptData] : gptDataCollection)
-    isSuccess &= function(path, gptData);
-
-  return isSuccess;
-}
-
-bool Builder::foreachGptData(
-    const std::function<bool(const std::filesystem::path &, const std::shared_ptr<GPTData> &)> &function) const {
-  LOGI << "Foreaching input function for all GPTData data." << std::endl;
-  bool isSuccess = true;
-  for (auto &[path, gptData] : gptDataCollection)
-    isSuccess &= function(path, gptData);
-
-  return isSuccess;
-}
-
-bool Builder::foreachFor(const std::vector<std::string> &list, const std::function<bool(Partition_t &)> &function) {
-  LOGI << "Foreaching input function for input list." << std::endl;
-  bool isSuccess = true;
-  for (auto &name : list) {
-    if (hasPartition(name) || hasLogicalPartition(name)) isSuccess &= function(partition(name));
-  }
-
-  return isSuccess;
-}
-
-bool Builder::foreachFor(const std::vector<std::string> &list, const std::function<bool(const Partition_t &)> &function) const {
-  LOGI << "Foreaching input function for input list." << std::endl;
-  bool isSuccess = true;
-  for (auto &name : list) {
-    if (hasPartition(name) || hasLogicalPartition(name)) isSuccess &= function(partition(name));
-  }
-
-  return isSuccess;
-}
-
-bool Builder::foreachForPartitions(const std::vector<std::string> &list, const std::function<bool(Partition_t &)> &function) {
-  LOGI << "Foreaching input function for input list (only normal partitions)." << std::endl;
-  bool isSuccess = true;
-  for (auto &name : list) {
-    if (hasPartition(name)) isSuccess &= function(partition(name));
-  }
-
-  return isSuccess;
-}
-
-bool Builder::foreachForPartitions(const std::vector<std::string> &list,
-                                   const std::function<bool(const Partition_t &)> &function) const {
-  LOGI << "Foreaching input function for input list (only normal partitions)." << std::endl;
-  bool isSuccess = true;
-  for (auto &name : list) {
-    if (hasPartition(name)) isSuccess &= function(partition(name));
-  }
-
-  return isSuccess;
-}
-
-bool Builder::foreachForLogicalPartitions(const std::vector<std::string> &list, const std::function<bool(Partition_t &)> &function) {
-  LOGI << "Foreaching input function for input list (only for logical partitions)." << std::endl;
-  bool isSuccess = true;
-  for (auto &name : list) {
-    if (hasLogicalPartition(name)) isSuccess &= function(partition(name));
-  }
-
-  return isSuccess;
-}
-
-bool Builder::foreachForLogicalPartitions(const std::vector<std::string> &list,
-                                          const std::function<bool(const Partition_t &)> &function) const {
-  LOGI << "Foreaching input function for input list (only for logical partitions)." << std::endl;
-  bool isSuccess = true;
-  for (auto &name : list) {
-    if (hasLogicalPartition(name)) isSuccess &= function(partition(name));
-  }
-
-  return isSuccess;
-}
-
 void Builder::reScan(bool auto_toggled) {
-  LOGI << "Rescanning..." << std::endl;
+  LOGI << "[PRIVATE FUNCTION] Rescanning..." << std::endl;
   if (auto_toggled) {
     if (!buildAutoOnDiskChanges) return;
   }
+  scan();
+  scanLogicalPartitions();
+}
+
+void Builder::reScan() {
+  LOGI << "Rescanning..." << std::endl;
   scan();
   scanLogicalPartitions();
 }
@@ -599,9 +477,15 @@ void Builder::removeTable(const std::string &name) {
   }
 }
 
-void Builder::setTables(std::unordered_set<std::string> names) {
+void Builder::setTables(const std::unordered_set<std::string> &tables) {
   LOGI << "Setting up partition table list as input list." << std::endl;
-  localTableNames = std::move(names);
+  localTableNames = tables;
+}
+
+Builder &Builder::withTables(const std::unordered_set<std::string> &tables) {
+  LOGI << "Setting up partition table list as input list." << std::endl;
+  localTableNames = tables;
+  return *this;
 }
 
 void Builder::setGPTDataOf(const std::string &name, std::shared_ptr<GPTData> data) {
@@ -609,7 +493,12 @@ void Builder::setGPTDataOf(const std::string &name, std::shared_ptr<GPTData> dat
   if (auto it = gptDataCollection.find("/dev/block/" + name); it != gptDataCollection.end()) it->second = std::move(data);
 }
 
-void Builder::setAutoScanOnTableChanges(bool state) { buildAutoOnDiskChanges = state; }
+void Builder::setAutoScan(bool state) { buildAutoOnDiskChanges = state; }
+
+Builder &Builder::withAutoScan(bool state) {
+  buildAutoOnDiskChanges = state;
+  return *this;
+}
 
 void Builder::clear() {
   LOGI << "Cleaning database." << std::endl;
@@ -659,7 +548,7 @@ Builder::const_list_t Builder::operator*() const {
   const_list_t parts;
   parts.reserve(localPartitions.size());
   for (const auto &part : localPartitions)
-    parts.push_back(&part);
+    parts.push_back(std::cref(part));
 
   return parts;
 }
@@ -668,7 +557,7 @@ Builder::list_t Builder::operator*() {
   list_t parts;
   parts.reserve(localPartitions.size());
   for (auto &part : localPartitions)
-    parts.push_back(&part);
+    parts.push_back(std::ref(part));
 
   return parts;
 }
@@ -696,7 +585,7 @@ GPTPart *Builder::operator()(const std::string &name, uint32_t index) {
     }
   }
 
-  return partition(name_).getGPTPartRef();
+  return partition(name_)->get().getGPTPartRef();
 }
 
 const GPTPart *Builder::operator()(const std::string &name, uint32_t index) const {
@@ -710,7 +599,7 @@ const GPTPart *Builder::operator()(const std::string &name, uint32_t index) cons
     }
   }
 
-  return partition(name_).getGPTPartRef();
+  return partition(name_)->get().getGPTPartRef();
 }
 
 Builder &Builder::operator=(Builder &&other) noexcept {
