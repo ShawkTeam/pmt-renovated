@@ -115,7 +115,7 @@ public:
       j["partitions"] = nlohmann::json::array();
       for (auto &part : jParts)
         j["partitions"].push_back({{jNamePartition, part.name()},
-                                   {jNameTable, part.tableName()},
+                                   {jNameTable, part.isLogicalPartition() ? "" : part.tableName()},
                                    {jNameSize, std::stoull(part.formattedSizeString(multiple, true))},
                                    {jNameLogical, part.isLogicalPartition()}});
 
