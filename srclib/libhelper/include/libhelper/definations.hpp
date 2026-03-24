@@ -19,6 +19,7 @@
 #define LIBHELPER_MACROS_HPP
 
 #include <concepts>
+#include <unistd.h>
 
 constexpr mode_t DEFAULT_FILE_PERMS = 0644;
 constexpr mode_t DEFAULT_EXTENDED_FILE_PERMS = 0755;
