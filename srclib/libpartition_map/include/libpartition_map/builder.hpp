@@ -23,6 +23,7 @@
 #include <map>
 #include <unordered_set>
 #include <gpt.h>
+#include <libhelper/definations.hpp>
 #include <libpartition_map/partition.hpp>
 
 namespace PartitionMap {
@@ -118,7 +119,9 @@ public:
                       // GPTData::Verify() and GPTData::CheckHeaderValidity().
 
   // For-each input function for all partitions (const).
-  template <std::invocable<const Partition_t &> F> bool forEach(F &&function) const {
+  template <typename F>
+    requires Helper::Invocable<F, bool, const Partition_t &>
+  bool forEach(F &&function) const {
     LOGI << "Foreaching input function for all partitions." << std::endl;
     bool isSuccess = true;
     for (auto &part : localPartitions)
@@ -128,7 +131,9 @@ public:
   }
 
   // For-each input function for all partitions (non-const).
-  template <std::invocable<Partition_t &> F> bool forEach(F &&function) {
+  template <typename F>
+    requires Helper::Invocable<F, bool, Partition_t &>
+  bool forEach(F &&function) {
     LOGI << "Foreaching input function for all partitions." << std::endl;
     bool isSuccess = true;
     for (auto &part : localPartitions)
@@ -138,7 +143,9 @@ public:
   }
 
   // For-each input function for partitions (const).
-  template <std::invocable<const Partition_t &> F> bool forEachPartitions(F &&function) const {
+  template <typename F>
+    requires Helper::Invocable<F, bool, const Partition_t &>
+  bool forEachPartitions(F &&function) const {
     LOGI << "Foreaching input function for normal partitions." << std::endl;
     bool isSuccess = true;
     for (auto &part : partitions())
@@ -148,7 +155,9 @@ public:
   }
 
   // For-each input function for partitions (non-const).
-  template <std::invocable<Partition_t &> F> bool forEachPartitions(F &&function) {
+  template <typename F>
+    requires Helper::Invocable<F, bool, Partition_t &>
+  bool forEachPartitions(F &&function) {
     LOGI << "Foreaching input function for normal partitions." << std::endl;
     bool isSuccess = true;
     for (auto &part : partitions())
@@ -158,7 +167,9 @@ public:
   }
 
   // For-each input function for logical partitions (const).
-  template <std::invocable<const Partition_t &> F> bool forEachLogicalPartitions(F &&function) const {
+  template <typename F>
+    requires Helper::Invocable<F, bool, const Partition_t &>
+  bool forEachLogicalPartitions(F &&function) const {
     LOGI << "Foreaching input function for logical partitions." << std::endl;
     bool isSuccess = true;
     for (auto &part : logicalPartitions())
@@ -168,7 +179,9 @@ public:
   }
 
   // For-each input function for logical partitions (non-const).
-  template <std::invocable<Partition_t &> F> bool forEachLogicalPartitions(F &&function) {
+  template <typename F>
+    requires Helper::Invocable<F, bool, Partition_t &>
+  bool forEachLogicalPartitions(F &&function) {
     LOGI << "Foreaching input function for logical partitions." << std::endl;
     bool isSuccess = true;
     for (auto &part : logicalPartitions())
@@ -178,7 +191,8 @@ public:
   }
 
   // For-each input function for gpt data collection (const).
-  template <std::invocable<const std::filesystem::path &, const std::shared_ptr<GPTData> &> F>
+  template <typename F>
+    requires Helper::Invocable<F, bool, const std::filesystem::path &, const std::shared_ptr<GPTData> &>
   bool forEachGptData(F &&function) const {
     LOGI << "Foreaching input function for all GPTData data." << std::endl;
     bool isSuccess = true;
@@ -189,7 +203,9 @@ public:
   }
 
   // For-each input function for gpt data collection (non-const).
-  template <std::invocable<const std::filesystem::path &, std::shared_ptr<GPTData> &> F> bool forEachGptData(F &&function) {
+  template <typename F>
+    requires Helper::Invocable<F, bool, const std::filesystem::path &, std::shared_ptr<GPTData> &>
+  bool forEachGptData(F &&function) {
     LOGI << "Foreaching input function for all GPTData data." << std::endl;
     bool isSuccess = true;
     for (auto &[path, gptData] : gptDataCollection)
@@ -199,7 +215,9 @@ public:
   }
 
   // For-each input function for input partition list (all types, const).
-  template <std::invocable<const Partition_t &> F> bool forEachFor(const std::vector<std::string> &list, F &&function) const {
+  template <typename F>
+    requires Helper::Invocable<F, bool, const Partition_t &>
+  bool forEachFor(const std::vector<std::string> &list, F &&function) const {
     LOGI << "Foreaching input function for input list." << std::endl;
     bool isSuccess = true;
     for (auto &name : list) {
@@ -210,7 +228,9 @@ public:
   }
 
   // For-each input function for input partition list (all types, non-const).
-  template <std::invocable<Partition_t &> F> bool forEachFor(const std::vector<std::string> &list, F &&function) {
+  template <typename F>
+    requires Helper::Invocable<F, bool, Partition_t &>
+  bool forEachFor(const std::vector<std::string> &list, F &&function) {
     LOGI << "Foreaching input function for input list." << std::endl;
     bool isSuccess = true;
     for (auto &name : list) {
@@ -221,7 +241,8 @@ public:
   }
 
   // For-each input function for input partition list (only logical partitions, const).
-  template <std::invocable<const Partition_t &> F>
+  template <typename F>
+    requires Helper::Invocable<F, bool, const Partition_t &>
   bool forEachForLogicalPartitions(const std::vector<std::string> &list, F &&function) const {
     LOGI << "Foreaching input function for input list (only for logical partitions)." << std::endl;
     bool isSuccess = true;
@@ -233,7 +254,9 @@ public:
   }
 
   // For-each input function for input partition list (only logical partitions, non-const).
-  template <std::invocable<Partition_t &> F> bool forEachForLogicalPartitions(const std::vector<std::string> &list, F &&function) {
+  template <typename F>
+    requires Helper::Invocable<F, bool, Partition_t &>
+  bool forEachForLogicalPartitions(const std::vector<std::string> &list, F &&function) {
     LOGI << "Foreaching input function for input list (only for logical partitions)." << std::endl;
     bool isSuccess = true;
     for (auto &name : list) {
@@ -244,7 +267,9 @@ public:
   }
 
   // For-each input function for input partition list (only normal partitions, const).
-  template <std::invocable<const Partition_t &> F> bool forEachPartitions(const std::vector<std::string> &list, F &&function) const {
+  template <typename F>
+    requires Helper::Invocable<F, bool, const Partition_t &>
+  bool forEachPartitions(const std::vector<std::string> &list, F &&function) const {
     LOGI << "Foreaching input function for input list (only normal partitions)." << std::endl;
     bool isSuccess = true;
     for (auto &name : list) {
@@ -255,7 +280,9 @@ public:
   }
 
   // For-each input function for input partition list (only normal partitions, non-const).
-  template <std::invocable<Partition_t &> F> bool forEachPartitions(const std::vector<std::string> &list, F &&function) {
+  template <typename F>
+    requires Helper::Invocable<F, bool, Partition_t &>
+  bool forEachPartitions(const std::vector<std::string> &list, F &&function) {
     LOGI << "Foreaching input function for input list (only normal partitions)." << std::endl;
     bool isSuccess = true;
     for (auto &name : list) {

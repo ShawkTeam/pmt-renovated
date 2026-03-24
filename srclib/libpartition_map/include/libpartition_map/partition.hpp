@@ -31,7 +31,7 @@
 #include <libhelper/functions.hpp>
 #include <libhelper/error.hpp>
 #include <libhelper/logging.hpp>
-#include <libhelper/macros.hpp>
+#include <libhelper/definations.hpp>
 #include <libpartition_map/definations.hpp>
 #include <libpartition_map/redefine_logging_macros.hpp>
 
@@ -764,87 +764,87 @@ struct Progress_t {
 };
 
 class ProgressRenderer {
-    std::vector<std::shared_ptr<Progress_t>> _entries;
-    std::thread _thread;
-    std::atomic<bool> _running{false};
-    std::mutex _mutex;
-    size_t _drawnCount = 0;
+  std::vector<std::shared_ptr<Progress_t>> _entries;
+  std::thread _thread;
+  std::atomic<bool> _running{false};
+  std::mutex _mutex;
+  size_t _drawnCount = 0;
 
-    void render() {
-      while (_running.load(std::memory_order_relaxed)) {
-        draw();
-        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  void render() {
+    while (_running.load(std::memory_order_relaxed)) {
+      draw();
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+  }
+
+  void draw() {
+    std::lock_guard lock(_mutex);
+    const size_t count = _entries.size();
+    if (count == 0) return;
+
+    if (_drawnCount > 0) std::cout << "\033[" << _drawnCount << "A";
+    _drawnCount = 0;
+
+    for (const auto &p : _entries) {
+      const uint64_t done = p->done.load(std::memory_order_relaxed);
+      const uint64_t total = p->total;
+
+      if (p->failed.load(std::memory_order_relaxed)) {
+        std::cout << "\033[2K\r\n";
+        _drawnCount++;
+        continue;
       }
+
+      const float pct = total > 0 ? static_cast<float>(done) / static_cast<float>(total) : 0.0f;
+      const int filled = static_cast<int>(pct * 20.0f);
+
+      std::string bar;
+      bar.reserve(20 * 3);
+      for (int i = 0; i < filled; i++)
+        bar += "━";
+      for (int i = filled; i < 20; i++)
+        bar += "╌";
+
+      std::cout << std::left << std::setw(16) << p->name << " [" << bar << "] " << std::right << std::setw(3)
+                << static_cast<int>(pct * 100) << "%"
+                << "\033[K"
+                << "\r\n";
+      _drawnCount++;
     }
 
-    void draw() {
+    std::cout.flush();
+  }
+
+public:
+  ~ProgressRenderer() { stop(); }
+
+  std::shared_ptr<Progress_t> add(const std::string &name, uint64_t total) {
+    std::lock_guard lock(_mutex);
+    auto p = std::make_shared<Progress_t>(name, total);
+    _entries.push_back(p);
+    return p;
+  }
+
+  void start() {
+    {
       std::lock_guard lock(_mutex);
-      const size_t count = _entries.size();
-      if (count == 0) return;
-
-      if (_drawnCount > 0) std::cout << "\033[" << _drawnCount << "A";
-      _drawnCount = 0;
-
-      for (const auto &p : _entries) {
-        const uint64_t done = p->done.load(std::memory_order_relaxed);
-        const uint64_t total = p->total;
-
-        if (p->failed.load(std::memory_order_relaxed)) {
-          std::cout << "\033[2K\r\n";
-          _drawnCount++;
-          continue;
-        }
-
-        const float pct = total > 0 ? static_cast<float>(done) / static_cast<float>(total) : 0.0f;
-        const int filled = static_cast<int>(pct * 20.0f);
-
-        std::string bar;
-        bar.reserve(20 * 3);
-        for (int i = 0; i < filled; i++)
-          bar += "━";
-        for (int i = filled; i < 20; i++)
-          bar += "╌";
-
-        std::cout << std::left << std::setw(16) << p->name << " [" << bar << "] " << std::right << std::setw(3)
-                  << static_cast<int>(pct * 100) << "%"
-                  << "\033[K"
-                  << "\r\n";
-        _drawnCount++;
-      }
-
+      for (size_t i = 0; i < _entries.size(); i++)
+        std::cout << "\n";
       std::cout.flush();
     }
+    _running.store(true, std::memory_order_relaxed);
+    _thread = std::thread(&ProgressRenderer::render, this);
+  }
 
-  public:
-    ~ProgressRenderer() { stop(); }
+  void stop() {
+    _running.store(false, std::memory_order_relaxed);
+    if (_thread.joinable()) _thread.join();
+    draw();
+  }
 
-    std::shared_ptr<Progress_t> add(const std::string &name, uint64_t total) {
-      std::lock_guard lock(_mutex);
-      auto p = std::make_shared<Progress_t>(name, total);
-      _entries.push_back(p);
-      return p;
-    }
-
-    void start() {
-      {
-        std::lock_guard lock(_mutex);
-        for (size_t i = 0; i < _entries.size(); i++)
-          std::cout << "\n";
-        std::cout.flush();
-      }
-      _running.store(true, std::memory_order_relaxed);
-      _thread = std::thread(&ProgressRenderer::render, this);
-    }
-
-    void stop() {
-      _running.store(false, std::memory_order_relaxed);
-      if (_thread.joinable()) _thread.join();
-      draw();
-    }
-
-    ProgressRenderer() = default;
-    ProgressRenderer(const ProgressRenderer &) = delete;
-    ProgressRenderer &operator=(const ProgressRenderer &) = delete;
+  ProgressRenderer() = default;
+  ProgressRenderer(const ProgressRenderer &) = delete;
+  ProgressRenderer &operator=(const ProgressRenderer &) = delete;
 };
 
 } // namespace PartitionMap
