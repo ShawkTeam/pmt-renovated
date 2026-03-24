@@ -22,77 +22,168 @@
 #include <string>
 #include <format>
 #include <filesystem>
-#include <libhelper/macros.hpp>
-#include <libhelper/management.hpp>
+#include <random>
 #include <dirent.h>
+#include <sys/wait.h>
+#include <libhelper/definations.hpp>
+#include <libhelper/management.hpp>
+#include <private/android_filesystem_config.h>
 
 namespace Helper {
+
+template <typename __path_type, typename __predicate>
+  requires Invocable<__predicate, bool, unsigned int> &&
+           (HasCStrFunction<__path_type> || std::is_same_v<std::decay_t<__path_type>, const char *>)
+bool __stat_check(__path_type &&__path, __predicate &&__pred) {
+  struct stat st{};
+  if constexpr (HasCStrFunction<__path_type>) {
+    if (stat(__path.c_str(), &st) != 0) return false;
+  } else {
+    if (stat(__path, &st) != 0) return false;
+  }
+
+  return __pred(st.st_mode);
+}
+
+template <typename __path_type, typename __predicate>
+  requires Invocable<__predicate, bool, unsigned int> &&
+           (HasCStrFunction<__path_type> || std::is_same_v<std::decay_t<__path_type>, const char *>)
+bool __lstat_check(__path_type &&__path, __predicate &&__pred, bool nlink = false) {
+  struct stat st{};
+  if constexpr (HasCStrFunction<__path_type>) {
+    if (lstat(__path.c_str(), &st) != 0) return false;
+  } else {
+    if (lstat(__path, &st) != 0) return false;
+  }
+
+  if (nlink) return __pred(st.st_nlink);
+  return __pred(st.st_mode);
+}
 
 /**
  * It is checked whether the user ID used is equivalent to AID_ROOT.
  * See external/core/libcutils/include/private/android_filesystem_config.h
  */
-bool hasSuperUser();
+inline bool hasSuperUser(uid_t uid = AID_ROOT) { return getuid() == uid; }
 
 /**
  * It is checked whether the user ID used is equivalent to AID_SHELL.
  * See external/core/libcutils/include/private/android_filesystem_config.h
  */
-bool hasAdbPermissions();
+inline bool hasAdbPermissions(uid_t uid = AID_SHELL) { return getuid() == uid; }
 
 /**
  * Checks whether the file/directory exists.
  */
-bool isExists(const std::filesystem::path &entry);
+template <typename PathType> bool isExists(PathType &&entry) {
+  return __stat_check(std::forward<PathType>(entry), [](unsigned int) { return true; });
+}
 
 /**
  * Checks whether the file exists.
  */
-bool fileIsExists(const std::filesystem::path &file);
+template <typename PathType> bool fileIsExists(PathType &&file) {
+  return __stat_check(std::forward<PathType>(file), [](mode_t mode) { return S_ISREG(mode); });
+}
 
 /**
  * Checks whether the directory exists.
  */
-bool directoryIsExists(const std::filesystem::path &directory);
-
-/**
- * Checks whether the link (symbolic or hard) exists.
- */
-bool linkIsExists(const std::filesystem::path &entry);
+template <typename PathType> bool directoryIsExists(PathType &&path) {
+  return __stat_check(std::forward<PathType>(path), [](mode_t mode) { return S_ISDIR(mode); });
+}
 
 /**
  * Checks if the entry is a symbolic link.
  */
-bool isLink(const std::filesystem::path &entry);
+template <typename PathType> bool isLink(PathType &&entry) {
+  return __lstat_check(std::forward<PathType>(entry), [](mode_t mode) { return S_ISLNK(mode); });
+}
 
 /**
  * Checks if the entry is a symbolic link.
  */
-bool isSymbolicLink(const std::filesystem::path &entry);
+template <typename PathType> bool isSymbolicLink(PathType &&entry) { return isLink(std::forward<PathType>(entry)); }
 
 /**
  * Checks if the entry is a hard link.
  */
-bool isHardLink(const std::filesystem::path &entry);
+template <typename PathType> bool isHardLink(PathType &&entry) {
+  return __lstat_check(std::forward<PathType>(entry), [](nlink_t nlink) { return nlink >= 2; }, true);
+}
 
 /**
- * Checks whether entry1 is linked to entry2.
+ * Checks whether the link (symbolic or hard) exists.
  */
-bool areLinked(const std::filesystem::path &entry1, const std::filesystem::path &entry2);
+template <typename PathType> bool linkIsExists(PathType &&entry) {
+  return isLink(std::forward<PathType>(entry)) || isHardLink(std::forward<PathType>(entry));
+}
 
 /**
  * Writes given text into file.
  * If file does not exist, it is automatically created.
  * Returns true on success.
  */
-bool writeFile(const std::filesystem::path &file, std::string_view text);
+template <typename PathType, typename StringType = std::string> bool writeFile(PathType &&file, StringType &&text) {
+  std::filesystem::path p(std::forward<PathType>(file));
+  std::string str(std::forward<StringType>(text));
+  LOGN(HELPER, INFO) << "write input string to " << std::quoted_string(p) << " requested." << std::endl;
+
+  auto fp = UniqueFP(p, "a");
+  if (!fp) return false;
+  fp.printf("{}", str);
+
+  LOGN(HELPER, INFO) << "write " << std::quoted_string(p) << " successfully." << std::endl;
+  return true;
+}
 
 /**
  * Reads file content into string.
- * On success returns file content.
- * On error returns std::nullopt.
+ * On success, returns file content.
+ * On error, returns std::nullopt.
  */
-std::optional<std::string> readFile(const std::filesystem::path &file);
+template <typename PathType, typename StringType = std::string>
+std::optional<ConstIfCharPointer_t<StringType>> readFile(PathType &&file) {
+  std::filesystem::path p(std::forward<PathType>(file));
+  LOGN(HELPER, INFO) << "read " << std::quoted_string(p) << " requested." << std::endl;
+
+  auto fp = UniqueFP(p, "r");
+  if (!fp) return std::nullopt;
+
+  char buffer[1024];
+  std::string str;
+  while (fp.gets(buffer, sizeof(buffer)))
+    str += buffer;
+
+  LOGN(HELPER, INFO) << "read " << p << " successfull." << std::endl;
+  ConstIfCharPointer_t<StringType> res = str.c_str();
+  return res;
+}
+
+/**
+ * Copy file to dest.
+ */
+template <typename PathType> bool copyFile(PathType &&file, PathType &&dest) {
+  std::filesystem::path _file(std::forward<PathType>(file));
+  std::filesystem::path _dest(std::forward<PathType>(dest));
+  LOGN(HELPER, INFO) << "copy " << std::quoted_string(_file) << " to " << std::quoted_string(_dest) << " requested." << std::endl;
+
+  const auto src_fd = UniqueFD(_file, O_RDONLY);
+  if (!src_fd) return false;
+
+  auto dst_fd = UniqueFD(_dest, O_WRONLY | O_CREAT | O_TRUNC, DEFAULT_FILE_PERMS);
+  if (!dst_fd) return false;
+
+  char buffer[512];
+  ssize_t br;
+  while ((br = src_fd.read(buffer, 512)) > 0) {
+    if (const ssize_t bw = dst_fd.write(buffer, br); bw != br) return false;
+  }
+
+  if (br == -1) return false;
+  LOGN(HELPER, INFO) << "copy " << std::quoted_string(_file) << " to " << std::quoted_string(_dest) << " successfully." << std::endl;
+  return true;
+}
 
 /**
  * Create directory.
@@ -127,12 +218,29 @@ bool eraseDirectoryRecursive(const std::filesystem::path &directory);
 /**
  * Get file size.
  */
-int64_t fileSize(const std::filesystem::path &file);
+template <typename ReturnType = int64_t>
+  requires std::is_integral_v<ReturnType>
+ReturnType fileSize(const std::filesystem::path &file) {
+  LOGN(HELPER, INFO) << "get file size request: " << std::quoted(file.string()) << std::endl;
+  struct stat st{};
+  if (stat(file.c_str(), &st) != 0) return -1;
+  return static_cast<ReturnType>(st.st_size);
+}
 
 /**
  * Read symlinks.
  */
 std::string readSymlink(const std::filesystem::path &entry);
+
+/**
+ * Checks whether entry1 is linked to entry2.
+ */
+inline bool areLinked(const std::filesystem::path &entry1, const std::filesystem::path &entry2) {
+  auto &&st1 = isSymbolicLink(entry1) ? readSymlink(entry1) : entry1.string();
+  auto &&st2 = isSymbolicLink(entry2) ? readSymlink(entry2) : entry2.string();
+
+  return st1 == st2;
+}
 
 /**
  * Compare SHA-256 values of files.
@@ -147,19 +255,14 @@ bool sha256Compare(const std::filesystem::path &file1, const std::filesystem::pa
 std::optional<std::string> sha256Of(const std::filesystem::path &path);
 
 /**
- * Copy file to dest.
- */
-bool copyFile(const std::filesystem::path &file, const std::filesystem::path &dest);
-
-/**
  * Run shell command.
  */
-bool runCommand(std::string_view cmd);
+bool runCommand(const std::string& cmd);
 
 /**
  * Shows message and asks for y/N from user.
  */
-bool confirmPropt(std::string_view message);
+bool confirmPropt(const std::string &message);
 
 /**
  * Change file permissions.
@@ -193,7 +296,55 @@ std::string currentTime();
  * Run shell command return output as string.
  * Returns std::pair<std::string, int>.
  */
-std::pair<std::string, int> runCommandWithOutput(std::string_view cmd);
+template <typename ExitCodeType = int>
+  requires std::is_integral_v<ExitCodeType>
+std::pair<std::string, ExitCodeType> runCommandWithOutput(const std::string &cmd) {
+  LOGN(HELPER, INFO) << "run command and catch out request: " << cmd << std::endl;
+
+  int pipefd[2];
+  if (pipe(pipefd) < 0) return {{}, (ExitCodeType)-1};
+
+  auto closePipe = makeScopeGuard([&] {
+    close(pipefd[0]);
+    close(pipefd[1]);
+  });
+
+  const pid_t pid = fork();
+  if (pid < 0) return {{}, (ExitCodeType)-1};
+
+  if (pid == 0) {
+    close(pipefd[0]);
+    dup2(pipefd[1], STDOUT_FILENO);
+    dup2(pipefd[1], STDERR_FILENO);
+    close(pipefd[1]);
+
+    const std::array<const char *, 4> args = {
+#ifdef __ANDROID__
+        "/system/bin/sh",
+#else
+        "/bin/sh",
+#endif
+        "-c", cmd.data(), nullptr};
+    execvp(args[0], const_cast<char *const *>(args.data()));
+    _exit(127);
+  }
+
+  close(pipefd[1]);
+  auto closeWrite = makeScopeGuard([&] { close(pipefd[0]); });
+  closePipe.dismiss();
+
+  std::string output;
+  auto buffer = std::make_unique<char[]>(1024);
+
+  ssize_t n;
+  while ((n = read(pipefd[0], buffer.get(), 1024)) > 0)
+    output.append(buffer.get(), n);
+
+  ExitCodeType status = 0;
+  if (waitpid(pid, &status, 0) < 0) return {output, (ExitCodeType)-1};
+
+  return {output, (ExitCodeType)(WIFEXITED(status) ? WEXITSTATUS(status) : -1)};
+}
 
 /**
  * Joins base path with relative path and returns result.
@@ -213,12 +364,27 @@ std::filesystem::path pathDirname(const std::filesystem::path &entry);
 /**
  * Get random offset depending on size and bufferSize.
  */
-uint64_t getRandomOffset(uint64_t size, uint64_t bufferSize);
+template <typename Ret = uint64_t, typename T = Ret>
+  requires std::is_integral_v<Ret> && std::is_integral_v<T> && std::is_unsigned_v<Ret> && std::is_unsigned_v<T>
+Ret getRandomOffset(T &&size, T &&bufferSize) {
+  if (size <= bufferSize) return 0;
+  const Ret maxOffset = size - bufferSize;
+  static std::mt19937_64 generator(std::random_device{}());
+  std::uniform_int_distribution<T> distribution(0, maxOffset - 1);
+  return static_cast<Ret>(distribution(generator));
+}
 
 /**
  * Convert input size to input multiple.
  */
-int convertTo(uint64_t size, sizeCastTypes type);
+template <typename Ret = int, typename SizeType = uint64_t>
+  requires std::is_integral_v<Ret> && std::is_integral_v<SizeType>
+Ret convertTo(SizeType size, sizeCastTypes type) {
+  if (type == KB) return TO_KB(size);
+  if (type == MB) return TO_MB(size);
+  if (type == GB) return TO_GB(size);
+  return static_cast<SizeType>(size);
+}
 
 /**
  * Convert input multiple variable to string.
@@ -236,7 +402,7 @@ template <typename... Args> std::string format(std::format_string<Args...> fmt, 
 /**
  * Convert input size to input multiple
  */
-template <uint64_t size> int convertTo(const sizeCastTypes type) {
+template <uint64_t size> int convertTo(const sizeCastTypes &type) {
   if (type == KB) return TO_KB(size);
   if (type == MB) return TO_MB(size);
   if (type == GB) return TO_GB(size);

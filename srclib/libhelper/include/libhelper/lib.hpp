@@ -22,7 +22,7 @@
 #error "libhelper/lib.hpp is requires C++20 or higher C++ standarts."
 #endif
 
-#include <libhelper/macros.hpp>
+#include <libhelper/definations.hpp>
 #include <libhelper/management.hpp>
 #include <libhelper/error.hpp>
 #include <libhelper/logging.hpp>

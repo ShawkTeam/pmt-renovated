@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <memory>
@@ -72,7 +71,7 @@ int android_reboot(const unsigned cmd, int /*flags*/, const char *arg) {
 
 namespace Helper {
 
-bool runCommand(const std::string_view cmd) {
+bool runCommand(const std::string& cmd) {
   LOGN(HELPER, INFO) << "run command request: " << cmd << std::endl;
 
   const std::array<const char *, 4> args = {
@@ -96,18 +95,31 @@ bool runCommand(const std::string_view cmd) {
   return WIFEXITED(status) && (WEXITSTATUS(status) == 0);
 }
 
-bool confirmPropt(const std::string_view message) {
-  LOGN(HELPER, INFO) << "create confirm propt request. Creating." << std::endl;
+bool confirmPropt(const std::string &message, int maxTries = 10) {
+  LOGN(HELPER, INFO) << "create confirm propt request." << std::endl;
+  static int total_tries = 1;
   char p;
 
   printf("%s [ y / n ]: ", message.data());
   std::cin >> p;
 
-  if (p == 'y' || p == 'Y') return true;
-  if (p == 'n' || p == 'N') return false;
+  if (p == 'y' || p == 'Y') {
+    total_tries = 1;
+    return true;
+  }
+  if (p == 'n' || p == 'N') {
+    total_tries = 1;
+    return false;
+  }
+
+  if (total_tries >= maxTries) {
+    printf("You have made many attempts (%d)!\n", maxTries);
+    return false;
+  }
 
   printf("Unexpected answer: '%c'. Try again.\n", p);
-  return confirmPropt(message);
+  total_tries++;
+  return confirmPropt(message, maxTries);
 }
 
 std::string currentWorkingDirectory() {
@@ -131,54 +143,6 @@ std::string currentTime() {
   if (const tm *date = localtime(&t))
     return std::string(std::to_string(date->tm_hour) + ":" + std::to_string(date->tm_min) + ":" + std::to_string(date->tm_sec));
   return {};
-}
-
-std::pair<std::string, int> runCommandWithOutput(const std::string_view cmd) {
-  LOGN(HELPER, INFO) << "run command and catch out request: " << cmd << std::endl;
-
-  int pipefd[2];
-  if (pipe(pipefd) < 0) return {{}, -1};
-
-  auto closePipe = makeScopeGuard([&] {
-    close(pipefd[0]);
-    close(pipefd[1]);
-  });
-
-  const pid_t pid = fork();
-  if (pid < 0) return {{}, -1};
-
-  if (pid == 0) {
-    close(pipefd[0]);
-    dup2(pipefd[1], STDOUT_FILENO);
-    dup2(pipefd[1], STDERR_FILENO);
-    close(pipefd[1]);
-
-    const std::array<const char *, 4> args = {
-#ifdef __ANDROID__
-        "/system/bin/sh",
-#else
-        "/bin/sh",
-#endif
-        "-c", cmd.data(), nullptr};
-    execvp(args[0], const_cast<char *const *>(args.data()));
-    _exit(127);
-  }
-
-  close(pipefd[1]);
-  auto closeWrite = makeScopeGuard([&] { close(pipefd[0]); });
-  closePipe.dismiss();
-
-  std::string output;
-  auto buffer = std::make_unique<char[]>(1024);
-
-  ssize_t n;
-  while ((n = read(pipefd[0], buffer.get(), 1024)) > 0)
-    output.append(buffer.get(), n);
-
-  int status = 0;
-  if (waitpid(pid, &status, 0) < 0) return {output, -1};
-
-  return {output, (WIFEXITED(status) ? WEXITSTATUS(status) : -1)};
 }
 
 std::filesystem::path pathJoin(std::filesystem::path base, const std::filesystem::path &relative) {
@@ -218,21 +182,6 @@ bool androidReboot(const std::string_view arg) {
   return android_reboot(cmd, 0, arg.empty() ? nullptr : arg.data()) != -1;
 }
 #endif
-
-uint64_t getRandomOffset(const uint64_t size, const uint64_t bufferSize) {
-  if (size <= bufferSize) return 0;
-  const uint64_t maxOffset = size - bufferSize;
-  static std::mt19937_64 generator(std::random_device{}());
-  std::uniform_int_distribution<uint64_t> distribution(0, maxOffset - 1);
-  return distribution(generator);
-}
-
-int convertTo(const uint64_t size, const sizeCastTypes type) {
-  if (type == KB) return TO_KB(size);
-  if (type == MB) return TO_MB(size);
-  if (type == GB) return TO_GB(size);
-  return static_cast<int>(size);
-}
 
 std::string multipleToString(const sizeCastTypes type) {
   if (type == KB) return "KB";

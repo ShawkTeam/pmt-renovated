@@ -46,17 +46,21 @@
 #include <sstream>
 #include <string>
 #include <fstream>
-#include <libhelper/macros.hpp>
+#include <iomanip>
+#include <libhelper/definations.hpp>
 
 namespace std {
 
 // For printing using the std::format style, a `quoted_string`
 // function that returns std::string is absolutely necessary.
-template <typename _CharT>
-  requires std::__is_char_type<_CharT>
-std::string quoted_string(const _CharT *s) {
+template <typename _T> std::string quoted_string(_T &&s) {
   std::ostringstream oss;
-  oss << std::quoted(s);
+  if constexpr (std::is_same_v<std::decay_t<_T>, std::filesystem::path> || std::is_same_v<std::decay_t<_T>, std::string>)
+    oss << std::quoted(s.c_str());
+  else if constexpr (std::is_same_v<std::decay_t<_T>, std::string_view>)
+    oss << std::quoted(s.data());
+  else
+    oss << s;
   return oss.str();
 }
 

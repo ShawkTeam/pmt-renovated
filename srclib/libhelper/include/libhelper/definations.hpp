@@ -18,7 +18,7 @@
 #ifndef LIBHELPER_MACROS_HPP
 #define LIBHELPER_MACROS_HPP
 
-#include <unistd.h>
+#include <concepts>
 
 constexpr mode_t DEFAULT_FILE_PERMS = 0644;
 constexpr mode_t DEFAULT_EXTENDED_FILE_PERMS = 0755;
@@ -27,6 +27,41 @@ constexpr int YES = 1;
 constexpr int NO = 0;
 
 enum sizeCastTypes { B = static_cast<int>('B'), KB = static_cast<int>('K'), MB = static_cast<int>('M'), GB = static_cast<int>('G') };
+
+namespace Helper {
+template <typename T>
+concept HasCStrFunction = requires(T v) {
+  { v.c_str() } -> std::constructible_from<char *>;
+};
+
+template <typename Func, typename Ret, typename... Args>
+concept Invocable = std::invocable<Func, Args...> && std::same_as<std::invoke_result_t<Func, Args...>, Ret>;
+
+template <typename T> struct DeepConst {
+  using type = std::add_const_t<T>;
+};
+
+template <typename T> struct DeepConst<T *> {
+  using type = const T *;
+};
+
+template <typename T> using DeepConst_t = DeepConst<T>::type;
+
+template <typename T> struct ConstIfCharPointer {
+  using type = T;
+};
+
+template <> struct ConstIfCharPointer<char *> {
+  using type = const char *;
+};
+
+template <> struct ConstIfCharPointer<const char *> {
+  using type = const char *;
+};
+
+template <typename T> using ConstIfCharPointer_t = ConstIfCharPointer<T>::type;
+
+} // namespace Helper
 
 #define HELPER "libhelper"
 

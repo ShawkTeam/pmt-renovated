@@ -20,7 +20,7 @@
 #include <iostream>
 #include <libhelper/lib.hpp>
 
-char *TEST_DIR = nullptr;
+const char *TEST_DIR = nullptr;
 
 std::string test_path(const char *file) {
   std::string end = std::string(TEST_DIR) + "/" + file;

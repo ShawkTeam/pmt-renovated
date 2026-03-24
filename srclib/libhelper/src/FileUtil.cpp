@@ -26,55 +26,10 @@
 #include <libhelper/management.hpp>
 
 namespace Helper {
-bool writeFile(const std::filesystem::path &file, const std::string_view text) {
-  LOGN(HELPER, INFO) << "write " << std::quoted(text) << " to " << std::quoted(file.c_str()) << "requested." << std::endl;
-
-  auto fp = UniqueFP(file, "a");
-  if (!fp) return false;
-  fp.printf("{}", text.data());
-
-  LOGN(HELPER, INFO) << "write " << std::quoted(file.string()) << " successfully." << std::endl;
-  return true;
-}
-
-std::optional<std::string> readFile(const std::filesystem::path &file) {
-  LOGN(HELPER, INFO) << "read " << std::quoted(file.string()) << " requested." << std::endl;
-
-  auto fp = UniqueFP(file, "r");
-  if (!fp) return std::nullopt;
-
-  char buffer[1024];
-  std::string str;
-  while (fp.gets(buffer, sizeof(buffer)))
-    str += buffer;
-
-  LOGN(HELPER, INFO) << "read " << file << " successfully, read text: " << std::quoted(str) << std::endl;
-  return str;
-}
-
-bool copyFile(const std::filesystem::path &file, const std::filesystem::path &dest) {
-  LOGN(HELPER, INFO) << "copy " << std::quoted(file.string()) << " to " << std::quoted(dest.string()) << " requested." << std::endl;
-
-  const auto src_fd = UniqueFD(file, O_RDONLY);
-  if (!src_fd) return false;
-
-  auto dst_fd = UniqueFD(dest, O_WRONLY | O_CREAT | O_TRUNC, DEFAULT_FILE_PERMS);
-  if (!dst_fd) return false;
-
-  char buffer[512];
-  ssize_t br;
-  while ((br = src_fd.read(buffer, 512)) > 0) {
-    if (const ssize_t bw = dst_fd.write(buffer, br); bw != br) return false;
-  }
-
-  if (br == -1) return false;
-  LOGN(HELPER, INFO) << "copy " << std::quoted(file.string()) << " to " << std::quoted(dest.string()) << " successfully." << std::endl;
-  return true;
-}
 
 bool makeDirectory(const std::filesystem::path &path) {
   if (isExists(path)) return false;
-  LOGN(HELPER, INFO) << "trying making directory: " << std::quoted(path.string()) << std::endl;
+  LOGN(HELPER, INFO) << "trying make directory: " << std::quoted(path.string()) << std::endl;
   return mkdir(path.c_str(), DEFAULT_DIR_PERMS) == 0;
 }
 
@@ -176,12 +131,5 @@ std::string readSymlink(const std::filesystem::path &entry) {
   target[len] = '\0';
   LOGN(HELPER, INFO) << std::quoted(entry.string()) << " is symlink to " << std::quoted(target) << std::endl;
   return target;
-}
-
-int64_t fileSize(const std::filesystem::path &file) {
-  LOGN(HELPER, INFO) << "get file size request: " << std::quoted(file.string()) << std::endl;
-  struct stat st{};
-  if (stat(file.c_str(), &st) != 0) return -1;
-  return st.st_size;
 }
 } // namespace Helper
