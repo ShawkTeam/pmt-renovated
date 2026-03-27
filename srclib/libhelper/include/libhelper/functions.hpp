@@ -248,7 +248,7 @@ bool runCommand(const std::string& cmd);
 /**
  * Shows message and asks for y/N from user.
  */
-bool confirmPropt(const std::string &message);
+bool confirmPropt(const std::string &message, int maxTries = 10);
 
 /**
  * Change file permissions.
