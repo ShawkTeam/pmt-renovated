@@ -96,7 +96,7 @@ bool runCommand(const std::string& cmd) {
   return WIFEXITED(status) && (WEXITSTATUS(status) == 0);
 }
 
-bool confirmPropt(const std::string &message, int maxTries = 10) {
+bool confirmPropt(const std::string &message, int maxTries) {
   LOGN(HELPER, INFO) << "create confirm propt request." << std::endl;
   static int total_tries = 1;
   char p;
