@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <libhelper/error.hpp>
 #include <libhelper/functions.hpp>
+#include <libhelper/android.hpp>
 #include <libpartition_map/lib.hpp>
 
 using namespace Helper;
