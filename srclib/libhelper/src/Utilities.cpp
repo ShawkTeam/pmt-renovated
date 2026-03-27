@@ -33,6 +33,7 @@
 #else
 #include <sys/system_properties.h>
 #endif
+#include <android-base/properties.h>
 #include <cutils/android_reboot.h>
 
 #ifdef __ANDROID__
@@ -165,18 +166,18 @@ bool changeOwner(const std::filesystem::path &file, const uid_t uid, const gid_t
 }
 
 #ifdef __ANDROID__
-std::string getProperty(const std::string_view prop) {
-  char val[PROP_VALUE_MAX];
-  const int x = __system_property_get(prop.data(), val);
-  return x > 0 ? val : "ERROR";
+std::optional<std::string> getProperty(const std::string& prop) {
+  auto &&val = android::base::GetProperty(prop, "ERROR");
+  if (val == "ERROR") return std::nullopt;
+  return val;
 }
 
-bool androidReboot(const std::string_view arg) {
+bool androidReboot(const std::string& arg) {
   LOGN(HELPER, INFO) << "reboot request sent!!!" << std::endl;
 
   unsigned cmd = ANDROID_RB_RESTART2;
-  if (const std::string prop = getProperty("ro.build.version.sdk"); prop != "ERROR") {
-    if (std::stoi(prop) < 26) cmd = ANDROID_RB_RESTART;
+  if (const auto& prop = getProperty("ro.build.version.sdk"); prop) {
+    if (*prop != "ERROR" && std::stoi(*prop) < 26) cmd = ANDROID_RB_RESTART;
   }
 
   return android_reboot(cmd, 0, arg.empty() ? nullptr : arg.data()) != -1;

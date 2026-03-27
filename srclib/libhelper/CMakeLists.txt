@@ -22,7 +22,7 @@ set(LIBHELPER_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Utilities.cpp
 )
 
-add_super_library(helper USE_INTERFACE_NOLIBS SOURCES ${LIBHELPER_SOURCES})
+add_super_library(helper USE_INTERFACE_NOLIBS SOURCES ${LIBHELPER_SOURCES} LIBS base)
 
 # Add target of tests
 add_executable(libhelper_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)

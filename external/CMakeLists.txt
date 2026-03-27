@@ -138,11 +138,11 @@ if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
     add_library(libcrypto SHARED IMPORTED)
     set_target_properties(libcrypto PROPERTIES IMPORTED_LOCATION "${PREBUILTS}/libcrypto.so")
 
-    add_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX DISABLE
+    add_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
             SOURCES ${FMTLIB_SOURCES}
             COMPILE_OPTIONS -fno-exceptions -UNDEBUG
     )
-    add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
+    add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBBASE_SOURCES}
             COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
             DEFINATIONS _FILE_OFFSET_BITS=64
