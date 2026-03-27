@@ -23,7 +23,7 @@
 #endif
 
 #define PM "PluginManager"
-#define PM_VERSION "1.0"
+#define PM_VERSION "1.1"
 
 // clang-format off
 #define Flags          (*flags)
@@ -94,11 +94,11 @@ concept minimumPluginClass = requires {
   requires std::is_base_of_v<BasicPlugin, __class>;
 }; // concept minimumPluginClass
 
-template <typename __class>
-  requires minimumPluginClass<__class>
+template <typename PluginClass>
+  requires minimumPluginClass<PluginClass>
 class BuiltinPluginRegistry {
 public:
-  using Factory = std::function<__class *()>;
+  using Factory = std::function<PluginClass *()>;
   static BuiltinPluginRegistry &getInstance() {
     static BuiltinPluginRegistry instance;
     return instance;
@@ -110,11 +110,24 @@ public:
 
 private:
   std::vector<Factory> factories;
-};
+}; // class BuiltinPluginRegistry
 
-template <typename __class>
-  requires minimumPluginClass<__class>
+template <typename BasePluginClass>
+  requires minimumPluginClass<BasePluginClass>
 class PluginManager {
+  using Creator = BasePluginClass *(*)();
+  struct Plugin {
+    std::string name;
+    void *handle = nullptr;
+    std::unique_ptr<BasePluginClass> instance;
+  };
+
+  std::vector<std::unique_ptr<BasePluginClass>> builtinPlugins;
+  std::vector<Plugin> plugins;
+  std::string logPath;
+  CLI::App &mainApp;
+  BasicFlags &mainFlags;
+
 public:
   PluginManager() = delete;
   explicit PluginManager(CLI::App &cmd, std::string logpath, BasicFlags &flags)
@@ -133,7 +146,7 @@ public:
 
   bool loadBuiltinPlugins() {
     LOGN(PM, INFO) << "Loading built-in plugins." << std::endl;
-    for (auto &plugin : BuiltinPluginRegistry<__class>::getInstance().getPlugins()) {
+    for (auto &plugin : BuiltinPluginRegistry<BasePluginClass>::getInstance().getPlugins()) {
       auto pluginHandle = plugin();
       LOGN(PM, INFO) << "Loading built-in plugin: " << pluginHandle->getName() << std::endl;
       if (!pluginHandle->onLoad(mainApp, logPath, mainFlags)) return false;
@@ -155,7 +168,7 @@ public:
       throw PluginError("dlsym failed: {}: create_plugin: {}", pluginPath, dlerror());
     }
 
-    auto plugin = std::unique_ptr<__class>(create());
+    auto plugin = std::unique_ptr<BasePluginClass>(create());
     if (alreadyExists(plugin->getName())) {
       LOGN(PM, ERROR) << plugin->getName() << " already exists!" << std::endl;
       return false;
@@ -192,7 +205,7 @@ public:
     return false; // Not used any plugin on command line.
   }
 
-  bool alreadyExists(const std::string &name) {
+  bool alreadyExists(const std::string &name) const {
     LOGN(PM, INFO) << "Checking " << std::quoted(name) << " named plugin is exists or not." << std::endl;
     for (auto &plugin : plugins)
       if (plugin.name == name) return true;
@@ -202,6 +215,9 @@ public:
     LOGN(PM, INFO) << std::quoted(name) << " named plugin is not exists." << std::endl;
     return false;
   }
+
+  // Returns alreadyExists(name).
+  bool exists(const std::string &name) const { return alreadyExists(name); }
 
   std::string getUsed() const {
     for (auto &plugin : plugins)
@@ -213,22 +229,83 @@ public:
     return {};
   }
 
+  std::optional<std::reference_wrapper<BasePluginClass>> getPlugin(const std::string &name) {
+    LOGN(PM, INFO) << "Considering plugin structure: " << name << std::endl;
+
+    if (!exists(name)) return std::nullopt;
+    for (auto &plugin : plugins)
+      if (plugin.instance->getName() == name) return std::ref(*plugin.instance);
+    for (auto &plugin : builtinPlugins)
+      if (plugin->getName() == name) return std::ref(*plugin);
+
+    return std::nullopt;
+  }
+
+  std::optional<std::reference_wrapper<BasePluginClass>> getPlugin(const std::string &name) const {
+    LOGN(PM, INFO) << "Considering plugin structure (as const): " << name << std::endl;
+
+    if (!exists(name)) return std::nullopt;
+    for (auto &plugin : plugins)
+      if (plugin.instance->getName() == name) return std::cref(*plugin.instance);
+    for (auto &plugin : builtinPlugins)
+      if (plugin->getName() == name) return std::cref(*plugin);
+
+    return std::nullopt;
+  }
+
+  std::vector<Plugin>& getPlugins() { return plugins; }
+  std::vector<Plugin>& getPlugins() const { return plugins; }
+
+  std::vector<std::reference_wrapper<BasePluginClass>> getBuiltinPlugins() {
+    std::vector<std::reference_wrapper<BasePluginClass>> refs;
+    for (auto &plugin : builtinPlugins)
+      refs.push_back(std::ref(*plugin));
+
+    return refs;
+  }
+
+  std::vector<std::reference_wrapper<BasePluginClass>> getBuiltinPlugins() const {
+    std::vector<std::reference_wrapper<BasePluginClass>> crefs;
+    for (auto &plugin : builtinPlugins)
+      crefs.push_back(std::cref(*plugin));
+
+    return crefs;
+  }
+
+  std::optional<std::reference_wrapper<BasePluginClass>> operator()(const std::string& name) {
+    return getPlugin(name);
+  }
+
+  std::optional<std::reference_wrapper<BasePluginClass>> operator()(const std::string& name) const {
+    return getPlugin(name);
+  }
+
+  bool operator()() { return runUsed(); }
+
   std::string getVersion() const { return PM_VERSION; }
 
-private:
-  using Creator = __class *(*)();
-  struct Plugin {
-    std::string name;
-    void *handle = nullptr;
-    std::unique_ptr<__class> instance;
-  };
+  std::vector<std::reference_wrapper<BasePluginClass>> operator*() {
+    std::vector<std::reference_wrapper<BasePluginClass>> all_refs;
+    auto builtins = getBuiltinPlugins();
 
-  std::vector<std::unique_ptr<__class>> builtinPlugins;
-  std::vector<Plugin> plugins;
-  std::string logPath;
-  CLI::App &mainApp;
-  BasicFlags &mainFlags;
-};
+    all_refs.reserve(builtins.size() + plugins.size());
+    std::ranges::for_each(getPlugins(), [&](Plugin plugin) { all_refs.push_back(std::ref(*plugin.instance)); });
+    all_refs.insert(all_refs.end(), builtins.begin(), builtins.end());
+
+    return all_refs;
+  }
+
+  std::vector<std::reference_wrapper<BasePluginClass>> operator*() const {
+    std::vector<std::reference_wrapper<BasePluginClass>> all_refs;
+    auto builtins = getBuiltinPlugins();
+
+    all_refs.reserve(builtins.size() + plugins.size());
+    std::ranges::for_each(getPlugins(), [&](const Plugin plugin) { all_refs.push_back(std::cref(*plugin.instance)); });
+    all_refs.insert(all_refs.end(), builtins.begin(), builtins.end());
+
+    return all_refs;
+  }
+}; // class PluginManager
 
 class AsyncResult_t {
 public:
@@ -281,7 +358,7 @@ public:
   }
 
   std::pair<std::string, bool> operator()() const { return std::make_pair(message, result); }
-};
+}; // class AsyncResult_t
 
 using BasicManager = PluginManager<BasicPlugin>;
 using BasicBuiltinPluginRegistry = BuiltinPluginRegistry<BasicPlugin>;
