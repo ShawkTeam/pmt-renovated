@@ -19,7 +19,8 @@
 #define LIBHELPER_ANDROID_HPP
 
 #include <string>
-#include <string_view>
+#include <optional>
+#include <private/android_filesystem_config.h>
 
 namespace Helper {
 // -------------------------------
@@ -28,14 +29,26 @@ namespace Helper {
 #ifdef __ANDROID__
 /**
  * Get input property as string (for Android).
- * Returns "ERROR" on any error.
+ * Returns std::nullopt on any error.
  */
-std::string getProperty(std::string_view prop);
+std::optional<std::string> getProperty(const std::string& prop);
 
 /**
  * Reboot device to input mode (for Android).
  */
-bool androidReboot(std::string_view arg);
+bool androidReboot(const std::string& arg);
+
+/**
+ * It is checked whether the user ID used is equivalent to AID_ROOT.
+ * See external/core/libcutils/include/private/android_filesystem_config.h
+ */
+inline bool hasSuperUser(uid_t uid = AID_ROOT) { return getuid() == uid; }
+
+/**
+ * It is checked whether the user ID used is equivalent to AID_SHELL.
+ * See external/core/libcutils/include/private/android_filesystem_config.h
+ */
+inline bool hasAdbPermissions(uid_t uid = AID_SHELL) { return getuid() == uid; }
 #endif // #ifdef __ANDROID__
 
 } // namespace Helper

@@ -23,11 +23,9 @@
 #include <format>
 #include <filesystem>
 #include <random>
-#include <dirent.h>
 #include <sys/wait.h>
 #include <libhelper/definations.hpp>
 #include <libhelper/management.hpp>
-#include <private/android_filesystem_config.h>
 
 namespace Helper {
 
@@ -59,18 +57,6 @@ bool __lstat_check(__path_type &&__path, __predicate &&__pred, bool nlink = fals
   if (nlink) return __pred(st.st_nlink);
   return __pred(st.st_mode);
 }
-
-/**
- * It is checked whether the user ID used is equivalent to AID_ROOT.
- * See external/core/libcutils/include/private/android_filesystem_config.h
- */
-inline bool hasSuperUser(uid_t uid = AID_ROOT) { return getuid() == uid; }
-
-/**
- * It is checked whether the user ID used is equivalent to AID_SHELL.
- * See external/core/libcutils/include/private/android_filesystem_config.h
- */
-inline bool hasAdbPermissions(uid_t uid = AID_SHELL) { return getuid() == uid; }
 
 /**
  * Checks whether the file/directory exists.
