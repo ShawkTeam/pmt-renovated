@@ -149,7 +149,7 @@ int main(int argc, char **argv) {
       return EXIT_SUCCESS;
     }
     if (Flags.viewVersion) {
-      Out::println("{}", PartitionManager::getAppVersion().data());
+      Out::println("{}", PartitionManager::getAppVersion());
       return EXIT_SUCCESS;
     }
 
@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
     // catch CLI::CallForHelp for printing help texts.
 
     std::cout << AppMain.help() << std::endl;
-    return 0;
+    return EXIT_SUCCESS;
   } catch (Helper::Error &error) {
     // catch Helper::Error
 

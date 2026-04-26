@@ -745,7 +745,7 @@ public:
 
 using Partition_t = BasicPartition_t<uint32_t, uint64_t, std::filesystem::path>;
 
-static_assert(minimumPartitionClass<Partition_t>, "BasicPartition_t is doesn't meet requirements of minimumPartitionClass");
+static_assert(IsValidPartitionClass<Partition_t>, "BasicPartition_t is doesn't meet requirements of minimumPartitionClass");
 
 inline std::error_code make_error_code(Errors ec) { return {static_cast<int>(ec), Partition_t::getErrorCategory()}; }
 

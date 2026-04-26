@@ -29,8 +29,8 @@
 namespace PartitionMap {
 
 class Builder {
-  std::vector<Partition_t> localPartitions;
   std::map<std::filesystem::path, std::shared_ptr<GPTData>> gptDataCollection;
+  std::vector<Partition_t> localPartitions;
   std::unordered_set<std::string> localTableNames;
 
   bool buildAutoOnDiskChanges, isUFS;
@@ -60,7 +60,7 @@ public:
   Builder(const Builder &other) = default; // Builder map(otherMap)
 
   Builder(Builder &&other) noexcept
-      : localPartitions(std::move(other.localPartitions)), gptDataCollection(std::move(other.gptDataCollection)),
+      : gptDataCollection(std::move(other.gptDataCollection)), localPartitions(std::move(other.localPartitions)),
         localTableNames(std::move(other.localTableNames)), buildAutoOnDiskChanges(other.buildAutoOnDiskChanges),
         isUFS(other.isUFS) { // Builder map(std::move(otherMap))
     other.buildAutoOnDiskChanges = true;

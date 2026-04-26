@@ -35,7 +35,7 @@
 namespace PartitionMap {
 enum SizeUnit : int { BYTE = 1, KiB = 2, MiB = 3, GiB = 4 };
 
-template <typename slot_type = uint32_t>
+template <typename slot_type>
   requires std::is_integral_v<slot_type>
 struct basic_data_base {
   GPTPart gptPart;
@@ -43,7 +43,7 @@ struct basic_data_base {
   std::filesystem::path tablePath;
 };
 
-template <typename size_type = uint64_t>
+template <typename size_type>
   requires std::is_integral_v<size_type>
 struct basic_info_base {
   std::string name;
@@ -84,10 +84,10 @@ concept IsPathTypeLike = requires(T v1, T v2, std::string s, const char *cp) {
     { v1.string() } -> std::convertible_to<std::string>;
   };
 
-  T{};
-  T{s};
-  T{cp};
-  T(std::move(v2));
+  std::is_constructible_v<T>;
+  std::is_constructible_v<T, std::string>;
+  std::is_constructible_v<T, const char*>;
+  std::is_nothrow_move_constructible_v<T>;
 
   v1 = v2;
   v1 == v2;
@@ -96,8 +96,7 @@ concept IsPathTypeLike = requires(T v1, T v2, std::string s, const char *cp) {
 };
 
 template <typename __class>
-concept minimumPartitionClass = requires(__class cls, __class cls2, GUIDData gdata, SizeUnit unit, uint32_t sector, bool no_throw,
-                                         const BasicData &data, const std::filesystem::path &path) {
+concept IsValidPartitionClass = requires(__class cls, __class cls2, GUIDData gdata, SizeUnit unit, uint32_t sector, bool no_throw) {
   // Check required functions
   { cls.path() } -> std::same_as<std::filesystem::path>;
   { cls.pathByName() } -> std::same_as<std::filesystem::path>;
@@ -107,12 +106,12 @@ concept minimumPartitionClass = requires(__class cls, __class cls2, GUIDData gda
   { cls.size(sector) } -> std::same_as<uint64_t>;
   { cls.empty() } -> std::convertible_to<bool>;
 
-  // Check required constructors
-  __class{};
-  __class{path};
-  __class{data};
-  __class{cls};
-  __class(std::move(cls2));
+  // Check required constructors, etc.
+  std::is_constructible_v<__class>;
+  std::is_constructible_v<__class, std::filesystem::path>;
+  std::is_constructible_v<__class, const BasicData&>;
+  std::is_copy_constructible_v<__class>;
+  std::is_nothrow_move_constructible_v<__class>;
 
   // Check required operators
   { cls == cls2 } -> std::convertible_to<bool>;
@@ -121,8 +120,8 @@ concept minimumPartitionClass = requires(__class cls, __class cls2, GUIDData gda
   { cls != gdata } -> std::convertible_to<bool>;
   { static_cast<bool>(cls) } -> std::convertible_to<bool>;
   { !cls } -> std::convertible_to<bool>;
-  cls = cls2;
-  cls = std::move(cls2);
+  std::is_copy_assignable_v<__class>;
+  std::is_nothrow_move_assignable_v<__class>;
 }; // concept minimumPartitionClass
 
 using Error = Helper::Error;
