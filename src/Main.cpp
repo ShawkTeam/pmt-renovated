@@ -153,7 +153,7 @@ int main(int argc, char **argv) {
       return EXIT_SUCCESS;
     }
 
-    if (!Helper::hasSuperUser()) // Root access is a fundamental requirement for this program.
+    if (!Helper::Android::isHasRootPrivileges()) // Root access is a fundamental requirement for this program.
       throw PartitionManager::Error("This program requires super-user privileges.");
     if (!Tables) throw PartitionManager::Error("Can't found any partition table in /dev/block.");
 

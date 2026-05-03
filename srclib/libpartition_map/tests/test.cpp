@@ -28,7 +28,7 @@
 using namespace Helper;
 
 int main() {
-  if (!hasSuperUser()) return 2; // Check root access.
+  if (!Android::isHasRootPrivileges()) return 2; // Check root access.
 
   try {
     PartitionMap::Builder partitions;

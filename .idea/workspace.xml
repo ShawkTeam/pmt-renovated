@@ -62,15 +62,16 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="pmt: Improve libhelper, etc.">
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/editor.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/editor.xml" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="pmt:">
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/builder.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/builder.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/tests/test.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,7 +80,13 @@
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/external/boringssl" />
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="main" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="ROOT_SYNC" value="DONT_SYNC" />
   </component>
   <component name="GitHubPullRequestSearchHistory">{
   &quot;lastFilter&quot;: {
@@ -95,6 +102,9 @@
 }</component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="iAhVS1Gg" />
+  </component>
+  <component name="OCResolveContextSettings">
+    <option name="configuration" value="0-Debug-libhelper_test" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -141,7 +151,7 @@
     &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;ff82e866&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
     &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/IdeaProjects/pmt-renovated/reformat.sh&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
@@ -162,18 +172,13 @@
       <recent name="$PROJECT_DIR$/build" />
     </key>
   </component>
-  <component name="RunManager" selected="Shell Script.Build (Debug)">
+  <component name="RunManager" selected="Shell Script.Push To Device">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -521,7 +526,30 @@
       <workItem from="1775231121801" duration="98000" />
       <workItem from="1775231241997" duration="946000" />
       <workItem from="1776704009586" duration="5000" />
-      <workItem from="1777192779501" duration="9000" />
+      <workItem from="1777192779501" duration="325000" />
+      <workItem from="1777193212995" duration="300000" />
+      <workItem from="1777193534244" duration="213000" />
+      <workItem from="1777193764649" duration="22000" />
+      <workItem from="1777193877440" duration="77000" />
+      <workItem from="1777193988807" duration="54000" />
+      <workItem from="1777194062322" duration="1147000" />
+      <workItem from="1777195231356" duration="338000" />
+      <workItem from="1777195748026" duration="138000" />
+      <workItem from="1777195907384" duration="169000" />
+      <workItem from="1777196098181" duration="490000" />
+      <workItem from="1777196615012" duration="9000" />
+      <workItem from="1777196811351" duration="14000" />
+      <workItem from="1777196850620" duration="132000" />
+      <workItem from="1777197007334" duration="9000" />
+      <workItem from="1777197072919" duration="43000" />
+      <workItem from="1777197139731" duration="180000" />
+      <workItem from="1777197342042" duration="11000" />
+      <workItem from="1777197468977" duration="52000" />
+      <workItem from="1777197665125" duration="69000" />
+      <workItem from="1777197751883" duration="10000" />
+      <workItem from="1777198211017" duration="760000" />
+      <workItem from="1777726439993" duration="4600000" />
+      <workItem from="1777792353583" duration="10000" />
     </task>
     <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
       <option name="closed" value="true" />
@@ -763,7 +791,15 @@
       <option name="project" value="LOCAL" />
       <updated>1759255635908</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="pmt: Improve libpartition_map, etc.">
+      <option name="closed" value="true" />
+      <created>1777193040295</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1777193040295</updated>
+    </task>
+    <option name="localTasksCounter" value="32" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -787,7 +823,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: Improve pmt &amp; libpartition_map&#10; - Change some operator returnn types.&#10; - Use std::map instead of std::unordered on magic number maps.&#10; - Some improvements." />
     <MESSAGE value="pmt: Improve libpartition_map and tests&#10; - Change doFor*** function return types as bool.&#10; - Add catching of doFor*** function test results.&#10; - Use std::ios_base_failure for catch std::fstream errors on tests" />
     <MESSAGE value="pmt: Improve libraries&#10; - Tests have been improved.&#10; - Some functions and classes in libhelper have been improved for better results." />
     <MESSAGE value="pmt: Add documentation to libhelper functions, etc." />
@@ -812,7 +847,8 @@
     <MESSAGE value="pmt: reformat code, etc." />
     <MESSAGE value="pmt: Add new type (class) to libhelper, etc.&#10; - Add Helper::Capsule.&#10; - Fix some compilation errors." />
     <MESSAGE value="pmt: Improve libhelper, etc." />
-    <option name="LAST_COMMIT_MESSAGE" value="pmt: Improve libhelper, etc." />
+    <MESSAGE value="pmt: Improve libpartition_map, etc." />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt: Improve libpartition_map, etc." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

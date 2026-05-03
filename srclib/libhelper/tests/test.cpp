@@ -32,7 +32,8 @@ int main(int argc, char **argv) {
   TEST_DIR = argv[1];
 
   try {
-    std::cout << "Has super user?; " << std::boolalpha << Helper::hasSuperUser() << std::endl;
+    std::cout << "Has su binary?; " << std::boolalpha << Helper::Android::isRooted() << std::endl;
+    std::cout << "Has super user?; " << std::boolalpha << Helper::Android::isHasRootPrivileges() << std::endl;
     std::cout << "file.txt is exists?; " << std::boolalpha << Helper::isExists(test_path("file.txt")) << std::endl;
     std::cout << "'file.txt' file is exists?; " << std::boolalpha << Helper::fileIsExists(test_path("file")) << std::endl;
     std::cout << "'dir' directory is exists?; " << std::boolalpha << Helper::directoryIsExists(test_path("dir")) << std::endl;

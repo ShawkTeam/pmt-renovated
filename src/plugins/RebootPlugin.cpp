@@ -56,7 +56,7 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << "Rebooting device!!! (custom reboot target: " << (rebootTarget.empty() ? "none" : rebootTarget)
                                  << std::endl;
 
-    if (Helper::androidReboot(rebootTarget))
+    if (Helper::Android::reboot(rebootTarget))
       Out::println("Reboot command was sent");
     else
       throw Error("Cannot reboot device!");

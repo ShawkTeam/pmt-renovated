@@ -18,8 +18,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <memory>
-#include <random>
 #include <string>
+#include <set>
 #include <string_view>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -27,6 +27,7 @@
 #include <fcntl.h>
 #include <libhelper/functions.hpp>
 #include <libhelper/management.hpp>
+#include <libhelper/android.hpp>
 #ifndef ANDROID_BUILD
 #include <sys/_system_properties.h>
 #include <generated/buildInfo.hpp>
@@ -79,7 +80,7 @@ bool runCommand(const std::string& cmd) {
 #ifdef __ANDROID__
       "/system/bin/sh",
 #else
-      "/bin/sh",
+      "/bin/bash",
 #endif
       "-c", cmd.data(), nullptr};
   pid_t pid = fork();
@@ -166,23 +167,54 @@ bool changeOwner(const std::filesystem::path &file, const uid_t uid, const gid_t
 }
 
 #ifdef __ANDROID__
-std::optional<std::string> getProperty(const std::string& prop) {
+namespace Android {
+
+std::set<std::string> getPaths() {
+  std::set<std::string> paths;
+  std::string_view pathVar = getenv("PATH");
+  if (pathVar.empty()) return {};
+
+  for (const auto part : pathVar | std::views::split(':'))
+    paths.insert(std::string(part.begin(), part.end()));
+
+  return paths;
+}
+
+bool isRooted() {
+  LOGN(HELPER, INFO) << "Searching su binary..." << std::endl;
+  bool found;
+
+  for (const auto& path : KNOWN_SU_BINARY_PATHS) {
+    std::string full = pathJoin(path, BINARY_SU);
+    if (isExists(full)) {
+      LOGN(HELPER, INFO) << "Found su binary: " << full << std::endl;
+      found = true;
+    }
+  }
+
+  LOGN_IF(HELPER, INFO, found) << "This device has su binary, so it's rooted!" << std::endl;
+  return found;
+}
+
+std::optional<std::string> getProperty(const std::string &prop) {
   auto &&val = android::base::GetProperty(prop, "ERROR");
   if (val == "ERROR") return std::nullopt;
   return val;
 }
 
-bool androidReboot(const std::string& arg) {
+bool reboot(const std::string &arg) {
   LOGN(HELPER, INFO) << "reboot request sent!!!" << std::endl;
 
   unsigned cmd = ANDROID_RB_RESTART2;
-  if (const auto& prop = getProperty("ro.build.version.sdk"); prop) {
+  if (const auto &prop = getProperty("ro.build.version.sdk"); prop) {
     if (*prop != "ERROR" && std::stoi(*prop) < 26) cmd = ANDROID_RB_RESTART;
   }
 
   return android_reboot(cmd, 0, arg.empty() ? nullptr : arg.data()) != -1;
 }
-#endif
+
+} // namespace Android
+#endif // #ifdef __ANDROID__
 
 std::string multipleToString(const sizeCastTypes type) {
   if (type == KB) return "KB";
