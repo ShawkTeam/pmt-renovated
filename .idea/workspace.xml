@@ -63,7 +63,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="pmt: reformat code, etc.&#10; - Add git hook for pushs." />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="pmt: reformat code, etc.&#10; - Add git hook for pushs.">
+      <change beforePath="$PROJECT_DIR$/build/scripts/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build/scripts/build.sh" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -550,7 +552,7 @@
       <workItem from="1777198211017" duration="760000" />
       <workItem from="1777726439993" duration="4600000" />
       <workItem from="1777792353583" duration="8570000" />
-      <workItem from="1777808091915" duration="6680000" />
+      <workItem from="1777808091915" duration="6989000" />
     </task>
     <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
       <option name="closed" value="true" />

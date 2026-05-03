@@ -86,7 +86,7 @@ parse_args() {
 
     while [ $# -gt 0 ]; do
         case "$1" in
-            build|rebuild|clean)
+            build|rebuild|clean|only-configure-git-hooks)
                 [ -n "$command" ] && { command echo "$THIS: Multiple commands specified: '$command' and '$1'"; exit 1; }
                 command="$1"
                 shift
@@ -164,4 +164,12 @@ case "$PARSED_COMMAND" in
     "build")   build "${PARSED_CMAKE_ARGS[@]}" ;;
     "clean")   clean ;;
     "rebuild") clean; build "${PARSED_CMAKE_ARGS[@]}" ;;
+    "only-configure-git-hooks")
+        if [ "$(git config core.hooksPath)" != ".githooks" ]; then
+          git config core.hooksPath .githooks
+          echo "Git hooks configured."
+        else
+          echo "Git hooks are already configured."
+        fi
+    ;;
 esac
