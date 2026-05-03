@@ -42,8 +42,8 @@ clean() {
 
 build() {
     set -e
-    command echo -e "BUILD INFO:
-    ARCHS: ${TARGET_ABI_LIST[*]}
+    command echo -e "BUILDING PMT!!! BUILD INFO:
+    ARCH(S): ${TARGET_ABI_LIST[*]}
     ANDROID_PLATFORM: $ANDROID_PLATFORM
     ANDROID_TOOLCHAIN_FILE: $ANDROID_NDK/build/cmake/android.toolchain.cmake\n"
 
@@ -67,26 +67,81 @@ build() {
         echo "Building $a artifacts... Using $(($(nproc) - 2)) thread."
         cmake --build "build_$a" -j$(($(nproc) - 2))
         echo "$a build complete, artifacts: $PWD/build_$a"
-
         echo "Building $a-builtin artifacts... Using $(($(nproc) - 2)) thread."
         cmake --build "build_$a-builtin" -j$(($(nproc) - 2))
         echo "$a-builtin build complete, artifacts: $PWD/build_$a-builtin"
     done
 }
 
+parse_args() {
+    local -A seen_abis=()
+    local custom_abis=()
+    local cmake_args=()
+    local command=""
+
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            build|rebuild|clean)
+                [ -n "$command" ] && { command echo "$THIS: Multiple commands specified: '$command' and '$1'"; exit 1; }
+                command="$1"
+                shift
+                ;;
+            --arch)
+                [ -z "$2" ] && { command echo "$THIS: --arch requires a value"; exit 1; }
+                if [ -z "${seen_abis[$2]+x}" ]; then
+                    seen_abis["$2"]=1
+                    custom_abis+=("$2")
+                else
+                    command echo "$THIS: Duplicate --arch '$2', skipping."
+                fi
+                shift 2
+                ;;
+            --arch=*)
+                local abi="${1#--arch=}"
+                [ -z "$abi" ] && { command echo "$THIS: --arch= requires a value"; exit 1; }
+                if [ -z "${seen_abis[$abi]+x}" ]; then
+                    seen_abis["$abi"]=1
+                    custom_abis+=("$abi")
+                else
+                    command echo "$THIS: Duplicate --arch '$abi', skipping."
+                fi
+                shift
+                ;;
+            -D*|-G*|-C*|-U*|-W*)
+                cmake_args+=("$1")
+                shift
+                ;;
+            *)
+                command echo "$THIS: Unknown argument: '$1'"
+                exit 1
+                ;;
+        esac
+    done
+
+    [ -z "$command" ] && { command echo "$THIS: No command specified. Use build, rebuild or clean."; exit 1; }
+    [ ${#custom_abis[@]} -gt 0 ] && TARGET_ABI_LIST=("${custom_abis[@]}")
+
+    PARSED_COMMAND="$command"
+    PARSED_CMAKE_ARGS=("${cmake_args[@]}")
+}
+
 if [ $# -eq 0 ]; then
-    command echo -e "Usage: $0 build|rebuild|clean [EXTRA_CMAKE_FLAGS]\n  HINT: Export ANDROID_PLATFORM if you set min Android target.\n  HINT: Change TARGET_ABI_LIST array in build.sh if you build other archs."
+    command echo -e "Usage: $0 build|rebuild|clean [--arch ABI]... [EXTRA_CMAKE_FLAGS]
+  HINT: Export ANDROID_PLATFORM if you set min Android target.
+  HINT: Use --arch to override target ABI list (default: ${TARGET_ABI_LIST[*]})
+  Example: $0 build --arch arm64-v8a
+  Example: $0 rebuild --arch armeabi-v7a
+  Example: $0 build --arch arm64-v8a --arch armeabi-v7a
+  Example: $0 clean --arch armeabi-v7a"
     exit 1
 fi
 
 [ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-30"
+parse_args "$@"
 checks
 
-case $1 in
-    "build")   shift; build "$@";;
+case "$PARSED_COMMAND" in
+    "build")   build "${PARSED_CMAKE_ARGS[@]}" ;;
     "clean")   clean ;;
-    "rebuild") clean; shift; build "$@";;
-    *)
-        command echo "$0: Unknown argument: $1"
-        exit 1 ;;
+    "rebuild") clean; build "${PARSED_CMAKE_ARGS[@]}" ;;
 esac
