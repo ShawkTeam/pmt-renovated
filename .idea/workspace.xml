@@ -63,14 +63,8 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake).">
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/cmake/functions.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libcrypto.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libcrypto.so" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -560,7 +554,7 @@
       <workItem from="1777198211017" duration="760000" />
       <workItem from="1777726439993" duration="4600000" />
       <workItem from="1777792353583" duration="8570000" />
-      <workItem from="1777808091915" duration="2540000" />
+      <workItem from="1777808091915" duration="2793000" />
     </task>
     <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
       <option name="closed" value="true" />
@@ -826,7 +820,23 @@
       <option name="project" value="LOCAL" />
       <updated>1777793829497</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="build.sh: Improve argument processing and add new flags (to make architectural selection easier).">
+      <option name="closed" value="true" />
+      <created>1777812608927</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1777812608927</updated>
+    </task>
+    <task id="LOCAL-00035" summary="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake).">
+      <option name="closed" value="true" />
+      <created>1777812685838</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1777812685838</updated>
+    </task>
+    <option name="localTasksCounter" value="36" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -850,8 +860,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: Add documentation to libhelper functions, etc." />
-    <MESSAGE value="pmt: add control for -l flag" />
     <MESSAGE value="pmt: Last commit for 1.2.0 version&#10; - Major changes for developers.&#10; - Some changes to flash and sizeof functions.&#10; - Some minor changes." />
     <MESSAGE value="pmt: fix workflow" />
     <MESSAGE value="pmt: start working on 1.3.0&#10; - Add log cleaner function.&#10; - Introduce function flag structure.&#10; - Some improvements." />
@@ -875,7 +883,9 @@
     <MESSAGE value="pmt: Improve libpartition_map, etc." />
     <MESSAGE value="pmt: continue working.&#10; - Improve libhelper's android functions." />
     <MESSAGE value="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`." />
-    <option name="LAST_COMMIT_MESSAGE" value="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`." />
+    <MESSAGE value="build.sh: Improve argument processing and add new flags (to make architectural selection easier)." />
+    <MESSAGE value="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake)." />
+    <option name="LAST_COMMIT_MESSAGE" value="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake)." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
