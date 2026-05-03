@@ -63,18 +63,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="build.sh: Stop embroidering -G* flags">
-      <change afterPath="$PROJECT_DIR$/build/scripts/android_genrule.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/scripts/build.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/scripts/manager.sh" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/build/scripts/reformat.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/android_genrule.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/manager.sh" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/reformat.sh" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
@@ -110,9 +101,6 @@
   <component name="MacroExpansionManager">
     <option name="directoryName" value="iAhVS1Gg" />
   </component>
-  <component name="OCResolveContextSettings">
-    <option name="configuration" value="0-Debug-libhelper_test" />
-  </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
     <option name="majorVersion" value="2025" />
@@ -135,6 +123,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "CMake Application.CLI11-generate-single-file.executor": "Run",
     "RunOnceActivity.RadMigrateCodeStyle": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
@@ -179,7 +168,7 @@
       <recent name="$PROJECT_DIR$/build" />
     </key>
   </component>
-  <component name="RunManager" selected="Shell Script.Reformat Code">
+  <component name="RunManager" selected="Shell Script.Cleanup">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -568,7 +557,7 @@
       <workItem from="1777198211017" duration="760000" />
       <workItem from="1777726439993" duration="4600000" />
       <workItem from="1777792353583" duration="8570000" />
-      <workItem from="1777808091915" duration="5038000" />
+      <workItem from="1777808091915" duration="6327000" />
     </task>
     <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
       <option name="closed" value="true" />
@@ -866,7 +855,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777813017618</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh">
+      <option name="closed" value="true" />
+      <created>1777815136152</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1777815136152</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -890,7 +887,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: start working on 1.3.0&#10; - Add log cleaner function.&#10; - Introduce function flag structure.&#10; - Some improvements." />
     <MESSAGE value="pmt: remove non-signal exit code catching." />
     <MESSAGE value="pmt: add [] operators to Map_t and builder" />
     <MESSAGE value="pmt: Improve libpartition_map types and some functions.&#10; - Add new operators to Map_t.&#10; - Add new flags to info function.&#10; - Move some local pmt function(s) to libhelper.&#10; - Etc..." />
@@ -915,7 +911,8 @@
     <MESSAGE value="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake)." />
     <MESSAGE value="pmt: start working on 1.7.0" />
     <MESSAGE value="build.sh: Stop embroidering -G* flags" />
-    <option name="LAST_COMMIT_MESSAGE" value="build.sh: Stop embroidering -G* flags" />
+    <MESSAGE value="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh" />
+    <option name="LAST_COMMIT_MESSAGE" value="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

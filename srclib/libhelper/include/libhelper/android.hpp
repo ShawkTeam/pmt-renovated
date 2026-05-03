@@ -28,36 +28,27 @@
 
 namespace Helper::Android {
 
-inline constexpr const char* BINARY_SU = "su";
-inline constexpr const char* BINARY_BUSYBOX = "busybox";
+inline constexpr const char *BINARY_SU = "su";
+inline constexpr const char *BINARY_BUSYBOX = "busybox";
 
-inline constexpr std::array<std::string_view, 15> KNOWN_SU_BINARY_PATHS = {
-    "/data/local/",
-    "/data/local/bin/",
-    "/data/local/xbin/",
-    "/sbin/",
-    "/su/bin/",
-    "/system/bin/",
-    "/system/bin/.ext/",
-    "/system/bin/failsafe/",
-    "/system/sd/xbin/",
-    "/system/usr/we-need-root/",
-    "/system/xbin/",
-    "/system_ext/bin/",
-    "/cache/",
-    "/data/",
-    "/dev/"
-};
+inline constexpr std::array<std::string_view, 15> KNOWN_SU_BINARY_PATHS = {"/data/local/",
+                                                                           "/data/local/bin/",
+                                                                           "/data/local/xbin/",
+                                                                           "/sbin/",
+                                                                           "/su/bin/",
+                                                                           "/system/bin/",
+                                                                           "/system/bin/.ext/",
+                                                                           "/system/bin/failsafe/",
+                                                                           "/system/sd/xbin/",
+                                                                           "/system/usr/we-need-root/",
+                                                                           "/system/xbin/",
+                                                                           "/system_ext/bin/",
+                                                                           "/cache/",
+                                                                           "/data/",
+                                                                           "/dev/"};
 
 inline constexpr std::array<std::string_view, 7> KNOWN_MAYBE_NOT_WRITABLE_PATHS = {
-    "/system",
-    "/system/bin",
-    "/system/sbin",
-    "/system/xbin",
-    "/vendor/bin",
-    "/sbin",
-    "/etc"
-};
+    "/system", "/system/bin", "/system/sbin", "/system/xbin", "/vendor/bin", "/sbin", "/etc"};
 
 /**
  * Get PATH variable as a splitted list (as std::set).
@@ -68,12 +59,12 @@ std::set<std::string> getPaths();
  * Get input property as string (for Android).
  * Returns std::nullopt on any error.
  */
-std::optional<std::string> getProperty(const std::string& property);
+std::optional<std::string> getProperty(const std::string &property);
 
 /**
  * Reboot device to input mode (for Android).
  */
-bool reboot(const std::string& arg);
+bool reboot(const std::string &arg);
 
 /**
  * Search su binary on device.

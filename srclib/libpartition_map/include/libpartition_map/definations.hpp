@@ -86,7 +86,7 @@ concept IsPathTypeLike = requires(T v1, T v2, std::string s, const char *cp) {
 
   std::is_constructible_v<T>;
   std::is_constructible_v<T, std::string>;
-  std::is_constructible_v<T, const char*>;
+  std::is_constructible_v<T, const char *>;
   std::is_nothrow_move_constructible_v<T>;
 
   v1 = v2;
@@ -109,7 +109,7 @@ concept IsValidPartitionClass = requires(__class cls, __class cls2, GUIDData gda
   // Check required constructors, etc.
   std::is_constructible_v<__class>;
   std::is_constructible_v<__class, std::filesystem::path>;
-  std::is_constructible_v<__class, const BasicData&>;
+  std::is_constructible_v<__class, const BasicData &>;
   std::is_copy_constructible_v<__class>;
   std::is_nothrow_move_constructible_v<__class>;
 

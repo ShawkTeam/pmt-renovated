@@ -243,7 +243,7 @@ std::optional<std::string> sha256Of(const std::filesystem::path &path);
 /**
  * Run shell command.
  */
-bool runCommand(const std::string& cmd);
+bool runCommand(const std::string &cmd);
 
 /**
  * Shows message and asks for y/N from user.

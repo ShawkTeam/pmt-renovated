@@ -73,7 +73,7 @@ int android_reboot(const unsigned cmd, int /*flags*/, const char *arg) {
 
 namespace Helper {
 
-bool runCommand(const std::string& cmd) {
+bool runCommand(const std::string &cmd) {
   LOGN(HELPER, INFO) << "run command request: " << cmd << std::endl;
 
   const std::array<const char *, 4> args = {
@@ -184,7 +184,7 @@ bool isRooted() {
   LOGN(HELPER, INFO) << "Searching su binary..." << std::endl;
   bool found;
 
-  for (const auto& path : KNOWN_SU_BINARY_PATHS) {
+  for (const auto &path : KNOWN_SU_BINARY_PATHS) {
     std::string full = pathJoin(path, BINARY_SU);
     if (isExists(full)) {
       LOGN(HELPER, INFO) << "Found su binary: " << full << std::endl;

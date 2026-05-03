@@ -31,6 +31,10 @@ checks() {
         echo "Please verify your CMake, Ninja and Python installation."
         exit 1
     fi
+    if [ "$(git config core.hooksPath)" != ".githooks" ]; then
+        git config core.hooksPath .githooks
+        echo "Git hooks configured."
+    fi
 }
 
 clean() {

@@ -253,8 +253,8 @@ public:
     return std::nullopt;
   }
 
-  std::vector<Plugin>& getPlugins() { return plugins; }
-  std::vector<Plugin>& getPlugins() const { return plugins; }
+  std::vector<Plugin> &getPlugins() { return plugins; }
+  std::vector<Plugin> &getPlugins() const { return plugins; }
 
   std::vector<std::reference_wrapper<BasePluginClass>> getBuiltinPlugins() {
     std::vector<std::reference_wrapper<BasePluginClass>> refs;
@@ -272,13 +272,9 @@ public:
     return crefs;
   }
 
-  std::optional<std::reference_wrapper<BasePluginClass>> operator()(const std::string& name) {
-    return getPlugin(name);
-  }
+  std::optional<std::reference_wrapper<BasePluginClass>> operator()(const std::string &name) { return getPlugin(name); }
 
-  std::optional<std::reference_wrapper<BasePluginClass>> operator()(const std::string& name) const {
-    return getPlugin(name);
-  }
+  std::optional<std::reference_wrapper<BasePluginClass>> operator()(const std::string &name) const { return getPlugin(name); }
 
   bool operator()() { return runUsed(); }
 
