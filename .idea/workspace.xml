@@ -63,8 +63,22 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake).">
-      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="build.sh: Stop embroidering -G* flags">
+      <change afterPath="$PROJECT_DIR$/build/scripts/android_genrule.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/scripts/build.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/scripts/manager.sh" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/build/scripts/reformat.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/build.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/build.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/android_genrule.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/manager.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/reformat.sh" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -119,42 +133,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.west.config.association.type.startup.service&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;SHELLCHECK.PATH&quot;: &quot;I do mind&quot;,
-    &quot;Shell Script.Build (Debug).executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Build.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Cleanup.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Open Shell.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Push To Device.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Reformat And Push Code.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Reformat Code.executor&quot;: &quot;Run&quot;,
-    &quot;bazel.project.detector.is.bazel.project&quot;: &quot;true&quot;,
-    &quot;cf.advertisement.text.overridden&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/IdeaProjects/pmt-renovated/reformat.sh&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;CMakeSettings&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.RadMigrateCodeStyle": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "RunOnceActivity.west.config.association.type.startup.service": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "SHELLCHECK.PATH": "I do mind",
+    "Shell Script.Build (Debug).executor": "Run",
+    "Shell Script.Build.executor": "Run",
+    "Shell Script.Cleanup.executor": "Run",
+    "Shell Script.Open Shell.executor": "Run",
+    "Shell Script.Push To Device.executor": "Run",
+    "Shell Script.Reformat And Push Code.executor": "Run",
+    "Shell Script.Reformat Code.executor": "Run",
+    "bazel.project.detector.is.bazel.project": "true",
+    "cf.advertisement.text.overridden": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "deletionFromPopupRequiresConfirmation": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/yzbruh/IdeaProjects/pmt-renovated/reformat.sh",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/include" />
@@ -165,7 +179,7 @@
       <recent name="$PROJECT_DIR$/build" />
     </key>
   </component>
-  <component name="RunManager" selected="Shell Script.Build (Debug)">
+  <component name="RunManager" selected="Shell Script.Reformat Code">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -304,7 +318,7 @@
     <configuration name="Build (Debug)" type="ShConfigurationType">
       <option name="SCRIPT_TEXT" value="" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
-      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build.sh" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build/scripts/build.sh" />
       <option name="SCRIPT_OPTIONS" value="rebuild -DCMAKE_BUILD_TYPE=Debug" />
       <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
       <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -319,7 +333,7 @@
     <configuration name="Build" type="ShConfigurationType">
       <option name="SCRIPT_TEXT" value="" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
-      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build.sh" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build/scripts/build.sh" />
       <option name="SCRIPT_OPTIONS" value="rebuild -DCMAKE_BUILD_TYPE=Release" />
       <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
       <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -334,7 +348,7 @@
     <configuration name="Cleanup" type="ShConfigurationType">
       <option name="SCRIPT_TEXT" value="" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
-      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build.sh" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build/scripts/build.sh" />
       <option name="SCRIPT_OPTIONS" value="clean" />
       <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
       <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -377,7 +391,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Reformat And Push Code" type="ShConfigurationType">
-      <option name="SCRIPT_TEXT" value="./reformat.sh &amp;&amp; git add . &amp;&amp; git commit -m &quot;pmt: reformat code&quot; &amp;&amp; proxychains git push" />
+      <option name="SCRIPT_TEXT" value="build/scripts/reformat.sh &amp;&amp; git add . &amp;&amp; git commit -m &quot;pmt: reformat code&quot; &amp;&amp; proxychains git push" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
       <option name="SCRIPT_PATH" value="" />
       <option name="SCRIPT_OPTIONS" value="" />
@@ -394,7 +408,7 @@
     <configuration name="Reformat Code" type="ShConfigurationType">
       <option name="SCRIPT_TEXT" value="" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
-      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/reformat.sh" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build/scripts/reformat.sh" />
       <option name="SCRIPT_OPTIONS" value="" />
       <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
       <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
@@ -554,7 +568,7 @@
       <workItem from="1777198211017" duration="760000" />
       <workItem from="1777726439993" duration="4600000" />
       <workItem from="1777792353583" duration="8570000" />
-      <workItem from="1777808091915" duration="2793000" />
+      <workItem from="1777808091915" duration="5038000" />
     </task>
     <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
       <option name="closed" value="true" />
@@ -836,7 +850,23 @@
       <option name="project" value="LOCAL" />
       <updated>1777812685838</updated>
     </task>
-    <option name="localTasksCounter" value="36" />
+    <task id="LOCAL-00036" summary="pmt: start working on 1.7.0">
+      <option name="closed" value="true" />
+      <created>1777812727301</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1777812727301</updated>
+    </task>
+    <task id="LOCAL-00037" summary="build.sh: Stop embroidering -G* flags">
+      <option name="closed" value="true" />
+      <created>1777813017618</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1777813017618</updated>
+    </task>
+    <option name="localTasksCounter" value="38" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -860,8 +890,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: Last commit for 1.2.0 version&#10; - Major changes for developers.&#10; - Some changes to flash and sizeof functions.&#10; - Some minor changes." />
-    <MESSAGE value="pmt: fix workflow" />
     <MESSAGE value="pmt: start working on 1.3.0&#10; - Add log cleaner function.&#10; - Introduce function flag structure.&#10; - Some improvements." />
     <MESSAGE value="pmt: remove non-signal exit code catching." />
     <MESSAGE value="pmt: add [] operators to Map_t and builder" />
@@ -885,7 +913,9 @@
     <MESSAGE value="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`." />
     <MESSAGE value="build.sh: Improve argument processing and add new flags (to make architectural selection easier)." />
     <MESSAGE value="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake)." />
-    <option name="LAST_COMMIT_MESSAGE" value="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake)." />
+    <MESSAGE value="pmt: start working on 1.7.0" />
+    <MESSAGE value="build.sh: Stop embroidering -G* flags" />
+    <option name="LAST_COMMIT_MESSAGE" value="build.sh: Stop embroidering -G* flags" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

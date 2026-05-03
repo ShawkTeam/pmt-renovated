@@ -38,8 +38,8 @@ jobs:
           git clone https://github.com/ShawkTeam/pmt-renovated -b main ./pmt && cd pmt
           git submodule update --init --recursive
           export ANDROID_NDK="${{ github.workspace }}/android-ndk-r28c"
-          bash build.sh clean
-          bash build.sh build -DCMAKE_BUILD_TYPE=Release
+          bash build/scripts/build.sh clean
+          bash build/scripts/build.sh build -DCMAKE_BUILD_TYPE=Release
           cd build_arm64-v8a
           cp src/pmt src/pmt_static src/plugins/*plugin.so srclib/libhelper/libhelper.* srclib/libpartition_map/libpartition_map.* .
           zip pmt-arm64-v8a.zip pmt libhelper.* libpartition_map.* *plugin.so
@@ -58,7 +58,7 @@ jobs:
           echo "BUILD=${{ github.workspace }}/pmt" >> $GITHUB_ENV
           cd ..
           echo -e "Read [Wiki - About Release Types](https://github.com/ShawkTeam/pmt-renovated/wiki/About-Release-Types) for getting more information.\n\n### Changes\n" > release.txt
-          git log --since=2025-08-21 \
+          git log --since=2026-04-03 \
             --no-merges \
             --pretty=format:'%ad|%s|%h|%H' \
             --date=short |

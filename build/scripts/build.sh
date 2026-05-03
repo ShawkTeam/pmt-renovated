@@ -16,6 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
+WORK_DIR="$(pwd)"
 THIS="$(basename "$0")"
 TARGET_ABI_LIST=("arm64-v8a" "armeabi-v7a")
 
@@ -35,9 +36,9 @@ checks() {
 clean() {
     echo "Cleaning workspace."
     for a in "${TARGET_ABI_LIST[@]}"; do rm -rf "build_$a" && rm -rf "build_$a-builtin"; done
-    rm -rf srclib/libhelper/tests/dir \
-        srclib/libhelper/tests/linkdir \
-        srclib/libhelper/tests/file.txt
+    rm -rf "${WORK_DIR}/srclib/libhelper/tests/dir" \
+        "${WORK_DIR}/srclib/libhelper/tests/linkdir" \
+        "${WORK_DIR}/srclib/libhelper/tests/file.txt"
 }
 
 build() {
@@ -49,13 +50,13 @@ build() {
 
     for a in "${TARGET_ABI_LIST[@]}"; do
         echo "Configuring for $a..."
-        mkdir -p "build_$a" "build_$a-builtin"
-        cmake -B "build_$a" -G Ninja -S . "$@" \
+        mkdir -p "${WORK_DIR}/build_$a" "${WORK_DIR}/build_$a-builtin"
+        cmake -B "${WORK_DIR}/build_$a" -G Ninja -S "${WORK_DIR}" "$@" \
             -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI="$a" \
             -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
             -DANDROID_STL=c++_static
-        cmake -B "build_$a-builtin" -G Ninja -S . "$@" \
+        cmake -B "${WORK_DIR}/build_$a-builtin" -G Ninja -S "${WORK_DIR}" "$@" \
             -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
             -DANDROID_ABI="$a" \
             -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
@@ -65,11 +66,11 @@ build() {
 
     for a in "${TARGET_ABI_LIST[@]}"; do
         echo "Building $a artifacts... Using $(($(nproc) - 2)) thread."
-        cmake --build "build_$a" -j$(($(nproc) - 2))
-        echo "$a build complete, artifacts: $PWD/build_$a"
+        cmake --build "${WORK_DIR}/build_$a" -j$(($(nproc) - 2))
+        echo "$a build complete, artifacts: ${WORK_DIR}/build_$a"
         echo "Building $a-builtin artifacts... Using $(($(nproc) - 2)) thread."
-        cmake --build "build_$a-builtin" -j$(($(nproc) - 2))
-        echo "$a-builtin build complete, artifacts: $PWD/build_$a-builtin"
+        cmake --build "${WORK_DIR}/build_$a-builtin" -j$(($(nproc) - 2))
+        echo "$a-builtin build complete, artifacts: ${WORK_DIR}/build_$a-builtin"
     done
 }
 
@@ -84,6 +85,21 @@ parse_args() {
             build|rebuild|clean)
                 [ -n "$command" ] && { command echo "$THIS: Multiple commands specified: '$command' and '$1'"; exit 1; }
                 command="$1"
+                shift
+                ;;
+            --working-directory)
+                [ -z "$2" ] && { command echo "$THIS: --working-directory requires a value"; exit 1; }
+                [ -e "$2" ] || { command echo "$THIS: $2: No such file or directory"; exit 1; }
+                [ -d "$2" ] || { command echo "$THIS: $2: Is not directory"; exit 1; }
+                WORK_DIR="$2"
+                shift 2
+                ;;
+            --working-directory=*)
+                local wd="${1#--working-directory=}"
+                [ -z "$wd" ] && { command echo "$THIS: --working-directory requires a value"; exit 1; }
+                [ -e "$wd" ] || { command echo "$THIS: $wd: No such file or directory"; exit 1; }
+                [ -d "$wd" ] || { command echo "$THIS: $wd: Is not directory"; exit 1; }
+                WORK_DIR="$wd"
                 shift
                 ;;
             --arch)
@@ -129,7 +145,7 @@ if [ $# -eq 0 ]; then
     command echo -e "Usage: $0 build|rebuild|clean [--arch ABI]... [EXTRA_CMAKE_FLAGS]
   HINT: Export ANDROID_PLATFORM if you set min Android target.
   HINT: Use --arch to override target ABI list (default: ${TARGET_ABI_LIST[*]})
-  Example: $0 build --arch arm64-v8a
+  Example: $0 build --arch arm64-v8a --working-directory \$PWD/other-pmt-renovated-src
   Example: $0 rebuild --arch armeabi-v7a
   Example: $0 build --arch arm64-v8a --arch armeabi-v7a
   Example: $0 clean --arch armeabi-v7a"
