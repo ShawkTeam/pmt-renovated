@@ -29,7 +29,10 @@ set(LIBCRYPTO_UTILS ${CMAKE_CURRENT_SOURCE_DIR}/core/libcrypto_utils)
 set(LIBSPARSE ${CMAKE_CURRENT_SOURCE_DIR}/core/libsparse)
 set(LIBEXT4_UTILS ${CMAKE_CURRENT_SOURCE_DIR}/extras/ext4_utils)
 set(LIBLP ${CMAKE_CURRENT_SOURCE_DIR}/core/fs_mgr/liblp)
-set(PREBUILTS ${CMAKE_SOURCE_DIR}/build/prebuilts/${CMAKE_ANDROID_ARCH_ABI})
+
+# Include BoringSSL's pre-created source list (for android)
+set(BORINGSSL_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/boringssl/)
+include(boringssl/android-sources.cmake)
 
 # libext2_uuid sources
 set(LIBEXT2_UUID_SOURCES
@@ -135,8 +138,21 @@ add_super_library(gptf USE_INTERFACE_NOLIBS_NOFLAGS
 )
 
 if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
-    add_library(libcrypto SHARED IMPORTED)
-    set_target_properties(libcrypto PROPERTIES IMPORTED_LOCATION "${PREBUILTS}/libcrypto.so")
+    if(CMAKE_ANDROID_ARCH_ABI EQUAL "arm64-v8a")
+        set_source_files_properties(
+                ${crypto_sources_asm}
+                PROPERTIES
+                COMPILE_FLAGS "-fsanitize=hwaddress"
+        )
+    endif()
+
+    add_shared_super_library(crypto USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${crypto_sources} ${crypto_sources_asm}
+            CPPSTD 17
+            COMPILE_OPTIONS -fvisibility=hidden -fno-data-sections -fno-function-sections -fno-sanitize=address -Werror -Wno-unused-parameter -Wno-reserved-user-defined-literal
+            LINKER_OPTIONS -Wl,-Bsymbolic
+            DEFINATIONS BORINGSSL_SHARED_LIBRARY BORINGSSL_ANDROID_SYSTEM BORINGSSL_IMPLEMENTATION OPENSSL_SMALL # There is no need for FIPS.
+    )
 
     add_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
             SOURCES ${FMTLIB_SOURCES}

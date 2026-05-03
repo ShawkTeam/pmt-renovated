@@ -19,6 +19,9 @@
 cmake_minimum_required(VERSION 3.20)
 project(pmt VERSION 1.6.0)
 
+# Enable assembly.
+enable_language(ASM)
+
 # Use modern C++ 20 standart
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

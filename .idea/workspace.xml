@@ -33,6 +33,7 @@
       <config projectName="pmt" targetName="info_plugin" />
       <config projectName="pmt" targetName="flash_plugin" />
       <config projectName="pmt" targetName="libbase_shared" />
+      <config projectName="pmt" targetName="libcrypto" />
       <config projectName="pmt" targetName="helper_shared" />
       <config projectName="pmt" targetName="generate_build_info" />
       <config projectName="pmt" targetName="libhelper_shared" />
@@ -58,20 +59,18 @@
   </component>
   <component name="CMakeSettings">
     <configurations>
-      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_PLATFORM=&quot;android-30" />
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_PLATFORM=&quot;android-30&quot; -DANDROID_ABI=&quot;arm64-v8a&quot;&quot;" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="pmt:">
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/tests/test.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/tests/test.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/functions.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/arm64-v8a/libcrypto.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/prebuilts/armeabi-v7a/libcrypto.so" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -158,7 +157,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;CMakeSettings&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -172,13 +171,18 @@
       <recent name="$PROJECT_DIR$/build" />
     </key>
   </component>
-  <component name="RunManager" selected="Shell Script.Push To Device">
+  <component name="RunManager" selected="Shell Script.Build (Debug)">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -229,6 +233,11 @@
       </method>
     </configuration>
     <configuration name="libbase_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libbase_static" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="libcrypto" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libcrypto" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -416,6 +425,7 @@
       <item itemvalue="CMake Application.info_plugin" />
       <item itemvalue="CMake Application.libbase_shared" />
       <item itemvalue="CMake Application.libbase_static" />
+      <item itemvalue="CMake Application.libcrypto" />
       <item itemvalue="CMake Application.libext2_uuid_shared" />
       <item itemvalue="CMake Application.libext2_uuid_static" />
       <item itemvalue="CMake Application.libgptf_shared" />
@@ -549,7 +559,8 @@
       <workItem from="1777197751883" duration="10000" />
       <workItem from="1777198211017" duration="760000" />
       <workItem from="1777726439993" duration="4600000" />
-      <workItem from="1777792353583" duration="10000" />
+      <workItem from="1777792353583" duration="8570000" />
+      <workItem from="1777808091915" duration="2540000" />
     </task>
     <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
       <option name="closed" value="true" />
@@ -799,7 +810,23 @@
       <option name="project" value="LOCAL" />
       <updated>1777193040295</updated>
     </task>
-    <option name="localTasksCounter" value="32" />
+    <task id="LOCAL-00032" summary="pmt: continue working.&#10; - Improve libhelper's android functions.">
+      <option name="closed" value="true" />
+      <created>1777792430503</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1777792430503</updated>
+    </task>
+    <task id="LOCAL-00033" summary="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`.">
+      <option name="closed" value="true" />
+      <created>1777793829497</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1777793829497</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -823,8 +850,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: Improve libpartition_map and tests&#10; - Change doFor*** function return types as bool.&#10; - Add catching of doFor*** function test results.&#10; - Use std::ios_base_failure for catch std::fstream errors on tests" />
-    <MESSAGE value="pmt: Improve libraries&#10; - Tests have been improved.&#10; - Some functions and classes in libhelper have been improved for better results." />
     <MESSAGE value="pmt: Add documentation to libhelper functions, etc." />
     <MESSAGE value="pmt: add control for -l flag" />
     <MESSAGE value="pmt: Last commit for 1.2.0 version&#10; - Major changes for developers.&#10; - Some changes to flash and sizeof functions.&#10; - Some minor changes." />
@@ -848,7 +873,9 @@
     <MESSAGE value="pmt: Add new type (class) to libhelper, etc.&#10; - Add Helper::Capsule.&#10; - Fix some compilation errors." />
     <MESSAGE value="pmt: Improve libhelper, etc." />
     <MESSAGE value="pmt: Improve libpartition_map, etc." />
-    <option name="LAST_COMMIT_MESSAGE" value="pmt: Improve libpartition_map, etc." />
+    <MESSAGE value="pmt: continue working.&#10; - Improve libhelper's android functions." />
+    <MESSAGE value="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`." />
+    <option name="LAST_COMMIT_MESSAGE" value="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
