@@ -107,7 +107,7 @@ parse_args() {
                 fi
                 shift
                 ;;
-            -D*|-G*|-C*|-U*|-W*)
+            -D*|-C*|-U*|-W*)
                 cmake_args+=("$1")
                 shift
                 ;;
