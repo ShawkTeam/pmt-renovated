@@ -63,14 +63,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/android.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
-    </list>
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="pmt: reformat code, etc.&#10; - Add git hook for pushs." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -557,7 +550,7 @@
       <workItem from="1777198211017" duration="760000" />
       <workItem from="1777726439993" duration="4600000" />
       <workItem from="1777792353583" duration="8570000" />
-      <workItem from="1777808091915" duration="6327000" />
+      <workItem from="1777808091915" duration="6680000" />
     </task>
     <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
       <option name="closed" value="true" />
@@ -863,7 +856,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777815136152</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="pmt: reformat code, etc.&#10; - Add git hook for pushs.">
+      <option name="closed" value="true" />
+      <created>1777816589295</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1777816589295</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -887,7 +888,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: remove non-signal exit code catching." />
     <MESSAGE value="pmt: add [] operators to Map_t and builder" />
     <MESSAGE value="pmt: Improve libpartition_map types and some functions.&#10; - Add new operators to Map_t.&#10; - Add new flags to info function.&#10; - Move some local pmt function(s) to libhelper.&#10; - Etc..." />
     <MESSAGE value="pmt: Improve libhelper and libpartition_map, etc." />
@@ -912,7 +912,8 @@
     <MESSAGE value="pmt: start working on 1.7.0" />
     <MESSAGE value="build.sh: Stop embroidering -G* flags" />
     <MESSAGE value="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh" />
-    <option name="LAST_COMMIT_MESSAGE" value="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh" />
+    <MESSAGE value="pmt: reformat code, etc.&#10; - Add git hook for pushs." />
+    <option name="LAST_COMMIT_MESSAGE" value="pmt: reformat code, etc.&#10; - Add git hook for pushs." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
