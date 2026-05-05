@@ -31,8 +31,8 @@ checks() {
         echo "Please verify your CMake, Ninja and Python installation."
         exit 1
     fi
-    if [ "$(git config core.hooksPath)" != ".githooks" ]; then
-        git config core.hooksPath .githooks
+    if [ "$(basename $(git config core.hooksPath))" != ".githooks" ]; then
+        git config core.hooksPath "${WORK_DIR}/.githooks"
         echo "Git hooks configured."
     fi
 }
@@ -86,7 +86,7 @@ parse_args() {
 
     while [ $# -gt 0 ]; do
         case "$1" in
-            build|rebuild|clean|only-configure-git-hooks)
+            build|rebuild|clean|only-configure-git-hooks|cleanup-generated-docs)
                 [ -n "$command" ] && { command echo "$THIS: Multiple commands specified: '$command' and '$1'"; exit 1; }
                 command="$1"
                 shift
@@ -164,9 +164,10 @@ case "$PARSED_COMMAND" in
     "build")   build "${PARSED_CMAKE_ARGS[@]}" ;;
     "clean")   clean ;;
     "rebuild") clean; build "${PARSED_CMAKE_ARGS[@]}" ;;
+    "cleanup-generated-docs") rm -rf "${WORK_DIR}/docs/html" ;;
     "only-configure-git-hooks")
-        if [ "$(git config core.hooksPath)" != ".githooks" ]; then
-          git config core.hooksPath .githooks
+        if [ "$(basename $(git config core.hooksPath))" != ".githooks" ]; then
+          git config core.hooksPath "${WORK_DIR}/.githooks"
           echo "Git hooks configured."
         else
           echo "Git hooks are already configured."

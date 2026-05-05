@@ -50,3 +50,15 @@ generate_build_info("${FLAGS}")
 add_subdirectory(external)
 add_subdirectory(srclib)
 add_subdirectory(src)
+
+# Doxygen integration
+find_package(Doxygen OPTIONAL_COMPONENTS dot)
+
+# Add custom target for generating
+if(DOXYGEN_FOUND)
+	add_custom_target(docs
+			COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Doxyfile
+			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+			VERBATIM
+	)
+endif()

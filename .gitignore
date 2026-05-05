@@ -3,3 +3,6 @@ cmake-build-*
 
 # Dont't add temporary build directories
 build_*
+
+# Don't add generated documentations
+docs/html

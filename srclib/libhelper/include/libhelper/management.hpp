@@ -15,6 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file management.hpp
+ * @brief Smart classes, wrappers, and more.
+ */
+
 #ifndef LIBHELPER_MANAGEMENT_HPP
 #define LIBHELPER_MANAGEMENT_HPP
 
@@ -39,10 +44,19 @@
 
 namespace Helper {
 
+/**
+ * @brief It offers a ready-made @c cleanup() function. It is used by other classes.
+ *        The default defination takes the type pointer and clears it with @c delete.
+ *
+ * @tparam T Type.
+ * @note This class has overloads for @c DIR , @c FILE , and arrays. However, they are not included in this documentation. Please refer
+ * to the code.
+ */
 template <typename T> struct CleanupTraits {
   static void cleanup(const T *ptr) { delete ptr; }
 };
 
+/** @cond */
 template <typename T> struct CleanupTraits<T[]> {
   static void cleanup(const T *ptr) { delete[] ptr; }
 };
@@ -58,13 +72,68 @@ template <> struct CleanupTraits<DIR> {
     if (dp) closedir(dp);
   }
 };
+/** @endcond */
 
+/**
+ * @brief The deletionability of the entry is checked using the @c delete key.
+ *        This check is performed using @c CleanupTraits . It is used by other classes.
+ *
+ * @tparam T Variable/type.
+ */
 template <typename T>
 concept Deletable = !std::is_void_v<T> && !std::is_array_v<T> && requires(T *p) { CleanupTraits<T>::cleanup(p); };
 
+/**
+ * @brief The deletionability of the entry is checked using the @c delete key. Only for arrays!
+ *        This check is performed using @c CleanupTraits . It is used by other classes.
+ *
+ * @tparam T Variable/type.
+ */
 template <typename T>
 concept ArrayDeletable = !std::is_void_v<T> && requires(T *p) { CleanupTraits<T[]>::cleanup(p); };
 
+/**
+ * @brief A simple class for easily managing asynchronous operations.
+ *
+ * @code
+ * int some_func(int x) {
+ *   std::this_thread::sleep_for(std::chrono::milliseconds(100));
+ *   return x;
+ * }
+ *
+ * int main(void) {
+ *   AsyncManager<int> a_manager;
+ *
+ *   // Define threads.
+ *   a_manager.addProcess(&some_func, 2);
+ *   a_manager.addProcess(&some_func, 102);
+ *   a_manager.addProcess(&some_func, 84923);
+ *
+ *   // Start threads.
+ *   a_manager.startAll();
+ *
+ *   // Get results and print.
+ *   auto vec = a_manager.getResults();
+ *   std::cout << vec << std::endl;
+ *
+ *   // Results are already get?
+ *   if (a_manager.resultsReceived())
+ *      std::cout << "Result are already get." << std::endl;
+ *
+ *   //// ONLY FOR std::pair<std::string, bool> LIKE RETURN TYPES ////
+ *
+ *   // Get result and print.
+ *   a_manager.finalize();
+ *
+ *   // getResults() + finalize()
+ *   a_manager();
+ *
+ *   return 0;
+ * }
+ * @endcode
+ *
+ * @tparam __return_type Return type of target function(s).
+ */
 template <typename __return_type> class AsyncManager {
   std::vector<std::packaged_task<__return_type()>> tasks;
   std::vector<std::future<__return_type>> futures;
@@ -74,11 +143,35 @@ template <typename __return_type> class AsyncManager {
 public:
   bool print = true;
 
+  /**
+   * @brief Add new processes.
+   *
+   * @code
+   * class SomeClass {
+   * public:
+   *   int func(int x) {
+   *     std::this_thread::sleep_for(std::chrono::milliseconds(100));
+   *     return x;
+   *   }
+   *
+   *   SomeClass() {
+   *     AsyncManager<int> a_manager;
+   *     a_manager.addProcess(&SomeClass::func, this, 2);
+   *     a_manager.addProcess(&SomeClass::func, this, 392);
+   *     a_manager.addProcess(&SomeClass::func, this, 950302);
+   *     // ...
+   *   }
+   * }
+   * @endcode
+   *
+   * @param args @c std::thread-like input.
+   */
   template <typename... Args> void addProcess(Args &&...args) {
     auto bound = std::bind(std::forward<Args>(args)...);
     tasks.emplace_back([bound = std::move(bound)]() mutable { return bound(); });
   }
 
+  /// @brief Start all defined threads.
   void startAll() {
     for (auto &task : tasks) {
       futures.push_back(task.get_future());
@@ -87,6 +180,12 @@ public:
     tasks.clear();
   }
 
+  /**
+   * @brief Get results of threads.
+   *
+   * @note It waits for unfinished threads.
+   * @return List of results.
+   */
   std::vector<__return_type> getResults() {
     if (!get) {
       std::ranges::for_each(futures, [&](auto &future) { results.push_back(future.get()); });
@@ -95,8 +194,14 @@ public:
     return results;
   }
 
+  /// @brief Check the status of the results being provided.
   bool resultsReceived() const { return get; }
 
+  /**
+   * @brief Print results. @ref getResults() must have been called beforehand.
+   *
+   * @note It is only available for return types like @c std::pair<std::string, bool> and similar types.
+   */
   bool finalize() const
     requires requires(__return_type v) {
       { v.first } -> std::convertible_to<std::string>;

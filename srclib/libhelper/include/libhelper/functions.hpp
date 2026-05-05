@@ -29,6 +29,7 @@
 
 namespace Helper {
 
+/** @cond */
 template <typename __path_type, typename __predicate>
   requires Invocable<__predicate, bool, unsigned int> &&
            (HasCStrFunction<__path_type> || std::is_same_v<std::decay_t<__path_type>, const char *>)
@@ -57,6 +58,7 @@ bool __lstat_check(__path_type &&__path, __predicate &&__pred, bool nlink = fals
   if (nlink) return __pred(st.st_nlink);
   return __pred(st.st_mode);
 }
+/** @endcond */
 
 /**
  * Checks whether the file/directory exists.

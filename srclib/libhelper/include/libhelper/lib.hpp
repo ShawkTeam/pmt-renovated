@@ -15,6 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file lib.hpp
+ * @brief Includes all header files for libhelper.
+ */
+
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 

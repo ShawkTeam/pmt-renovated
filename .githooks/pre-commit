@@ -16,6 +16,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-echo ".githooks/pre-push triggered. Reformatting code!!!"
+echo ".githooks/pre-commit triggered. Reformatting code!!!"
 build/scripts/reformat.sh --working-directory=$PWD || exit 1
-echo "Reformat complete."
+echo "Reformat complete. Adding changes."
+git add $PWD || exit 1

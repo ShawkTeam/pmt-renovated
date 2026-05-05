@@ -15,6 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file error.hpp
+ * @brief It offers a modern throwable error class.
+ */
+
 #ifndef LIBHELPER_ERROR_HPP
 #define LIBHELPER_ERROR_HPP
 
@@ -25,32 +30,78 @@
 #include <libhelper/logging.hpp>
 
 namespace Helper {
-// Throwable error class
+
+/**
+ * @brief A modern, throwable error class. It provides the @c << operator and offers usage in the @c std::print style of modern C++23.
+ *
+ * @code
+ * void someFunction(void) {
+ *   int e = Helper::Random<>::getNumber();
+ *   // I will ignore the namespace in the instance of the 'Error' class.
+ *
+ *   throw Error() << "An error occurred! Error code: " << e; // With << operator.
+ *   throw Error().withCode(e) << "An error code occurred!"; // With << operator and error code specifying.
+ *   throw Error("An error occurred! Error code: {}", e); // With <format>.
+ *   throw Error("An error occurred!").withCode(e); // With <format> and error code specifying.
+ *
+ *   // Let's make things a little more interesting...
+ *   throw Error("What is that? ").withCode(e) << "Oh right, that's a error!";
+ * }
+ *
+ * int main(int argc, char** argv) {
+ *   try {
+ *      someFunction();
+ *   } catch (Error &e) {
+ *      // Let's assume we receive the "interesting" error message we wrote at the end.
+ *      std::cout << e.what() << " Error code: " << e.getErrorCode() << std::endl;
+ *      return e.getErrorCode();
+ *   }
+ *
+ *   return 0;
+ * }
+ * @endcode
+ */
 class Error final : public std::exception {
   std::ostringstream oss;
   std::string message;
+  int ec = 0;
 
 public:
   Error() = default;
+
+  /// @brief Copy constructor.
   Error(const Error &other) noexcept : message(other.message) {}
 
+  /// @brief Modern std::print style input field constructor.
   template <typename... Args> explicit Error(std::format_string<Args...> fmt, Args &&...args) {
     oss << std::format(fmt, std::forward<Args>(args)...);
     message = oss.str();
   }
 
+  /// @brief To use the @c << operator for receiving non-function-like inputs.
   template <typename T> Error &&operator<<(const T &msg) && {
     oss << msg;
     message = oss.str();
     return std::move(*this);
   }
 
+  /// @brief To receive function-like inputs, use the @c << operator.
   Error &operator<<(std::ostream &(*msg)(std::ostream &)) {
     oss << msg;
     message = oss.str();
     return *this;
   }
 
+  /// @brief It is used to determine the error code when an error is thrown.
+  Error &&withCode(int _ec) {
+    ec = _ec;
+    return std::move(*this);
+  }
+
+  /// @brief Get error code.
+  int getErrorCode() const { return ec; }
+
+  /// @brief Get error message.
   [[nodiscard]] const char *what() const noexcept override { return message.data(); }
 };
 
