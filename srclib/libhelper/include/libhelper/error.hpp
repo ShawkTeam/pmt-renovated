@@ -17,6 +17,7 @@
 
 /**
  * @file error.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
  * @brief It offers a modern throwable error class.
  */
 

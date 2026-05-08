@@ -17,6 +17,7 @@
 
 /**
  * @file management.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
  * @brief Smart classes, wrappers, and more.
  */
 
@@ -49,7 +50,7 @@ namespace Helper {
  *        The default defination takes the type pointer and clears it with @c delete.
  *
  * @tparam T Type.
- * @note This class has overloads for @c DIR , @c FILE , and arrays. However, they are not included in this documentation. Please refer
+ * @note This class has overloads for @c DIR, @c FILE, and arrays. However, they are not included in this documentation. Please refer
  * to the code.
  */
 template <typename T> struct CleanupTraits {
@@ -76,7 +77,7 @@ template <> struct CleanupTraits<DIR> {
 
 /**
  * @brief The deletionability of the entry is checked using the @c delete key.
- *        This check is performed using @c CleanupTraits . It is used by other classes.
+ *        This check is performed using @c CleanupTraits. It is used by other classes.
  *
  * @tparam T Variable/type.
  */
@@ -85,7 +86,7 @@ concept Deletable = !std::is_void_v<T> && !std::is_array_v<T> && requires(T *p) 
 
 /**
  * @brief The deletionability of the entry is checked using the @c delete key. Only for arrays!
- *        This check is performed using @c CleanupTraits . It is used by other classes.
+ *        This check is performed using @c CleanupTraits. It is used by other classes.
  *
  * @tparam T Variable/type.
  */
@@ -120,7 +121,7 @@ concept ArrayDeletable = !std::is_void_v<T> && requires(T *p) { CleanupTraits<T[
  *   if (a_manager.resultsReceived())
  *      std::cout << "Result are already get." << std::endl;
  *
- *   //// ONLY FOR std::pair<std::string, bool> LIKE RETURN TYPES ////
+ *   // ONLY FOR std::pair<std::string, bool> LIKE RETURN TYPES //
  *
  *   // Get result and print.
  *   a_manager.finalize();
@@ -132,15 +133,16 @@ concept ArrayDeletable = !std::is_void_v<T> && requires(T *p) { CleanupTraits<T[
  * }
  * @endcode
  *
- * @tparam __return_type Return type of target function(s).
+ * @tparam RetT Return type of target function(s).
  */
-template <typename __return_type> class AsyncManager {
-  std::vector<std::packaged_task<__return_type()>> tasks;
-  std::vector<std::future<__return_type>> futures;
-  std::vector<__return_type> results;
+template <typename RetT> class AsyncManager {
+  std::vector<std::packaged_task<RetT()>> tasks;
+  std::vector<std::future<RetT>> futures;
+  std::vector<RetT> results;
   bool get = false;
 
 public:
+  /// @brief Turn printing on/off.
   bool print = true;
 
   /**
@@ -161,10 +163,10 @@ public:
    *     a_manager.addProcess(&SomeClass::func, this, 950302);
    *     // ...
    *   }
-   * }
+   * };
    * @endcode
    *
-   * @param args @c std::thread-like input.
+   * @param args @c std::thread like input.
    */
   template <typename... Args> void addProcess(Args &&...args) {
     auto bound = std::bind(std::forward<Args>(args)...);
@@ -186,7 +188,7 @@ public:
    * @note It waits for unfinished threads.
    * @return List of results.
    */
-  std::vector<__return_type> getResults() {
+  std::vector<RetT> getResults() {
     if (!get) {
       std::ranges::for_each(futures, [&](auto &future) { results.push_back(future.get()); });
       get = true;
@@ -203,7 +205,7 @@ public:
    * @note It is only available for return types like @c std::pair<std::string, bool> and similar types.
    */
   bool finalize() const
-    requires requires(__return_type v) {
+    requires requires(RetT v) {
       { v.first } -> std::convertible_to<std::string>;
       { v.second } -> std::convertible_to<bool>;
     }
@@ -224,8 +226,19 @@ public:
     return ret;
   }
 
+  /**
+   * @brief Calls @ref getResults() and @ref finalize() .
+   *
+   * @code
+   * AsyncManager<int> a_manager;
+   * // ...
+   * a_manager();
+   * @endcode
+   *
+   * @note It is only available for return types like @c std::pair<std::string, bool> and similar types.
+   */
   bool operator()()
-    requires requires(__return_type v) {
+    requires requires(RetT v) {
       { v.first } -> std::convertible_to<std::string>;
       { v.second } -> std::convertible_to<bool>;
     }
@@ -235,54 +248,116 @@ public:
   }
 };
 
-template <typename T>
-concept IsCloser_FD = requires(T t, int fd) {
-  { t(fd) } -> std::same_as<void>;
-} || requires(T t, int fd) {
-  { t.close(fd) } -> std::same_as<void>;
+/**
+ * @brief Checks if the input class can close the needed thing, either as a @c operator() or using the @c close() function.
+ *
+ * @code
+ * // A example valid class structure.
+ * class Closer {
+ *   template <typename>
+ *    static constexpr bool always_false = false;
+ *
+ * public:
+ *   template <typename T>
+ *   void close(T &var) const noexcept {
+ *     if constexpr (std::is_same_v<std::decay_t<T>, int>) {
+ *       if (static_cast<int>(var) >= 0) ::close(static_cast<int>(var));
+ *     } else if constexpr (std::is_same_v<std::decay_t<T>, FILE*>) {
+ *       if (var != nullptr) fclose(var);
+ *     } else if constexpr (std::is_same_v<std::decay_t<T>, DIR*>) {
+ *       if (var != nullptr) closedir(var);
+ *     } else {
+ *       static_assert(always_false<T>, "Unsupported input type. Closer is only supports int, FILE* and DIR*");
+ *     }
+ *   }
+ *
+ *   template <typename T>
+ *   void operator()(T &var) const noexcept {
+ *     close(var);
+ *    }
+ * };
+ *
+ * // To see how this concept is used, check out Helper::BasicUniqueFD or Helper::BasicUniqueFP.
+ * @endcode
+ *
+ * @tparam Class Class.
+ * @tparam Type Needed type.
+ * @see Helper::BasicUniqueFD
+ * @see Helper::BasicUniqueFP
+ * @note The return type of the desired @c close() function/@c operator() must be @c void.
+ */
+template <typename Class, typename Type>
+concept IsCloser = requires(Class c, Type t) {
+  { c(t) } -> std::same_as<void>;
+} || requires(Class c, Type t) {
+  { c.close(t) } -> std::same_as<void>;
 };
 
-template <typename T>
-concept IsCloser_FP = requires(T t, FILE *fp) {
-  { t(fp) } -> std::same_as<void>;
-} || requires(T t, FILE *fp) {
-  { t.close(fp) } -> std::same_as<void>;
+/**
+ * @brief Check the ownership of @c operator() in the closer class.
+ *
+ * @tparam Class Class.
+ * @tparam Type Needed type.
+ * @see Helper::BasicUniqueFD
+ * @see Helper::BasicUniqueFP
+ * @note To see how this concept is used, check out @c Helper::BasicUniqueFD or @c Helper::BasicUniqueFP.
+ */
+template <typename Class, typename Type>
+concept IsCloserWithOperator = requires(Class c, Type t) {
+  { c(t) } -> std::same_as<void>;
 };
 
-template <typename T>
-concept CloserHasOperator_FD = requires(T t, int fd) {
-  { t(fd) } -> std::same_as<void>;
+/**
+ * @brief Check the ownership of @c close() in the closer class.
+ *
+ * @tparam Class Class.
+ * @tparam Type Needed type.
+ * @see Helper::BasicUniqueFD
+ * @see Helper::BasicUniqueFP
+ * @note To see how this concept is used, check out @c Helper::BasicUniqueFD or @c Helper::BasicUniqueFP.
+ */
+template <typename Class, typename Type>
+concept IsCloserWithFunction = requires(Class c, Type t) {
+  { c.close(t) } -> std::same_as<void>;
 };
 
-template <typename T>
-concept CloserHasOperator_FP = requires(T t, FILE *fp) {
-  { t(fp) } -> std::same_as<void>;
-};
+/// @brief Valid file descriptor, file pointer and directory pointer closer class structure. Used by default.
+class Closer {
+  template <typename> static constexpr bool always_false = false;
 
-class DefaultCloser_FD {
 public:
-  void operator()(int fd) const noexcept {
-    if (fd >= 0) ::close(fd);
+  /// @brief Close the input @c fd, @c fp or @c dp.
+  template <typename T> void close(T &var) const noexcept {
+    if constexpr (std::is_integral_v<std::decay_t<T>>) {
+      if (static_cast<int>(var) >= 0) ::close(static_cast<int>(var));
+    } else if constexpr (std::is_same_v<std::decay_t<T>, FILE *>) {
+      if (var != nullptr) fclose(var);
+    } else if constexpr (std::is_same_v<std::decay_t<T>, DIR *>) {
+      if (var != nullptr) closedir(var);
+    } else {
+      static_assert(always_false<T>, "Unsupported input type. Closer is only supports int, FILE* and DIR*");
+    }
   }
 
-  void close(int fd) const noexcept {
-    if (fd >= 0) ::close(fd);
-  }
+  /// @brief Close the input @c fd, @c fp or @c dp.
+  template <typename T> void operator()(T &var) const noexcept { close(var); }
 };
 
-class DefaultCloser_FP {
-public:
-  void operator()(FILE *fp) const noexcept {
-    if (fp != nullptr) fclose(fp);
-  }
-
-  void close(FILE *fp) const noexcept {
-    if (fp != nullptr) fclose(fp);
-  }
-};
-
-template <typename Closer>
-  requires IsCloser_FD<Closer>
+/**
+ * @brief A class that helps with easy file descriptor management.
+ *
+ * @code
+ * auto sfd = BasicUniqueFD("file.txt", O_RDONLY);
+ * // ... operations
+ * @endcode
+ *
+ * @tparam Closer Closer class. @c Helper::Closer used by default.
+ * @see Helper::IsCloser
+ * @see Helper::IsCloserWithOperator
+ * @see Helper::Closer
+ */
+template <typename Closer = Helper::Closer>
+  requires IsCloser<Closer, int>
 class BasicUniqueFD {
   int fd_ = -1, flags_ = 0;
   std::optional<mode_t> mode_ = std::nullopt;
@@ -290,18 +365,48 @@ class BasicUniqueFD {
   [[no_unique_address]] Closer closer_;
 
 public:
+  /// @brief Turn on/off synchronization before closing (by object).
   bool syncOnClose = true;
 
+  /// @brief Default constructor, initializes local class variables.
   BasicUniqueFD() = default;
+
+  /// @brief A class that claims the unique property cannot be copied.
   BasicUniqueFD(const BasicUniqueFD &) = delete;
+
+  /// @brief Move constructor.
   BasicUniqueFD(BasicUniqueFD &&other) noexcept
       : fd_(other.fd_), flags_(other.flags_), mode_(other.mode_), path_(other.path_), closer_(other.closer_) {
     other.fd_ = -1;
   }
+
+  /**
+   * @brief Constructor that opens the file.
+   *
+   * @param path File path.
+   * @param flags Open flags.
+   * @see [open() flags](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/fcntl.h)
+   */
   BasicUniqueFD(const std::filesystem::path &path, int flags) : fd_(::open(path.c_str(), flags)), flags_(flags), path_(path) {}
+
+  /**
+   * @brief Constructor that opens the file with mode.
+   *
+   * @param path File path.
+   * @param flags Open flags.
+   * @param mode Mode.
+   * @see [open() flags](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/fcntl.h)
+   * @see [mode flags](https://github.com/torvalds/linux/blob/master/include/uapi/linux/stat.h)
+   */
   BasicUniqueFD(const std::filesystem::path &path, int flags, mode_t mode)
       : fd_(::open(path.c_str(), flags, mode)), flags_(flags), mode_(mode), path_(path) {}
 
+  /**
+   * @brief A constructor that takes over the management of an existing file descriptor.
+   *
+   * @param fd File descriptor.
+   * @see Helper::BasicUniqueFD::getOwnership
+   */
   explicit BasicUniqueFD(int fd) : fd_(fd) {
     if (fd_ < 0) return;
 
@@ -320,26 +425,46 @@ public:
     }
   }
 
+  /// @brief The destructor that closes the file descriptor.
   ~BasicUniqueFD() {
-    if constexpr (CloserHasOperator_FD<Closer>)
+    if (fd_ >= 0 && syncOnClose) fsync();
+
+    if constexpr (IsCloserWithOperator<Closer, int>)
       closer_(fd_);
     else
       closer_.close(fd_);
   }
 
+  /**
+   * @brief An alternative to @c Helper::BasicUniqueFD(int fd)
+   *
+   * @param fd File descriptor.
+   * @return A BasicUniqueFD object that holds @p fd.
+   */
   static BasicUniqueFD getOwnership(int fd) { return BasicUniqueFD(fd); }
 
-  int fd() { return fd_; }
-  int fd() const { return fd_; }
-  int flags() { return flags_; }
-  int flags() const { return flags_; }
+  /**
+   * @name BasicUniqueFD's function declarations.
+   * @brief In-class declarations of functions that work with file descriptors.
+   * @{
+   */
 
-  std::optional<mode_t> mode() { return mode_; }
-  std::optional<mode_t> mode() const { return mode_; }
+  int fd() { return fd_; }             ///< Get file descriptor.
+  int fd() const { return fd_; }       ///< Get file descriptor.
+  int flags() { return flags_; }       ///< Get @c open() flags.
+  int flags() const { return flags_; } ///< Get @c open() flags.
 
-  std::filesystem::path path() { return path_; }
-  std::filesystem::path path() const { return path_; }
+  std::optional<mode_t> mode() { return mode_; }       ///< It returns std::nullopt if no mode information is stored!
+  std::optional<mode_t> mode() const { return mode_; } ///< It returns std::nullopt if no mode information is stored!
 
+  std::filesystem::path path() { return path_; }       ///< Get file path.
+  std::filesystem::path path() const { return path_; } ///< Get file path.
+
+  /**
+   * @brief Open.
+   * @param withMode Open with mode or not.
+   * @return @c *this
+   */
   BasicUniqueFD &open(bool withMode = false) {
     if (fd_ >= 0) return *this;
     if (withMode && mode_.has_value())
@@ -349,6 +474,14 @@ public:
     return *this;
   }
 
+  /**
+   * @brief Open input file.
+   *
+   * @param path File path.
+   * @param flags Open flags.
+   * @return @c *this
+   * @see [open() flags](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/fcntl.h)
+   */
   BasicUniqueFD &open(const std::filesystem::path &path, int flags) {
     if (fd_ >= 0) return *this;
 
@@ -359,6 +492,16 @@ public:
     return *this;
   }
 
+  /**
+   * @brief Open input file with mode.
+   *
+   * @param path File path.
+   * @param flags Open flags.
+   * @param mode Mode.
+   * @return @c *this
+   * @see [open() flags](https://github.com/torvalds/linux/blob/master/include/uapi/asm-generic/fcntl.h)
+   * @see [mode flags](https://github.com/torvalds/linux/blob/master/include/uapi/linux/stat.h)
+   */
   BasicUniqueFD &open(const std::filesystem::path &path, int flags, mode_t mode) {
     if (fd_ >= 0) return *this;
 
@@ -370,6 +513,7 @@ public:
     return *this;
   }
 
+  /// @brief Class-specific function that reopens the file.
   bool reOpen(bool withMode = false) {
     close();
     if (withMode && mode_.has_value())
@@ -381,12 +525,13 @@ public:
   }
 
   void close() noexcept {
-    if constexpr (CloserHasOperator_FD<Closer>)
+    if (fd_ >= 0 && syncOnClose) fsync();
+
+    if constexpr (IsCloserWithOperator<Closer, int>)
       closer_(fd_);
     else
       closer_.close(fd_);
 
-    if (fd_ >= 0 && syncOnClose) fsync();
     fd_ = -1;
   }
 
@@ -405,6 +550,13 @@ public:
   int dup() { return ::dup(fd_); }
   int dup2(int newfd) { return ::dup2(fd_, newfd); }
 
+  /** @} */
+
+  /**
+   * @name BasicUniqueFD's operator declarations.
+   * @brief Definitions of operators required for int-style behavior.
+   * @{
+   */
   bool operator!() const noexcept { return fd_ < 0; }
   explicit operator bool() const noexcept { return fd_ >= 0; }
   int operator()() noexcept { return fd_; }
@@ -446,7 +598,12 @@ public:
     return fd_ != static_cast<int>(fd);
   }
 
+  /** @} */
+
+  /// @brief A class that claims the unique property cannot be copied.
   BasicUniqueFD &operator=(const BasicUniqueFD &) = delete;
+
+  /// @brief Mover @c = operator.
   BasicUniqueFD &operator=(BasicUniqueFD &&other) noexcept {
     if (this != &other) {
       close();
@@ -461,8 +618,21 @@ public:
   }
 };
 
-template <typename Closer>
-  requires IsCloser_FP<Closer>
+/**
+ * @brief A class that helps with easy file pointer management.
+ *
+ * @code
+ * auto sfd = BasicUniqueFP("file.txt", "r");
+ * // ... operations
+ * @endcode
+ *
+ * @tparam Closer Closer class. @c Helper::Closer used by default.
+ * @see Helper::IsCloser
+ * @see Helper::IsCloserWithOperator
+ * @see Helper::Closer
+ */
+template <typename Closer = Helper::Closer>
+  requires IsCloser<Closer, FILE *>
 class BasicUniqueFP {
   FILE *fp_ = nullptr;
   std::string_view flags_;
@@ -489,16 +659,36 @@ class BasicUniqueFP {
   }
 
 public:
+  /// @brief Turn on/off flushing before closing (by object).
   bool flushOnClose = true;
 
+  /// @brief Default constructor, initializes local class variables.
   BasicUniqueFP() = default;
+
+  /// @brief A class that claims the unique property cannot be copied.
   BasicUniqueFP(const BasicUniqueFP &) = delete;
+
+  /// @brief Move constructor.
   BasicUniqueFP(BasicUniqueFP &&other) noexcept : fp_(other.fp_), flags_(other.flags_), path_(other.path_), closer_(other.closer_) {
     other.fp_ = nullptr;
   }
+
+  /**
+   * @brief Constructor that opens the file.
+   *
+   * @param path File path.
+   * @param flags Open flags.
+   * @see [fopen() flags](https://www.man7.org/linux/man-pages/man3/fopen.3.html)
+   */
   BasicUniqueFP(const std::filesystem::path &path, const std::string_view &flags)
       : fp_(fopen(path.c_str(), flags.data())), flags_(flags), path_(path) {}
 
+  /**
+   * @brief A constructor that takes over the management of an existing file pointer.
+   *
+   * @param fp File pointer.
+   * @see Helper::BasicUniqueFP::getOwnership
+   */
   explicit BasicUniqueFP(FILE *fp) : fp_(fp) {
     if (fp_ == nullptr) return;
 
@@ -514,32 +704,54 @@ public:
     }
   }
 
+  /// @brief The destructor that closes the file pointer.
   ~BasicUniqueFP() {
-    if constexpr (CloserHasOperator_FP<Closer>)
+    if constexpr (IsCloserWithOperator<Closer, FILE *>)
       closer_(fp_);
     else
       closer_.close(fp_);
   }
 
+  /**
+   * @brief An alternative to @c Helper::BasicUniqueFP(FILE *fp)
+   *
+   * @param fp File pointer.
+   * @return A BasicUniqueFP object that holds @p fp.
+   */
   static BasicUniqueFP getOwnership(FILE *fp) { return BasicUniqueFP(fp); }
 
-  int rawFd() const noexcept { return fileno(fp_); }
+  /**
+   * @name BasicUniqueFP's function declarations.
+   * @brief In-class declarations of functions that work with file pointers.
+   * @{
+   */
+
+  int rawFd() const noexcept { return fileno(fp_); } ///< Get file descriptor of file pointer.
 
   FILE *fp() noexcept { return fp_; }
   const FILE *fp() const noexcept { return fp_; }
 
-  std::string_view flags() noexcept { return flags_; }
-  std::string_view flags() const noexcept { return flags_; }
+  std::string_view flags() noexcept { return flags_; }       ///< Get @c fopen() flags.
+  std::string_view flags() const noexcept { return flags_; } ///< Get @c fopen() flags.
 
+  /// @brief Get file permissions (mode).
   mode_t mode() const noexcept {
     struct stat st{};
     if (fstat(rawFd(), &st) == 0) return st.st_mode;
     return 0;
   }
 
-  std::filesystem::path path() noexcept { return path_; }
-  std::filesystem::path path() const noexcept { return path_; }
+  std::filesystem::path path() noexcept { return path_; }       ///< Get file path.
+  std::filesystem::path path() const noexcept { return path_; } ///< Get file path.
 
+  /**
+   * @brief Open input file.
+   *
+   * @param path File path.
+   * @param flags Open flags.
+   * @return @c *this
+   * @see [fopen() flags](https://www.man7.org/linux/man-pages/man3/fopen.3.html)
+   */
   BasicUniqueFP &open(const std::filesystem::path &path, const std::string_view &flags) noexcept {
     if (fp_ == nullptr) return *this;
 
@@ -550,6 +762,7 @@ public:
     return *this;
   }
 
+  /// @brief Class-specific function that reopens the file.
   bool reOpen() {
     close();
     fp_ = fopen(path_.c_str(), flags_.data());
@@ -558,7 +771,7 @@ public:
   }
 
   void close() noexcept {
-    if constexpr (CloserHasOperator_FP<Closer>)
+    if constexpr (IsCloserWithOperator<Closer, FILE *>)
       closer_(fp_);
     else
       closer_.close(fp_);
@@ -595,6 +808,14 @@ public:
 
   int flush() noexcept { return fflush(fp_); }
 
+  /** @} */
+
+  /**
+   * @name BasicUniqueFP's operator declarations.
+   * @brief Definitions of operators required for pointer-style behavior and usability.
+   * @{
+   */
+
   bool operator!() const noexcept { return fp_ == nullptr; }
   explicit operator bool() const noexcept { return fp_ != nullptr; }
   FILE *operator()() noexcept { return fp_; }
@@ -603,7 +824,12 @@ public:
   bool operator==(const FILE *fp) const noexcept { return fp_ == fp; }
   bool operator!=(const FILE *fp) const noexcept { return fp_ != fp; }
 
+  /** @} */
+
+  /// @brief A class that claims the unique property cannot be copied.
   BasicUniqueFP &operator=(const BasicUniqueFP &) = delete;
+
+  /// @brief Mover @c = operator.
   BasicUniqueFP &operator=(BasicUniqueFP &&other) noexcept {
     if (this != &other) {
       close();
@@ -617,77 +843,127 @@ public:
   }
 };
 
-using UniqueFD = BasicUniqueFD<DefaultCloser_FD>;
-using UniqueFP = BasicUniqueFP<DefaultCloser_FP>;
+using UniqueFD = BasicUniqueFD<Closer>;
+using UniqueFP = BasicUniqueFP<Closer>;
 
+/**
+ * @brief When an object created within a given scope leaves that scope, the corresponding input function is executed.
+ *
+ * @code
+ * int main(void) {
+ *   {
+ *     int fd = open("file.txt", O_RDONLY);
+ *     int* ptr = calloc(100, sizeof(int));
+ *     auto scope1 = makeScopeGuard([&] { close(fd); });
+ *     auto scope2 = makeScopeGuard([&] { free(ptr); ptr = nullptr; });
+ *   }
+ *
+ *   return 0;
+ * }
+ * @endcode
+ *
+ * @tparam F Function.
+ * @see [C++ scopes](https://cppreference.com/cpp/language/scope)
+ * @see Helper::makeScopeGuard
+ * @note Input functions can never be parameterized.
+ */
 template <std::invocable F> class ScopeGuard {
   F _fn;
   bool _active = true;
 
 public:
+  /// @brief Constructor with function input.
   explicit ScopeGuard(F &&fn) : _fn(std::forward<F>(fn)) {}
+
+  /// @brief This class is not copyable.
   ScopeGuard(const ScopeGuard &) = delete;
+
+  /// @brief Move constructor.
   ScopeGuard(ScopeGuard &&other) noexcept : _fn(std::move(other._fn)), _active(other._active) { other.dismiss(); }
 
+  /// @brief Run function if scope guard is active.
   ~ScopeGuard() {
     if (_active) _fn();
   }
 
+  /// @brief Run process now.
   void now() noexcept {
-    if (_active) _fn();
+    if (_active) {
+      _fn();
+      _active = false;
+    }
   }
+
+  /// @brief Disable scope guard.
   void dismiss() noexcept { _active = false; }
+
+  /// @brief Release.
   auto release() noexcept {
     dismiss();
     return std::move(_fn);
   }
 
+  /// @brief This class is not copyable.
   ScopeGuard &operator=(const ScopeGuard &) = delete;
 };
 
+/**
+ * @brief Make scope guard with input function.
+ *
+ * @tparam F Function reference.
+ * @param fn Function.
+ * @return Helper::ScopeGuard
+ */
 template <std::invocable F> [[nodiscard]] static auto makeScopeGuard(F &&fn) noexcept {
   return ScopeGuard<std::decay_t<F>>(std::forward<F>(fn));
 }
 
-inline auto openFd(const std::filesystem::path &path, int flags) noexcept {
-  int fd = open(path.c_str(), flags);
+/// @brief Open file (creates file descriptor).
+template <typename... Args>
+  requires(sizeof...(Args) >= 2)
+inline auto openFd(Args &&...args) noexcept {
+  int fd = open(args...);
   return std::pair{fd, makeScopeGuard([fd] {
                      if (fd >= 0) close(fd);
                    })};
 }
 
-inline auto openFd(const std::filesystem::path &path, int flags, mode_t mode) noexcept {
-  int fd = open(path.c_str(), flags, mode);
-  return std::pair{fd, makeScopeGuard([fd] {
-                     if (fd >= 0) close(fd);
-                   })};
-}
-
-inline auto openFp(const std::filesystem::path &path, const char *mode) noexcept {
-  FILE *fp = fopen(path.c_str(), mode);
+/// @brief Open file (creates file pointer).
+template <typename... Args>
+  requires(sizeof...(Args) >= 2)
+inline auto openFp(Args &&...args) noexcept {
+  FILE *fp = fopen(args...);
   return std::pair{fp, makeScopeGuard([fp] {
                      if (fp != nullptr) fclose(fp);
                    })};
 }
 
-inline auto openDir(const std::filesystem::path &path) noexcept {
-  DIR *dir = opendir(path.c_str());
+/// @brief Open directory.
+template <typename... Args>
+  requires(sizeof...(Args) >= 1)
+inline auto openDir(Args &&...args) noexcept {
+  DIR *dir = opendir(args...);
   return std::pair{dir, makeScopeGuard([dir] {
                      if (dir != nullptr) closedir(dir);
                    })};
 }
 
+/// @brief Silence @c stdout and @c stderr.
 class Silencer {
   int saved_stdout = -1, saved_stderr = -1, dev_null = -1;
 
 public:
+  /// @brief Initially, muting is optional; it's not mandatory.
   explicit Silencer(bool silence = true) {
     if (silence) silenceAgain();
   }
+
+  /// @brief Stops silencer.
   ~Silencer() {
     if (saved_stdout != -1 && dev_null != -1) stop();
   }
 
+  /// @brief Stop silencer.
   void stop() {
     if (saved_stdout == -1 && saved_stderr == -1 && dev_null == -1) return;
     fflush(stdout);
@@ -702,6 +978,7 @@ public:
     dev_null = -1;
   }
 
+  /// @brief (Re)start silencer.
   void silenceAgain() {
     if (saved_stdout != -1 && saved_stderr != -1 && dev_null != -1) return;
     fflush(stdout);

@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file functions.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Functions of libhelper.
+ */
+
 #ifndef LIBHELPER_FUNCTIONS_HPP
 #define LIBHELPER_FUNCTIONS_HPP
 
@@ -61,56 +67,64 @@ bool __lstat_check(__path_type &&__path, __predicate &&__pred, bool nlink = fals
 /** @endcond */
 
 /**
- * Checks whether the file/directory exists.
+ * @brief Checks whether the file/directory exists.
+ * @param entry File/directory path.
  */
 template <typename PathType> bool isExists(PathType &&entry) {
   return __stat_check(std::forward<PathType>(entry), [](unsigned int) { return true; });
 }
 
 /**
- * Checks whether the file exists.
+ * @brief Checks whether the file exists.
+ * @param file File path.
  */
 template <typename PathType> bool fileIsExists(PathType &&file) {
   return __stat_check(std::forward<PathType>(file), [](mode_t mode) { return S_ISREG(mode); });
 }
 
 /**
- * Checks whether the directory exists.
+ * @brief Checks whether the directory exists.
+ * @param path Directory path.
  */
 template <typename PathType> bool directoryIsExists(PathType &&path) {
   return __stat_check(std::forward<PathType>(path), [](mode_t mode) { return S_ISDIR(mode); });
 }
 
 /**
- * Checks if the entry is a symbolic link.
+ * @brief Checks if the entry is a symbolic link.
+ * @param entry File/directory path.
  */
 template <typename PathType> bool isLink(PathType &&entry) {
   return __lstat_check(std::forward<PathType>(entry), [](mode_t mode) { return S_ISLNK(mode); });
 }
 
 /**
- * Checks if the entry is a symbolic link.
+ * @brief Checks if the entry is a symbolic link.
+ * @param entry Fİle/directory path.
  */
 template <typename PathType> bool isSymbolicLink(PathType &&entry) { return isLink(std::forward<PathType>(entry)); }
 
 /**
- * Checks if the entry is a hard link.
+ * @brief Checks if the entry is a hard link.
+ * @param entry File/directory path.
  */
 template <typename PathType> bool isHardLink(PathType &&entry) {
   return __lstat_check(std::forward<PathType>(entry), [](nlink_t nlink) { return nlink >= 2; }, true);
 }
 
 /**
- * Checks whether the link (symbolic or hard) exists.
+ * @brief Checks whether the link (symbolic or hard) exists.
+ * @param entry File/directory path.
  */
 template <typename PathType> bool linkIsExists(PathType &&entry) {
   return isLink(std::forward<PathType>(entry)) || isHardLink(std::forward<PathType>(entry));
 }
 
 /**
- * Writes given text into file.
- * If file does not exist, it is automatically created.
- * Returns true on success.
+ * @brief Writes given text into file. If file does not exist, it is automatically created.
+ * @tparam StringType String type (default is @c std::string ).
+ * @param file File path.
+ * @param text Text.
  */
 template <typename PathType, typename StringType = std::string> bool writeFile(PathType &&file, StringType &&text) {
   std::filesystem::path p(std::forward<PathType>(file));
@@ -126,9 +140,16 @@ template <typename PathType, typename StringType = std::string> bool writeFile(P
 }
 
 /**
- * Reads file content into string.
+ *
  * On success, returns file content.
  * On error, returns std::nullopt.
+ */
+/**
+ * @brief Reads file content into string.
+ * @tparam StringType String type (default is @c std::string ).
+ * @param file File path.
+ * @retval std::nullopt Error occurred.
+ * @retval StringType File content.
  */
 template <typename PathType, typename StringType = std::string>
 std::optional<ConstIfCharPointer_t<StringType>> readFile(PathType &&file) {
@@ -149,7 +170,9 @@ std::optional<ConstIfCharPointer_t<StringType>> readFile(PathType &&file) {
 }
 
 /**
- * Copy file to dest.
+ * @brief Copy file to destination.
+ * @param file File path.
+ * @param dest Destination.
  */
 template <typename PathType> bool copyFile(PathType &&file, PathType &&dest) {
   std::filesystem::path _file(std::forward<PathType>(file));
@@ -173,38 +196,28 @@ template <typename PathType> bool copyFile(PathType &&file, PathType &&dest) {
   return true;
 }
 
-/**
- * Create directory.
- */
+/// @brief Create directory.
 bool makeDirectory(const std::filesystem::path &path);
 
-/**
- * Create recursive directory.
- */
+/// @brief Create recursive directory.
 bool makeRecursiveDirectory(const std::filesystem::path &paths);
 
-/**
- * Create file.
- */
+/// @brief Create file.
 bool createFile(const std::filesystem::path &path);
 
-/**
- * Symlink entry1 to entry2.
- */
+/// @brief Symlink entries.
 bool createSymlink(const std::filesystem::path &entry1, const std::filesystem::path &entry2);
 
-/**
- * Remove file or empty directory.
- */
+/// @brief Remove file or empty directory.
 bool eraseEntry(const std::filesystem::path &entry);
 
-/**
- * Remove directory and all directory contents recursively.
- */
+/// @brief Remove directory and all directory contents recursively.
 bool eraseDirectoryRecursive(const std::filesystem::path &directory);
 
 /**
- * Get file size.
+ * @brief Get file size.
+ * @tparam ReturnType Return type (default is @c int64_t ).
+ * @param file File path.
  */
 template <typename ReturnType = int64_t>
   requires std::is_integral_v<ReturnType>
@@ -215,14 +228,10 @@ ReturnType fileSize(const std::filesystem::path &file) {
   return static_cast<ReturnType>(st.st_size);
 }
 
-/**
- * Read symlinks.
- */
+/// @brief Read symlinks.
 std::string readSymlink(const std::filesystem::path &entry);
 
-/**
- * Checks whether entry1 is linked to entry2.
- */
+/// @brief It checks if the two entries are linked.
 inline bool areLinked(const std::filesystem::path &entry1, const std::filesystem::path &entry2) {
   auto &&st1 = isSymbolicLink(entry1) ? readSymlink(entry1) : entry1.string();
   auto &&st2 = isSymbolicLink(entry2) ? readSymlink(entry2) : entry2.string();
@@ -231,59 +240,51 @@ inline bool areLinked(const std::filesystem::path &entry1, const std::filesystem
 }
 
 /**
- * Compare SHA-256 values of files.
- * Throws Helper::Error on error occurred.
+ * @brief Compare SHA-256 values of files.
+ * @param file1 First file path.
+ * @param file2 Second file path.
+ * @throws Helper::Error
  */
 bool sha256Compare(const std::filesystem::path &file1, const std::filesystem::path &file2);
 
 /**
- * Get SHA-256 of file.
- * Throws Helper::Error on error occurred.
+ * @brief Get SHA-256 of file.
+ * @param path File path.
+ * @throws Helper::Error
  */
 std::optional<std::string> sha256Of(const std::filesystem::path &path);
 
-/**
- * Run shell command.
- */
+/// @brief Run shell command.
 bool runCommand(const std::string &cmd);
 
-/**
- * Shows message and asks for y/N from user.
- */
+/// Shows message and asks for y/N from user.
 bool confirmPropt(const std::string &message, int maxTries = 10);
 
-/**
- * Change file permissions.
- */
+/// @brief Changes file permissions.
 bool changeMode(const std::filesystem::path &file, mode_t mode);
 
-/**
- * Change file owner (user ID and group ID).
- */
+/// @brief Change file owner (user ID and group ID).
 bool changeOwner(const std::filesystem::path &file, uid_t uid, gid_t gid);
 
 /**
- * Get current working directory as string.
- * Returns empty string on error.
+ * @brief Get current working directory as string.
+ * @retval "Empty String" An error occurred.
  */
 std::string currentWorkingDirectory();
 
 /**
- * Get current date as string (format: YYYY-MM-DD).
- * Returns empty string on error.
+ * @brief Get current date as string (format: YYYY-MM-DD).
+ * @retval "Empty String" An error occurred.
  */
 std::string currentDate();
 
 /**
- * Get current time as string (format: HH:MM:SS).
- * Returns empty string on error.
+ * @brief Get current time as string (format: HH:MM:SS).
+ * @retval "Empty String" An error occurred.
  */
 std::string currentTime();
 
-/**
- * Run shell command return output as string.
- * Returns std::pair<std::string, int>.
- */
+/// @brief Run shell command return output as string.
 template <typename ExitCodeType = int>
   requires std::is_integral_v<ExitCodeType>
 std::pair<std::string, ExitCodeType> runCommandWithOutput(const std::string &cmd) {
@@ -334,24 +335,16 @@ std::pair<std::string, ExitCodeType> runCommandWithOutput(const std::string &cmd
   return {output, (ExitCodeType)(WIFEXITED(status) ? WEXITSTATUS(status) : -1)};
 }
 
-/**
- * Joins base path with relative path and returns result.
- */
+/// @brief Joins base path with relative path and returns result.
 std::filesystem::path pathJoin(std::filesystem::path base, const std::filesystem::path &relative);
 
-/**
- * Get the filename part of given path.
- */
+/// @briefGet the filename part of given path.
 std::filesystem::path pathBasename(const std::filesystem::path &entry);
 
-/**
- * Get the directory part of given path.
- */
+/// @brief Get the directory part of given path.
 std::filesystem::path pathDirname(const std::filesystem::path &entry);
 
-/**
- * Get random offset depending on size and bufferSize.
- */
+/// @brief Get random offset depending on size and bufferSize.
 template <typename Ret = uint64_t, typename T = Ret>
   requires std::is_integral_v<Ret> && std::is_integral_v<T> && std::is_unsigned_v<Ret> && std::is_unsigned_v<T>
 Ret getRandomOffset(T &&size, T &&bufferSize) {
@@ -363,7 +356,11 @@ Ret getRandomOffset(T &&size, T &&bufferSize) {
 }
 
 /**
- * Convert input size to input multiple.
+ * @brief Convert input size to input multiple.
+ * @tparam Ret Return type.
+ * @tparam SizeType Input size type
+ * @param size Size.
+ * @param type Cast type.
  */
 template <typename Ret = int, typename SizeType = uint64_t>
   requires std::is_integral_v<Ret> && std::is_integral_v<SizeType>
@@ -374,21 +371,19 @@ Ret convertTo(SizeType size, sizeCastTypes type) {
   return static_cast<SizeType>(size);
 }
 
-/**
- * Convert input multiple variable to string.
- */
+/// @brief Convert input multiple variable to string.
 std::string multipleToString(sizeCastTypes type);
 
-/**
- * Format it input and return as std::string.
- */
+/// @brief Format it input and return as @c std::string.
 template <typename... Args> std::string format(std::format_string<Args...> fmt, Args &&...args) {
   const std::string message = std::format(fmt, std::forward<Args>(args)...);
   return message;
 }
 
 /**
- * Convert input size to input multiple
+ * @brief Convert input size to input multiple
+ * @tparam size Size.
+ * @param type Cast type.
  */
 template <uint64_t size> int convertTo(const sizeCastTypes &type) {
   if (type == KB) return TO_KB(size);
@@ -397,9 +392,7 @@ template <uint64_t size> int convertTo(const sizeCastTypes &type) {
   return static_cast<int>(size);
 }
 
-/**
- * Get libhelper library version string.
- */
+/// @brief Get @c libhelper library version string.
 std::string getLibVersion();
 } // namespace Helper
 

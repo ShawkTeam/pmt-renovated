@@ -20,6 +20,7 @@
 
 /**
  * @file definations.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
  * @brief Some concept definitions, descriptions, etc. of the library.
  */
 
@@ -35,10 +36,10 @@ inline constexpr mode_t DEFAULT_EXTENDED_FILE_PERMS = 0755;
 /// @brief Default directory permissions.
 inline constexpr mode_t DEFAULT_DIR_PERMS = 0755;
 
-/// @brief Alternative of @c true .
+/// @brief Alternative of @c true.
 inline constexpr int YES = 1;
 
-/// @brief Alternative of @c false .
+/// @brief Alternative of @c false.
 inline constexpr int NO = 0;
 
 /// @brief Short names used in dimension type conversions
@@ -92,7 +93,7 @@ template <typename T> struct DeepConst<T *> {
 /** @endcond */
 
 /**
- * @brief Shorcut of @c DeepConst<T>::type .
+ * @brief Shorcut of @c DeepConst<T>::type.
  *
  * @code
  * std::is_same_v<DeepConst_t<int>, const int> // Equals to true.
@@ -103,7 +104,7 @@ template <typename T> struct DeepConst<T *> {
 template <typename T> using DeepConst_t = DeepConst<T>::type;
 
 /**
- * @brief Add the @c const qualifier if input type is @c char* .
+ * @brief Add the @c const qualifier if input type is @c char*.
  *
  * @code
  * std::is_same_v<ConstIfCharPointer<char*>::type, const char*> // Equals to true.
@@ -111,7 +112,7 @@ template <typename T> using DeepConst_t = DeepConst<T>::type;
  * @endcode
  *
  * @tparam T Input type.
- * @note If the type is not @c char* , @c type is directly determined as the input type.
+ * @note If the type is not @c char*, @c type is directly determined as the input type.
  */
 template <typename T> struct ConstIfCharPointer {
   using type = T;
@@ -130,7 +131,7 @@ template <> struct ConstIfCharPointer<const char *> {
 /** @endcond */
 
 /**
- * @brief Shorcut of @c ConstIfCharPointer<T>::type .
+ * @brief Shorcut of @c ConstIfCharPointer<T>::type.
  *
  * @code
  * std::is_same_v<ConstIfCharPointer_t<char*>, const char*> // Equals to true.

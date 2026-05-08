@@ -17,6 +17,7 @@
 
 /**
  * @file android.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
  * @brief Android-specific system utilities for root detection, property access and device control.
  */
 

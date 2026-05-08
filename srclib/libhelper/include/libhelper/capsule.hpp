@@ -17,6 +17,7 @@
 
 /**
  * @file capsule.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
  * @brief Provides a capsule structure to store variable references and values.
  */
 

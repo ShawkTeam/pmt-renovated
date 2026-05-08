@@ -96,5 +96,9 @@ done
 
 find ${WORK_DIR} \( "${FIND_ARGS[@]}" \) -prune -o \
      -type f \( -name "*.cpp" -o -name "*.h" -o -name "*.hpp" \) \
-     "${EXCLUDE_ARGS[@]}" -print \
-     -exec clang-format -i {} +
+     -print | while IFS= read -r file; do
+        before=$(md5sum "$file")
+        clang-format -i "$file"
+        after=$(md5sum "$file")
+        [ "$before" != "$after" ] && echo "$file"
+done

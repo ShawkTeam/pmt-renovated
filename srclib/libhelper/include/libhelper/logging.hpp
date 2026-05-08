@@ -17,6 +17,7 @@
 
 /**
  * @file logging.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
  * @brief A logging solution that can be used throughout the program(s).
  */
 

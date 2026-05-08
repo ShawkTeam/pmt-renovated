@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file pure_tuple.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Provides a tuple class.
+ */
+
 #ifndef LIBHELPER_PURE_TUPLE_HPP
 #define LIBHELPER_PURE_TUPLE_HPP
 
@@ -28,6 +34,15 @@
 #include <functional>
 
 namespace Helper {
+
+/**
+ * @brief A class that stores tuple data in a list.
+ *
+ * @tparam _Type1 First type.
+ * @tparam _Type2 Second type
+ * @tparam _Type3 Third type.
+ * @note All given types must contain the @c = and @c == operators.
+ */
 template <typename _Type1, typename _Type2, typename _Type3>
   requires requires(_Type1 v1, _Type2 v2, _Type3 v3) {
     v1 = v1;
@@ -50,6 +65,7 @@ class PureTuple {
   }
 
 public:
+  /// @brief A class that stores a single tuple of data.
   struct Data {
     _Type1 first;
     _Type2 second;
@@ -63,7 +79,7 @@ public:
       return first == other.first && second == other.second && third == other.third;
     }
 
-    bool operator!=(const Data &other) const noexcept { return !(*this == other); }
+    bool operator!=(const Data &other) const noexcept { return *this != other; }
 
     explicit operator bool() const noexcept { return first != _Type1{} || second != _Type2{} || third != _Type3{}; }
 
@@ -87,21 +103,30 @@ public:
   Data tuple_data_type = {_Type1{}, _Type2{}, _Type3{}};
   size_t capacity{}, count{};
 
+  /// @brief Default constructor. Sets capacity as 20.
   PureTuple() : tuple_data(new Data[20]), capacity(20), count(0) {}
+
+  /// @brief Destructor that deletes data.
   ~PureTuple() { delete[] tuple_data; }
 
+  /// @brief Constructor with initializer list.
   PureTuple(std::initializer_list<Data> val) : tuple_data(new Data[20]), capacity(20), count(0) {
     for (const auto &v : val)
       insert(v);
   }
+
+  /// @brief Copy constructor.
   PureTuple(PureTuple &other) : tuple_data(new Data[other.capacity]), capacity(other.capacity), count(other.count) {
     std::copy(other.tuple_data, other.tuple_data + count, tuple_data);
   }
+
+  /// @brief Move constructor.
   PureTuple(PureTuple &&other) noexcept : tuple_data(new Data[other.capacity]), capacity(other.capacity), count(other.count) {
     std::copy(other.tuple_data, other.tuple_data + count, tuple_data);
     other.clear();
   }
 
+  /// @brief PureTuple's iterator class.
   class iterator {
   private:
     Data *it;
@@ -160,6 +185,7 @@ public:
     bool operator==(const iterator &other) const { return it == other.it; }
   };
 
+  /// @brief Find data.
   bool find(const Data &data) const noexcept {
     for (size_t i = 0; i < count; i++)
       if (data == tuple_data[i]) return true;
@@ -167,6 +193,7 @@ public:
     return false;
   }
 
+  /// @brief Find data (with tuple input).
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
     requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
   bool find(const std::tuple<_Type1, _Type2, _Type3> &t) const noexcept {
@@ -176,6 +203,7 @@ public:
     return false;
   }
 
+  /// @brief Find data (with value inputs).
   bool find(const _Type1 &val, const _Type2 &val2, const _Type3 &val3) const noexcept {
     for (size_t i = 0; i < count; i++)
       if (tuple_data[i] == std::make_tuple(val, val2, val3)) return true;
@@ -183,11 +211,13 @@ public:
     return false;
   }
 
+  /// @brief Insert data.
   void insert(const Data &val) noexcept {
     expand_if_needed();
     if (!find(val)) tuple_data[count++] = val;
   }
 
+  /// @brief Insert data (with tuple input).
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
     requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
   void insert(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
@@ -195,20 +225,24 @@ public:
     if (!find(t)) tuple_data[count++] = Data{std::get<0>(t), std::get<1>(t), std::get<2>(t)};
   }
 
+  /// @brief Insert data (with value inputs).
   void insert(const _Type1 &val, const _Type2 &val2, const _Type3 &val3) noexcept {
     expand_if_needed();
     if (!find(val, val2, val3)) tuple_data[count++] = Data{val, val2, val3};
   }
 
+  /// @brief Combine with another class data.
   void merge(const PureTuple &other) noexcept {
     for (const auto &v : other)
       insert(v);
   }
 
+  /// @brief Remove the last piece of data.
   void pop_back() noexcept {
     if (count > 0) --count;
   }
 
+  /// @brief Remove data.
   void pop(const Data &data) noexcept {
     for (size_t i = 0; i < count; i++) {
       if (tuple_data[i] == data) {
@@ -220,6 +254,7 @@ public:
     }
   }
 
+  /// @brief Remove data (using index).
   void pop(const size_t i) noexcept {
     if (i >= count) return;
     for (size_t x = 0; x < count; x++) {
@@ -232,6 +267,7 @@ public:
     }
   }
 
+  /// @brief Remove data (pairing with input values).
   void pop(const _Type1 &val, const _Type2 &val2, const _Type3 &val3) noexcept {
     for (size_t i = 0; i < count; i++) {
       if (tuple_data[i] == std::make_tuple(val, val2, val3)) {
@@ -243,6 +279,7 @@ public:
     }
   }
 
+  /// @brief Remove data (with tuple).
   template <typename T = std::tuple<_Type1, _Type2, _Type3>>
     requires requires { std::is_same_v<T, std::tuple<_Type1, _Type2, _Type3>>; }
   void pop(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
@@ -256,6 +293,7 @@ public:
     }
   }
 
+  /// @brief Clear all data.
   void clear() noexcept {
     delete[] tuple_data;
     count = 0;
@@ -263,29 +301,54 @@ public:
     tuple_data = new Data[capacity];
   }
 
+  /// @brief Get the last data.
   Data back() const noexcept { return (count > 0) ? tuple_data[count - 1] : Data{}; }
+
+  /// @brief Get the initial data.
   Data top() const noexcept { return (count > 0) ? tuple_data[0] : Data{}; }
 
+  /// @brief Provide the data that is in the requested index.
   Data at(size_t i) const noexcept {
     if (i >= count) return Data{};
     return tuple_data[i];
   }
 
+  /**
+   * @brief The input function is an application for all tuples.
+   *
+   * @param func Function.
+   * @note The input function must be able to accept all given data types in the order they are given to the class.
+   */
   void foreach (std::function<void(_Type1, _Type2, _Type3)> func) {
     for (size_t i = 0; i < count; i++)
       func(tuple_data[i].first, tuple_data[i].second, tuple_data[i].third);
   }
 
+  /**
+   * @brief The input function is an application for all tuples.
+   *
+   * @param func Function.
+   * @note The input function must be able to accept all given data types in the order they are given to the class.
+   * @note Unlike other @c foreach() overload, this one takes input as a @c std::tuple for the desired input function.
+   */
   void foreach (std::function<void(std::tuple<_Type1, _Type2, _Type3>)> func) {
     for (size_t i = 0; i < count; i++)
       func(std::make_tuple(tuple_data[i].first, tuple_data[i].second, tuple_data[i].third));
   }
 
+  /// @brief Get size.
   [[nodiscard]] size_t size() const noexcept { return count; }
+
   [[nodiscard]] bool empty() const noexcept { return count == 0; }
 
   iterator begin() const noexcept { return iterator(tuple_data); }
   iterator end() const noexcept { return iterator(tuple_data + count); }
+
+  /**
+   * @name PureTuple's operator declarations.
+   * @brief Definitions of operators required for list-like operations, etc.
+   * @{
+   */
 
   explicit operator bool() const noexcept { return count > 0; }
   bool operator!() const noexcept { return count == 0; }
@@ -298,14 +361,29 @@ public:
 
     return true;
   }
-  bool operator!=(const PureTuple &other) const noexcept { return !(*this == other); }
+
+  bool operator!=(const PureTuple &other) const noexcept { return *this != other; }
 
   Data operator[](size_t i) const noexcept {
     if (i >= count) return Data{};
     return tuple_data[i];
   }
+
   explicit operator int() const noexcept { return count; }
 
+  PureTuple &operator<<(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
+    insert(t);
+    return *this;
+  }
+
+  friend PureTuple &operator>>(const std::tuple<_Type1, _Type2, _Type3> &t, PureTuple &tuple) noexcept {
+    tuple.insert(t);
+    return tuple;
+  }
+
+  /** @} */
+
+  /// @brief Copy constructor.
   PureTuple &operator=(const PureTuple &other) {
     if (this != &other) {
       delete[] tuple_data;
@@ -318,16 +396,6 @@ public:
     }
 
     return *this;
-  }
-
-  PureTuple &operator<<(const std::tuple<_Type1, _Type2, _Type3> &t) noexcept {
-    insert(t);
-    return *this;
-  }
-
-  friend PureTuple &operator>>(const std::tuple<_Type1, _Type2, _Type3> &t, PureTuple &tuple) noexcept {
-    tuple.insert(t);
-    return tuple;
   }
 };
 

@@ -17,6 +17,11 @@
 #
 
 echo ".githooks/pre-commit triggered. Reformatting code!!!"
-build/scripts/reformat.sh --working-directory=$PWD || exit 1
-echo "Reformat complete. Adding changes."
-git add $PWD || exit 1
+
+output=$(build/scripts/reformat.sh --working-directory=$PWD)
+while IFS= read -r f; do
+    echo "Adding formatted source file to git: $f"
+    git add "$f"
+done <<< "$output"
+
+echo "Reformat complete."

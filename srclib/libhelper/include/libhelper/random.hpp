@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file random.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Random number generation.
+ */
+
 #ifndef LIBHELPER_RANDOM_HPP
 #define LIBHELPER_RANDOM_HPP
 
@@ -23,12 +29,21 @@
 
 namespace Helper {
 
+/**
+ * @brief Generate random numbers with @c std::mt19937.
+ *
+ * @tparam max Maximum number limit.
+ * @tparam start Minimum value of numbers.
+ * @tparam count List count.
+ * @tparam d Delimiter.
+ */
 template <int max = 100, int start = 0, int count = 10, int d = 0> class Random {
   static_assert(max > start, "max is larger than start");
   static_assert(count > 1, "count is larger than 1");
   static_assert(count <= max - start, "count is greater than max-start");
 
 public:
+  /// @brief Get a random number list.
   static std::set<int> get() {
     std::set<int> set;
     std::random_device rd;
@@ -47,6 +62,7 @@ public:
     return set;
   }
 
+  /// @brief Get a random number.
   static int getNumber() {
     std::random_device rd;
     std::mt19937 gen(rd());
