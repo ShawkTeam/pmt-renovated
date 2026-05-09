@@ -64,8 +64,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="doxygen: improve build instructions on the main page">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="github: setting up pages.">
+      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Doxyfile" beforeDir="false" afterPath="$PROJECT_DIR$/Doxyfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -73,6 +74,13 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="GitHub Workflow" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
@@ -592,7 +600,7 @@
       <workItem from="1778268958024" duration="208000" />
       <workItem from="1778308828940" duration="5784000" />
       <workItem from="1778320253911" duration="286000" />
-      <workItem from="1778320624594" duration="8153000" />
+      <workItem from="1778320624594" duration="8457000" />
     </task>
     <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
       <option name="closed" value="true" />
@@ -978,7 +986,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778327613337</updated>
     </task>
-    <option name="localTasksCounter" value="49" />
+    <task id="LOCAL-00049" summary="github: setting up pages.">
+      <option name="closed" value="true" />
+      <created>1778337201925</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1778337201925</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1002,7 +1018,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: add random number generator class (compile-time, with templates)" />
     <MESSAGE value="pmt: cleanup PureTuple class." />
     <MESSAGE value="pmt: improve PureTuple class." />
     <MESSAGE value="pmt: improve PureTuple class and improve function manager." />
@@ -1027,7 +1042,8 @@
     <MESSAGE value="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc." />
     <MESSAGE value="doxygen: add main page content" />
     <MESSAGE value="doxygen: improve build instructions on the main page" />
-    <option name="LAST_COMMIT_MESSAGE" value="doxygen: improve build instructions on the main page" />
+    <MESSAGE value="github: setting up pages." />
+    <option name="LAST_COMMIT_MESSAGE" value="github: setting up pages." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

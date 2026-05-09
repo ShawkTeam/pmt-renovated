@@ -1,4 +1,4 @@
-# PMT Renovated Documentation
+@mainpage PMT Renovated
 
 ## Introduction
 
