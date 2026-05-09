@@ -22,8 +22,7 @@ set(PMT_SOURCES
 )
 
 # Add pmt to build targets
-add_executable(pmt ${PMT_SOURCES}
-        ../docs/plugin-structure/ExamplePlugin.cpp)
+add_executable(pmt ${PMT_SOURCES})
 add_executable(pmt_static ${PMT_SOURCES})
 
 if(BUILTIN_PLUGINS)
