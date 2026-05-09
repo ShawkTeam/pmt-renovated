@@ -55,9 +55,7 @@ The project is organized into several key components:
 git clone https://github.com/ShawkTeam/pmt-renovated.git
 git submodule --init --recursive --depth 1
 cd pmt-renovated
-mkdir build && cd build
-cmake ..
-make
+bash build/scripts/build.sh build
 ```
 
 ## Documentation
