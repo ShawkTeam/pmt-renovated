@@ -15,7 +15,9 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 THIS="$(basename "$0")"
-RELEASE="20260207"
+DEFAULT_RELEASE="20260207"
+RELEASE="${DEFAULT_RELEASE}"
+VARIANT=""
 
 echo() { command echo "[$THIS]: $*"; }
 error() { echo "$*"; exit 1; }
@@ -26,7 +28,20 @@ checks() {
 	echo "Updating repositories and checking required packages..."
 	pkg update &>/dev/null
 	[ ! -f "$PREFIX/bin/unzip" ] && pkg install -y unzip
-  [ ! -f "$PREFIX/bin/wget" ] && pkg install -y wget
+	[ ! -f "$PREFIX/bin/wget" ] && pkg install -y wget
+	[ ! -f "$PREFIX/bin/jq" ] && pkg install -y jq
+}
+
+get_latest_release() {
+	echo "Fetching latest release information..."
+	LATEST_RELEASE=$(curl -s "https://api.github.com/repos/ShawkTeam/pmt-renovated/releases/latest" | jq -r '.tag_name' 2>/dev/null)
+	if [ -z "$LATEST_RELEASE" ] || [ "$LATEST_RELEASE" = "null" ]; then
+		echo "Warning: Could not fetch latest release, using default: $DEFAULT_RELEASE"
+		RELEASE="$DEFAULT_RELEASE"
+	else
+		RELEASE="$LATEST_RELEASE"
+		echo "Latest release found: $RELEASE"
+	fi
 }
 
 select_variant() {
@@ -42,7 +57,7 @@ select_variant() {
 download() {
 	echo "Downloading pmt-${VARIANT}${ARCH}-builtin.zip (${RELEASE})"
 	if ! wget -O "$PREFIX/tmp/pmt.zip" "${LINK}" &>/dev/null; then
-		rm "$PREFIX/tmp/*.zip"
+		rm -f "$PREFIX/tmp"/*.zip
 		error "Download failed! LINK=${LINK}"
 	fi
 
@@ -55,7 +70,7 @@ setup() {
 	set -e
 	install -t "$PREFIX/bin" "$PREFIX/tmp/pmt"
 	if [ -f "$PREFIX/tmp/libhelper.so" ]; then
-	  find "$PREFIX/tmp" -name "*lib*" -exec install -t "$PREFIX/lib" {} \;
+		find "$PREFIX/tmp" -name "*lib*" -exec install -t "$PREFIX/lib" {} \;
 	fi
 	echo "Installed successfully. Try running 'pmt' command."
 }
@@ -69,24 +84,69 @@ is_installed() {
 }
 
 cleanup() {
-	rm -f "$PREFIX"/tmp/pmt* "$PREFIX"/tmp/lib* "$PREFIX"/tmp/*.zip &>/dev/null
+	rm -f "$PREFIX/tmp"/pmt* "$PREFIX/tmp"/lib* "$PREFIX/tmp"/*.zip &>/dev/null
 }
 
-if [ $# -eq 0 ]; then
-    command echo "Usage: $0 install|uninstall"
+show_help() {
+	cat << EOF
+Usage: $0 [COMMAND] [OPTIONS]
+
+COMMANDS:
+    install [TAG]     Install PMT. If TAG is not specified, uses the latest release.
+    uninstall          Remove PMT installation.
+    reinstall [TAG]    Reinstall PMT. If TAG is not specified, uses the latest release.
+    help               Show this help message.
+
+EXAMPLES:
+    $0 install                    # Install latest release
+    $0 install v20260207          # Install specific tag/release
+    $0 reinstall                  # Reinstall latest release
+    $0 reinstall v20260115        # Reinstall specific tag/release
+
+VARIANTS:
+    The script automatically detects your architecture (arm64-v8a or armeabi-v7a).
+EOF
+}
+
+# Parse command line arguments
+COMMAND="$1"
+TAG_ARG="$2"
+
+if [ -z "$COMMAND" ]; then
+    show_help
     exit 1
 fi
 
 basename -a "${PREFIX}"/bin/* | grep "termux" &>/dev/null \
-  || error "This script only for termux!"
+  || error "This script only works for Termux!"
 
-case $1 in
+# Handle help command
+if [ "$COMMAND" = "help" ] || [ "$COMMAND" = "-h" ] || [ "$COMMAND" = "--help" ]; then
+    show_help
+    exit 0
+fi
+
+# Set release version based on tag argument
+if [ -n "$TAG_ARG" ]; then
+    RELEASE="$TAG_ARG"
+    echo "Using specified tag: $RELEASE"
+else
+    get_latest_release
+fi
+
+# Validate release format (should be like v20260207 or just 20260207)
+if ! echo "$RELEASE" | grep -E '^v?[0-9]{8}$' &>/dev/null; then
+    echo "Warning: Release tag format '$RELEASE' may not be valid. Expected format: vYYYYMMDD or YYYYMMDD"
+fi
+
+case $COMMAND in
     "install")
     	is_installed
     	checks
     	select_variant
-			download
-			setup
+		download
+		setup
+		cleanup
     ;;
     "uninstall")
     	uninstall && echo "Uninstalled successfully."
@@ -97,8 +157,11 @@ case $1 in
       select_variant
       download
       setup
+      cleanup
     ;;
     *)
-      command echo "$0: Unknown argument: $1"
+      echo "Error: Unknown command: $COMMAND"
+      echo
+      show_help
       exit 1 ;;
 esac
