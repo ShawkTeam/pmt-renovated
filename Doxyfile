@@ -48,7 +48,7 @@ PROJECT_NAME           = "PMT Renovated"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = main-branch
+PROJECT_NUMBER         = main
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewers a
@@ -1030,7 +1030,10 @@ INPUT                  = include/PartitionManager \
                          srclib/libhelper/include/libhelper/ \
                          srclib/libpartition_map/include/libpartition_map/ \
                          docs/plugin-structure/ExamplePlugin.cpp \
-                         docs/various/documentation-mainpage.md
+                         docs/md/documentation-mainpage.md \
+                         docs/md/building-from-source.md \
+                         docs/md/usage-guide.md \
+                         docs/md/release-types.md
 
 # This tag can be used to specify the character encoding of the source files
 # that Doxygen parses. Internally Doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1218,7 +1221,7 @@ FILTER_SOURCE_PATTERNS =
 # (index.html). This can be useful if you have a project on for instance GitHub
 # and want to reuse the introduction page also for the Doxygen output.
 
-USE_MDFILE_AS_MAINPAGE = docs/various/documentation-mainpage.md
+USE_MDFILE_AS_MAINPAGE = docs/md/documentation-mainpage.md
 
 # If the IMPLICIT_DIR_DOCS tag is set to YES, any README.md file found in sub-
 # directories of the project's root, is used as the documentation for that sub-
