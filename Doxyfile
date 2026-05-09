@@ -1033,7 +1033,8 @@ INPUT                  = include/PartitionManager \
                          docs/md/documentation-mainpage.md \
                          docs/md/building-from-source.md \
                          docs/md/usage-guide.md \
-                         docs/md/release-types.md
+                         docs/md/release-types.md \
+                         docs/md/using-with-termux.md
 
 # This tag can be used to specify the character encoding of the source files
 # that Doxygen parses. Internally Doxygen uses the UTF-8 encoding. Doxygen uses
