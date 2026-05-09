@@ -57,7 +57,6 @@ template <typename T> struct CleanupTraits {
   static void cleanup(const T *ptr) { delete ptr; }
 };
 
-/** @cond */
 template <typename T> struct CleanupTraits<T[]> {
   static void cleanup(const T *ptr) { delete[] ptr; }
 };
@@ -73,16 +72,15 @@ template <> struct CleanupTraits<DIR> {
     if (dp) closedir(dp);
   }
 };
-/** @endcond */
 
 /**
- * @brief The deletionability of the entry is checked using the @c delete key.
+ * @brief The deletionability of the entry is checked using the @c delete key. Only for pointers/classes!
  *        This check is performed using @c CleanupTraits. It is used by other classes.
  *
  * @tparam T Variable/type.
  */
 template <typename T>
-concept Deletable = !std::is_void_v<T> && !std::is_array_v<T> && requires(T *p) { CleanupTraits<T>::cleanup(p); };
+concept PointerDeletable = !std::is_void_v<T> && !std::is_array_v<T> && requires(T *p) { CleanupTraits<T>::cleanup(p); };
 
 /**
  * @brief The deletionability of the entry is checked using the @c delete key. Only for arrays!
@@ -92,6 +90,16 @@ concept Deletable = !std::is_void_v<T> && !std::is_array_v<T> && requires(T *p) 
  */
 template <typename T>
 concept ArrayDeletable = !std::is_void_v<T> && requires(T *p) { CleanupTraits<T[]>::cleanup(p); };
+
+/**
+ * @brief The deletionability of the entry is checked using the @c delete key.
+ *        This check is performed using @c CleanupTraits. It is used by other classes.
+ *
+ * @tparam T Variable/type.
+ * @note This concept handles both @c PointerDeletable and @c ArrayDeletable controls.
+ */
+template <typename T>
+concept Deletable = PointerDeletable<T> && ArrayDeletable<T>;
 
 /**
  * @brief A simple class for easily managing asynchronous operations.
@@ -253,9 +261,70 @@ public:
  *
  * @code
  * // A example valid class structure.
+ * class CloserWithFunction {
+ *   template <typename>
+ *   static constexpr bool always_false = false;
+ *
+ * public:
+ *   template <typename T>
+ *   void close(T &var) const noexcept {
+ *     if constexpr (std::is_same_v<std::decay_t<T>, int>) {
+ *       if (static_cast<int>(var) >= 0) ::close(static_cast<int>(var));
+ *     } else if constexpr (std::is_same_v<std::decay_t<T>, FILE*>) {
+ *       if (var != nullptr) fclose(var);
+ *     } else if constexpr (std::is_same_v<std::decay_t<T>, DIR*>) {
+ *       if (var != nullptr) closedir(var);
+ *     } else {
+ *       static_assert(always_false<T>, "Unsupported input type. Closer is only supports int, FILE* and DIR*");
+ *     }
+ *   }
+ * };
+ *
+ * // --- OR --- //
+ *
+ * class CloserWithOperator {
+ *   template <typename>
+ *   static constexpr bool always_false = false;
+ *
+ * public:
+ *   template <typename T>
+ *   void operator()(T &var) const noexcept {
+ *     if constexpr (std::is_same_v<std::decay_t<T>, int>) {
+ *       if (static_cast<int>(var) >= 0) ::close(static_cast<int>(var));
+ *     } else if constexpr (std::is_same_v<std::decay_t<T>, FILE*>) {
+ *       if (var != nullptr) fclose(var);
+ *     } else if constexpr (std::is_same_v<std::decay_t<T>, DIR*>) {
+ *       if (var != nullptr) closedir(var);
+ *     } else {
+ *       static_assert(always_false<T>, "Unsupported input type. Closer is only supports int, FILE* and DIR*");
+ *     }
+ *   }
+ * };
+ *
+ * // To see how this concept is used, check out Helper::BasicUniqueFD or Helper::BasicUniqueFP.
+ * @endcode
+ *
+ * @tparam Class Class.
+ * @tparam Type Needed type.
+ * @see Helper::BasicUniqueFD
+ * @see Helper::BasicUniqueFP
+ * @note The return type of the desired @c close() function/@c operator() must be @c void.
+ */
+template <typename Class, typename Type>
+concept IsCloser = requires(Class c, Type t) {
+  { c(t) } -> std::same_as<void>;
+} || requires(Class c, Type t) {
+  { c.close(t) } -> std::same_as<void>;
+};
+
+/**
+ * @brief Checks if the input class can close the needed thing, either as a @c operator() and using the @c close() function.
+ *
+ * @code
+ * // A example valid class structure.
  * class Closer {
  *   template <typename>
- *    static constexpr bool always_false = false;
+ *   static constexpr bool always_false = false;
  *
  * public:
  *   template <typename T>
@@ -284,12 +353,11 @@ public:
  * @tparam Type Needed type.
  * @see Helper::BasicUniqueFD
  * @see Helper::BasicUniqueFP
- * @note The return type of the desired @c close() function/@c operator() must be @c void.
+ * @note The return type of the desired @c close() function and @c operator() must be @c void.
  */
 template <typename Class, typename Type>
-concept IsCloser = requires(Class c, Type t) {
+concept IsFullCloser = requires(Class c, Type t) {
   { c(t) } -> std::same_as<void>;
-} || requires(Class c, Type t) {
   { c.close(t) } -> std::same_as<void>;
 };
 

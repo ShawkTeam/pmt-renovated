@@ -18,7 +18,7 @@
 /**
  * @file functions.hpp
  * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
- * @brief Functions of libhelper.
+ * @brief Functions of @c libhelper.
  */
 
 #ifndef LIBHELPER_FUNCTIONS_HPP

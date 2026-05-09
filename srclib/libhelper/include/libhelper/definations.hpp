@@ -15,14 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#ifndef LIBHELPER_MACROS_HPP
-#define LIBHELPER_MACROS_HPP
-
 /**
  * @file definations.hpp
  * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
  * @brief Some concept definitions, descriptions, etc. of the library.
  */
+
+#ifndef LIBHELPER_MACROS_HPP
+#define LIBHELPER_MACROS_HPP
 
 #include <concepts>
 #include <unistd.h>

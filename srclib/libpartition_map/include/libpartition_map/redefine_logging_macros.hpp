@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file redefined_logging_macros.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Redefines logging macros for @c libpartition_map.
+ */
+
 #ifndef LIBPARTITION_MAP_REDEFINE_LOGGING_MACROS_HPP
 #define LIBPARTITION_MAP_REDEFINE_LOGGING_MACROS_HPP
 

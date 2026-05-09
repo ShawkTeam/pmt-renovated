@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file lib.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Includes all header files for @c libpartition_map.
+ */
+
 #ifndef LIBPARTITION_MAP_LIB_HPP
 #define LIBPARTITION_MAP_LIB_HPP
 

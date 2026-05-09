@@ -200,12 +200,7 @@ std::vector<std::pair<bool, std::string>> Builder::duplicatePartitionPositions(c
   LOGI << "Building and providing (non)duplicate partition status for " << std::quoted(name) << " partition." << std::endl;
   std::vector<std::pair<bool, std::string>> parts;
   for (auto &part : localPartitions) {
-    if (part.name() == name) {
-      if (part.isLogicalPartition())
-        parts.emplace_back(!part.pathByName().empty(), "");
-      else
-        parts.emplace_back(!part.pathByName().empty(), part.tableName());
-    }
+    if (part.name() == name) parts.emplace_back(!part.pathByName().empty(), part.isLogicalPartition() ? "" : part.tableName());
   }
 
   return parts;

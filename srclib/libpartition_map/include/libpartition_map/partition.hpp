@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file partition.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Provides partition management class.
+ */
+
 #ifndef LIBPARTITION_MAP_PARTITION_HPP
 #define LIBPARTITION_MAP_PARTITION_HPP
 
@@ -36,6 +42,8 @@
 #include <libpartition_map/redefine_logging_macros.hpp>
 
 namespace PartitionMap {
+
+/// @brief Error codes of @c BasicPartition_t.
 enum class Errors {
   Success = 0,
   IsNotLogicalObject = 1,
@@ -45,10 +53,13 @@ enum class Errors {
   IoctlFailed = 5
 };
 
+/// @brief Error category of @c BasicPartition_t.
 class basic_partition_t_errors final : public std::error_category {
 public:
+  /// @brief Returns the name of the error category.
   const char *name() const noexcept override { return "PartitionError"; }
 
+  /// @brief Returns the error message.
   std::string message(int ev) const override {
     switch (static_cast<Errors>(ev)) {
       case Errors::Success:
@@ -71,8 +82,16 @@ public:
 
 } // namespace PartitionMap
 
+/// @brief Specialization of @c std::is_error_code_enum for @c PartitionMap::Errors.
 template <> struct std::is_error_code_enum<PartitionMap::Errors> : std::true_type {};
 
+/**
+ * @brief Basic partition management class.
+ *
+ * @tparam slot_type Slot type for holding partition index.
+ * @tparam size_type Size type for holding partition size.
+ * @tparam path_type Path type for holding partition path.
+ */
 namespace PartitionMap {
 template <typename slot_type, typename size_type, typename path_type>
   requires IsSlotType<slot_type> && IsSizeType<size_type> && IsPathTypeLike<path_type>
@@ -84,33 +103,31 @@ class BasicPartition_t {
 
   bool isLogical = false; // This class contains a logical partition?
 
-  template <typename Tuple, std::size_t... I> void assign_from_tuple_impl(Tuple &&t, std::index_sequence<I...>) {
-    (process_ctor(std::get<I>(t)), ...);
-  }
-
-  template <typename Tuple> void assign_from_tuple(Tuple &&t) {
-    assign_from_tuple_impl(std::forward<Tuple>(t), std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<Tuple>>>{});
-  }
-
   void process_ctor(const slot_type &index) { localIndex = index; }
   void process_ctor(const GPTPart &part) { gptPart = part; }
   void process_ctor(const path_type &path) { localTablePath = path; }
 
 public:
+  /// @brief Extra functions for partition management.
   class Extra {
   public:
+    /// @brief Checks if the path is a logical partition.
     static bool isReallyLogical(const path_type &path) { return path.string().find("/mapper/") != std::string::npos; }
   };
 
+  /// @brief Error category getter of @c BasicPartition_t.
   static const basic_partition_t_errors &getErrorCategory() {
     static basic_partition_t_errors instance;
     return instance;
   }
 
-  using BasicData = basic_data_base<slot_type>;
-  using ErrorCategory = basic_partition_t_errors;
-  using IOCallback = std::function<void(size_type, size_type)>; // First = written/readed size, second = total size.
+  using BasicData = basic_data_base<slot_type>;   ///< Short for @c basic_data_base.
+  using ErrorCategory = basic_partition_t_errors; ///< Short for @c basic_partition_t_errors.
 
+  /// @note First arg = written/readed size, second arg = total size.
+  using IOCallback = std::function<void(size_type, size_type)>;
+
+  /// @brief Get object for logical partition.
   static BasicPartition_t &AsLogicalPartition(BasicPartition_t &orig, const path_type &path) {
     orig.isLogical = true;
     orig.logicalPartitionPath = path;
@@ -118,9 +135,12 @@ public:
     return orig;
   }
 
-  BasicPartition_t() : gptPart(GPTPart()) {}                 // BasicPartition_t<...> partititon
-  BasicPartition_t(const BasicPartition_t &other) = default; // BasicPartition_t<...> partition(otherPartition)
-  BasicPartition_t(BasicPartition_t &&other) noexcept        // BasicPartition_t<...> partition(std::move(otherPartition))
+  /// @brief Default constructor.
+  BasicPartition_t() : gptPart(GPTPart()) {}
+  /// @brief Copy constructor.
+  BasicPartition_t(const BasicPartition_t &other) = default;
+  /// @brief Move constructor.
+  BasicPartition_t(BasicPartition_t &&other) noexcept
       : localTablePath(std::move(other.localTablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)),
         localIndex(other.localIndex), gptPart(other.gptPart), isLogical(other.isLogical) {
     other.localIndex = 0;
@@ -128,24 +148,50 @@ public:
     other.isLogical = false;
   }
 
+  /**
+   * @brief Constructor from arguments.
+   *
+   * @code
+   * BasicPartition_t<uint32_t, uint64_t, std::filesystem::path> partition(myGptPart, "/dev/block/sda", 4);
+   * // For normal partitions! The order of arguments may differ from the example.
+   * @endcode
+   *
+   * @tparam Args Arguments.
+   */
   template <typename... Args>
-    requires(sizeof...(Args) == 3) &&
-            ((is_gptpart_decay<Args> || is_slot_type_decay<Args, slot_type> || is_string_or_path_decay<Args, path_type>) && ...)
-  explicit BasicPartition_t(Args &&...args) { // BasicPartition_t<...> partition(myGptPart, "/dev/block/sda", 4); For normal
-                                              // partitions. The order of arguments may differ from the example.
-    auto tuple = std::make_tuple(std::forward<Args>(args)...);
-    assign_from_tuple(tuple);
+    requires(sizeof...(Args) == 3) && FindInArgs::HasSlotType<Args...> || FindInArgs::HasStringOrPath<Args...> ||
+                FindInArgs::HasGPTPart<Args...>
+            explicit BasicPartition_t(Args &&...args) {
+    (process_ctor(std::forward<Args>(args)), ...);
   }
 
-  explicit BasicPartition_t(const basic_data_base<slot_type>
-                                &input) // BasicPartition_t<...> partition({myGptPart, 4, "/dev/block/sda"}); For normal partitions.
+  /**
+   * @brief Constructor from basic data.
+   *
+   * @code
+   * BasicPartition_t<uint32_t, uint64_t, std::filesystem::path> partition({myGptPart, 4, "/dev/block/sda"});
+   * // Only for normal partitions.
+   * @endcode
+   *
+   * @param input Basic data.
+   */
+  explicit BasicPartition_t(const basic_data_base<slot_type> &input)
       : localTablePath(input.tablePath), localIndex(input.index), gptPart(input.gptPart) {}
 
+  /**
+   * @brief Constructor for logical partitions.
+   *
+   * @code
+   * BasicPartition_t<uint32_t, uint64_t, std::filesystem::path> logicalPartition("/dev/block/mapper/system");
+   * // Only for logical partitions.
+   * @endcode
+   *
+   * @param path Logical partition path.
+   */
   explicit BasicPartition_t(const path_type &path) /* NOLINT(modernize-pass-by-value) */
-      : logicalPartitionPath(path), gptPart(GPTPart()), isLogical(true) {
-  } // BasicPartition_t<...> logicalPartition("/dev/block/mapper/system"); For logical partitions.
+      : logicalPartitionPath(path), gptPart(GPTPart()), isLogical(true) {}
 
-  // Get copy of GPTPart data.
+  /// @brief Get copy of @c GPTPart data.
   GPTPart getGPTPart() const {
     std::error_code ec;
     auto result = getGPTPart(ec);
@@ -154,7 +200,7 @@ public:
     return result;
   }
 
-  // Get copy of GPTPart data.
+  /// @brief Get copy of @c GPTPart data.
   GPTPart getGPTPart(std::error_code &ec) const noexcept {
     ec.clear();
     if (isLogical) {
@@ -164,7 +210,7 @@ public:
     return gptPart;
   }
 
-  // Get reference of GPTPart data (non-const reference).
+  /// @brief Get reference of @c GPTPart data (non-constant reference).
   GPTPart *getGPTPartRef() {
     std::error_code ec;
     auto result = getGPTPartRef(ec);
@@ -173,7 +219,7 @@ public:
     return result;
   }
 
-  // Get reference of GPTPart data (non-const reference).
+  /// @brief Get reference of @c GPTPart data (non-constant reference).
   GPTPart *getGPTPartRef(std::error_code &ec) noexcept {
     ec.clear();
     if (isLogical) {
@@ -183,7 +229,7 @@ public:
     return &gptPart;
   }
 
-  // Get reference of GPTPart data (const reference).
+  /// @brief Get reference of @c GPTPart data (constant reference).
   const GPTPart *getGPTPartRef() const {
     std::error_code ec;
     const auto result = getGPTPartRef(ec);
@@ -192,7 +238,7 @@ public:
     return result;
   }
 
-  // Get reference of GPTPart data (const reference).
+  /// @brief Get reference of @c GPTPart data (constant reference).
   const GPTPart *getGPTPartRef(std::error_code &ec) const noexcept {
     ec.clear();
     if (isLogical) {
@@ -202,13 +248,13 @@ public:
     return &gptPart;
   }
 
-  // Get partition path (like /dev/block/sdc4).
+  /// @brief Get partition path (like @c /dev/block/sdc4 ).
   path_type path() const {
     std::error_code ec;
     return path(ec);
   }
 
-  // Get partition path (like /dev/block/sdc4).
+  /// @brief Get partition path (like @c /dev/block/sdc4 ).
   path_type path(std::error_code &ec) const noexcept {
     const std::string suffix = isdigit(localTablePath.string().back()) ? "p" : "";
     path_type path = isLogical ? logicalPartitionPath : path_type(localTablePath.string() + suffix + std::to_string(localIndex + 1));
@@ -216,7 +262,10 @@ public:
     return path;
   }
 
-  // Get absolute partition path (returns std::filesystem::read_symlink(getPath()) for normal partitions).
+  /**
+   * @brief Get absolute partition path.
+   * @return std::filesystem::read_symlink(getPath()) For normal partitions.
+   */
   path_type absolutePath() const {
     std::error_code ec;
     const auto result = absolutePath(ec);
@@ -225,14 +274,17 @@ public:
     return result;
   }
 
-  // Get absolute partition path (returns std::filesystem::read_symlink(getPath()) for normal partitions).
+  /**
+   * @brief Get absolute partition path.
+   * @return std::filesystem::read_symlink(getPath()) For normal partitions.
+   */
   path_type absolutePath(std::error_code &ec) const noexcept {
     ec = Errors::Success;
     if (isLogical) return std::filesystem::read_symlink(logicalPartitionPath, ec);
     return path();
   }
 
-  // Get tablePath variable (const reference).
+  /// @brief Get @c tablePath variable (constant reference).
   const path_type &tablePath() const {
     std::error_code ec;
     auto &result = tablePath(ec);
@@ -241,7 +293,7 @@ public:
     return result;
   }
 
-  // Get tablePath variable (const reference).
+  /// @brief Get @c tablePath variable (constant reference).
   const path_type &tablePath(std::error_code &ec) const noexcept {
     ec.clear();
     if (isLogical) {
@@ -251,7 +303,7 @@ public:
     return localTablePath;
   }
 
-  // Get tablePath variable (non-const reference).
+  /// @brief Get @c tablePath variable (non-constant reference).
   path_type &tablePath() {
     std::error_code ec;
     auto &result = tablePath(ec);
@@ -260,7 +312,7 @@ public:
     return result;
   }
 
-  // Get tablePath variable (non-const reference).
+  /// @brief Get @c tablePath variable (non-constant reference).
   path_type &tablePath(std::error_code &ec) noexcept {
     ec.clear();
     if (isLogical) {
@@ -270,7 +322,7 @@ public:
     return localTablePath;
   }
 
-  // Get partition path by name.
+  /// @brief Get partition path by name.
   path_type pathByName() const {
     std::error_code ec;
     auto result = pathByName(ec);
@@ -279,7 +331,7 @@ public:
     return result;
   }
 
-  // Get partition path by name.
+  /// @brief Get partition path by name.
   path_type pathByName(std::error_code &ec) const noexcept {
     ec.clear();
     if (isLogical) return logicalPartitionPath;
@@ -290,13 +342,13 @@ public:
     return result;
   }
 
-  // Get partition name.
+  /// @brief Get partition name.
   std::string name() const {
     if (isLogical) return logicalPartitionPath.filename().string();
     return gptPart.GetDescription();
   }
 
-  // Get table name.
+  /// @brief Get table name.
   std::string tableName() const {
     std::error_code ec;
     auto result = tableName(ec);
@@ -305,7 +357,7 @@ public:
     return result;
   }
 
-  // Get table name.
+  /// @brief Get table name.
   std::string tableName(std::error_code &ec) const noexcept {
     ec.clear();
     if (isLogical) {
@@ -315,7 +367,7 @@ public:
     return localTablePath.filename();
   }
 
-  // Get partition size as formatted string.
+  /// @brief Get partition size as formatted string.
   std::string formattedSizeString(const SizeUnit size_unit, bool no_type = false) const {
     size_type size_ = size();
     switch (size_unit) {
@@ -332,7 +384,7 @@ public:
     return no_type ? std::to_string(size_) : std::to_string(size_) + "B";
   }
 
-  // Get partition GUID as string.
+  /// @brief Get partition GUID as string.
   std::string GUIDAsString() const {
     std::error_code ec;
     auto result = GUIDAsString(ec);
@@ -341,7 +393,7 @@ public:
     return result;
   }
 
-  // Get partition GUID as string.
+  /// @brief Get partition GUID as string.
   std::string GUIDAsString(std::error_code &ec) const noexcept {
     ec.clear();
     if (isLogical) {
@@ -351,7 +403,7 @@ public:
     return gptPart.GetUniqueGUID().AsString();
   }
 
-  // Get partition index in GPT table (const) reference.
+  /// @brief Get partition index in GPT table (constant) reference.
   const slot_type &index() const {
     std::error_code ec;
     auto &result = index(ec);
@@ -360,7 +412,7 @@ public:
     return result;
   }
 
-  // Get partition index in GPT table (const) reference.
+  /// @brief Get partition index in GPT table (constant) reference.
   const slot_type &index(std::error_code &ec) const noexcept {
     ec.clear();
     if (isLogical) {
@@ -370,7 +422,7 @@ public:
     return localIndex;
   }
 
-  // Get partition index in GPT table (non-const) as reference.
+  /// @brief Get partition index in GPT table (non-constant) as reference.
   slot_type &index() {
     std::error_code ec;
     auto &result = index(ec);
@@ -379,7 +431,7 @@ public:
     return result;
   }
 
-  // Get partition index in GPT table (non-const) as reference.
+  /// @brief Get partition index in GPT table (non-constant) as reference.
   slot_type &index(std::error_code &ec) noexcept {
     ec.clear();
     if (isLogical) {
@@ -389,7 +441,7 @@ public:
     return localIndex;
   }
 
-  // Get partition size in bytes.
+  /// @brief Get partition size in bytes.
   size_type size(size_type sectorSize = 4096) const {
     if (isLogical) {
       auto fd = Helper::UniqueFD(std::filesystem::read_symlink(logicalPartitionPath).string(), O_RDONLY);
@@ -407,7 +459,7 @@ public:
     return gptPart.GetLengthLBA() * sectorSize;
   }
 
-  // Get starting byte address.
+  /// @brief Get starting byte address.
   size_type start(std::error_code &ec, size_type sectorSize = 4096) const noexcept {
     ec.clear();
     if (isLogical) {
@@ -417,7 +469,7 @@ public:
     return gptPart.GetFirstLBA() * sectorSize;
   }
 
-  // Get starting byte address.
+  /// @brief Get starting byte address.
   size_type start(size_type sectorSize = 4096) const {
     std::error_code ec;
     const auto result = start(ec, sectorSize);
@@ -426,7 +478,7 @@ public:
     return result;
   }
 
-  // Get ending byte address.
+  /// @brief Get ending byte address.
   size_type end(std::error_code &ec, size_type sectorSize = 4096) const noexcept {
     ec.clear();
     if (isLogical) {
@@ -436,7 +488,7 @@ public:
     return (gptPart.GetLastLBA() + 1) * sectorSize;
   }
 
-  // Get ending byte address.
+  /// @brief Get ending byte address.
   size_type end(size_type sectorSize = 4096) const {
     std::error_code ec;
     const auto result = end(ec, sectorSize);
@@ -445,7 +497,7 @@ public:
     return result;
   }
 
-  // Get partition GUID.
+  /// @brief Get partition GUID.
   GUIDData GUID() const {
     std::error_code ec;
     const auto result = GUID(ec);
@@ -454,7 +506,7 @@ public:
     return result;
   }
 
-  // Get partition GUID.
+  /// @brief Get partition GUID.
   GUIDData GUID(std::error_code &ec) const noexcept {
     if (isLogical) {
       ec = Errors::IsNotNormalObject;
@@ -463,7 +515,7 @@ public:
     return gptPart.GetUniqueGUID();
   }
 
-  // Dump image of partition.
+  /// @brief Dump image of partition.
   [[maybe_unused]] bool dump(const path_type &destination = "", size_type bufsize = MB(1), IOCallback callback = nullptr) const {
 
     std::error_code ec;
@@ -473,7 +525,7 @@ public:
     return result;
   }
 
-  // Dump image of partition.
+  /// @brief Dump image of partition.
   [[maybe_unused]] bool dump(std::error_code &ec, const path_type &destination = "", size_type bufsize = MB(1),
                              IOCallback callback = nullptr) const noexcept {
 
@@ -529,7 +581,7 @@ public:
     return bytesReadSoFar == totalBytesToRead;
   }
 
-  // Write input image to partition.
+  /// @brief Write input image to partition.
   [[maybe_unused]] bool write(std::error_code &ec, const path_type &image, size_type bufsize = MB(1),
                               IOCallback callback = nullptr) noexcept {
 
@@ -616,7 +668,7 @@ public:
     return bytesWrittenSoFar == imageSize;
   }
 
-  // Write input image to partition.
+  /// @brief Write input image to partition.
   [[maybe_unused]] bool write(const path_type &image, size_type bufsize = MB(1), IOCallback callback = nullptr) {
     std::error_code ec;
     const auto result = write(ec, image, bufsize, callback);
@@ -625,7 +677,7 @@ public:
     return result;
   }
 
-  // Set GPTPart object, index and table path.
+  /// @brief Set @c GPTPart object, index and table path.
   void set(const basic_data_base<slot_type> &data) {
     if (isLogical) throw Error("This is not a normal partition object!");
     gptPart = data.gptPart;
@@ -633,85 +685,69 @@ public:
     localIndex = data.index;
   }
 
-  // Set partition path. Only for logical partitions.
+  /// @brief Set partition path. Only for logical partitions.
   void setPartitionPath(const path_type &path) {
     if (!isLogical) throw Error("This is not a logical partition object!");
     logicalPartitionPath = path;
   }
 
-  // Set partition index.
+  /// @brief Set partition index.
   void setIndex(slot_type new_index) {
     if (isLogical) throw Error("This is not a normal partition object!");
     localIndex = new_index;
   }
 
-  // Set table path.
-  void setDiskPath(const path_type &path) {
-    if (isLogical) throw Error("This is not a normal partition object!");
-    localTablePath = path;
-  }
-
-  // Set table name (automatically adds /dev/block and uses setDiskPath()).
-  void setDiskName(const std::string &name) {
-    if (isLogical) throw Error("This is not a normal partition object!");
-    path_type p("/dev/block");
-    p.append(name); // Add name
-    setDiskPath(p);
-  }
-
-  // Set GPTPart object.
+  /// @brief Set @c GPTPart object.
   void setGptPart(const GPTPart &otherGptPart) {
     if (isLogical) throw Error("This is not a normal partition object!");
     gptPart = otherGptPart;
   }
 
-  // Checks whether the partition is dynamic or not.
+  /// @brief Checks whether the partition is dynamic or not.
   bool isSuperPartition() const {
     if (isLogical) throw Error("This is not a normal partition object!");
     return GUID() == GUIDData("89A12DE1-5E41-4CB3-8B4C-B1441EB5DA38");
   }
 
-  // Checks whether the partition is logical or not.
+  /// @brief Checks whether the partition is logical or not.
   bool isLogicalPartition() const { return isLogical; }
 
-  // Checks whether the partition info is empty or not.
+  /// @brief Checks whether the partition info is empty or not.
   bool empty() const { return isLogical ? logicalPartitionPath.empty() : !gptPart.IsUsed() && localTablePath.empty(); }
 
-  // p1 == p2
+  /**
+   * @name @c BasicPartition_t's operators.
+   * @brief Operators of @c BasicPartition_t class.
+   * @{
+   */
+
+  /// @brief Checks whether two partitions are equal.
   bool operator==(const BasicPartition_t &other) const {
     if (isLogical) return logicalPartitionPath == other.logicalPartitionPath;
     return localTablePath == other.localTablePath && localIndex == other.localIndex &&
            gptPart.GetUniqueGUID() == other.gptPart.GetUniqueGUID();
   }
 
-  // p1 == guid
+  /// @brief Checks whether the partition is equal to the given GUID.
   bool operator==(const GUIDData &other) const {
     if (isLogical) throw Error("This is not a normal partition object!");
     return gptPart.GetUniqueGUID() == other;
   }
 
-  // p1 != p2
-  bool operator!=(const BasicPartition_t &other) const { return !(*this == other); }
+  bool operator!=(const BasicPartition_t &other) const { return *this != other; } ///< Checks whether two partitions are not equal.
+  bool operator!=(const GUIDData &other) const {
+    return *this != other;
+  } ///< Checks whether the partition is not equal to the given GUID.
 
-  // p1 != guid
-  bool operator!=(const GUIDData &other) const { return !(*this == other); }
+  explicit operator bool() const { return !empty(); } ///< It indicates whether the information is not empty.
+  bool operator!() const { return empty(); }          ///< It indicates whether the information is empty.
 
-  // p (returns !empty())
-  explicit operator bool() const { return !empty(); }
+  const GPTPart *operator*() const { return getGPTPart(); } ///< Get @c GPTPart object (as const).
+  GPTPart *operator*() { return getGPTPart(); }             ///< Get @c GPTPart object.
 
-  // !p (returns empty())
-  bool operator!() const { return empty(); }
+  BasicPartition_t &operator=(const BasicPartition_t &other) = default; ///< Copy assignment operator.
 
-  // const GPTPart part = *p1
-  const GPTPart *operator*() const { return getGPTPart(); }
-
-  // GPTPart part = *pd1
-  GPTPart *operator*() { return getGPTPart(); }
-
-  // p1 = p2
-  BasicPartition_t &operator=(const BasicPartition_t &other) = default;
-
-  // p1 = std::move(p2)
+  /// @brief Move assignment operator.
   BasicPartition_t &operator=(BasicPartition_t &&other) noexcept {
     if (this != &other) {
       localTablePath = std::move(other.localTablePath);
@@ -728,7 +764,7 @@ public:
     return *this;
   }
 
-  // std::cout << p1
+  /// @brief @c << operator.
   friend std::ostream &operator<<(std::ostream &os, BasicPartition_t &other) {
     os << "Name: " << other.name() << std::endl
        << "Logical: " << std::boolalpha << other.isLogical << std::endl
@@ -741,28 +777,36 @@ public:
 
     return os;
   }
+
+  /** @} */
+
 }; // class BasicPartition_t
 
+/// @brief Template alias for BasicPartition_t.
 using Partition_t = BasicPartition_t<uint32_t, uint64_t, std::filesystem::path>;
 
 static_assert(IsValidPartitionClass<Partition_t>, "BasicPartition_t is doesn't meet requirements of minimumPartitionClass");
 
 inline std::error_code make_error_code(Errors ec) { return {static_cast<int>(ec), Partition_t::getErrorCategory()}; }
 
+/// @brief Progress information structure for @c ProgressRenderer.
 struct Progress_t {
-  const std::string name;
-  const uint64_t total;
-  std::atomic<uint64_t> done{0};
-  std::atomic<bool> finished{false};
-  std::atomic<bool> failed{false};
+  const std::string name;            ///< Partition name.
+  const uint64_t total;              ///< Total size.
+  std::atomic<uint64_t> done{0};     ///< Done size.
+  std::atomic<bool> finished{false}; ///< Process is finished or not.
+  std::atomic<bool> failed{false};   ///< Process is failed or not.
 
+  /// @brief Deleted constructor.
   Progress_t() = delete;
+  /// @brief Main constructor.
   Progress_t(std::string name, uint64_t total) : name(std::move(name)), total(total) {}
 
-  Progress_t(const Progress_t &) = delete;
-  Progress_t &operator=(const Progress_t &) = delete;
+  Progress_t(const Progress_t &) = delete;            ///< Deleted copy constructor.
+  Progress_t &operator=(const Progress_t &) = delete; ///< Deleted copy assignment.
 };
 
+/// @brief Progress renderer class.
 class ProgressRenderer {
   std::vector<std::shared_ptr<Progress_t>> _entries;
   std::thread _thread;
@@ -770,6 +814,7 @@ class ProgressRenderer {
   std::mutex _mutex;
   size_t _drawnCount = 0;
 
+  /// @brief Render loop.
   void render() {
     while (_running.load(std::memory_order_relaxed)) {
       draw();
@@ -777,6 +822,7 @@ class ProgressRenderer {
     }
   }
 
+  /// @brief Draw progress bar.
   void draw() {
     std::lock_guard lock(_mutex);
     const size_t count = _entries.size();
@@ -818,6 +864,7 @@ class ProgressRenderer {
 public:
   ~ProgressRenderer() { stop(); }
 
+  /// @brief Add a new progress entry.
   std::shared_ptr<Progress_t> add(const std::string &name, uint64_t total) {
     std::lock_guard lock(_mutex);
     auto p = std::make_shared<Progress_t>(name, total);
@@ -825,6 +872,7 @@ public:
     return p;
   }
 
+  /// @brief Start the progress renderer.
   void start() {
     {
       std::lock_guard lock(_mutex);
@@ -836,16 +884,18 @@ public:
     _thread = std::thread(&ProgressRenderer::render, this);
   }
 
+  /// @brief Stop the progress renderer.
   void stop() {
     _running.store(false, std::memory_order_relaxed);
     if (_thread.joinable()) _thread.join();
     draw();
   }
 
+  /// @brief Default constructor.
   ProgressRenderer() = default;
   ProgressRenderer(const ProgressRenderer &) = delete;
   ProgressRenderer &operator=(const ProgressRenderer &) = delete;
-};
+}; // class ProgressRenderer
 
 } // namespace PartitionMap
 

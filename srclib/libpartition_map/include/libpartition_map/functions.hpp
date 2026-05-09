@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file functions.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Functions of @c libpartition_map.
+ */
+
 #ifndef LIBPARTITION_MAP_FUNCTIONS_HPP
 #define LIBPARTITION_MAP_FUNCTIONS_HPP
 
@@ -27,13 +33,50 @@
 
 namespace PartitionMap {
 
-std::string getLibVersion(); // Get version string of library.
+/// @brief Get version string of library.
+std::string getLibVersion();
 
 namespace Extra {
 
+/**
+ * @brief Get version string of library.
+ *
+ * @return Version string of the library.
+ */
+std::string getLibVersion();
+
+/**
+ * @brief Get length of magic.
+ *
+ * @param magic Magic number.
+ * @return Size of magic number.
+ */
 size_t getMagicLength(uint64_t magic);
+
+/**
+ * @brief Check if file has a magic number.
+ *
+ * @param magic Magic number.
+ * @param buf File descriptor.
+ * @param path File path.
+ * @return True if file has the magic number, false otherwise.
+ */
 bool hasMagic(uint64_t magic, ssize_t buf, const std::string &path);
+
+/**
+ * @brief Format magic number.
+ *
+ * @param magic Magic number.
+ * @return Formatted magic number string.
+ */
 std::string formatMagic(uint64_t magic);
+
+/**
+ * @brief Get size unit as string.
+ *
+ * @param size Size unit.
+ * @return Size unit as string.
+ */
 std::string getSizeUnitAsString(SizeUnit size);
 
 } // namespace Extra

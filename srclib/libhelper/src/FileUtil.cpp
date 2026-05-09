@@ -94,7 +94,7 @@ bool eraseDirectoryRecursive(const std::filesystem::path &directory) {
   struct stat buf{};
   dirent *entry;
 
-  auto [dir, guard] = openDir(directory);
+  auto [dir, guard] = openDir(directory.c_str());
   if (dir == nullptr) return false;
 
   while ((entry = readdir(dir)) != nullptr) {

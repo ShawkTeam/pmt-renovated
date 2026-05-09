@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file super.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Manages super partition. Work in progress.
+ */
+
 #ifndef LIBPARTITION_MAP_SUPER_HPP
 #define LIBPARTITION_MAP_SUPER_HPP
 

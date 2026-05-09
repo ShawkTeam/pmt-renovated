@@ -138,7 +138,7 @@ add_super_library(gptf USE_INTERFACE_NOLIBS_NOFLAGS
 )
 
 if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
-    if(CMAKE_ANDROID_ARCH_ABI EQUAL "arm64-v8a")
+    if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
         set_source_files_properties(
                 ${crypto_sources_asm}
                 PROPERTIES

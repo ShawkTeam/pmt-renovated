@@ -18,7 +18,7 @@
 /**
  * @file lib.hpp
  * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
- * @brief Includes all header files for libhelper.
+ * @brief Includes all header files for @c libhelper.
  */
 
 #ifndef LIBHELPER_LIB_HPP

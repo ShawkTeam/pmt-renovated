@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file PartitionManager.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Partition Manager header file.
+ */
+
 #ifndef PARTITION_MANAGER__PARTITION_MANAGER_HPP
 #define PARTITION_MANAGER__PARTITION_MANAGER_HPP
 
@@ -28,13 +34,19 @@
 #include <libhelper/lib.hpp>
 #include <libpartition_map/lib.hpp>
 
+/**
+ * @namespace Out
+ * @brief Output namespace.
+ */
 namespace Out {
 
+/// @brief Prints a formatted string to stdout.
 template <typename... Args> static void print(const std::format_string<Args...> &fmt, Args &&...args) {
   const std::string message = std::format(fmt, std::forward<Args>(args)...);
   fprintf(stdout, "%s", message.c_str());
 }
 
+/// @brief Prints a formatted string to stdout and appends a newline.
 template <typename... Args> static void println(const std::format_string<Args...> &fmt, Args &&...args) {
   const std::string message = std::format(fmt, std::forward<Args>(args)...);
   fprintf(stdout, "%s\n", message.c_str());
@@ -42,28 +54,32 @@ template <typename... Args> static void println(const std::format_string<Args...
 
 } // namespace Out
 
+/**
+ * @namespace PartitionManager
+ * @brief Main namespace of pmt.
+ */
 namespace PartitionManager {
-std::string getAppVersion(); // Not Android app version (an Android app is
-                             // planned!), tells pmt version.
+/// @brief Returns the version of pmt.
+std::string getAppVersion();
 
+/// @brief Basic flag structure of pmt.
 class BasicFlags {
 public:
   BasicFlags();
 
-  std::unique_ptr<PartitionMap::Builder> partitionTables;
-  std::string logFile;
+  std::unique_ptr<PartitionMap::Builder> partitionTables; ///< Partition tables.
+  std::string logFile;                                    ///< Log file path.
 
-  bool onLogical;
-  bool quietProcess;
-  bool verboseMode;
-  bool viewVersion;
-  bool viewLicense;
-  bool forceProcess;
-  bool noWorkOnUsed;
+  bool onLogical;    ///< Only process logical partitions.
+  bool quietProcess; ///< Turn on/off quiet processing.
+  bool verboseMode;  ///< Turn on/off verbose processing.
+  bool viewVersion;  ///< Print version and exit.
+  bool viewLicense;  ///< View license and exit.
+  bool forceProcess; ///< Enable force processes.
+  bool noWorkOnUsed; ///< Don't work on used partitions.
 };
 
 using Error = Helper::Error;
-// using FlagsBase = std::shared_ptr<BasicFlags>;
 } // namespace PartitionManager
 
 #endif // #ifndef PARTITION_MANAGER__PARTITION_MANAGER_HPP
