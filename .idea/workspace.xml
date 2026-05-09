@@ -61,13 +61,15 @@
   <component name="CMakeSettings">
     <configurations>
       <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_PLATFORM=&quot;android-30&quot; -DANDROID_ABI=&quot;arm64-v8a&quot;&quot;" />
+      <configuration PROFILE_NAME="Release" ENABLED="true" CONFIG_NAME="Release" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_PLATFORM=&quot;android-30&quot; -DANDROID_ABI=&quot;arm64-v8a&quot;&quot;" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="doxygen: add missing md file to inputs.">
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="documentation: add new documentation: Example Plugins (Writing plugins)">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Doxyfile" beforeDir="false" afterPath="$PROJECT_DIR$/Doxyfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/md/using-with-termux.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/using-with-termux.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -129,46 +131,46 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;CMake Application.CLI11-generate-single-file.executor&quot;: &quot;Run&quot;,
-    &quot;CMake Application.docs.executor&quot;: &quot;Run&quot;,
-    &quot;CMake Application.libhelper_shared.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.RadMigrateCodeStyle&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.readMode.enableVisualFormatting&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.west.config.association.type.startup.service&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;SHELLCHECK.PATH&quot;: &quot;I do mind&quot;,
-    &quot;Shell Script.Build (Debug).executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Build.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Cleanup generated docs.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Cleanup.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Open Shell.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Push To Device.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Reformat And Push Code.executor&quot;: &quot;Run&quot;,
-    &quot;Shell Script.Reformat Code.executor&quot;: &quot;Run&quot;,
-    &quot;bazel.project.detector.is.bazel.project&quot;: &quot;true&quot;,
-    &quot;cf.advertisement.text.overridden&quot;: &quot;true&quot;,
-    &quot;cf.first.check.clang-format&quot;: &quot;false&quot;,
-    &quot;cidr.known.project.marker&quot;: &quot;true&quot;,
-    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
-    &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/IdeaProjects/pmt-renovated/build/scripts/build.sh&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.keymap&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "CMake Application.CLI11-generate-single-file.executor": "Run",
+    "CMake Application.docs.executor": "Run",
+    "CMake Application.libhelper_shared.executor": "Run",
+    "RunOnceActivity.RadMigrateCodeStyle": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.cidr.known.project.marker": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "RunOnceActivity.readMode.enableVisualFormatting": "true",
+    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
+    "RunOnceActivity.west.config.association.type.startup.service": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "SHELLCHECK.PATH": "I do mind",
+    "Shell Script.Build (Debug).executor": "Run",
+    "Shell Script.Build.executor": "Run",
+    "Shell Script.Cleanup generated docs.executor": "Run",
+    "Shell Script.Cleanup.executor": "Run",
+    "Shell Script.Open Shell.executor": "Run",
+    "Shell Script.Push To Device.executor": "Run",
+    "Shell Script.Reformat And Push Code.executor": "Run",
+    "Shell Script.Reformat Code.executor": "Run",
+    "bazel.project.detector.is.bazel.project": "true",
+    "cf.advertisement.text.overridden": "true",
+    "cf.first.check.clang-format": "false",
+    "cidr.known.project.marker": "true",
+    "codeWithMe.voiceChat.enabledByDefault": "false",
+    "deletionFromPopupRequiresConfirmation": "false",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "/home/yzbruh/IdeaProjects/pmt-renovated/build/scripts/build.sh",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "CMakeSettings",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/include" />
@@ -602,15 +604,7 @@
       <workItem from="1778308828940" duration="5784000" />
       <workItem from="1778320253911" duration="286000" />
       <workItem from="1778320624594" duration="8815000" />
-      <workItem from="1778349959696" duration="6314000" />
-    </task>
-    <task id="LOCAL-00006" summary="pmt: Improve libpartition_map and tests&#10; - Change doFor*** function return types as bool.&#10; - Add catching of doFor*** function test results.&#10; - Use std::ios_base_failure for catch std::fstream errors on tests">
-      <option name="closed" value="true" />
-      <created>1756679748573</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1756679748573</updated>
+      <workItem from="1778349959696" duration="6965000" />
     </task>
     <task id="LOCAL-00007" summary="pmt: Improve libraries&#10; - Tests have been improved.&#10; - Some functions and classes in libhelper have been improved for better results.">
       <option name="closed" value="true" />
@@ -996,7 +990,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778355544378</updated>
     </task>
-    <option name="localTasksCounter" value="55" />
+    <task id="LOCAL-00055" summary="documentation: add new documentation: Example Plugins (Writing plugins)">
+      <option name="closed" value="true" />
+      <created>1778356357281</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1778356357281</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1020,7 +1022,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: Improve libhelper, etc." />
     <MESSAGE value="pmt: Improve libpartition_map, etc." />
     <MESSAGE value="pmt: continue working.&#10; - Improve libhelper's android functions." />
     <MESSAGE value="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`." />
@@ -1045,7 +1046,8 @@
     <MESSAGE value="manager: improve installer script" />
     <MESSAGE value="documentation: add new doc, etc." />
     <MESSAGE value="doxygen: add missing md file to inputs." />
-    <option name="LAST_COMMIT_MESSAGE" value="doxygen: add missing md file to inputs." />
+    <MESSAGE value="documentation: add new documentation: Example Plugins (Writing plugins)" />
+    <option name="LAST_COMMIT_MESSAGE" value="documentation: add new documentation: Example Plugins (Writing plugins)" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -35,6 +35,11 @@ We welcome contributions! Please see our [Contributing Guide](https://github.com
 ## License
 This project is licensed under the MIT License - see the [LICENSE](https://github.com/ShawkTeam/pmt-renovated/blob/main/LICENSE) file for details.
 
+## Credits
+- [CLI11: Command line parser for C++11](https://github.com/CLIUtils/CLI11)
+- [PicoSHA2: A header-file-only, SHA256 hash generator in C++](https://github.com/okdshin/PicoSHA2)
+- [nlohmann/json: JSON for Modern C++](https://github.com/nlohmann/json)
+
 ## Support
 For support and questions:
 - GitHub Issues: [Report issues](https://github.com/ShawkTeam/pmt-renovated/issues)
