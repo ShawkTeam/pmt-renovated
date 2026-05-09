@@ -64,11 +64,10 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="manager: improve installer script">
-      <change afterPath="$PROJECT_DIR$/docs/md/using-with-termux.md" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="doxygen: add missing md file to inputs.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/plugin-structure/ExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CONTRIBUTING.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Doxyfile" beforeDir="false" afterPath="$PROJECT_DIR$/Doxyfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/md/using-with-termux.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/using-with-termux.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -175,11 +174,11 @@
       <recent name="$PROJECT_DIR$/include" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/docs/md" />
       <recent name="$PROJECT_DIR$/docs/various" />
       <recent name="$PROJECT_DIR$/docs" />
       <recent name="$PROJECT_DIR$/srclib/libhelper/include" />
       <recent name="$PROJECT_DIR$/include/nlohmann" />
-      <recent name="$PROJECT_DIR$/build" />
     </key>
   </component>
   <component name="RunManager" selected="CMake Application.docs">
@@ -603,23 +602,7 @@
       <workItem from="1778308828940" duration="5784000" />
       <workItem from="1778320253911" duration="286000" />
       <workItem from="1778320624594" duration="8815000" />
-      <workItem from="1778349959696" duration="5425000" />
-    </task>
-    <task id="LOCAL-00004" summary="pmt: Improve libpartition_map&#10; - Add new operators to Map_t and builder.&#10; - Some improvements.">
-      <option name="closed" value="true" />
-      <created>1756643791272</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1756643791272</updated>
-    </task>
-    <task id="LOCAL-00005" summary="pmt: Improve pmt &amp; libpartition_map&#10; - Change some operator returnn types.&#10; - Use std::map instead of std::unordered on magic number maps.&#10; - Some improvements.">
-      <option name="closed" value="true" />
-      <created>1756678874574</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1756678874574</updated>
+      <workItem from="1778349959696" duration="6314000" />
     </task>
     <task id="LOCAL-00006" summary="pmt: Improve libpartition_map and tests&#10; - Change doFor*** function return types as bool.&#10; - Add catching of doFor*** function test results.&#10; - Use std::ios_base_failure for catch std::fstream errors on tests">
       <option name="closed" value="true" />
@@ -997,7 +980,23 @@
       <option name="project" value="LOCAL" />
       <updated>1778354635403</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="documentation: add new doc, etc.">
+      <option name="closed" value="true" />
+      <created>1778355425857</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1778355425857</updated>
+    </task>
+    <task id="LOCAL-00054" summary="doxygen: add missing md file to inputs.">
+      <option name="closed" value="true" />
+      <created>1778355544378</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1778355544378</updated>
+    </task>
+    <option name="localTasksCounter" value="55" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1021,8 +1020,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: reformat code, etc." />
-    <MESSAGE value="pmt: Add new type (class) to libhelper, etc.&#10; - Add Helper::Capsule.&#10; - Fix some compilation errors." />
     <MESSAGE value="pmt: Improve libhelper, etc." />
     <MESSAGE value="pmt: Improve libpartition_map, etc." />
     <MESSAGE value="pmt: continue working.&#10; - Improve libhelper's android functions." />
@@ -1046,7 +1043,9 @@
     <MESSAGE value="doxygen: fixup main page" />
     <MESSAGE value="doxygen: improve documentation" />
     <MESSAGE value="manager: improve installer script" />
-    <option name="LAST_COMMIT_MESSAGE" value="manager: improve installer script" />
+    <MESSAGE value="documentation: add new doc, etc." />
+    <MESSAGE value="doxygen: add missing md file to inputs." />
+    <option name="LAST_COMMIT_MESSAGE" value="doxygen: add missing md file to inputs." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

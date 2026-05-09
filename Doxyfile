@@ -1034,7 +1034,11 @@ INPUT                  = include/PartitionManager \
                          docs/md/building-from-source.md \
                          docs/md/usage-guide.md \
                          docs/md/release-types.md \
-                         docs/md/using-with-termux.md
+                         docs/md/using-with-termux.md \
+                         docs/md/example-plugins.md \
+                         docs/plugin-instructions/ExamplePlugin.cpp \
+                         docs/plugin-instructions/AdvancedExamplePlugin.cpp \
+                         docs/plugin-instructions/AsyncExamplePlugin.cpp
 
 # This tag can be used to specify the character encoding of the source files
 # that Doxygen parses. Internally Doxygen uses the UTF-8 encoding. Doxygen uses
