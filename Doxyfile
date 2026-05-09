@@ -1029,7 +1029,8 @@ WARN_LOGFILE           =
 INPUT                  = include/PartitionManager \
                          srclib/libhelper/include/libhelper/ \
                          srclib/libpartition_map/include/libpartition_map/ \
-                         docs/plugin-structure/ExamplePlugin.cpp
+                         docs/plugin-structure/ExamplePlugin.cpp \
+                         docs/various/documentation-mainpage.md
 
 # This tag can be used to specify the character encoding of the source files
 # that Doxygen parses. Internally Doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1217,7 +1218,7 @@ FILTER_SOURCE_PATTERNS =
 # (index.html). This can be useful if you have a project on for instance GitHub
 # and want to reuse the introduction page also for the Doxygen output.
 
-USE_MDFILE_AS_MAINPAGE =
+USE_MDFILE_AS_MAINPAGE = mainpage.md
 
 # If the IMPLICIT_DIR_DOCS tag is set to YES, any README.md file found in sub-
 # directories of the project's root, is used as the documentation for that sub-

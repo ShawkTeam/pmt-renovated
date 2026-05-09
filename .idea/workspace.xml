@@ -64,25 +64,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="doxygen: fixup syntax">
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/functions.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/lib.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/management.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/FileUtil.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/builder.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/builder.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/definations.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/functions.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/functions.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/lib.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/partition.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/super.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/super.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/src/Builder.cpp" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc.">
+      <change afterPath="$PROJECT_DIR$/docs/various/documentation-mainpage.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Doxyfile" beforeDir="false" afterPath="$PROJECT_DIR$/Doxyfile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -608,7 +592,7 @@
       <workItem from="1778268958024" duration="208000" />
       <workItem from="1778308828940" duration="5784000" />
       <workItem from="1778320253911" duration="286000" />
-      <workItem from="1778320624594" duration="6114000" />
+      <workItem from="1778320624594" duration="6821000" />
     </task>
     <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
       <option name="closed" value="true" />
@@ -970,7 +954,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778263112065</updated>
     </task>
-    <option name="localTasksCounter" value="46" />
+    <task id="LOCAL-00046" summary="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc.">
+      <option name="closed" value="true" />
+      <created>1778326761533</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1778326761534</updated>
+    </task>
+    <option name="localTasksCounter" value="47" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -994,7 +986,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: fixup manager.sh" />
     <MESSAGE value="pmt: improve libhelper, etc." />
     <MESSAGE value="pmt: add stdin parsing support, etc." />
     <MESSAGE value="pmt: add random number generator class (compile-time, with templates)" />
@@ -1019,7 +1010,8 @@
     <MESSAGE value="git: fixup pre-commit" />
     <MESSAGE value="doxygen: add tagfile of cppreference.com" />
     <MESSAGE value="doxygen: fixup syntax" />
-    <option name="LAST_COMMIT_MESSAGE" value="doxygen: fixup syntax" />
+    <MESSAGE value="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc." />
+    <option name="LAST_COMMIT_MESSAGE" value="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
