@@ -64,10 +64,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="github: setting up pages.">
-      <change beforePath="$PROJECT_DIR$/.github/workflows/deploy.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/deploy.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Doxyfile" beforeDir="false" afterPath="$PROJECT_DIR$/Doxyfile" afterDir="false" />
-    </list>
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="doxygen: fixup main page" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -600,15 +597,7 @@
       <workItem from="1778268958024" duration="208000" />
       <workItem from="1778308828940" duration="5784000" />
       <workItem from="1778320253911" duration="286000" />
-      <workItem from="1778320624594" duration="8457000" />
-    </task>
-    <task id="LOCAL-00001" summary="build.sh: Gift two threads to the user...">
-      <option name="closed" value="true" />
-      <created>1756322917112</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1756322917112</updated>
+      <workItem from="1778320624594" duration="8815000" />
     </task>
     <task id="LOCAL-00002" summary="pmt: Introduce, fixup&#10; - Fix pstderr file pointer.&#10; - Improve and add more functions on libpartition_map.&#10; - Improve functions.">
       <option name="closed" value="true" />
@@ -994,7 +983,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778337201925</updated>
     </task>
-    <option name="localTasksCounter" value="50" />
+    <task id="LOCAL-00050" summary="doxygen: fixup main page">
+      <option name="closed" value="true" />
+      <created>1778337666079</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1778337666082</updated>
+    </task>
+    <option name="localTasksCounter" value="51" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1018,7 +1015,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: cleanup PureTuple class." />
     <MESSAGE value="pmt: improve PureTuple class." />
     <MESSAGE value="pmt: improve PureTuple class and improve function manager." />
     <MESSAGE value="pmt: reformat code, etc." />
@@ -1043,7 +1039,8 @@
     <MESSAGE value="doxygen: add main page content" />
     <MESSAGE value="doxygen: improve build instructions on the main page" />
     <MESSAGE value="github: setting up pages." />
-    <option name="LAST_COMMIT_MESSAGE" value="github: setting up pages." />
+    <MESSAGE value="doxygen: fixup main page" />
+    <option name="LAST_COMMIT_MESSAGE" value="doxygen: fixup main page" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

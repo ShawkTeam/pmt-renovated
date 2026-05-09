@@ -51,6 +51,12 @@ jobs:
           cp -r docs/html/* site/pmt-documentation/
           echo '<meta http-equiv="refresh" content="0; url=/pmt-documentation/">' > site/index.html
 
+      - name: Cache busting
+        run: |
+          BUILD_HASH=$(git rev-parse --short HEAD)
+          find site/ -name "*.html" -exec sed -i \
+            "s/\.css\"/\.css?v=${BUILD_HASH}\"/g; s/\.js\"/\.js?v=${BUILD_HASH}\"/g" {} \;
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: ./site
