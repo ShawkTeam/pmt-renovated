@@ -64,19 +64,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="doxygen: fixup main page">
-      <change afterPath="$PROJECT_DIR$/docs/md/building-from-source.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/md/release-types.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/md/usage-guide.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/plugin-instructions/AdvancedExamplePlugin.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/plugin-instructions/AsyncExamplePlugin.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/plugin-instructions/ExamplePlugin.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/docs/plugin-instructions/SimpleExamplePlugin.cpp" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="manager: improve installer script">
+      <change afterPath="$PROJECT_DIR$/docs/md/using-with-termux.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Doxyfile" beforeDir="false" afterPath="$PROJECT_DIR$/Doxyfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/scripts/manager.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build/scripts/manager.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/docs/plugin-structure/ExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/CONTRIBUTING.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/various/documentation-mainpage.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -611,23 +603,7 @@
       <workItem from="1778308828940" duration="5784000" />
       <workItem from="1778320253911" duration="286000" />
       <workItem from="1778320624594" duration="8815000" />
-      <workItem from="1778349959696" duration="4596000" />
-    </task>
-    <task id="LOCAL-00002" summary="pmt: Introduce, fixup&#10; - Fix pstderr file pointer.&#10; - Improve and add more functions on libpartition_map.&#10; - Improve functions.">
-      <option name="closed" value="true" />
-      <created>1756412032827</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1756412032827</updated>
-    </task>
-    <task id="LOCAL-00003" summary="pmt: Minor changes.&#10; - Add build instruction.&#10; - Improve function lambdas.">
-      <option name="closed" value="true" />
-      <created>1756464007167</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1756464007167</updated>
+      <workItem from="1778349959696" duration="5425000" />
     </task>
     <task id="LOCAL-00004" summary="pmt: Improve libpartition_map&#10; - Add new operators to Map_t and builder.&#10; - Some improvements.">
       <option name="closed" value="true" />
@@ -1005,7 +981,23 @@
       <option name="project" value="LOCAL" />
       <updated>1778337666082</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="doxygen: improve documentation">
+      <option name="closed" value="true" />
+      <created>1778354595523</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1778354595523</updated>
+    </task>
+    <task id="LOCAL-00052" summary="manager: improve installer script">
+      <option name="closed" value="true" />
+      <created>1778354635403</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1778354635403</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1029,8 +1021,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: improve PureTuple class." />
-    <MESSAGE value="pmt: improve PureTuple class and improve function manager." />
     <MESSAGE value="pmt: reformat code, etc." />
     <MESSAGE value="pmt: Add new type (class) to libhelper, etc.&#10; - Add Helper::Capsule.&#10; - Fix some compilation errors." />
     <MESSAGE value="pmt: Improve libhelper, etc." />
@@ -1054,7 +1044,9 @@
     <MESSAGE value="doxygen: improve build instructions on the main page" />
     <MESSAGE value="github: setting up pages." />
     <MESSAGE value="doxygen: fixup main page" />
-    <option name="LAST_COMMIT_MESSAGE" value="doxygen: fixup main page" />
+    <MESSAGE value="doxygen: improve documentation" />
+    <MESSAGE value="manager: improve installer script" />
+    <option name="LAST_COMMIT_MESSAGE" value="manager: improve installer script" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

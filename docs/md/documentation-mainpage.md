@@ -24,8 +24,8 @@ This tool provides a comprehensive solution for managing Android device partitio
 The project is organized into several key components:
 
 - **Core Library**: Main partition management logic
-- **`Helper` Library**: Utility functions and common operations
-- **`PartitionMap` Library**: Partition table parsing and management
+- `Helper` **Library**: Utility functions and common operations
+- `PartitionMap` **Library**: Partition table parsing and management
 - **Plugin System**: Extensible plugin architecture
 - **CLI Interface**: Command-line interface for user interaction
 
