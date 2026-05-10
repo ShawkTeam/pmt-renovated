@@ -69,14 +69,15 @@ setup() {
 	[ -f "$PREFIX/tmp/pmt_static" ] && mv "$PREFIX/tmp/pmt_static" "$PREFIX/tmp/pmt"
 	set -e
 	install -t "$PREFIX/bin" "$PREFIX/tmp/pmt"
-	if [ -f "$PREFIX/tmp/libhelper.so" ]; then
-		find "$PREFIX/tmp" -name "*lib*" -exec install -t "$PREFIX/lib" {} \;
+	if find "$PREFIX/tmp" -name "lib*.so" &>/dev/null; then
+		find "$PREFIX/tmp" -name "lib*.so" -exec install -t "$PREFIX/lib" {} \;
+		echo "Libraries installed to $PREFIX/lib"
 	fi
 	echo "Installed successfully. Try running 'pmt' command."
 }
 
 uninstall() {
-	rm -f "$PREFIX/bin/pmt" "$PREFIX"/lib/libhelper* "$PREFIX"/lib/libpartition_map* &>/dev/null
+	rm -f "$PREFIX/bin/pmt" "$PREFIX"/lib/libhelper* "$PREFIX"/lib/libpartition_map* "$PREFIX"/lib/*.so &>/dev/null
 }
 
 is_installed() {

@@ -83,9 +83,6 @@ sudo zypper install git cmake ninja python3
 ```bash
 # Set minimum Android API level (default: android-30)
 export ANDROID_PLATFORM="android-30"
-
-# Set custom working directory for builds
-export PMT_WORK_DIR="$HOME/pmt-build"
 ```
 
 ## Repository Setup

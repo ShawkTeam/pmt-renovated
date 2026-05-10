@@ -28,7 +28,7 @@ termux-setup-storage
 You can easily install PMT with the ready-made script!
 ```bash
 # Download PMT's installer script for termux
-curl -LSs "https://raw.githubusercontent.com/ShawkTeam/pmt-renovated/refs/heads/main/manager.sh" > manager.sh
+curl -LSs "https://raw.githubusercontent.com/ShawkTeam/pmt-renovated/refs/heads/main/build/scripts/manager.sh" > manager.sh
 
 # Start script!
 bash manager.sh install
