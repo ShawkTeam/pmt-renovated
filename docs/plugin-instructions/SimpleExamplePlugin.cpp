@@ -44,18 +44,17 @@ class SimpleExamplePlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  BasicFlags *flags;
-  const char *logPath = nullptr;
+  BasicFlags *flags = nullptr;
+  std::string logPath;
 
-  PLUGIN_SECTION SimpleExamplePlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
+  PLUGIN_SECTION SimpleExamplePlugin() = default;
   PLUGIN_SECTION ~SimpleExamplePlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+    logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
 
     flags = &mainFlags;
-    logPath = logpath.c_str();
-
     // Create a simple subcommand
     cmd = mainApp.add_subcommand("simple", "Simple example plugin");
     cmd->fallthrough();

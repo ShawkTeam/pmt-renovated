@@ -65,19 +65,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="plugins: simplify the structure">
+      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/AdvancedExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/AdvancedExamplePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/AsyncExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/AsyncExamplePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/ExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/ExamplePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/SimpleExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/SimpleExamplePlugin.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -614,15 +606,7 @@
       <workItem from="1778390341453" duration="140000" />
       <workItem from="1778390507347" duration="621000" />
       <workItem from="1778426013351" duration="2505000" />
-      <workItem from="1778441210465" duration="3054000" />
-    </task>
-    <task id="LOCAL-00011" summary="pmt: Last commit for 1.2.0 version&#10; - Major changes for developers.&#10; - Some changes to flash and sizeof functions.&#10; - Some minor changes.">
-      <option name="closed" value="true" />
-      <created>1757061109484</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1757061109485</updated>
+      <workItem from="1778441210465" duration="3371000" />
     </task>
     <task id="LOCAL-00012" summary="pmt: fix workflow">
       <option name="closed" value="true" />
@@ -1008,7 +992,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778397415869</updated>
     </task>
-    <option name="localTasksCounter" value="60" />
+    <task id="LOCAL-00060" summary="plugins: simplify the structure">
+      <option name="closed" value="true" />
+      <created>1778444305692</created>
+      <option name="number" value="00060" />
+      <option name="presentableId" value="LOCAL-00060" />
+      <option name="project" value="LOCAL" />
+      <updated>1778444305693</updated>
+    </task>
+    <option name="localTasksCounter" value="61" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1032,7 +1024,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake)." />
     <MESSAGE value="pmt: start working on 1.7.0" />
     <MESSAGE value="build.sh: Stop embroidering -G* flags" />
     <MESSAGE value="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh" />
@@ -1057,7 +1048,8 @@
     <MESSAGE value="manager: fixup installing from wrong tag" />
     <MESSAGE value="documentation: add plugin examples to documentation, etc." />
     <MESSAGE value="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc." />
-    <option name="LAST_COMMIT_MESSAGE" value="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc." />
+    <MESSAGE value="plugins: simplify the structure" />
+    <option name="LAST_COMMIT_MESSAGE" value="plugins: simplify the structure" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

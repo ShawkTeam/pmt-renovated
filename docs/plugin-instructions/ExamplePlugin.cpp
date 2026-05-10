@@ -50,10 +50,10 @@ class ExamplePlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  BasicFlags *flags;
-  const char *logPath = nullptr;
+  BasicFlags *flags = nullptr;
+  std::string logPath;
 
-  PLUGIN_SECTION ExamplePlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
+  PLUGIN_SECTION ExamplePlugin() = default;
   PLUGIN_SECTION ~ExamplePlugin() override = default;
 
   /**
@@ -61,12 +61,10 @@ public:
    * This is where you set up your CLI command and options.
    */
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+    logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
 
-    // Store references for later use
     flags = &mainFlags;
-    logPath = logpath.c_str();
-
     // Create the subcommand for this plugin
     cmd = mainApp.add_subcommand("example", "Example plugin demonstrating partition operations");
     cmd->fallthrough();

@@ -49,18 +49,17 @@ class AsyncExamplePlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  BasicFlags *flags;
-  const char *logPath = nullptr;
+  BasicFlags *flags = nullptr;
+  std::string logPath;
 
-  PLUGIN_SECTION AsyncExamplePlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
+  PLUGIN_SECTION AsyncExamplePlugin() = default;
   PLUGIN_SECTION ~AsyncExamplePlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+    logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
 
     flags = &mainFlags;
-    logPath = logpath.c_str();
-
     cmd = mainApp.add_subcommand("async-example", "Example plugin demonstrating async operations");
     cmd->fallthrough();
 
