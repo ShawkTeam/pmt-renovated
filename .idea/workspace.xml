@@ -65,12 +65,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="manager: fixup installing from wrong tag">
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="documentation: add plugin examples to documentation, etc.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Doxyfile" beforeDir="false" afterPath="$PROJECT_DIR$/Doxyfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/md/example-plugins.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/example-plugins.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -184,7 +184,7 @@
       <recent name="$PROJECT_DIR$/include/nlohmann" />
     </key>
   </component>
-  <component name="RunManager" selected="CMake Application.docs">
+  <component name="RunManager" selected="Shell Script.Open Shell">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -386,7 +386,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Open Shell" type="ShConfigurationType">
-      <option name="SCRIPT_TEXT" value="adb shell; exit $?" />
+      <option name="SCRIPT_TEXT" value="adb shell; adb shell su -c rm -f /data/local/tmp/pmt_static exit $?" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
       <option name="SCRIPT_PATH" value="" />
       <option name="SCRIPT_OPTIONS" value="" />
@@ -608,14 +608,6 @@
       <workItem from="1778349959696" duration="6965000" />
       <workItem from="1778390341453" duration="140000" />
       <workItem from="1778390507347" duration="621000" />
-    </task>
-    <task id="LOCAL-00009" summary="pmt: reformat code, etc.">
-      <option name="closed" value="true" />
-      <created>1757007774222</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1757007774222</updated>
     </task>
     <task id="LOCAL-00010" summary="pmt: add control for -l flag">
       <option name="closed" value="true" />
@@ -1001,7 +993,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778393863749</updated>
     </task>
-    <option name="localTasksCounter" value="58" />
+    <task id="LOCAL-00058" summary="documentation: add plugin examples to documentation, etc.">
+      <option name="closed" value="true" />
+      <created>1778395947618</created>
+      <option name="number" value="00058" />
+      <option name="presentableId" value="LOCAL-00058" />
+      <option name="project" value="LOCAL" />
+      <updated>1778395947618</updated>
+    </task>
+    <option name="localTasksCounter" value="59" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1025,7 +1025,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`." />
     <MESSAGE value="build.sh: Improve argument processing and add new flags (to make architectural selection easier)." />
     <MESSAGE value="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake)." />
     <MESSAGE value="pmt: start working on 1.7.0" />
@@ -1050,7 +1049,8 @@
     <MESSAGE value="documentation: add new documentation: Example Plugins (Writing plugins)" />
     <MESSAGE value="github: fixup deployer" />
     <MESSAGE value="manager: fixup installing from wrong tag" />
-    <option name="LAST_COMMIT_MESSAGE" value="manager: fixup installing from wrong tag" />
+    <MESSAGE value="documentation: add plugin examples to documentation, etc." />
+    <option name="LAST_COMMIT_MESSAGE" value="documentation: add plugin examples to documentation, etc." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

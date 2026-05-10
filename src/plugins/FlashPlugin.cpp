@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cerrno>
-#include <cstdlib>
 #include <future>
 #include <fcntl.h>
 #include <unistd.h>
@@ -25,7 +23,7 @@
 #include <CLI11.hpp>
 
 #define PLUGIN "FlashPlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -34,6 +32,9 @@ class FlashPlugin final : public BasicPlugin {
   std::string rawPartitions, rawImageNames, imageDirectory;
   uint64_t bufferSize = 0;
   bool deleteAfterProgress = false;
+
+  static constexpr uint64_t MIN_BUFFER_SIZE = 1024;                 ///< 1KB minimum buffer size
+  static constexpr uint64_t MAX_BUFFER_SIZE = 128ULL * 1024 * 1024; ///< 128MB maximum buffer size
 
 public:
   CLI::App *cmd = nullptr;
@@ -53,7 +54,18 @@ public:
     cmd->add_option("imageFile(s)", rawImageNames, "Name(s) of image file(s)")->required();
     cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading image(s) and writing to partition(s)")
         ->transform(CLI::AsSizeValue(false))
-        ->default_val("1MB");
+        ->default_val("1MB")
+        ->check([](const std::string &input) -> std::string {
+          try {
+            uint64_t size = std::stoul(input);
+            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE) {
+              return "Buffer size must be between 1KB and 128MB";
+            }
+            return "";
+          } catch (...) {
+            return "Invalid buffer size format";
+          }
+        });
     cmd->add_option("-I,--image-directory", imageDirectory, "Directory to find image(s) and flash to partition(s)");
     cmd->add_flag("-d,--delete", deleteAfterProgress, "Delete flash file(s) after progress.")->default_val(false);
 
@@ -74,19 +86,25 @@ public:
     if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
 
     auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed)->get();
-    const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
+    if (partition.size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
 
-    if (Helper::fileSize(imageName) > partition.size())
-      return AsyncResult_t::Error("{} is larger than {} partition size!", imageName, partitionName);
+    const uint64_t imageSize = Helper::fileSize(imageName);
+    if (imageSize == 0) return AsyncResult_t::Error("Image file {} is empty", imageName);
 
-    LOGNF(PLUGIN, logPath, INFO) << "flashing " << imageName << " to " << partitionName << std::endl;
+    const uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition.size()));
+
+    if (imageSize > partition.size())
+      return AsyncResult_t::Error("Image file {} ({} bytes) is larger than partition {} ({} bytes)", imageName, imageSize,
+                                  partitionName, partition.size());
+
+    LOGNF(PLUGIN, logPath, INFO) << "Flashing " << imageName << " to " << partitionName << std::endl;
 
     if (Flags.onLogical && !Tables.isLogical(partitionName)) {
       if (Flags.forceProcess)
-        LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
+        LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " exists but is not logical. Ignoring (from --force, -f)."
                                         << std::endl;
       else
-        return AsyncResult_t::Error("Used --logical (-l) flag but is not logical partition: {}", partitionName);
+        return AsyncResult_t::Error("Used --logical (-l) flag but partition is not logical: {}", partitionName);
     }
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
@@ -102,17 +120,18 @@ public:
 
     if (!partition.write(ec, imageName, buf, cb)) {
       if (progress) progress->failed.store(true, std::memory_order_relaxed);
-      return AsyncResult_t::Error("Failed to write {} image to {} partition: {}", imageName, partitionName, ec.message());
+      return AsyncResult_t::Error("Failed to write image {} to partition {}: {}", imageName, partitionName, ec.message());
     }
     if (progress) progress->finished.store(true, std::memory_order_relaxed);
 
     if (deleteAfterProgress) {
       LOGNF(PLUGIN, logPath, INFO) << "Deleting flash file: " << imageName << std::endl;
-      if (!Helper::eraseEntry(imageName) && !Flags.quietProcess)
-        WARNING(std::string("Cannot erase flash file: " + imageName + "\n").data());
+      if (!Helper::eraseEntry(imageName) && !Flags.quietProcess) {
+        LOGNF(PLUGIN, logPath, WARNING) << "Cannot erase flash file: " << imageName << std::endl;
+      }
     }
 
-    return AsyncResult_t::Success("{} is successfully wrote to {} partition", imageName, partitionName);
+    return AsyncResult_t::Success("Image {} successfully flashed to partition {}", imageName, partitionName);
   }
 
   PLUGIN_SECTION bool run() override {

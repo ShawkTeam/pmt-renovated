@@ -25,7 +25,7 @@
 #include <private/android_filesystem_config.h>
 
 #define PLUGIN "BackupPlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -34,6 +34,9 @@ class BackupPlugin final : public BasicPlugin {
   std::string rawPartitions, rawOutputNames, outputDirectory;
   uint64_t bufferSize = 0;
   bool noSetPermissions = false, verify = false;
+
+  static constexpr uint64_t MIN_BUFFER_SIZE = 1024;                 ///< 1KB minimum buffer size
+  static constexpr uint64_t MAX_BUFFER_SIZE = 128ULL * 1024 * 1024; ///< 128MB maximum buffer size
 
 public:
   CLI::App *cmd = nullptr;
@@ -55,7 +58,18 @@ public:
         ->check(CLI::ExistingDirectory);
     cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")
         ->transform(CLI::AsSizeValue(false))
-        ->default_val("1MB");
+        ->default_val("1MB")
+        ->check([](const std::string &input) -> std::string {
+          try {
+            uint64_t size = std::stoul(input);
+            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE) {
+              return "Buffer size must be between 1KB and 128MB";
+            }
+            return "";
+          } catch (...) {
+            return "Invalid buffer size format";
+          }
+        });
     cmd->add_flag("-n,--no-set-perms", noSetPermissions, "Don't change permission and owner after progress")->default_val(false);
     cmd->add_flag("-S,--verify", verify, "Verify SHA-256 of the backup image(s)")->default_val(false);
     return true;
@@ -74,9 +88,11 @@ public:
     if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
 
     const auto &partition = Tables.partitionWithDupCheck(partitionName)->get();
-    const uint64_t buf = std::min<uint64_t>(bufferSize, partition.size());
+    if (partition.size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
 
-    LOGNF(PLUGIN, logPath, INFO) << "Back upping " << partitionName << " as " << outputName << std::endl;
+    const uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition.size()));
+
+    LOGNF(PLUGIN, logPath, INFO) << "Backing up " << partitionName << " to " << outputName << std::endl;
 
     if (Flags.onLogical && !Tables.isLogical(partitionName)) {
       if (Flags.forceProcess)
@@ -86,10 +102,11 @@ public:
         return AsyncResult_t::Error("Used --logical (-l) flag but is not logical partition: {}", partitionName);
     }
 
-    if (Helper::fileIsExists(outputName) && !Flags.forceProcess)
-      return AsyncResult_t::Error("{} is exists. Remove it, or use --force (-f) flag.", outputName);
+    if (Helper::fileIsExists(outputName) && !Flags.forceProcess) {
+      return AsyncResult_t::Error("File {} already exists. Remove it, or use --force (-f) flag.", outputName);
+    }
 
-    LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for back upping " << partitionName << "): " << buf << std::endl;
+    LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for backing up " << partitionName << "): " << buf << std::endl;
 
     std::shared_ptr<PartitionMap::Progress_t> progress;
     if (renderer) progress = renderer->add(partitionName, partition.size());
@@ -102,25 +119,30 @@ public:
 
     if (!partition.dump(ec, outputName, buf, cb)) {
       if (progress) progress->failed.store(true, std::memory_order_relaxed);
-      return AsyncResult_t::Error("Failed to write {} partition to {} image: {}", partitionName, outputName, ec.message());
+      return AsyncResult_t::Error("Failed to write partition {} to image {}: {}", partitionName, outputName, ec.message());
     }
     if (progress) progress->finished.store(true, std::memory_order_relaxed);
 
     if (verify) {
-      if (!Helper::sha256Compare(partition.absolutePath(), outputName))
-        return AsyncResult_t::Error("{} and {} is not contains same SHA-256.", partition.absolutePath().string(), outputName);
+      if (!Helper::sha256Compare(partition.absolutePath(), outputName)) {
+        return AsyncResult_t::Error("Verification failed: {} and {} have different SHA-256 hashes.", partition.absolutePath().string(),
+                                    outputName);
+      }
+      LOGNF(PLUGIN, logPath, INFO) << "SHA-256 verification successful for " << outputName << std::endl;
     }
 
     if (!noSetPermissions) {
-      if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY))
+      if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY)) {
         LOGNF(PLUGIN, logPath, WARNING) << "Failed to change owner of output file: " << outputName
-                                        << ". Access problems maybe occur in non-root mode" << std::endl;
-      if (!Helper::changeMode(outputName, 0664))
-        LOGNF(PLUGIN, logPath, WARNING) << "Failed to change mode of output file as 660: " << outputName
-                                        << ". Access problems maybe occur in non-root mode" << std::endl;
+                                        << ". Access problems may occur in non-root mode" << std::endl;
+      }
+      if (!Helper::changeMode(outputName, DEFAULT_FILE_PERMS)) {
+        LOGNF(PLUGIN, logPath, WARNING) << "Failed to change mode of output file to " << std::oct << DEFAULT_FILE_PERMS << ": "
+                                        << outputName << ". Access problems may occur in non-root mode" << std::endl;
+      }
     }
 
-    return AsyncResult_t::Success("{} partition successfully back upped to {}", partitionName, outputName);
+    return AsyncResult_t::Success("Partition {} successfully backed up to {}", partitionName, outputName);
   }
 
   PLUGIN_SECTION bool run() override {
@@ -139,7 +161,7 @@ public:
       if (!outputDirectory.empty()) outputName.insert(0, outputDirectory + '/');
 
       manager.addProcess(&BackupPlugin::runAsync, this, partitionName, outputName, renderer.get());
-      LOGNF(PLUGIN, logPath, INFO) << "Created thread backup upping " << partitionName << std::endl;
+      LOGNF(PLUGIN, logPath, INFO) << "Created thread for backing up " << partitionName << std::endl;
     }
 
     PLUGIN_END_WITH_RENDERER(renderer, manager);

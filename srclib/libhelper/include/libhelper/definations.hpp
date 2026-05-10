@@ -28,7 +28,7 @@
 #include <unistd.h>
 
 /// @brief Default file permissions.
-inline constexpr mode_t DEFAULT_FILE_PERMS = 0644;
+inline constexpr mode_t DEFAULT_FILE_PERMS = 0664;
 
 /// @brief Extended file permissions (using by executables etc).
 inline constexpr mode_t DEFAULT_EXTENDED_FILE_PERMS = 0755;

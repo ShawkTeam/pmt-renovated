@@ -24,13 +24,17 @@
 #include <CLI11.hpp>
 
 #define PLUGIN "ErasePlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
 class ErasePlugin final : public BasicPlugin {
   std::vector<std::string> partitions;
   uint64_t bufferSize = 0;
+
+  static constexpr uint64_t MIN_BUFFER_SIZE = 1024;                 ///< 1KB minimum buffer size
+  static constexpr uint64_t MAX_BUFFER_SIZE = 128ULL * 1024 * 1024; ///< 128MB maximum buffer size
+  static constexpr uint64_t DEFAULT_BUFFER_SIZE = 4ULL * 1024;      ///< 4KB default buffer size
 
 public:
   CLI::App *cmd = nullptr;
@@ -48,7 +52,18 @@ public:
     cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
     cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for writing zero bytes to partition(s)")
         ->transform(CLI::AsSizeValue(false))
-        ->default_val("4KB");
+        ->default_val("4KB")
+        ->check([](const std::string &input) -> std::string {
+          try {
+            uint64_t size = std::stoul(input);
+            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE) {
+              return "Buffer size must be between 1KB and 128MB";
+            }
+            return "";
+          } catch (...) {
+            return "Invalid buffer size format";
+          }
+        });
 
     return true;
   }
@@ -64,56 +79,64 @@ public:
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName) const {
     if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
 
+    const auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed)->get();
+    if (partition.size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
+
     if (Flags.onLogical && !Tables.isLogical(partitionName)) {
       if (Flags.forceProcess)
-        LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
+        LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " exists but is not logical. Ignoring (from --force, -f)."
                                         << std::endl;
       else
-        return AsyncResult_t::Error("Used --logical (-l) flag but is not logical partition: {}", partitionName);
+        return AsyncResult_t::Error("Used --logical (-l) flag but partition is not logical: {}", partitionName);
     }
 
-    uint64_t buf = bufferSize;
+    uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition.size()));
     setupBufferSize(buf, partitionName, Tables);
 
-    LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf;
+    LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
 
     // Automatically close file descriptors and delete allocated memories (arrays)
-    const auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed)->get();
 
     auto pfd = Helper::UniqueFD(partition.absolutePath(), O_WRONLY);
-    if (!pfd) return AsyncResult_t::Error("Can't open partition: {}: {}", partitionName, strerror(errno));
+    if (!pfd) return AsyncResult_t::Error("Can't open partition {}: {}", partitionName, strerror(errno));
 
     if (!Flags.forceProcess) {
       if (!Helper::confirmPropt("Are you sure you want to continue? This could render your device "
                                 "unusable! Do not continue if you "
-                                "do not know what you are doing!"))
-        throw Error("Operation canceled.");
+                                "do not know what you are doing!")) {
+        throw Error("Operation canceled by user.");
+      }
     }
 
     LOGNF(PLUGIN, logPath, INFO) << "Writing zero bytes to partition: " << partitionName << std::endl;
     auto buffer = std::make_unique<char[]>(buf);
+    std::memset(buffer.get(), 0, buf);
 
     ssize_t bytesWritten = 0;
     const uint64_t partitionSize = partition.size();
 
     while (bytesWritten < partitionSize) {
-      size_t toWrite = sizeof(buffer);
-      if (partitionSize - bytesWritten < sizeof(buffer)) toWrite = partitionSize - bytesWritten;
+      size_t toWrite = std::min<uint64_t>(buf, partitionSize - bytesWritten);
 
-      if (const ssize_t result = pfd.write(buffer.get(), toWrite); result == -1)
-        return AsyncResult_t::Error("Can't write zero bytes to partition: {}: {}", partitionName, strerror(errno));
-      else
+      if (const ssize_t result = pfd.write(buffer.get(), toWrite); result == -1) {
+        return AsyncResult_t::Error("Can't write zero bytes to partition {}: {}", partitionName, strerror(errno));
+      } else if (result == 0) {
+        return AsyncResult_t::Error("Write operation returned 0 bytes for partition {}", partitionName);
+      } else {
         bytesWritten += result;
+      }
     }
 
-    return AsyncResult_t::Success("Successfully wrote zero bytes to the %s partition", partitionName);
+    return AsyncResult_t::Success("Successfully wrote zero bytes to partition {}", partitionName);
   }
 
   PLUGIN_SECTION bool run() override {
     Helper::AsyncManager<AsyncResult_t> manager;
+    manager.print = false;
+
     for (const auto &partitionName : partitions) {
       manager.addProcess(&ErasePlugin::runAsync, this, partitionName);
-      LOGNF(PLUGIN, logPath, INFO) << "Created thread for writing zero bytes to " << partitionName << std::endl;
+      LOGNF(PLUGIN, logPath, INFO) << "Created thread for erasing partition " << partitionName << std::endl;
     }
 
     LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
