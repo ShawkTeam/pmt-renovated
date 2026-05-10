@@ -42,6 +42,9 @@ get_latest_release() {
 		RELEASE="$LATEST_RELEASE"
 		echo "Latest release found: $RELEASE"
 	fi
+	
+	# Ensure RELEASE is set globally
+	export RELEASE
 }
 
 select_variant() {
@@ -136,8 +139,12 @@ else
 fi
 
 # Validate release format (should be like v20260207 or just 20260207)
-if ! echo "$RELEASE" | grep -E '^v?[0-9]{8}$' &>/dev/null; then
-    echo "Warning: Release tag format '$RELEASE' may not be valid. Expected format: vYYYYMMDD or YYYYMMDD"
+echo "Debug: Validating release format for '$RELEASE'"
+if echo "$RELEASE" | grep -E '^v?[0-9]{8}$' &>/dev/null; then
+    echo "Debug: Release tag format is valid: $RELEASE"
+else
+    echo "Warning: Release tag format '$RELEASE' is not valid. Expected format: vYYYYMMDD or YYYYMMDD"
+    echo "Debug: This may cause download issues. Using current value anyway."
 fi
 
 case $COMMAND in
