@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file AsyncExamplePlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Async example plugin demonstrating asynchronous operations.
+ */
+
 #include <chrono>
 #include <future>
 #include <PartitionManager/PartitionManager.hpp>

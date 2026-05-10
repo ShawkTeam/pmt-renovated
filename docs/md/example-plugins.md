@@ -21,7 +21,7 @@ This page contains documentation and notes about the example plugins provided wi
 The example plugins are located in the `docs/plugin-instructions/` directory and demonstrate various aspects of plugin development:
 
 - **ExamplePlugin.cpp** - Basic plugin functionality
-- **SimplePlugin.cpp** - Super simple plugin functionally
+- **SimpleExamplePlugin.cpp** - Super simple plugin functionally
 - **AdvancedExamplePlugin.cpp** - Complex plugin with advanced features
 - **AsyncExamplePlugin.cpp** - Asynchronous operations and parallel processing
 

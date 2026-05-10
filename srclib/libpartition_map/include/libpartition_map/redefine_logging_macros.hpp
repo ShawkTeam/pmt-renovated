@@ -16,7 +16,7 @@
  */
 
 /**
- * @file redefined_logging_macros.hpp
+ * @file redefine_logging_macros.hpp
  * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
  * @brief Redefines logging macros for @c libpartition_map.
  */

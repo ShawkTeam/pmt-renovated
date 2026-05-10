@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file AdvancedExamplePlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Advanced example plugin demonstrating complex plugin functionality.
+ */
+
 #include <chrono>
 #include <future>
 #include <map>

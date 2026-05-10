@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file SimpleExamplePlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Simple example plugin demonstrating minimal plugin structure.
+ */
+
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 #include <CLI11.hpp>

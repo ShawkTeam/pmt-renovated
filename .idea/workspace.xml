@@ -65,8 +65,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="github: fixup deployer">
-      <change beforePath="$PROJECT_DIR$/build/scripts/manager.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build/scripts/manager.sh" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="manager: fixup installing from wrong tag">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Doxyfile" beforeDir="false" afterPath="$PROJECT_DIR$/Doxyfile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/md/example-plugins.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/example-plugins.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libpartition_map/include/libpartition_map/redefine_logging_macros.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -187,6 +191,11 @@
       </method>
     </configuration>
     <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -600,14 +609,6 @@
       <workItem from="1778390341453" duration="140000" />
       <workItem from="1778390507347" duration="621000" />
     </task>
-    <task id="LOCAL-00008" summary="pmt: Add documentation to libhelper functions, etc.">
-      <option name="closed" value="true" />
-      <created>1756830013706</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1756830013706</updated>
-    </task>
     <task id="LOCAL-00009" summary="pmt: reformat code, etc.">
       <option name="closed" value="true" />
       <created>1757007774222</created>
@@ -992,7 +993,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778392641672</updated>
     </task>
-    <option name="localTasksCounter" value="57" />
+    <task id="LOCAL-00057" summary="manager: fixup installing from wrong tag">
+      <option name="closed" value="true" />
+      <created>1778393863749</created>
+      <option name="number" value="00057" />
+      <option name="presentableId" value="LOCAL-00057" />
+      <option name="project" value="LOCAL" />
+      <updated>1778393863749</updated>
+    </task>
+    <option name="localTasksCounter" value="58" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1016,7 +1025,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: continue working.&#10; - Improve libhelper's android functions." />
     <MESSAGE value="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`." />
     <MESSAGE value="build.sh: Improve argument processing and add new flags (to make architectural selection easier)." />
     <MESSAGE value="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake)." />
@@ -1041,7 +1049,8 @@
     <MESSAGE value="doxygen: add missing md file to inputs." />
     <MESSAGE value="documentation: add new documentation: Example Plugins (Writing plugins)" />
     <MESSAGE value="github: fixup deployer" />
-    <option name="LAST_COMMIT_MESSAGE" value="github: fixup deployer" />
+    <MESSAGE value="manager: fixup installing from wrong tag" />
+    <option name="LAST_COMMIT_MESSAGE" value="manager: fixup installing from wrong tag" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

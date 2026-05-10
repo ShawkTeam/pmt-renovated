@@ -54,7 +54,7 @@ PROJECT_NUMBER         = main
 # for a project that appears at the top of each page and should give viewers a
 # quick idea about the purpose of the project. Keep the description short.
 
-PROJECT_BRIEF          = "Partition Manager Tool is a fast, reliable, and feature-rich CLI application for Android devices that enables advanced partition operations such as backup, flashing, erasing, information retrieval, and more."
+PROJECT_BRIEF          = "Partition Manager Tool is a fast, reliable, and feature-rich CLI application for Android devices."
 
 # With the PROJECT_LOGO tag one can specify a logo or an icon that is included
 # in the documentation. The maximum height of the logo should not exceed 55
@@ -548,7 +548,7 @@ TIMESTAMP              = NO
 # normally produced when WARNINGS is set to YES.
 # The default value is: NO.
 
-EXTRACT_ALL            = NO
+EXTRACT_ALL            = YES
 
 # If the EXTRACT_PRIVATE tag is set to YES, all private members of a class will
 # be included in the documentation.
@@ -1029,7 +1029,6 @@ WARN_LOGFILE           =
 INPUT                  = include/PartitionManager \
                          srclib/libhelper/include/libhelper/ \
                          srclib/libpartition_map/include/libpartition_map/ \
-                         docs/plugin-structure/ExamplePlugin.cpp \
                          docs/md/documentation-mainpage.md \
                          docs/md/building-from-source.md \
                          docs/md/usage-guide.md \
@@ -1037,6 +1036,7 @@ INPUT                  = include/PartitionManager \
                          docs/md/using-with-termux.md \
                          docs/md/example-plugins.md \
                          docs/plugin-instructions/ExamplePlugin.cpp \
+                         docs/plugin-instructions/SimpleExamplePlugin.cpp \
                          docs/plugin-instructions/AdvancedExamplePlugin.cpp \
                          docs/plugin-instructions/AsyncExamplePlugin.cpp
 
