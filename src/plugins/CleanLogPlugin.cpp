@@ -27,14 +27,14 @@ namespace PartitionManager {
 class CleanLogPlugin final : public BasicPlugin {
 public:
   CLI::App *cmd = nullptr;
-  BasicFlags *flags;
-  const char *logPath = nullptr;
+  BasicFlags *flags = nullptr;
+  std::string logPath;
 
-  PLUGIN_SECTION CleanLogPlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
+  PLUGIN_SECTION CleanLogPlugin() = default;
   PLUGIN_SECTION ~CleanLogPlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath.c_str();
+    logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("clean-logs", "Clean PMT logs.");
     flags = &mainFlags;

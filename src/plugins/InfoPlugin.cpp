@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <cerrno>
-#include <cstdlib>
 #include <fcntl.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
@@ -36,14 +34,15 @@ class InfoPlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  BasicFlags *flags;
-  const char *logPath = nullptr;
+  BasicFlags *flags = nullptr;
+  std::string logPath;
 
-  PLUGIN_SECTION InfoPlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
+  PLUGIN_SECTION InfoPlugin() = default;
   PLUGIN_SECTION ~InfoPlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+    logPath = logpath;
+    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("info", "Tell info(s) of input partition list")
               ->footer("Use get-all or getvar-all as partition name for getting "
                        "info's of all partitions.\nUse get-logicals as partition "

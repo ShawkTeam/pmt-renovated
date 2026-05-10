@@ -38,14 +38,14 @@ class ErasePlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  BasicFlags *flags;
-  const char *logPath = nullptr;
+  BasicFlags *flags = nullptr;
+  std::string logPath;
 
-  PLUGIN_SECTION ErasePlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
+  PLUGIN_SECTION ErasePlugin() = default;
   PLUGIN_SECTION ~ErasePlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath.c_str();
+    logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.add_subcommand("erase", "Writes zero bytes to partition(s)");
     flags = &mainFlags;

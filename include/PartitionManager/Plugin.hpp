@@ -34,7 +34,8 @@
 // clang-format off
 #define Flags          (*flags) ///< Flags pointer
 #define Tables         (*Flags.partitionTables) ///< Partition tables pointer
-#define DEFAULT_PLUGIN_CONSTRUCTOR : flags(nullptr) {} ///< Recommended plugin constructor boddy.
+#define DEFAULT_PLUGIN_CONSTRUCTOR : flags(nullptr) {} ///< Recommended plugin constructor boddy. @deprecated Don't use this!
+
 #define PLUGIN_END_WITH_RENDERER(r, m) \
   if (r) { r->start(); } \
   m.startAll(); \
@@ -84,15 +85,17 @@ namespace PartitionManager {
  */
 class BasicPlugin {
 public:
-  CLI::App *cmd = nullptr; ///< @c CLI11 command object for plugin.
-  BasicFlags *flags;       ///< Pointer to BasicFlags.
-  const char *logPath;     ///< Log file path.
+  /**
+   * CLI::App *cmd = nullptr;
+   * BasicFlags *flags = nullptr;
+   * std::string logPath;
+   */
 
-  PLUGIN_SECTION BasicPlugin() : flags(nullptr), logPath(nullptr) {}
+  PLUGIN_SECTION BasicPlugin() = default;
   virtual PLUGIN_SECTION ~BasicPlugin() = default;
 
   /// @brief Called when the plugin is loaded.
-  virtual PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) = 0;
+  virtual PLUGIN_SECTION bool onLoad(CLI::App &, const std::string &, BasicFlags &) = 0;
   /// @brief Called when the plugin is unloaded.
   virtual PLUGIN_SECTION bool onUnload() = 0;
   /// @brief Returns true if the plugin is used in command line.

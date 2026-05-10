@@ -65,12 +65,19 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="documentation: add plugin examples to documentation, etc.">
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,9 +116,6 @@
   <component name="MacroExpansionManager">
     <option name="directoryName" value="iAhVS1Gg" />
   </component>
-  <component name="OCResolveContextSettings">
-    <option name="configuration" value="0-Debug-pmt_static" />
-  </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
     <option name="majorVersion" value="2025" />
@@ -134,6 +138,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;C/C++ File.main.cpp.executor&quot;: &quot;Run&quot;,
     &quot;CMake Application.CLI11-generate-single-file.executor&quot;: &quot;Run&quot;,
     &quot;CMake Application.docs.executor&quot;: &quot;Run&quot;,
     &quot;CMake Application.libhelper_shared.executor&quot;: &quot;Run&quot;,
@@ -184,7 +189,7 @@
       <recent name="$PROJECT_DIR$/include/nlohmann" />
     </key>
   </component>
-  <component name="RunManager" selected="Shell Script.Open Shell">
+  <component name="RunManager" selected="Shell Script.Cleanup">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -608,14 +613,8 @@
       <workItem from="1778349959696" duration="6965000" />
       <workItem from="1778390341453" duration="140000" />
       <workItem from="1778390507347" duration="621000" />
-    </task>
-    <task id="LOCAL-00010" summary="pmt: add control for -l flag">
-      <option name="closed" value="true" />
-      <created>1757010918533</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1757010918533</updated>
+      <workItem from="1778426013351" duration="2505000" />
+      <workItem from="1778441210465" duration="3054000" />
     </task>
     <task id="LOCAL-00011" summary="pmt: Last commit for 1.2.0 version&#10; - Major changes for developers.&#10; - Some changes to flash and sizeof functions.&#10; - Some minor changes.">
       <option name="closed" value="true" />
@@ -1001,7 +1000,15 @@
       <option name="project" value="LOCAL" />
       <updated>1778395947618</updated>
     </task>
-    <option name="localTasksCounter" value="59" />
+    <task id="LOCAL-00059" summary="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc.">
+      <option name="closed" value="true" />
+      <created>1778397415869</created>
+      <option name="number" value="00059" />
+      <option name="presentableId" value="LOCAL-00059" />
+      <option name="project" value="LOCAL" />
+      <updated>1778397415869</updated>
+    </task>
+    <option name="localTasksCounter" value="60" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1025,7 +1032,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="build.sh: Improve argument processing and add new flags (to make architectural selection easier)." />
     <MESSAGE value="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake)." />
     <MESSAGE value="pmt: start working on 1.7.0" />
     <MESSAGE value="build.sh: Stop embroidering -G* flags" />
@@ -1050,7 +1056,8 @@
     <MESSAGE value="github: fixup deployer" />
     <MESSAGE value="manager: fixup installing from wrong tag" />
     <MESSAGE value="documentation: add plugin examples to documentation, etc." />
-    <option name="LAST_COMMIT_MESSAGE" value="documentation: add plugin examples to documentation, etc." />
+    <MESSAGE value="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc." />
+    <option name="LAST_COMMIT_MESSAGE" value="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

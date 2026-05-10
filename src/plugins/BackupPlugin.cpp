@@ -40,14 +40,14 @@ class BackupPlugin final : public BasicPlugin {
 
 public:
   CLI::App *cmd = nullptr;
-  BasicFlags *flags;
-  const char *logPath = nullptr;
+  BasicFlags *flags = nullptr;
+  std::string logPath;
 
-  PLUGIN_SECTION BackupPlugin() DEFAULT_PLUGIN_CONSTRUCTOR;
+  PLUGIN_SECTION BackupPlugin() = default;
   PLUGIN_SECTION ~BackupPlugin() override = default;
 
   PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath.c_str();
+    logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = &mainFlags;
     cmd = mainApp.add_subcommand("backup", "Backup partition(s) to file(s)");
@@ -76,7 +76,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    LOGNF(getName(), logPath, INFO) << getName() << "::onUnload() trigger. Bye!" << std::endl;
     cmd = nullptr;
     return true;
   }
