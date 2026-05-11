@@ -33,7 +33,7 @@ The project is organized into several key components:
 We welcome contributions! Please see our [Contributing Guide](https://github.com/ShawkTeam/pmt-renovated/blob/main/CONTRIBUTING.md) for details.
 
 ## License
-This project is licensed under the MIT License - see the [LICENSE](https://github.com/ShawkTeam/pmt-renovated/blob/main/LICENSE) file for details.
+This project is licensed under the GNU GPLv3 License - see the [LICENSE](https://github.com/ShawkTeam/pmt-renovated/blob/main/LICENSE) file for details.
 
 ## Credits
 - [CLI11: Command line parser for C++11](https://github.com/CLIUtils/CLI11)
