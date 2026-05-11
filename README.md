@@ -25,8 +25,8 @@ PMT is designed for developers, technicians, and Android enthusiasts who need fi
 
 ## Documentation
 
-Partition Manager Tool is licensed under **_GNU GPLv3 license._**\
-For all information about PMT, see the [wiki](https://documentations.yzbruh.com.tr/pmt-renovated).\
+Partition Manager Tool is licensed under **GNU GPLv3 license.**\
+For all information about PMT, see the [Documentation](https://documentations.yzbruh.com.tr/pmt-renovated).
 
 ## Bug Reporting
 Please submit bugs at [Issues](https://github.com/ShawkTeam/pmt-renovated/issues) page.
