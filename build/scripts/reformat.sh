@@ -102,3 +102,5 @@ find ${WORK_DIR} \( "${FIND_ARGS[@]}" \) -prune -o \
         after=$(md5sum "$file")
         [ "$before" != "$after" ] && echo "$file"
 done
+
+exit 0

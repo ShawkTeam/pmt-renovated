@@ -3,7 +3,8 @@ Checks:          'clang-diagnostic-*,
                   clang-analyzer-*,
                   -bugrone-unused-return-value,
                   -bugprone-reserved-identifier,
-                  -modernize-use-nodiscard'
+                  -modernize-use-nodiscard
+                  -misc-unused-parameters'
 WarningsAsErrors: ''
 HeaderFileExtensions:
   - ''

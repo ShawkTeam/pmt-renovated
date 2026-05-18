@@ -51,7 +51,6 @@
       <config projectName="pmt" targetName="libbase_static" />
       <config projectName="pmt" targetName="pmt" />
       <config projectName="pmt" targetName="type_plugin" />
-      <config projectName="pmt" targetName="CLI11" />
       <config projectName="pmt" targetName="CLI11-generate-single-file" folderName="Scripts" />
       <config projectName="pmt" targetName="memory_test_plugin" />
       <config projectName="pmt" targetName="fmtlib_shared" />
@@ -65,11 +64,31 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="plugins: simplify the structure">
-      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/AdvancedExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/AdvancedExamplePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/AsyncExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/AsyncExamplePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/ExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/ExamplePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/SimpleExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/SimpleExamplePlugin.cpp" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="refactor(CommandLine): CLI11 usage has been discontinued.&#10;&#10; - Cleaned from CMake scripts and git modules.">
+      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/cmdline.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.clang-tidy" beforeDir="false" afterPath="$PROJECT_DIR$/.clang-tidy" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/scripts/reformat.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build/scripts/reformat.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/external/CLI11" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/error.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/error.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -99,6 +118,9 @@
     &quot;assignee&quot;: &quot;YZBruh&quot;
   }
 }</component>
+  <component name="GithubDefaultAccount">
+    <option name="defaultAccountId" value="d86625ba-20f7-4cb7-bebd-bd9a29b0db94" />
+  </component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/ShawkTeam/pmt-renovated&quot;,
@@ -107,6 +129,9 @@
 }</component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="iAhVS1Gg" />
+  </component>
+  <component name="ProblemsViewState">
+    <option name="autoscrollToSource" value="true" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -165,7 +190,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;CMakeSettings&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;vcs.Git&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -181,13 +206,8 @@
       <recent name="$PROJECT_DIR$/include/nlohmann" />
     </key>
   </component>
-  <component name="RunManager" selected="Shell Script.Cleanup">
+  <component name="RunManager" selected="Shell Script.Build (Debug)">
     <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="CLI11" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -444,7 +464,6 @@
     </configuration>
     <list>
       <item itemvalue="CMake Application.CLI11-generate-single-file" />
-      <item itemvalue="CMake Application.CLI11" />
       <item itemvalue="CMake Application.backup_plugin" />
       <item itemvalue="CMake Application.clean_log_plugin" />
       <item itemvalue="CMake Application.docs" />
@@ -606,31 +625,18 @@
       <workItem from="1778390341453" duration="140000" />
       <workItem from="1778390507347" duration="621000" />
       <workItem from="1778426013351" duration="2505000" />
-      <workItem from="1778441210465" duration="3371000" />
-    </task>
-    <task id="LOCAL-00012" summary="pmt: fix workflow">
-      <option name="closed" value="true" />
-      <created>1757061499519</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1757061499520</updated>
-    </task>
-    <task id="LOCAL-00013" summary="pmt: start working on 1.3.0&#10; - Add log cleaner function.&#10; - Introduce function flag structure.&#10; - Some improvements.">
-      <option name="closed" value="true" />
-      <created>1757149860359</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1757149860360</updated>
-    </task>
-    <task id="LOCAL-00014" summary="pmt: remove non-signal exit code catching.">
-      <option name="closed" value="true" />
-      <created>1757149969051</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1757149969051</updated>
+      <workItem from="1778441210465" duration="4334000" />
+      <workItem from="1778515610897" duration="321000" />
+      <workItem from="1778515946441" duration="1055000" />
+      <workItem from="1778517019522" duration="136000" />
+      <workItem from="1779116363501" duration="31000" />
+      <workItem from="1779116410133" duration="686000" />
+      <workItem from="1779117112479" duration="145000" />
+      <workItem from="1779117281342" duration="4530000" />
+      <workItem from="1779121830045" duration="6000" />
+      <workItem from="1779122009614" duration="3624000" />
+      <workItem from="1779125717074" duration="7305000" />
+      <workItem from="1779133085725" duration="918000" />
     </task>
     <task id="LOCAL-00015" summary="pmt: add [] operators to Map_t and builder">
       <option name="closed" value="true" />
@@ -1000,7 +1006,31 @@
       <option name="project" value="LOCAL" />
       <updated>1778444305693</updated>
     </task>
-    <option name="localTasksCounter" value="61" />
+    <task id="LOCAL-00061" summary="plugins: update plugin examples.">
+      <option name="closed" value="true" />
+      <created>1778444607013</created>
+      <option name="number" value="00061" />
+      <option name="presentableId" value="LOCAL-00061" />
+      <option name="project" value="LOCAL" />
+      <updated>1778444607013</updated>
+    </task>
+    <task id="LOCAL-00062" summary="docs(documentation-mainpage,CONTRUBUTING): update maninpage of wiki and create contributing guide&#10;&#10;- Contributing document should have been included much earlier. Even though it's late, adding it was necessary.">
+      <option name="closed" value="true" />
+      <created>1778516386271</created>
+      <option name="number" value="00062" />
+      <option name="presentableId" value="LOCAL-00062" />
+      <option name="project" value="LOCAL" />
+      <updated>1778516386272</updated>
+    </task>
+    <task id="LOCAL-00063" summary="docs(README): fixup format, etc.">
+      <option name="closed" value="true" />
+      <created>1778516698086</created>
+      <option name="number" value="00063" />
+      <option name="presentableId" value="LOCAL-00063" />
+      <option name="project" value="LOCAL" />
+      <updated>1778516698086</updated>
+    </task>
+    <option name="localTasksCounter" value="64" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1024,10 +1054,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="pmt: start working on 1.7.0" />
-    <MESSAGE value="build.sh: Stop embroidering -G* flags" />
-    <MESSAGE value="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh" />
-    <MESSAGE value="pmt: reformat code, etc.&#10; - Add git hook for pushs." />
     <MESSAGE value="build.sh: add command for configuring git hooks." />
     <MESSAGE value="git: Correct the logical fallacy in githooks." />
     <MESSAGE value="libhelper: finalize documentation.&#10; - git: fixup pre-commit.&#10; - scripts: reformat.sh: Print only the names of the formatted files to the terminal." />
@@ -1049,7 +1075,11 @@
     <MESSAGE value="documentation: add plugin examples to documentation, etc." />
     <MESSAGE value="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc." />
     <MESSAGE value="plugins: simplify the structure" />
-    <option name="LAST_COMMIT_MESSAGE" value="plugins: simplify the structure" />
+    <MESSAGE value="plugins: update plugin examples." />
+    <MESSAGE value="docs(documentation-mainpage,CONTRUBUTING): update maninpage of wiki and create contributing guide&#10;&#10;- Contributing document should have been included much earlier. Even though it's late, adding it was necessary." />
+    <MESSAGE value="docs(README): fixup format, etc." />
+    <MESSAGE value="refactor(CommandLine): CLI11 usage has been discontinued.&#10;&#10; - Cleaned from CMake scripts and git modules." />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor(CommandLine): CLI11 usage has been discontinued.&#10;&#10; - Cleaned from CMake scripts and git modules." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

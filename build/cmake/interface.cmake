@@ -57,8 +57,8 @@ target_link_options(pmt_interface_static INTERFACE "-Wl,-rpath,/data/data/com.te
 target_link_options(pmt_interface_nolibs INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
 target_link_options(pmt_interface_nolibs_and_flags INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib")
 
-target_link_libraries(pmt_interface_shared INTERFACE libhelper_shared libpartition_map_shared libgptf_static libext2_uuid_static CLI11_SINGLE)
-target_link_libraries(pmt_interface_static INTERFACE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static CLI11_SINGLE)
+target_link_libraries(pmt_interface_shared INTERFACE libhelper_shared libpartition_map_shared libgptf_static libext2_uuid_static)
+target_link_libraries(pmt_interface_static INTERFACE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static)
 
 target_include_directories(pmt_interface_shared INTERFACE ${INCLUDE_DIRECTORIES})
 target_include_directories(pmt_interface_static INTERFACE ${INCLUDE_DIRECTORIES})

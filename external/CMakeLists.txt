@@ -15,10 +15,6 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 
-# Include CLI11 targets.
-set(CLI11_SINGLE_FILE ON)
-add_subdirectory(CLI11)
-
 # Set directory paths
 set(E2FSPROGS ${CMAKE_CURRENT_SOURCE_DIR}/e2fsprogs)
 set(GPTFDISK ${CMAKE_CURRENT_SOURCE_DIR}/gptfdisk)
