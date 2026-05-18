@@ -58,7 +58,7 @@
   };                                                                                        \
   static __class##_AutoRegister _reg;
 #else
-#define PLUGIN_SECTION __attribute__((section(".pmt_module"))) /// @brief Custom section macro for plugins.
+#define PLUGIN_SECTION __attribute__((section(".pmt_module"))) ///< Custom section macro for plugins.
 
 /// @brief Register a plugin.
 #define REGISTER_PLUGIN(__namespace, __class) \
@@ -74,8 +74,8 @@
 #include <format>
 #include <dlfcn.h>
 #include <libhelper/logging.hpp>
+#include <libhelper/cmdline.hpp>
 #include <libpartition_map/lib.hpp>
-#include <CLI11.hpp>
 
 namespace PartitionManager {
 
@@ -95,7 +95,7 @@ public:
   virtual PLUGIN_SECTION ~BasicPlugin() = default;
 
   /// @brief Called when the plugin is loaded.
-  virtual PLUGIN_SECTION bool onLoad(CLI::App &, const std::string &, BasicFlags &) = 0;
+  virtual PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &, const std::string &, BasicFlags &) = 0;
   /// @brief Called when the plugin is unloaded.
   virtual PLUGIN_SECTION bool onUnload() = 0;
   /// @brief Returns true if the plugin is used in command line.
@@ -171,14 +171,14 @@ class PluginManager {
   std::vector<std::unique_ptr<BasePluginClass>> builtinPlugins;
   std::vector<Plugin> plugins;
   std::string logPath;
-  CLI::App &mainApp;
+  Helper::CMDLine::App &mainApp;
   BasicFlags &mainFlags;
 
 public:
   PluginManager() = delete; /// @brief Deleted constructor.
 
   /// @brief Main constructor.
-  explicit PluginManager(CLI::App &cmd, std::string logpath, BasicFlags &flags)
+  explicit PluginManager(Helper::CMDLine::App &cmd, std::string logpath, BasicFlags &flags)
       : logPath(std::move(logpath)), mainApp(cmd), mainFlags(flags) {}
 
   /// @brief Destructor.
@@ -451,12 +451,12 @@ using BasicBuiltinPluginRegistry = BuiltinPluginRegistry<BasicPlugin>; ///< Shor
 /// @brief Splits the string if it contains the delimiter and checks for duplicate elements.
 inline auto splitIfHasDelim = [](const std::string &s, const char delim, const bool checkForBadUsage) {
   if (s.find(delim) == std::string::npos) return std::vector<std::string>{};
-  auto vec = CLI::detail::split(s, delim);
+  auto vec = Helper::CMDLine::split(s, delim);
 
   if (checkForBadUsage) {
     std::unordered_set<std::string> set;
     for (const auto &str : vec) {
-      if (set.contains(str)) throw CLI::ValidationError("Duplicate element in your inputs!");
+      if (set.contains(str)) throw Error("Duplicate element in your inputs!").cmdlineError().withCode(EX_USAGE);
       set.insert(str);
     }
   }

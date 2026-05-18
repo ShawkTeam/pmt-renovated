@@ -65,7 +65,8 @@ namespace Helper {
 class Error final : public std::exception {
   std::ostringstream oss;
   std::string message;
-  int ec = 0;
+  int ec = 1;
+  bool is_cmdline_error = false;
 
 public:
   Error() = default;
@@ -99,8 +100,17 @@ public:
     return std::move(*this);
   }
 
+  /// @brief Set is_cmdline_error value (private).
+  Error &&cmdlineError(bool v = true) {
+    is_cmdline_error = v;
+    return std::move(*this);
+  }
+
   /// @brief Get error code.
   int getErrorCode() const { return ec; }
+
+  /// @brief Get is_cmdline_error value (private).
+  bool isCmdlineError() const { return is_cmdline_error; }
 
   /// @brief Get error message.
   [[nodiscard]] const char *what() const noexcept override { return message.data(); }

@@ -22,6 +22,7 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include <libhelper/cmdline.hpp>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 
@@ -44,8 +45,7 @@ static void sigHandler(int sig) {
 }
 
 int main(int argc, char **argv) {
-  CLI::App AppMain{"Partition Manager Tool"};
-  CLI::App bootstrap{"Partition Manager Tool (Bootstrap)"};
+  Helper::CMDLine::App app("Partition Manager Tool");
   std::vector<char *> argvStorage;
   std::vector<std::string> args;
   Helper::Silencer silencer(
@@ -81,44 +81,33 @@ int main(int argc, char **argv) {
     std::vector<std::string> plugins;
     std::string pluginPath;
 
-    // To prevent bootstrap from affecting the main application, disable some of its attributes.
-    bootstrap.allow_extras();
-    bootstrap.fallthrough(true);
-    bootstrap.set_help_flag();
-    bootstrap.set_help_all_flag();
-
-    AppMain.set_help_all_flag("--help-all", "Print full help message and exit");
-    AppMain.footer(
+    app.setLicenseString(
         "Copyright (C) 2026 Yağız Zengin\nPartition Manager Tool is written by Yağız Zengin, licensed under GNU GPLv3 license.\nThis "
         "program comes with ABSOLUTELY NO "
         "WARRANTY. Use --license for more information.\nReport "
         "bugs to https://github.com/ShawkTeam/pmt-renovated/issues");
-    AppMain.add_option("-L,--log-file", Flags.logFile, "Set log file.");
-    AppMain.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(','); // Dummy option for help message.
-    AppMain.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")
-        ->check(CLI::ExistingDirectory); // Dummy option for help message.
-    AppMain.add_flag("-s,--select-on-duplicate", Flags.noWorkOnUsed,
-                     "Select partition for work if has input named duplicate partitions.");
-    AppMain.add_flag("-f,--force", Flags.forceProcess, "Force process to be processed.");
-    AppMain.add_flag("-l,--logical", Flags.onLogical, "Specify that the target partition is logical.");
-    AppMain.add_flag("-q,--quiet", Flags.quietProcess, "Quiet process."); // Dummy option for help message.
-    AppMain.add_flag("-V,--verbose", Flags.verboseMode,
-                     "Detailed information is written on the screen while the transaction is being carried out.");
-    AppMain.add_flag("-v,--version", Flags.viewVersion, "Print version and exit.");
-    AppMain.add_flag("--license", Flags.viewLicense, "Print license and exit.");
 
-    bootstrap.add_option("-p,--plugins", plugins, "Load input plugin files.")->delimiter(',');
-    bootstrap.add_option("-d,--plugin-directory", pluginPath, "Load plugins in input directory.")->check(CLI::ExistingDirectory);
-    bootstrap.add_option("-L,--log-file", Flags.logFile, "Set log file.");
-    bootstrap.add_flag("-q,--quiet", Flags.quietProcess, "Quiet process.");
-    bootstrap.add_flag("-V,--verbose", Flags.verboseMode,
-                       "Detailed information is written on the screen while the transaction is being carried out.");
+    app.addOption("-L,--log-file", Flags.logFile, "Set log file.")->early();
+    app.addOption("-p,--plugins", plugins, "Load input plugin files.")->early();
+    app.addOption("-d,--plugin-directory", pluginPath, "Load plugins from the input directory.")
+        ->early()
+        ->check([](const std::string &s) {
+          if (!Helper::directoryIsExists(s)) throw Helper::Error("{}: Directory is not exists.", s).withCode(EX_USAGE);
+        });
 
-    bootstrap.parse(argc, argv);
+    app.addFlag("-V,--verbose", Flags.verboseMode, "Enable verbose output mode.")->early();
+    app.addFlag("-q,--quiet", Flags.quietProcess, "Enable quiet processing.")->early();
+    app.addFlag("-s,--select-on-duplicate", Flags.noWorkOnUsed, "Select partition for work if has input named duplicate partitions.");
+    app.addFlag("-f,--force", Flags.forceProcess, "Force process to be processed.");
+    app.addFlag("-l,--logical", Flags.onLogical, "Specify that the target partition is logical.");
+    app.addFlag("-v,--version", Flags.viewVersion, "Print version and exit.");
+    app.addFlag("--license", Flags.viewLicense, "Print license and exit.");
+
+    app.parse_earlies(argc, argv);
 
     Helper::Logger::Properties::setPrinting(Flags.verboseMode);
     Helper::Logger::Properties::setFile(Flags.logFile, true);
-    PartitionManager::BasicManager manager(AppMain, Flags.logFile, Flags);
+    PartitionManager::BasicManager manager(app, Flags.logFile, Flags);
 
     manager.loadBuiltinPlugins(); // Load built-in plugins if existed.
     if (!plugins.empty()) {
@@ -131,7 +120,8 @@ int main(int argc, char **argv) {
         if (entry.path().extension().string() == ".so") manager.loadPlugin(entry.path().string());
     }
 
-    AppMain.parse(argc, argv);
+    // AppMain.parse(argc, argv);
+    app.parse(argc, argv);
 
     if (argc < 2 || (argc == 3 && (!plugins.empty() || !pluginPath.empty()))) {
       Out::println("Usage: {} [OPTIONS] [SUBCOMMAND]\nUse --help for more information.", argv[0]);
@@ -164,22 +154,14 @@ int main(int argc, char **argv) {
 
     if (manager.getUsed().empty()) throw PartitionManager::Error("Unknown main command speficied! Use --help for more information.");
 
-    return !manager.runUsed(); // If the operation is successful, it returns true, which is equal to 1. Therefore, the opposite result
-                               // should be obtained.
-  } catch (CLI::CallForHelp &) {
-    // catch CLI::CallForHelp for printing help texts.
-
-    std::cout << AppMain.help() << std::endl;
-    return EXIT_SUCCESS;
+    return !manager.runUsed(); // If the operation is successful, it returns true, which is equal to 1.
   } catch (Helper::Error &error) {
-    // catch Helper::Error
-
-    fprintf(stderr, "%s%sFAIL:%s\n%s\n", RED, BOLD, STYLE_RESET, error.what());
-    return EXIT_FAILURE;
-  } catch (CLI::Error &error) {
-    // catch CLI::Error
-
-    fprintf(stderr, "%s: %s\n", argv[0], error.what());
-    return error.get_exit_code();
-  } // try-catch end
+    if (error.isCmdlineError()) {
+      fprintf(stderr, "%s: %s\n", argv[0], error.what());
+      return error.getErrorCode();
+    } else {
+      fprintf(stderr, "%s%sFAIL:%s\n%s\n", RED, BOLD, STYLE_RESET, error.what());
+      return error.getErrorCode();
+    }
+  }
 }

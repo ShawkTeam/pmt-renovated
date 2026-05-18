@@ -17,10 +17,9 @@
 
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 
 #define PLUGIN "RealPathPlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -29,20 +28,24 @@ class RealPathPlugin final : public BasicPlugin {
   bool byName = false;
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION RealPathPlugin() = default;
   PLUGIN_SECTION ~RealPathPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
-    cmd = mainApp.add_subcommand("real-path", "Tell real paths of partition(s)");
+    cmd = mainApp.addSubcommand("real-path", "Tell real paths of partition(s).");
     flags = &mainFlags;
-    cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
-    cmd->add_flag("--by-name", byName, "Print by-name path(s)")->default_val(false);
+    cmd->addOption("partition(s)", partitions, "Partition name(s)")->required();
+    cmd->addFlag("--by-name", byName, "Print by-name path(s)")->defaultValue(false);
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
+      Out::println("{} v{}", getName(), getVersion());
+      std::exit(0);
+    });
 
     return true;
   }
@@ -53,7 +56,7 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION bool run() override {
     for (const auto &partition : partitions) {

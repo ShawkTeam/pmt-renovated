@@ -20,10 +20,9 @@
 #include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 
 #define PLUGIN "FlashPlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -37,24 +36,23 @@ class FlashPlugin final : public BasicPlugin {
   static constexpr uint64_t MAX_BUFFER_SIZE = 128ULL * 1024 * 1024; ///< 128MB maximum buffer size
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION FlashPlugin() = default;
   PLUGIN_SECTION ~FlashPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = &mainFlags;
-    cmd = mainApp.add_subcommand("flash", "Flash image(s) to partition(s)");
-    cmd->fallthrough();
-    cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
-    cmd->add_option("imageFile(s)", rawImageNames, "Name(s) of image file(s)")->required();
-    cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading image(s) and writing to partition(s)")
-        ->transform(CLI::AsSizeValue(false))
-        ->default_val("1MB")
+    cmd = mainApp.addSubcommand("flash", "Flash image(s) to partition(s).");
+    cmd->addOption("partition(s)", rawPartitions, "Partition name(s)")->required();
+    cmd->addOption("imageFile(s)", rawImageNames, "Name(s) of image file(s)")->required();
+    cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for reading image(s) and writing to partition(s)")
+        ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
+        ->defaultValue("1MB")
         ->check([](const std::string &input) -> std::string {
           try {
             uint64_t size = std::stoul(input);
@@ -66,8 +64,12 @@ public:
             return "Invalid buffer size format";
           }
         });
-    cmd->add_option("-I,--image-directory", imageDirectory, "Directory to find image(s) and flash to partition(s)");
-    cmd->add_flag("-d,--delete", deleteAfterProgress, "Delete flash file(s) after progress.")->default_val(false);
+    cmd->addOption("-I,--image-directory", imageDirectory, "Directory to find image(s) and flash to partition(s)");
+    cmd->addFlag("-d,--delete", deleteAfterProgress, "Delete flash file(s) after progress.")->defaultValue(false);
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
+      Out::println("{} v{}", getName(), getVersion());
+      std::exit(0);
+    });
 
     return true;
   }
@@ -78,7 +80,7 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &imageName,
                                         PartitionMap::ProgressRenderer *renderer) const {
@@ -137,7 +139,7 @@ public:
   PLUGIN_SECTION bool run() override {
     processCommandLine(partitions, imageNames, rawPartitions, rawImageNames, ',', true);
     if (partitions.size() != imageNames.size())
-      throw CLI::ValidationError("You must provide an image file(s) as long as the partition name(s)");
+      throw Error("You must provide an image file(s) as long as the partition name(s)").cmdlineError().withCode(EX_USAGE);
 
     for (size_t i = 0; i < partitions.size(); i++) {
       if (!imageDirectory.empty()) imageNames[i].insert(0, imageDirectory + '/');

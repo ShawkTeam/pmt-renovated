@@ -17,10 +17,9 @@
 
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 
 #define PLUGIN "PartitionSizePlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -29,32 +28,36 @@ class PartitionSizePlugin final : public BasicPlugin {
   bool onlySize = false, asByte = false, asKiloBytes = false, asMega = false, asGiga = false;
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION PartitionSizePlugin() = default;
   PLUGIN_SECTION ~PartitionSizePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
-    cmd = mainApp.add_subcommand("sizeof", "Tell size(s) of input partition list")
+    cmd = mainApp.addSubcommand("sizeof", "Tell size(s) of input partition list.")
               ->footer("Use get-all or getvar-all as partition name for getting "
                        "sizes of all partitions.\nUse get-logicals as partition "
                        "name for getting sizes of logical partitions.\n"
                        "Use get-physical as partition name for getting sizes of "
                        "physical partitions.");
     flags = &mainFlags;
-    cmd->add_option("partition(s)", partitions, "Partition name(s).")->required()->delimiter(',');
-    cmd->add_flag("--as-byte", asByte, "Tell input size of partition list as byte.")->default_val(false);
-    cmd->add_flag("--as-kilobyte", asKiloBytes, "Tell input size of partition list as kilobyte.")->default_val(false);
-    cmd->add_flag("--as-megabyte", asMega, "Tell input size of partition list as megabyte.")->default_val(true);
-    cmd->add_flag("--as-gigabyte", asGiga, "Tell input size of partition list as gigabyte.")->default_val(false);
-    cmd->add_flag("--only-size", onlySize,
-                  "Tell input size of partition list as not printing multiple "
-                  "and partition name.")
-        ->default_val(false);
+    cmd->addOption("partition(s)", partitions, "Partition name(s).")->required();
+    cmd->addFlag("--as-byte", asByte, "Tell input size of partition list as byte.")->defaultValue(false);
+    cmd->addFlag("--as-kilobyte", asKiloBytes, "Tell input size of partition list as kilobyte.")->defaultValue(false);
+    cmd->addFlag("--as-megabyte", asMega, "Tell input size of partition list as megabyte.")->defaultValue(true);
+    cmd->addFlag("--as-gigabyte", asGiga, "Tell input size of partition list as gigabyte.")->defaultValue(false);
+    cmd->addFlag("--only-size", onlySize,
+                 "Tell input size of partition list as not printing multiple "
+                 "and partition name.")
+        ->defaultValue(false);
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
+      Out::println("{} v{}", getName(), getVersion());
+      std::exit(0);
+    });
     return true;
   }
 
@@ -64,7 +67,7 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION bool run() override {
     PartitionMap::SizeUnit multiple = {};

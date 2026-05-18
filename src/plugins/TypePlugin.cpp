@@ -18,10 +18,9 @@
 #include <map>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 
 #define PLUGIN "TypePlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -31,25 +30,29 @@ class TypePlugin final : public BasicPlugin {
   uint64_t bufferSize = 0;
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION TypePlugin() = default;
   PLUGIN_SECTION ~TypePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
-    cmd = mainApp.add_subcommand("type", "Get type of the partition(s) or image(s)");
+    cmd = mainApp.addSubcommand("type", "Get type of the partition(s) or image(s).");
     flags = &mainFlags;
-    cmd->add_option("content(s)", contents, "Content(s)")->required()->delimiter(',');
-    cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for max seek depth")
-        ->transform(CLI::AsSizeValue(false))
-        ->default_val("4KB");
-    cmd->add_flag("--only-check-android-magics", onlyCheckAndroidMagics, "Only check Android magic values.")->default_val(false);
-    cmd->add_flag("--only-check-filesystem-magics", onlyCheckFileSystemMagics, "Only check filesystem magic values.")
-        ->default_val(false);
+    cmd->addOption("content(s)", contents, "Content(s)")->required();
+    cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for max seek depth")
+        ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
+        ->defaultValue("4KB");
+    cmd->addFlag("--only-check-android-magics", onlyCheckAndroidMagics, "Only check Android magic values.")->defaultValue(false);
+    cmd->addFlag("--only-check-filesystem-magics", onlyCheckFileSystemMagics, "Only check filesystem magic values.")
+        ->defaultValue(false);
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
+      Out::println("{} v{}", getName(), getVersion());
+      std::exit(0);
+    });
 
     return true;
   }
@@ -60,7 +63,7 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION bool run() override {
     std::map<uint64_t, std::string> magics;

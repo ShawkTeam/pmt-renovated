@@ -19,10 +19,9 @@
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 #include <nlohmann/json.hpp>
-#include <CLI11.hpp>
 
 #define PLUGIN "InfoPlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -33,37 +32,41 @@ class InfoPlugin final : public BasicPlugin {
   bool jsonFormat = false, asByte = true, asKiloBytes = false, asMega = false, asGiga = false;
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION InfoPlugin() = default;
   PLUGIN_SECTION ~InfoPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
-    cmd = mainApp.add_subcommand("info", "Tell info(s) of input partition list")
+    cmd = mainApp.addSubcommand("info", "Tell info(s) of input partition list.")
               ->footer("Use get-all or getvar-all as partition name for getting "
                        "info's of all partitions.\nUse get-logicals as partition "
                        "name for getting info's of logical partitions.\n"
                        "Use get-physical as partition name for getting info's of "
                        "physical partitions.");
     flags = &mainFlags;
-    cmd->add_option("partition(s)", partitions, "Partition name(s).")->required()->delimiter(',');
-    cmd->add_flag("-J,--json", jsonFormat,
-                  "Print info(s) as JSON body. The body of each partition will "
-                  "be written separately")
-        ->default_val(false);
-    cmd->add_flag("--as-byte", asByte, "View sizes as byte.")->default_val(true);
-    cmd->add_flag("--as-kilobyte", asKiloBytes, "View sizes as kilobyte.")->default_val(false);
-    cmd->add_flag("--as-megabyte", asMega, "View sizes as megabyte.")->default_val(false);
-    cmd->add_flag("--as-gigabyte", asGiga, "View sizes as gigabyte.")->default_val(false);
-    cmd->add_option("--json-partition-name", jNamePartition, "Specify partition name element for JSON body")->default_val("name");
-    cmd->add_option("--json-table-name", jNameTable, "Specify table elemtn name for JSON body")->default_val("table");
-    cmd->add_option("--json-size-name", jNameSize, "Specify size element name for JSON body")->default_val("size");
-    cmd->add_option("--json-logical-name", jNameLogical, "Specify logical element name for JSON body")->default_val("isLogical");
-    cmd->add_option("--json-indent-size", jIndentSize, "Set JSON indent size for printing to screen")->default_val(2);
+    cmd->addOption("partition(s)", partitions, "Partition name(s).")->required();
+    cmd->addFlag("-J,--json", jsonFormat,
+                 "Print info(s) as JSON body. The body of each partition will "
+                 "be written separately")
+        ->defaultValue(false);
+    cmd->addFlag("--as-byte", asByte, "View sizes as byte.")->defaultValue(true);
+    cmd->addFlag("--as-kilobyte", asKiloBytes, "View sizes as kilobyte.")->defaultValue(false);
+    cmd->addFlag("--as-megabyte", asMega, "View sizes as megabyte.")->defaultValue(false);
+    cmd->addFlag("--as-gigabyte", asGiga, "View sizes as gigabyte.")->defaultValue(false);
+    cmd->addOption("--json-partition-name", jNamePartition, "Specify partition name element for JSON body")->defaultValue("name");
+    cmd->addOption("--json-table-name", jNameTable, "Specify table elemtn name for JSON body")->defaultValue("table");
+    cmd->addOption("--json-size-name", jNameSize, "Specify size element name for JSON body")->defaultValue("size");
+    cmd->addOption("--json-logical-name", jNameLogical, "Specify logical element name for JSON body")->defaultValue("isLogical");
+    cmd->addOption("--json-indent-size", jIndentSize, "Set JSON indent size for printing to screen")->defaultValue(2);
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
+      Out::println("{} v{}", getName(), getVersion());
+      std::exit(0);
+    });
 
     return true;
   }
@@ -74,7 +77,7 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION bool run() override {
     std::vector<PartitionMap::Partition_t> jParts;

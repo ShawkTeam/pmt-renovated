@@ -21,10 +21,9 @@
 #include <fcntl.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 
 #define PLUGIN "ErasePlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -37,33 +36,36 @@ class ErasePlugin final : public BasicPlugin {
   static constexpr uint64_t DEFAULT_BUFFER_SIZE = 4ULL * 1024;      ///< 4KB default buffer size
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION ErasePlugin() = default;
   PLUGIN_SECTION ~ErasePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
-    cmd = mainApp.add_subcommand("erase", "Writes zero bytes to partition(s)");
+    cmd = mainApp.addSubcommand("erase", "Writes zero bytes to partition(s).");
     flags = &mainFlags;
-    cmd->add_option("partition(s)", partitions, "Partition name(s)")->required()->delimiter(',');
-    cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for writing zero bytes to partition(s)")
-        ->transform(CLI::AsSizeValue(false))
-        ->default_val("4KB")
-        ->check([](const std::string &input) -> std::string {
+    cmd->addOption("partition(s)", partitions, "Partition name(s)")->required();
+    cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for writing zero bytes to partition(s)")
+        ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
+        ->defaultValue("4KB")
+        ->check([](const std::string &input) {
           try {
             uint64_t size = std::stoul(input);
-            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE) {
-              return "Buffer size must be between 1KB and 128MB";
-            }
+            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE)
+              throw Error("Buffer size must be between 1KB and 128MB").cmdlineError().withCode(EX_USAGE);
             return "";
           } catch (...) {
-            return "Invalid buffer size format";
+            throw Error("Invalid buffer size format").cmdlineError().withCode(EX_USAGE);
           }
         });
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
+      Out::println("{} v{}", getName(), getVersion());
+      std::exit(0);
+    });
 
     return true;
   }
@@ -74,7 +76,7 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName) const {
     if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);

@@ -72,6 +72,16 @@ template <typename Func, typename Ret, typename... Args>
 concept Invocable = std::invocable<Func, Args...> && std::same_as<std::invoke_result_t<Func, Args...>, Ret>;
 
 /**
+ * @brief Checks whether the input is a container.
+ * @tparam T Input class.
+ */
+template <typename T>
+concept IsContainer = requires(T &container) {
+  { std::begin(container) } -> std::input_or_output_iterator;
+  { std::end(container) } -> std::sentinel_for<decltype(std::begin(container))>;
+} && !std::same_as<T, std::string> && !std::same_as<T, std::string_view>;
+
+/**
  * @brief Add the @c const qualifier to the input type.
  *
  * @code

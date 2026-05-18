@@ -23,10 +23,9 @@
 #include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 
 #define PLUGIN "MemoryTestPlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -36,20 +35,20 @@ class MemoryTestPlugin final : public BasicPlugin {
   bool doNotReadTest = false;
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION MemoryTestPlugin() = default;
   PLUGIN_SECTION ~MemoryTestPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
-    cmd = mainApp.add_subcommand("memtest", "Test your write/read speed of device.");
+    cmd = mainApp.addSubcommand("memtest", "Test your write/read speed of device.");
     flags = &mainFlags;
-    cmd->add_option("testDirectory", testPath, "Path to test directory")
-        ->default_val("/data/local/tmp")
+    cmd->addOption("testDirectory", testPath, "Path to test directory")
+        ->defaultValue("/data/local/tmp")
         ->check([&](const std::string &val) {
           if (val.find("/sdcard") != std::string::npos || val.find("/storage") != std::string::npos)
             return std::string("Sequential read tests on FUSE-mounted paths do not give correct "
@@ -60,8 +59,14 @@ public:
 
           return std::string();
         });
-    cmd->add_option("-s,--file-size", testFileSize, "File size of test file")->transform(CLI::AsSizeValue(false))->default_val("1GB");
-    cmd->add_flag("--no-read-test", doNotReadTest, "Don't read test data from disk")->default_val(false);
+    cmd->addOption("-s,--file-size", testFileSize, "File size of test file")
+        ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
+        ->defaultValue("1GB");
+    cmd->addFlag("--no-read-test", doNotReadTest, "Don't read test data from disk")->defaultValue(false);
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
+      Out::println("{} v{}", getName(), getVersion());
+      std::exit(0);
+    });
 
     return true;
   }
@@ -72,7 +77,7 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION bool run() override {
     if (testFileSize > GB(2) && !Flags.forceProcess)

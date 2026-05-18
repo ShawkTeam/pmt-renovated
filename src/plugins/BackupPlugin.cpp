@@ -21,11 +21,10 @@
 #include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 #include <private/android_filesystem_config.h>
 
 #define PLUGIN "BackupPlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -39,39 +38,42 @@ class BackupPlugin final : public BasicPlugin {
   static constexpr uint64_t MAX_BUFFER_SIZE = 128ULL * 1024 * 1024; ///< 128MB maximum buffer size
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION BackupPlugin() = default;
   PLUGIN_SECTION ~BackupPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     flags = &mainFlags;
-    cmd = mainApp.add_subcommand("backup", "Backup partition(s) to file(s)");
-    cmd->fallthrough();
-    cmd->add_option("partition(s)", rawPartitions, "Partition name(s)")->required();
-    cmd->add_option("output(s)", rawOutputNames, "File name(s) (or path(s)) to save the partition image(s)");
-    cmd->add_option("-O,--output-directory", outputDirectory, "Directory to save the partition image(s)")
-        ->check(CLI::ExistingDirectory);
-    cmd->add_option("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")
-        ->transform(CLI::AsSizeValue(false))
-        ->default_val("1MB")
-        ->check([](const std::string &input) -> std::string {
+    cmd = mainApp.addSubcommand("backup", "Backup partition(s) to file(s).");
+    cmd->addOption("partition(s)", rawPartitions, "Partition name(s)")->required();
+    cmd->addOption("output(s)", rawOutputNames, "File name(s) (or path(s)) to save the partition image(s)");
+    cmd->addOption("-O,--output-directory", outputDirectory, "Directory to save the partition image(s)")
+        ->check([](const std::string &s) {
+          if (!Helper::directoryIsExists(s)) throw Helper::Error("{}: Directory is not exists.", s).withCode(EX_USAGE);
+        });
+    cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")
+        ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
+        ->defaultValue("1MB")
+        ->check([](const std::string &input) {
           try {
             uint64_t size = std::stoul(input);
-            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE) {
-              return "Buffer size must be between 1KB and 128MB";
-            }
-            return "";
+            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE)
+              throw Error("Buffer size must be between 1KB and 128MB").cmdlineError(EX_USAGE);
           } catch (...) {
-            return "Invalid buffer size format";
+            throw Error("Invalid buffer size format").cmdlineError().withCode(EX_USAGE);
           }
         });
-    cmd->add_flag("-n,--no-set-perms", noSetPermissions, "Don't change permission and owner after progress")->default_val(false);
-    cmd->add_flag("-S,--verify", verify, "Verify SHA-256 of the backup image(s)")->default_val(false);
+    cmd->addFlag("-n,--no-set-perms", noSetPermissions, "Don't change permission and owner after progress")->defaultValue(false);
+    cmd->addFlag("-S,--verify", verify, "Verify SHA-256 of the backup image(s)")->defaultValue(false);
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
+      Out::println("{} v{}", getName(), getVersion());
+      std::exit(0);
+    });
     return true;
   }
 
@@ -81,7 +83,7 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &outputName,
                                         PartitionMap::ProgressRenderer *renderer) const {
@@ -148,7 +150,7 @@ public:
   PLUGIN_SECTION bool run() override {
     processCommandLine(partitions, outputNames, rawPartitions, rawOutputNames, ',', true);
     if (!outputNames.empty() && partitions.size() != outputNames.size())
-      throw CLI::ValidationError("You must provide an output name(s) as long as the partition name(s)");
+      throw Helper::Error("You must provide an output name(s) as long as the partition name(s)").cmdlineError().withCode(EX_USAGE);
 
     Helper::AsyncManager<AsyncResult_t> manager;
     manager.print = false;
