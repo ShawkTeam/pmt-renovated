@@ -100,6 +100,10 @@ template <> inline std::string from_string<std::string>(const std::string &s) { 
 
 template <> inline std::filesystem::path from_string<std::filesystem::path>(const std::string &s) { return std::filesystem::path(s); }
 
+template <> inline char *from_string<char *>(const std::string &s) { return const_cast<char *>(s.data()); }
+
+template <> inline const char *from_string<const char *>(const std::string &s) { return s.data(); }
+
 template <> inline char from_string<char>(const std::string &s) {
   if (s.empty()) throw Error("Empty char option").cmdlineError().withCode(EX_DATAERR);
   return s[0];

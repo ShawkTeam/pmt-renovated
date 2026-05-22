@@ -62,9 +62,15 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="refactor(libbase)!: Disable libbase (for now)&#10;&#10;- Use __system_property_read_callback instead of android::base::getProperty">
-      <change beforePath="$PROJECT_DIR$/Android.bp" beforeDir="false" afterPath="$PROJECT_DIR$/Android.bp" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="refactor(android): Fixup soong files">
+      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/external/picosha2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/srclib/libhelper/Android.bp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/Android.bp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/cmdline.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/cmdline.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -602,15 +608,7 @@
       <workItem from="1779125717074" duration="7305000" />
       <workItem from="1779133085725" duration="1190000" />
       <workItem from="1779294487979" duration="841000" />
-      <workItem from="1779462251915" duration="4212000" />
-    </task>
-    <task id="LOCAL-00021" summary="pmt: fixup manager.sh">
-      <option name="closed" value="true" />
-      <created>1757577582810</created>
-      <option name="number" value="00021" />
-      <option name="presentableId" value="LOCAL-00021" />
-      <option name="project" value="LOCAL" />
-      <updated>1757577582810</updated>
+      <workItem from="1779462251915" duration="5154000" />
     </task>
     <task id="LOCAL-00022" summary="pmt: improve libhelper, etc.">
       <option name="closed" value="true" />
@@ -996,7 +994,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779466240695</updated>
     </task>
-    <option name="localTasksCounter" value="70" />
+    <task id="LOCAL-00070" summary="refactor(android): Fixup soong files">
+      <option name="closed" value="true" />
+      <created>1779466509474</created>
+      <option name="number" value="00070" />
+      <option name="presentableId" value="LOCAL-00070" />
+      <option name="project" value="LOCAL" />
+      <updated>1779466509474</updated>
+    </task>
+    <option name="localTasksCounter" value="71" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1020,7 +1026,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="doxygen: fixup syntax" />
     <MESSAGE value="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc." />
     <MESSAGE value="doxygen: add main page content" />
     <MESSAGE value="doxygen: improve build instructions on the main page" />
@@ -1045,7 +1050,8 @@
     <MESSAGE value="fix(CMDLine): fixup CMDLine collections." />
     <MESSAGE value="refactor(Out): Move Out namespace to libhelper" />
     <MESSAGE value="refactor(libbase)!: Disable libbase (for now)&#10;&#10;- Use __system_property_read_callback instead of android::base::getProperty" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor(libbase)!: Disable libbase (for now)&#10;&#10;- Use __system_property_read_callback instead of android::base::getProperty" />
+    <MESSAGE value="refactor(android): Fixup soong files" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor(android): Fixup soong files" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

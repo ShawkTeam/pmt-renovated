@@ -91,9 +91,7 @@ int main(int argc, char **argv) {
     app.addOption("-p,--plugins", plugins, "Load input plugin files.")->early();
     app.addOption("-d,--plugin-directory", pluginPath, "Load plugins from the input directory.")
         ->early()
-        ->check([](const std::string &s) {
-          if (!Helper::directoryIsExists(s)) throw Helper::Error("{}: Directory is not exists.", s).withCode(EX_USAGE);
-        });
+        ->check(Helper::CMDLine::Checkers::ExistingDirectory());
 
     app.addFlag("-V,--verbose", Flags.verboseMode, "Enable verbose output mode.")->early();
     app.addFlag("-q,--quiet", Flags.quietProcess, "Enable quiet processing.")->early();
