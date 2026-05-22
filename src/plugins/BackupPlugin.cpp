@@ -53,7 +53,7 @@ public:
     cmd->addOption("partition(s)", rawPartitions, "Partition name(s)")->required();
     cmd->addOption("output(s)", rawOutputNames, "File name(s) (or path(s)) to save the partition image(s)");
     cmd->addOption("-O,--output-directory", outputDirectory, "Directory to save the partition image(s)")
-        ->check(Helper::CMDLine::Checkers::ExistingDirectory);
+        ->check(Helper::CMDLine::Checkers::ExistingDirectory());
     cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")
         ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
         ->defaultValue("1MB")

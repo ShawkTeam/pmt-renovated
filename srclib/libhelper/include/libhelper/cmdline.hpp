@@ -30,6 +30,7 @@
 #include <concepts>
 #include <libhelper/error.hpp>
 #include <libhelper/definations.hpp>
+#include <libhelper/functions.hpp>
 #include <sysexits.h>
 
 /**
