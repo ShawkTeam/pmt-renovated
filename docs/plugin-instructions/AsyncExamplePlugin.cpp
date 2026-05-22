@@ -25,7 +25,6 @@
 #include <future>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 
 #define PLUGIN "AsyncExamplePlugin"
 #define PLUGIN_VERSION "1.0"
@@ -48,26 +47,23 @@ class AsyncExamplePlugin final : public BasicPlugin {
   bool simulateWork = false;
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION AsyncExamplePlugin() = default;
   PLUGIN_SECTION ~AsyncExamplePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
 
     flags = &mainFlags;
-    cmd = mainApp.add_subcommand("async-example", "Example plugin demonstrating async operations");
-    cmd->fallthrough();
+    cmd = mainApp.addSubcommand("async-example", "Example plugin demonstrating async operations");
 
-    cmd->add_option("partition(s)", rawPartitions, "Partition name(s) to process asynchronously")->delimiter(',');
-
-    cmd->add_option("--delay", delayMs, "Delay in milliseconds for simulated work")->default_val(1000);
-
-    cmd->add_flag("--simulate", simulateWork, "Simulate async work with delay")->default_val(false);
+    cmd->addOption("partition(s)", rawPartitions, "Partition name(s) to process asynchronously")->delimiter(',');
+    cmd->addOption("--delay", delayMs, "Delay in milliseconds for simulated work")->defaultValue(1000);
+    cmd->addFlag("--simulate", simulateWork, "Simulate async work with delay")->defaultValue(false);
 
     return true;
   }
@@ -112,12 +108,10 @@ public:
     if (rawPartitions.empty()) {
       // If no partitions specified, process all partitions
       auto allParts = Tables.allPartitions();
-      for (const auto &part : allParts) {
+      for (const auto &part : allParts)
         partitions.push_back(part.get().name());
-      }
-    } else {
-      partitions = CLI::detail::split(rawPartitions, ',');
-    }
+    } else
+      partitions = Helper::CMDLine::split(rawPartitions, ',');
 
     if (partitions.empty()) {
       Out::println("No partitions to process.");
