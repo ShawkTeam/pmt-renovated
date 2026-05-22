@@ -53,27 +53,16 @@ public:
     cmd->addOption("partition(s)", rawPartitions, "Partition name(s)")->required();
     cmd->addOption("output(s)", rawOutputNames, "File name(s) (or path(s)) to save the partition image(s)");
     cmd->addOption("-O,--output-directory", outputDirectory, "Directory to save the partition image(s)")
-        ->check([](const std::string &s) {
-          if (!Helper::directoryIsExists(s)) throw Helper::Error("{}: Directory is not exists.", s).withCode(EX_USAGE);
-        });
+        ->check(Helper::CMDLine::Checkers::ExistingDirectory);
     cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")
         ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
         ->defaultValue("1MB")
-        ->check([](const std::string &input) {
-          try {
-            uint64_t size = std::stoul(input);
-            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE)
-              throw Error("Buffer size must be between 1KB and 128MB").cmdlineError(EX_USAGE);
-          } catch (...) {
-            throw Error("Invalid buffer size format").cmdlineError().withCode(EX_USAGE);
-          }
-        });
+        ->check(Helper::CMDLine::Checkers::BufferSizeCheck(MIN_BUFFER_SIZE, MAX_BUFFER_SIZE));
     cmd->addFlag("-n,--no-set-perms", noSetPermissions, "Don't change permission and owner after progress")->defaultValue(false);
     cmd->addFlag("-S,--verify", verify, "Verify SHA-256 of the backup image(s)")->defaultValue(false);
-    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
-      Out::println("{} v{}", getName(), getVersion());
-      std::exit(0);
-    });
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
     return true;
   }
 

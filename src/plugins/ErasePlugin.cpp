@@ -52,20 +52,10 @@ public:
     cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for writing zero bytes to partition(s)")
         ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
         ->defaultValue("4KB")
-        ->check([](const std::string &input) {
-          try {
-            uint64_t size = std::stoul(input);
-            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE)
-              throw Error("Buffer size must be between 1KB and 128MB").cmdlineError().withCode(EX_USAGE);
-            return "";
-          } catch (...) {
-            throw Error("Invalid buffer size format").cmdlineError().withCode(EX_USAGE);
-          }
-        });
-    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
-      Out::println("{} v{}", getName(), getVersion());
-      std::exit(0);
-    });
+        ->check(Helper::CMDLine::Checkers::BufferSizeCheck(MIN_BUFFER_SIZE, MAX_BUFFER_SIZE));
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;
   }

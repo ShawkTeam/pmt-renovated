@@ -53,23 +53,13 @@ public:
     cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for reading image(s) and writing to partition(s)")
         ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
         ->defaultValue("1MB")
-        ->check([](const std::string &input) -> std::string {
-          try {
-            uint64_t size = std::stoul(input);
-            if (size < MIN_BUFFER_SIZE || size > MAX_BUFFER_SIZE) {
-              return "Buffer size must be between 1KB and 128MB";
-            }
-            return "";
-          } catch (...) {
-            return "Invalid buffer size format";
-          }
-        });
-    cmd->addOption("-I,--image-directory", imageDirectory, "Directory to find image(s) and flash to partition(s)");
+        ->check(Helper::CMDLine::Checkers::BufferSizeCheck(MIN_BUFFER_SIZE, MAX_BUFFER_SIZE));
+    cmd->addOption("-I,--image-directory", imageDirectory, "Directory to find image(s) and flash to partition(s)")
+        ->check(Helper::CMDLine::Checkers::ExistingDirectory());
     cmd->addFlag("-d,--delete", deleteAfterProgress, "Delete flash file(s) after progress.")->defaultValue(false);
-    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
-      Out::println("{} v{}", getName(), getVersion());
-      std::exit(0);
-    });
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;
   }

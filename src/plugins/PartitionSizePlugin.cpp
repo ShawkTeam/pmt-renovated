@@ -54,10 +54,9 @@ public:
                  "Tell input size of partition list as not printing multiple "
                  "and partition name.")
         ->defaultValue(false);
-    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
-      Out::println("{} v{}", getName(), getVersion());
-      std::exit(0);
-    });
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
     return true;
   }
 

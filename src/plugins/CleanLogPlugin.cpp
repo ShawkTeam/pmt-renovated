@@ -36,10 +36,9 @@ public:
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.addSubcommand("clean-logs", "Clean PMT logs.");
-    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
-      Out::println("{} v{}", getName(), getVersion());
-      std::exit(0);
-    });
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
     flags = &mainFlags;
     return true;
   }

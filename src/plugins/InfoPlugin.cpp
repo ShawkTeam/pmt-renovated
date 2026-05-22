@@ -63,10 +63,9 @@ public:
     cmd->addOption("--json-size-name", jNameSize, "Specify size element name for JSON body")->defaultValue("size");
     cmd->addOption("--json-logical-name", jNameLogical, "Specify logical element name for JSON body")->defaultValue("isLogical");
     cmd->addOption("--json-indent-size", jIndentSize, "Set JSON indent size for printing to screen")->defaultValue(2);
-    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
-      Out::println("{} v{}", getName(), getVersion());
-      std::exit(0);
-    });
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;
   }

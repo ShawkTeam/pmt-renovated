@@ -49,10 +49,9 @@ public:
     cmd->addFlag("--only-check-android-magics", onlyCheckAndroidMagics, "Only check Android magic values.")->defaultValue(false);
     cmd->addFlag("--only-check-filesystem-magics", onlyCheckFileSystemMagics, "Only check filesystem magic values.")
         ->defaultValue(false);
-    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
-      Out::println("{} v{}", getName(), getVersion());
-      std::exit(0);
-    });
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;
   }

@@ -63,10 +63,9 @@ public:
         ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
         ->defaultValue("1GB");
     cmd->addFlag("--no-read-test", doNotReadTest, "Don't read test data from disk")->defaultValue(false);
-    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")->superior()->callback([this] {
-      Out::println("{} v{}", getName(), getVersion());
-      std::exit(0);
-    });
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;
   }

@@ -120,6 +120,14 @@ template <> inline std::vector<int> from_string<std::vector<int>>(const std::str
 template <> inline std::vector<std::string> from_string<std::vector<std::string>>(const std::string &s) { return split(s, ','); }
 
 struct OptionProperties {
+  OptionProperties() = default;
+
+  OptionProperties(OptionProperties &&other) = default;
+  OptionProperties &operator=(OptionProperties &&other) = default;
+
+  OptionProperties(const OptionProperties &other) = default;
+  OptionProperties &operator=(const OptionProperties &other) = default;
+
   std::vector<std::string> valid_names;
   std::function<void(const std::string &)> setter;
   std::function<void()> default_setter;
@@ -137,6 +145,15 @@ struct OptionProperties {
   bool is_used_as_long = false;
   bool early = false;
   bool superior = false;
+
+  bool operator==(const OptionProperties &other) const {
+    return valid_names == other.valid_names && description == other.description && option_typename == other.option_typename &&
+           default_value == other.default_value && option_delimiter == other.option_delimiter && is_required == other.is_required &&
+           is_flag == other.is_flag && is_found == other.is_found && is_used_as_long == other.is_used_as_long &&
+           early == other.early && superior == other.superior;
+  }
+
+  bool operator!=(const OptionProperties &other) const { return !(*this == other); }
 };
 
 typedef enum { WITH_LONG_NAME, WITH_SHORT_NAME } UsageType;
@@ -146,8 +163,9 @@ typedef enum { WITH_LONG_NAME, WITH_SHORT_NAME } UsageType;
  * @brief A collection of transformers for converting strings to other types.
  */
 namespace Transformers {
+
 /// @brief Converts a string to a size value. Inspired by the CLI11 project.
-static inline std::function<std::string(const std::string &)> AsSizeValue(bool use_si = false) {
+inline std::function<std::string(const std::string &)> AsSizeValue(bool use_si = false) {
   return [use_si](const std::string &s) -> std::string {
     if (s.empty()) throw std::invalid_argument("Empty size value");
 
@@ -194,7 +212,60 @@ static inline std::function<std::string(const std::string &)> AsSizeValue(bool u
     return std::to_string(result);
   };
 }
+
 } // namespace Transformers
+
+/**
+ * @namespace Checkers
+ * @brief A collection of checkers for validating strings.
+ */
+namespace Checkers {
+
+inline std::function<void(const std::string &)> Exists() {
+  return [](const std::string &s) {
+    if (!Helper::isExists(s)) throw Error("{}: Entry is not exists.", s).withCode(EX_USAGE);
+  };
+}
+
+inline std::function<void(const std::string &)> ExistingDirectory() {
+  return [](const std::string &s) {
+    if (!Helper::directoryIsExists(s)) throw Error("{}: Directory is not exists.", s).withCode(EX_USAGE);
+  };
+}
+
+inline std::function<void(const std::string &)> ExistingFile() {
+  return [](const std::string &s) {
+    if (!Helper::fileIsExists(s)) throw Error("{}: File is not exists.", s).withCode(EX_USAGE);
+  };
+}
+
+template <typename T> inline std::function<void(const std::string &)> BufferSizeCheck(T min, T max) {
+  return [&](const std::string &s) {
+    try {
+      uint64_t size = from_string<uint64_t>(s);
+      if (size < min || size > max) throw Error("{}: Buffer size is out of range.", s).cmdlineError().withCode(EX_USAGE);
+    } catch (...) {
+      throw Error("Invalid buffer size format").cmdlineError().withCode(EX_USAGE);
+    }
+  };
+}
+
+} // namespace Checkers
+
+/**
+ * @namespace Callbacks
+ * @brief A collection of callbacks for handling option values, etc.
+ */
+namespace Callbacks {
+
+inline std::function<void()> ViewPluginVersion(const std::string_view name, const std::string_view &ver, bool do_exit = true) {
+  return [&]() {
+    Out::println("{} v{}", name, ver);
+    if (do_exit) std::exit(0);
+  };
+}
+
+} // namespace Callbacks
 
 class Option {
 public:
@@ -363,6 +434,11 @@ public:
   bool isSuperior() const { return properties->superior; }
 
   std::string getDescription() const { return properties->description; }
+
+  bool operator==(const Option &other) const { return properties == other.properties; }
+  bool operator!=(const Option &other) const { return !(*this == other); }
+
+  explicit operator bool() const { return properties->is_found; }
 };
 
 class Subcommand {
@@ -445,6 +521,14 @@ public:
   std::vector<std::unique_ptr<Option>> &getOptions() { return options; }
 
   const std::vector<std::unique_ptr<Option>> &getOptions() const { return options; }
+
+  bool operator==(const Subcommand &other) const {
+    return name == other.name && description == other.description && _footer == other._footer && options == other.options;
+  }
+
+  bool operator!=(const Subcommand &other) const { return !(*this == other); }
+
+  explicit operator bool() const { return is_found; }
 };
 
 class App {
@@ -808,6 +892,22 @@ public:
               .withCode(EX_USAGE);
       }
     }
+  }
+
+  bool containsSuperiorOption() const {
+    for (const auto &arg : options)
+      if (arg->getProperties()->superior) return true;
+    for (const auto &cmd : subcommands)
+      if (cmd->containsSuperiorOption()) return true;
+    return false;
+  }
+
+  bool anySuperiorIsUsed() const {
+    for (const auto &arg : options)
+      if (arg->getProperties()->superior && arg->isUsed()) return true;
+    for (const auto &cmd : subcommands)
+      if (cmd->anySuperiorIsUsed()) return true;
+    return false;
   }
 };
 
