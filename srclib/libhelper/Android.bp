@@ -30,6 +30,7 @@ cc_library {
     name: "libhelper",
     defaults: ["pmt_defaults"],
     srcs: [":libhelper_srcs"],
+    shared_libs : ["libcrypto"],
     local_include_dirs : ["include"],
     export_include_dirs : ["include"],
     licenses: ["external_pmt_license"],

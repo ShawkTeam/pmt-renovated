@@ -37,7 +37,7 @@ This project is licensed under the GNU GPLv3 License - see the [LICENSE](https:/
 
 ## Credits
 - [CLI11: Command line parser for C++11](https://github.com/CLIUtils/CLI11) - **Not in use since PMT version 1.7.0.**
-- [PicoSHA2: A header-file-only, SHA256 hash generator in C++](https://github.com/okdshin/PicoSHA2)
+- [PicoSHA2: A header-file-only, SHA256 hash generator in C++](https://github.com/okdshin/PicoSHA2) - **Not in use since PMT version 1.7.0.**
 - [nlohmann/json: JSON for Modern C++](https://github.com/nlohmann/json)
 
 ## Support

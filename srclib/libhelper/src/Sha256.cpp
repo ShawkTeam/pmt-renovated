@@ -17,35 +17,54 @@
 
 #include <fstream>
 #include <iomanip>
-#include <iostream>
 #include <optional>
 #include <string>
 #include <vector>
-#include <sys/stat.h>
 #include <libhelper/functions.hpp>
-#include <picosha2.h>
+#include <openssl/sha.h>
 
 namespace Helper {
+static std::string bytesToHexString(const unsigned char *bytes, size_t length) {
+  std::ostringstream oss;
+  for (size_t i = 0; i < length; ++i)
+    oss << std::hex << std::setw(2) << std::setfill('0') << static_cast<int>(bytes[i]);
+  return oss.str();
+}
+
 std::optional<std::string> sha256Of(const std::filesystem::path &path) {
   LOGN(HELPER, INFO) << "get sha256 of " << std::quoted(path.string()) << " request. Getting full path (if input is link and exists)."
                      << std::endl;
-  const std::string fp = (isLink(path)) ? readSymlink(path) : std::string(path);
 
+  const std::string fp = (isLink(path)) ? readSymlink(path) : path.string();
   if (!isExists(fp)) throw Error("Is not exists or not file: {}", fp);
 
-  if (const std::ifstream file(fp, std::ios::binary); !file) throw Error("Cannot open file: {}", fp);
+  std::ifstream file(fp, std::ios::binary);
+  if (!file) throw Error("Cannot open file: {}", fp);
 
-  std::vector<unsigned char> hash(picosha2::k_digest_size);
-  picosha2::hash256(fp, hash.begin(), hash.end());
+  SHA256_CTX sha256Context;
+  if (!SHA256_Init(&sha256Context)) throw Error("SHA256_Init failed for: {}", fp);
+
+  constexpr size_t bufferSize = 4096;
+  std::vector<char> buffer(bufferSize);
+
+  while (file.read(buffer.data(), bufferSize) || file.gcount() > 0) {
+    if (!SHA256_Update(&sha256Context, buffer.data(), file.gcount())) throw Error("SHA256_Update failed during reading: {}", fp);
+  }
+
+  unsigned char hash[SHA256_DIGEST_LENGTH];
+  if (!SHA256_Final(hash, &sha256Context)) {
+    throw Error("SHA256_Final failed for: {}", fp);
+  }
+
   LOGN(HELPER, INFO) << "get sha256 of " << std::quoted(path.string()) << " successfully." << std::endl;
-  return picosha2::bytes_to_hex_string(hash.begin(), hash.end());
+  return bytesToHexString(hash, SHA256_DIGEST_LENGTH);
 }
 
 bool sha256Compare(const std::filesystem::path &file1, const std::filesystem::path &file2) {
   LOGN(HELPER, INFO) << "comparing sha256 signatures of input files." << std::endl;
   const auto f1 = sha256Of(file1);
   const auto f2 = sha256Of(file2);
-  if (f1->empty() || f2->empty()) return false;
+  if (!f1 || !f2 || f1->empty() || f2->empty()) return false;
   LOGN_IF(HELPER, INFO, *f1 == *f2) << "(): input files is contains same sha256 signature." << std::endl;
   return *f1 == *f2;
 }
