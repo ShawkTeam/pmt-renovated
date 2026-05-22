@@ -35,26 +35,6 @@
 #include <libpartition_map/lib.hpp>
 
 /**
- * @namespace Out
- * @brief Output namespace.
- */
-namespace Out {
-
-/// @brief Prints a formatted string to stdout.
-template <typename... Args> static void print(const std::format_string<Args...> &fmt, Args &&...args) {
-  const std::string message = std::format(fmt, std::forward<Args>(args)...);
-  fprintf(stdout, "%s", message.c_str());
-}
-
-/// @brief Prints a formatted string to stdout and appends a newline.
-template <typename... Args> static void println(const std::format_string<Args...> &fmt, Args &&...args) {
-  const std::string message = std::format(fmt, std::forward<Args>(args)...);
-  fprintf(stdout, "%s\n", message.c_str());
-}
-
-} // namespace Out
-
-/**
  * @namespace PartitionManager
  * @brief Main namespace of pmt.
  */
