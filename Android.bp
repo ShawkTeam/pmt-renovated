@@ -25,15 +25,6 @@ license {
 }
 
 license {
-    name: "external_cli11_license",
-    visibility: [":__subpackages__"],
-    license_kinds: [
-        "SPDX-license-identifier-BSD-3-Clause",
-    ],
-    license_text: ["external/CLI11/LICENSE"],
-}
-
-license {
     name: "external_pmt_license",
     visibility: [":__subpackages__"],
     license_kinds: [
@@ -96,11 +87,9 @@ cc_binary {
     shared_libs: [
         "libhelper",
         "libpartition_map",
-        "libbase",
     ],
     licenses: [
         "external_pmt_license",
-        "external_cli11_license",
         "external_nlohmann_json_license",
     ],
 }

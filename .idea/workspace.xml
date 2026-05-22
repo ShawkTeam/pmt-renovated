@@ -32,7 +32,6 @@
       <config projectName="pmt" targetName="libgptf_static" />
       <config projectName="pmt" targetName="info_plugin" />
       <config projectName="pmt" targetName="flash_plugin" />
-      <config projectName="pmt" targetName="libbase_shared" />
       <config projectName="pmt" targetName="libcrypto" />
       <config projectName="pmt" targetName="helper_shared" />
       <config projectName="pmt" targetName="generate_build_info" />
@@ -48,7 +47,6 @@
       <config projectName="pmt" targetName="clean_log_plugin" />
       <config projectName="pmt" targetName="docs" />
       <config projectName="pmt" targetName="pmt_static" />
-      <config projectName="pmt" targetName="libbase_static" />
       <config projectName="pmt" targetName="pmt" />
       <config projectName="pmt" targetName="type_plugin" />
       <config projectName="pmt" targetName="CLI11-generate-single-file" folderName="Scripts" />
@@ -64,12 +62,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="refactor(Out): Move Out namespace to libhelper">
-      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="refactor(libbase)!: Disable libbase (for now)&#10;&#10;- Use __system_property_read_callback instead of android::base::getProperty">
+      <change beforePath="$PROJECT_DIR$/Android.bp" beforeDir="false" afterPath="$PROJECT_DIR$/Android.bp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/Android.bp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/Android.bp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -607,15 +602,7 @@
       <workItem from="1779125717074" duration="7305000" />
       <workItem from="1779133085725" duration="1190000" />
       <workItem from="1779294487979" duration="841000" />
-      <workItem from="1779462251915" duration="3857000" />
-    </task>
-    <task id="LOCAL-00020" summary="pmt: reformat code and improve workflow">
-      <option name="closed" value="true" />
-      <created>1757577497581</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1757577497581</updated>
+      <workItem from="1779462251915" duration="4212000" />
     </task>
     <task id="LOCAL-00021" summary="pmt: fixup manager.sh">
       <option name="closed" value="true" />
@@ -1001,7 +988,15 @@
       <option name="project" value="LOCAL" />
       <updated>1779465399502</updated>
     </task>
-    <option name="localTasksCounter" value="69" />
+    <task id="LOCAL-00069" summary="refactor(libbase)!: Disable libbase (for now)&#10;&#10;- Use __system_property_read_callback instead of android::base::getProperty">
+      <option name="closed" value="true" />
+      <created>1779466240695</created>
+      <option name="number" value="00069" />
+      <option name="presentableId" value="LOCAL-00069" />
+      <option name="project" value="LOCAL" />
+      <updated>1779466240695</updated>
+    </task>
+    <option name="localTasksCounter" value="70" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1025,7 +1020,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="doxygen: add tagfile of cppreference.com" />
     <MESSAGE value="doxygen: fixup syntax" />
     <MESSAGE value="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc." />
     <MESSAGE value="doxygen: add main page content" />
@@ -1050,7 +1044,8 @@
     <MESSAGE value="feat(CMDLine,Plugins): Add collections of checkers and callbacks.&#10;&#10;- Apply to plugins." />
     <MESSAGE value="fix(CMDLine): fixup CMDLine collections." />
     <MESSAGE value="refactor(Out): Move Out namespace to libhelper" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor(Out): Move Out namespace to libhelper" />
+    <MESSAGE value="refactor(libbase)!: Disable libbase (for now)&#10;&#10;- Use __system_property_read_callback instead of android::base::getProperty" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor(libbase)!: Disable libbase (for now)&#10;&#10;- Use __system_property_read_callback instead of android::base::getProperty" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

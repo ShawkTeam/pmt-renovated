@@ -19,7 +19,6 @@
 filegroup {
     name: "libhelper_srcs",
     srcs: [
-        "src/Checkers.cpp",
         "src/FileUtil.cpp",
         "src/Sha256.cpp",
         "src/Utilities.cpp",
@@ -31,8 +30,6 @@ cc_library {
     name: "libhelper",
     defaults: ["pmt_defaults"],
     srcs: [":libhelper_srcs"],
-    shared_libs: ["libbase"],
-    static_libs : ["libbase"],
     local_include_dirs : ["include"],
     export_include_dirs : ["include"],
     licenses: ["external_pmt_license"],
