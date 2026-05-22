@@ -23,7 +23,6 @@
 
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 
 #define PLUGIN "SimpleExamplePlugin"
 #define PLUGIN_VERSION "1.0"
@@ -43,24 +42,23 @@ class SimpleExamplePlugin final : public BasicPlugin {
   std::string partitionName;
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION SimpleExamplePlugin() = default;
   PLUGIN_SECTION ~SimpleExamplePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
 
     flags = &mainFlags;
     // Create a simple subcommand
-    cmd = mainApp.add_subcommand("simple", "Simple example plugin");
-    cmd->fallthrough();
+    cmd = mainApp.addSubcommand("simple", "Simple example plugin");
 
     // Add a single option for partition name
-    cmd->add_option("partition", partitionName, "Partition name to examine")->required();
+    cmd->addOption("partition", partitionName, "Partition name to examine")->required();
 
     return true;
   }
@@ -88,9 +86,7 @@ public:
       Out::println("Name: {}", partition.name());
       Out::println("Type: {}", partition.isLogicalPartition() ? "Logical" : "Physical");
 
-      if (!partition.isLogicalPartition()) {
-        Out::println("Table: {}", partition.tableName());
-      }
+      if (!partition.isLogicalPartition()) Out::println("Table: {}", partition.tableName());
 
       Out::println("Size: {}", partition.formattedSizeString(PartitionMap::MiB, true));
       Out::println("Path: {}", partition.absolutePath().string());

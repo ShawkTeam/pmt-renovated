@@ -28,6 +28,7 @@
 #include <optional>
 #include <cctype>
 #include <concepts>
+#include <unordered_set>
 #include <libhelper/error.hpp>
 #include <libhelper/definations.hpp>
 #include <libhelper/functions.hpp>
@@ -255,6 +256,39 @@ template <typename T> inline std::function<void(const std::string &)> BufferSize
   };
 }
 
+inline std::function<void(const std::string &)> IsMember(std::initializer_list<std::string> allowed) {
+  return [vals = std::vector<std::string>(allowed)](const std::string &s) {
+    if (std::find(vals.begin(), vals.end(), s) == vals.end()) {
+      std::string options;
+      for (size_t i = 0; i < vals.size(); ++i) {
+        options += vals[i];
+        if (i + 1 < vals.size()) options += ", ";
+      }
+      throw Error("{}: must be one of [{}].", s, options).cmdlineError().withCode(EX_USAGE);
+    }
+  };
+}
+
+inline std::function<void(const std::string &)> IsMemberIgnoreCase(std::initializer_list<std::string> allowed) {
+  return [vals = std::vector<std::string>(allowed)](const std::string &s) {
+    std::string lower_s = s;
+    std::transform(lower_s.begin(), lower_s.end(), lower_s.begin(), [](unsigned char c) { return std::tolower(c); });
+
+    for (const auto &v : vals) {
+      std::string lower_v = v;
+      std::transform(lower_v.begin(), lower_v.end(), lower_v.begin(), [](unsigned char c) { return std::tolower(c); });
+      if (lower_s == lower_v) return;
+    }
+
+    std::string options;
+    for (size_t i = 0; i < vals.size(); ++i) {
+      options += vals[i];
+      if (i + 1 < vals.size()) options += ", ";
+    }
+    throw Error("{}: must be one of [{}].", s, options).cmdlineError().withCode(EX_USAGE);
+  };
+}
+
 } // namespace Checkers
 
 /**
@@ -446,6 +480,71 @@ public:
   explicit operator bool() const { return properties->is_found; }
 };
 
+class OptionGroup {
+  friend class App;
+  friend class Subcommand;
+
+  std::vector<Option *> group_options;
+
+public:
+  std::string name;
+  std::string description;
+  int min_required = 0;  ///< Min required option count (-1 = no limit)
+  int max_required = -1; ///< Max usable option count (-1 = no limit)
+
+  OptionGroup() = default;
+  OptionGroup(const std::string &name, const std::string &desc = "") : name(name), description(desc) {}
+
+  OptionGroup(const OptionGroup &) = delete;
+  OptionGroup &operator=(const OptionGroup &) = delete;
+  OptionGroup(OptionGroup &&) = default;
+  OptionGroup &operator=(OptionGroup &&) = default;
+
+  OptionGroup *require(int min, int max = -1) {
+    min_required = min;
+    max_required = max;
+    return this;
+  }
+
+  OptionGroup *requireExactly(int n) {
+    min_required = n;
+    max_required = n;
+    return this;
+  }
+
+  OptionGroup *requireAtMostOne() {
+    min_required = 0;
+    max_required = 1;
+    return this;
+  }
+
+  OptionGroup *requireAtLeastOne() {
+    min_required = 1;
+    max_required = -1;
+    return this;
+  }
+
+  const std::vector<Option *> &getOptions() const { return group_options; }
+
+  void validate() const {
+    if (min_required <= 0 && max_required < 0) return; // No rule.
+
+    int used_count = 0;
+    for (const auto *opt : group_options)
+      if (opt->isUsed()) used_count++;
+
+    if (min_required > 0 && used_count < min_required)
+      throw Error("Option group '{}': at least {} option(s) required, {} given.", name, min_required, used_count)
+          .cmdlineError()
+          .withCode(EX_USAGE);
+
+    if (max_required >= 0 && used_count > max_required)
+      throw Error("Option group '{}': at most {} option(s) allowed, {} given.", name, max_required, used_count)
+          .cmdlineError()
+          .withCode(EX_USAGE);
+  }
+};
+
 class Subcommand {
   friend class App;
 
@@ -456,6 +555,7 @@ public:
   std::string name;
   std::string description;
   std::string _footer;
+  std::vector<std::unique_ptr<OptionGroup>> groups;
 
   Subcommand() = default;
   Subcommand(const std::string &name, const std::string desc = "") : name(name), description(desc) {}
@@ -470,6 +570,12 @@ public:
     auto arg = std::make_unique<Option>(spec, dest, desc);
     options.push_back(std::move(arg));
     return options.back().get();
+  }
+
+  template <typename T> Option *addOption(const std::string &spec, T &dest, const std::string &desc, OptionGroup *group) {
+    auto *opt = addOption(spec, dest, desc);
+    if (group) group->group_options.push_back(opt);
+    return opt;
   }
 
   void addOption(Option *orig) {
@@ -492,11 +598,29 @@ public:
     return options.back().get();
   }
 
+  Option *addFlag(const std::string &spec, std::nullptr_t, const std::string &desc, OptionGroup *group) {
+    auto *opt = addFlag(spec, nullptr, desc);
+    if (group) group->group_options.push_back(opt);
+    return opt;
+  }
+
+  template <typename T> Option *addFlag(const std::string &spec, T &dest, const std::string &desc, OptionGroup *group) {
+    auto *opt = addFlag(spec, dest, desc);
+    if (group) group->group_options.push_back(opt);
+    return opt;
+  }
+
   void addFlag(Option *orig) {
     if (orig == nullptr) throw Error("Input option pointer is null.").cmdlineError().withCode(EX_CONFIG);
     orig->getProperties()->is_flag = true;
     std::unique_ptr<Option> arg(orig);
     options.push_back(std::move(arg));
+  }
+
+  OptionGroup *addOptionGroup(const std::string &_name, const std::string &desc = "") {
+    auto grp = std::make_unique<OptionGroup>(_name, desc);
+    groups.push_back(std::move(grp));
+    return groups.back().get();
   }
 
   Subcommand *footer(const std::string &s) {
@@ -505,6 +629,11 @@ public:
   }
 
   void setFooter(const std::string &s) { _footer = s; }
+
+  void validateGroups() const {
+    for (const auto &grp : groups)
+      grp->validate();
+  }
 
   bool containsSuperiorOption() const {
     for (const auto &arg : options)
@@ -547,6 +676,7 @@ class App {
   bool fallback = false;
   std::vector<std::unique_ptr<Subcommand>> subcommands;
   std::vector<std::unique_ptr<Option>> options;
+  std::vector<std::unique_ptr<OptionGroup>> groups;
 
   Option *findOption(const std::string &_name, const std::vector<std::unique_ptr<Option>> &arg_list) {
     for (const auto &arg : arg_list) {
@@ -618,6 +748,12 @@ public:
     return options.back().get();
   }
 
+  template <typename T> Option *addOption(const std::string &spec, T &dest, const std::string &desc, OptionGroup *group) {
+    auto *opt = addOption(spec, dest, desc);
+    if (group) group->group_options.push_back(opt);
+    return opt;
+  }
+
   void addOption(Option *orig) {
     if (orig == nullptr) throw Error("Input option pointer is null.").cmdlineError().withCode(EX_CONFIG);
     std::unique_ptr<Option> arg(orig);
@@ -636,6 +772,18 @@ public:
     arg->getProperties()->is_flag = true;
     options.push_back(std::move(arg));
     return options.back().get();
+  }
+
+  Option *addFlag(const std::string &spec, std::nullptr_t, const std::string &desc, OptionGroup *group) {
+    auto *opt = addFlag(spec, nullptr, desc);
+    if (group) group->group_options.push_back(opt);
+    return opt;
+  }
+
+  template <typename T> Option *addFlag(const std::string &spec, T &dest, const std::string &desc, OptionGroup *group) {
+    auto *opt = addFlag(spec, dest, desc);
+    if (group) group->group_options.push_back(opt);
+    return opt;
   }
 
   void addFlag(Option *orig) {
@@ -675,6 +823,12 @@ public:
     return std::nullopt;
   }
 
+  OptionGroup *addOptionGroup(const std::string &_name, const std::string &desc = "") {
+    auto grp = std::make_unique<OptionGroup>(_name, desc);
+    groups.push_back(std::move(grp));
+    return groups.back().get();
+  }
+
   void setLicenseString(const std::string &s) { license_string = s; }
 
   void setFallback(bool v = true) { fallback = v; }
@@ -695,21 +849,61 @@ public:
       if (!subcmd->getFooter().empty()) std::cout << indentLines(subcmd->getFooter()) << "\n\n";
 
       if (!subcmd->options.empty()) {
-        std::cout << "Subcommand Options:\n";
-        for (const auto &arg : subcmd->options) {
-          std::string left_part = "";
-          for (size_t i = 0; i < arg->getProperties()->valid_names.size(); ++i) {
-            left_part += arg->getProperties()->valid_names[i];
-            if (i + 1 < arg->getProperties()->valid_names.size()) left_part += ", ";
+        std::unordered_set<const Option *> subcmd_grouped;
+        for (const auto &grp : subcmd->groups)
+          for (const auto *opt : grp->getOptions())
+            subcmd_grouped.insert(opt);
+
+        for (const auto &grp : subcmd->groups) {
+          if (grp->getOptions().empty()) continue;
+          std::cout << grp->name;
+          if (!grp->description.empty()) std::cout << " — " << grp->description;
+          if (grp->min_required > 0 && grp->max_required == grp->min_required)
+            std::cout << " (exactly " << grp->min_required << " required)";
+          else if (grp->max_required == 1)
+            std::cout << " (mutually exclusive)";
+          else if (grp->min_required > 0)
+            std::cout << " (at least " << grp->min_required << " required)";
+          else if (grp->max_required >= 0)
+            std::cout << " (at most " << grp->max_required << " allowed)";
+          std::cout << ":\n";
+          for (const auto *opt : grp->getOptions()) {
+            std::string left_part;
+            for (size_t i = 0; i < opt->getProperties()->valid_names.size(); ++i) {
+              left_part += opt->getProperties()->valid_names[i];
+              if (i + 1 < opt->getProperties()->valid_names.size()) left_part += ", ";
+            }
+            if (opt->getProperties()->is_required) left_part += " (required)";
+            if (opt->getProperties()->superior) left_part += " (superior)";
+            if (!opt->getProperties()->is_flag) left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
+            printAlignedOption(left_part, opt->getDescription());
+          }
+          std::cout << "\n";
+        }
+
+        bool hasUngrouped = false;
+        for (const auto &arg : subcmd->options)
+          if (!subcmd_grouped.count(arg.get())) {
+            hasUngrouped = true;
+            break;
           }
 
-          if (arg->getProperties()->is_required) left_part += " (required)";
-          if (arg->getProperties()->superior) left_part += " (superior)";
-          if (!arg->getProperties()->is_flag) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
-
-          printAlignedOption(left_part, arg->getDescription());
+        if (hasUngrouped) {
+          std::cout << "Subcommand Options:\n";
+          for (const auto &arg : subcmd->options) {
+            if (subcmd_grouped.count(arg.get())) continue;
+            std::string left_part;
+            for (size_t i = 0; i < arg->getProperties()->valid_names.size(); ++i) {
+              left_part += arg->getProperties()->valid_names[i];
+              if (i + 1 < arg->getProperties()->valid_names.size()) left_part += ", ";
+            }
+            if (arg->getProperties()->is_required) left_part += " (required)";
+            if (arg->getProperties()->superior) left_part += " (superior)";
+            if (!arg->getProperties()->is_flag) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
+            printAlignedOption(left_part, arg->getDescription());
+          }
+          std::cout << "\n";
         }
-        std::cout << "\n";
       }
 
       std::cout << "See " << cmd_name << " -h or --help for global options.\n";
@@ -728,19 +922,59 @@ public:
       }
 
       if (!options.empty()) {
-        std::cout << "Global Options:\n";
-        for (const auto &arg : options) {
-          std::string left_part = "";
-          for (size_t i = 0; i < arg->getProperties()->valid_names.size(); ++i) {
-            left_part += arg->getProperties()->valid_names[i];
-            if (i + 1 < arg->getProperties()->valid_names.size()) left_part += ", ";
+        std::unordered_set<const Option *> grouped;
+        for (const auto &grp : groups)
+          for (const auto *opt : grp->getOptions())
+            grouped.insert(opt);
+
+        for (const auto &grp : groups) {
+          if (grp->getOptions().empty()) continue;
+          std::cout << grp->name;
+          if (!grp->description.empty()) std::cout << " — " << grp->description;
+          if (grp->min_required > 0 && grp->max_required == grp->min_required)
+            std::cout << " (exactly " << grp->min_required << " required)";
+          else if (grp->max_required == 1)
+            std::cout << " (mutually exclusive)";
+          else if (grp->min_required > 0)
+            std::cout << " (at least " << grp->min_required << " required)";
+          else if (grp->max_required >= 0)
+            std::cout << " (at most " << grp->max_required << " allowed)";
+          std::cout << ":\n";
+          for (const auto *opt : grp->getOptions()) {
+            std::string left_part;
+            for (size_t i = 0; i < opt->getProperties()->valid_names.size(); ++i) {
+              left_part += opt->getProperties()->valid_names[i];
+              if (i + 1 < opt->getProperties()->valid_names.size()) left_part += ", ";
+            }
+            if (opt->getProperties()->is_required) left_part += " (required)";
+            if (opt->getProperties()->superior) left_part += " (superior)";
+            if (!opt->getProperties()->is_flag) left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
+            printAlignedOption(left_part, opt->getDescription());
+          }
+          std::cout << "\n";
+        }
+
+        bool hasUngrouped = false;
+        for (const auto &arg : options)
+          if (!grouped.count(arg.get())) {
+            hasUngrouped = true;
+            break;
           }
 
-          if (arg->getProperties()->is_required) left_part += " (required)";
-          if (arg->getProperties()->superior) left_part += " (superior)";
-          if (!arg->getProperties()->is_flag) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
-
-          printAlignedOption(left_part, arg->getDescription());
+        if (hasUngrouped) {
+          std::cout << "Global Options:\n";
+          for (const auto &arg : options) {
+            if (grouped.count(arg.get())) continue;
+            std::string left_part;
+            for (size_t i = 0; i < arg->getProperties()->valid_names.size(); ++i) {
+              left_part += arg->getProperties()->valid_names[i];
+              if (i + 1 < arg->getProperties()->valid_names.size()) left_part += ", ";
+            }
+            if (arg->getProperties()->is_required) left_part += " (required)";
+            if (arg->getProperties()->superior) left_part += " (superior)";
+            if (!arg->getProperties()->is_flag) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
+            printAlignedOption(left_part, arg->getDescription());
+          }
         }
 
         if (!license_string.empty()) std::cout << std::endl << license_string << std::endl;
@@ -889,6 +1123,9 @@ public:
       if (arg->getProperties()->is_required && !arg->isUsed())
         throw Error("Missing required option: {}", arg->getProperties()->valid_names[0]).cmdlineError().withCode(EX_USAGE);
     }
+    for (const auto &grp : groups)
+      grp->validate();
+
     if (active_subcommand) {
       for (const auto &arg : active_subcommand->options) {
         if (arg->getProperties()->is_required && !arg->isUsed() && !active_subcommand->anySuperiorIsUsed())
@@ -896,6 +1133,7 @@ public:
               .cmdlineError()
               .withCode(EX_USAGE);
       }
+      active_subcommand->validateGroups();
     }
   }
 

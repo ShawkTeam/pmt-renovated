@@ -23,7 +23,6 @@
 
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 #include <nlohmann/json.hpp>
 
 #define PLUGIN "ExamplePlugin"
@@ -49,7 +48,7 @@ class ExamplePlugin final : public BasicPlugin {
   bool countOnly = false;
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
@@ -60,23 +59,19 @@ public:
    * @brief Called when the plugin is loaded.
    * This is where you set up your CLI command and options.
    */
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
 
     flags = &mainFlags;
     // Create the subcommand for this plugin
-    cmd = mainApp.add_subcommand("example", "Example plugin demonstrating partition operations");
-    cmd->fallthrough();
+    cmd = mainApp.addSubcommand("example", "Example plugin demonstrating partition operations");
 
     // Add command line options
-    cmd->add_option("partition(s)", rawPartitions, "Partition name(s) to analyze")->delimiter(',');
-
-    cmd->add_flag("-j,--json", jsonFormat, "Output results in JSON format")->default_val(false);
-
-    cmd->add_flag("-d,--detailed", detailed, "Show detailed information")->default_val(false);
-
-    cmd->add_flag("-c,--count", countOnly, "Only show partition count")->default_val(false);
+    cmd->addOption("partition(s)", rawPartitions, "Partition name(s) to analyze")->delimiter(',');
+    cmd->addFlag("-j,--json", jsonFormat, "Output results in JSON format")->defaultValue(false);
+    cmd->addFlag("-d,--detailed", detailed, "Show detailed information")->defaultValue(false);
+    cmd->addFlag("-c,--count", countOnly, "Only show partition count")->defaultValue(false);
 
     return true;
   }
@@ -102,17 +97,14 @@ public:
    */
   PLUGIN_SECTION bool run() override {
     // Process command line arguments
-    if (!rawPartitions.empty()) {
-      partitions = CLI::detail::split(rawPartitions, ',');
-    }
+    if (!rawPartitions.empty()) partitions = Helper::CMDLine::split(rawPartitions, ',');
 
-    if (countOnly) {
+    if (countOnly)
       return showPartitionCount();
-    } else if (partitions.empty()) {
+    else if (partitions.empty())
       return showAllPartitions();
-    } else {
+    else
       return analyzeSpecificPartitions();
-    }
   }
 
   /**
@@ -152,11 +144,10 @@ private:
    * @brief Show information about all partitions.
    */
   bool showAllPartitions() {
-    if (jsonFormat) {
+    if (jsonFormat)
       return showAllPartitionsJson();
-    } else {
+    else
       return showAllPartitionsText();
-    }
   }
 
   /**
@@ -166,16 +157,15 @@ private:
     Out::println("=== All Partitions ===");
 
     auto getter = [this](const PartitionMap::Partition_t &partition) -> bool {
-      if (detailed) {
+      if (detailed)
         Out::println("Name: {} | Table: {} | Size: {} | Logical: {} | Path: {}", partition.name(),
                      partition.isLogicalPartition() ? "N/A" : partition.tableName(),
                      partition.formattedSizeString(PartitionMap::MiB, true), partition.isLogicalPartition(),
                      partition.absolutePath().string());
-      } else {
+      else
         Out::println("partition={} table={} size={} isLogical={}", partition.name(),
                      partition.isLogicalPartition() ? "" : partition.tableName(),
                      partition.formattedSizeString(PartitionMap::MiB, true), partition.isLogicalPartition());
-      }
       return true;
     };
 
@@ -213,16 +203,14 @@ private:
   bool analyzeSpecificPartitions() {
     // Validate that all requested partitions exist
     for (const auto &partition : partitions) {
-      if (!Tables.hasPartition(partition) && !Tables.hasLogicalPartition(partition)) {
+      if (!Tables.hasPartition(partition) && !Tables.hasLogicalPartition(partition))
         throw PluginError("Couldn't find partition: {}", partition);
-      }
     }
 
-    if (jsonFormat) {
+    if (jsonFormat)
       return analyzeSpecificPartitionsJson();
-    } else {
+    else
       return analyzeSpecificPartitionsText();
-    }
   }
 
   /**
@@ -250,9 +238,7 @@ private:
   void analyzePartitionText(const PartitionMap::Partition_t &partition) {
     Out::println("\n--- Partition: {} ---", partition.name());
     Out::println("Type: {}", partition.isLogicalPartition() ? "Logical" : "Physical");
-    if (!partition.isLogicalPartition()) {
-      Out::println("Table: {}", partition.tableName());
-    }
+    if (!partition.isLogicalPartition()) Out::println("Table: {}", partition.tableName());
     Out::println("Size: {} ({})", partition.formattedSizeString(PartitionMap::MiB, true), partition.size());
     Out::println("Path: {}", partition.absolutePath().string());
 
@@ -292,9 +278,7 @@ private:
     part["name"] = partition.name();
     part["type"] = partition.isLogicalPartition() ? "logical" : "physical";
 
-    if (!partition.isLogicalPartition()) {
-      part["table"] = partition.tableName();
-    }
+    if (!partition.isLogicalPartition()) part["table"] = partition.tableName();
 
     part["size"] = {{"bytes", partition.size()}, {"human_readable", partition.formattedSizeString(PartitionMap::MiB, true)}};
 
@@ -302,9 +286,7 @@ private:
     part["device"] = partition.absolutePath().parent_path().string();
     part["exists"] = std::filesystem::exists(partition.absolutePath());
 
-    if (detailed) {
-      part["additional_info"] = "Detailed analysis would go here";
-    }
+    if (detailed) part["additional_info"] = "Detailed analysis would go here";
 
     return part;
   }

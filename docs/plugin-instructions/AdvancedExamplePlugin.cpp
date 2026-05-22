@@ -26,7 +26,6 @@
 #include <map>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <CLI11.hpp>
 #include <nlohmann/json.hpp>
 
 #define PLUGIN "AdvancedExamplePlugin"
@@ -58,47 +57,49 @@ class AdvancedExamplePlugin final : public BasicPlugin {
   uint64_t maxSize = UINT64_MAX;
 
 public:
-  CLI::App *cmd = nullptr;
+  Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
   std::string logPath;
 
   PLUGIN_SECTION AdvancedExamplePlugin() = default;
   PLUGIN_SECTION ~AdvancedExamplePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(CLI::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
 
     flags = &mainFlags;
-    cmd = mainApp.add_subcommand("advanced", "Advanced example plugin with complex operations");
-    cmd->fallthrough();
+    cmd = mainApp.addSubcommand("advanced", "Advanced example plugin with complex operations");
 
     // Partition selection options
-    auto partitionGroup = cmd->add_option_group("Partition Selection", "Select which partitions to analyze");
-    partitionGroup->add_option("partition(s)", rawPartitions, "Specific partition name(s) to analyze")->delimiter(',');
-    partitionGroup->add_flag("-l,--logical", onlyLogical, "Analyze only logical partitions");
-    partitionGroup->add_flag("-p,--physical", onlyPhysical, "Analyze only physical partitions");
+    auto *partitionGroup = cmd->addOptionGroup("Partition Selection", "Select which partitions to analyze");
+    cmd->add_option("partition(s)", rawPartitions, "Specific partition name(s) to analyze", partitionGroup)->delimiter(',');
+    cmd->add_flag("-l,--logical", onlyLogical, "Analyze only logical partitions", partitionGroup);
+    cmd->add_flag("-p,--physical", onlyPhysical, "Analyze only physical partitions", partitionGroup);
 
     // Size filtering options
-    auto sizeGroup = cmd->add_option_group("Size Filtering", "Filter partitions by size");
-    sizeGroup->add_option("--min-size", minSize, "Minimum partition size (bytes)")->transform(CLI::AsSizeValue(false));
-    sizeGroup->add_option("--max-size", maxSize, "Maximum partition size (bytes)")->transform(CLI::AsSizeValue(false));
+    auto *sizeGroup = cmd->addOptionGroup("Size Filtering", "Filter partitions by size");
+    cmd->add_option("--min-size", minSize, "Minimum partition size (bytes)", sizeGroup)
+        ->transform(Helper::CMDLine::Transformers::AsSizeValue());
+    cmd->add_option("--max-size", maxSize, "Maximum partition size (bytes)", sizeGroup)
+        ->transform(Helper::CMDLine::Transformers::AsSizeValue());
 
     // Output options
-    auto outputGroup = cmd->add_option_group("Output Options", "Control output format and content");
-    outputGroup->add_flag("-j,--json", jsonFormat, "Output in JSON format");
-    outputGroup->add_flag("-t,--tables", includeTables, "Include table information");
-    outputGroup->add_option("-o,--output", outputFile, "Output to file instead of stdout");
+    auto *outputGroup = cmd->addOptionGroup("Output Options", "Control output format and content");
+    cmd->add_flag("-j,--json", jsonFormat, "Output in JSON format", outputGroup);
+    cmd->add_flag("-t,--tables", includeTables, "Include table information", outputGroup);
+    cmd->add_option("-o,--output", outputFile, "Output to file instead of stdout", outputGroup);
 
     // Sorting options
-    auto sortGroup = cmd->add_option_group("Sorting", "Control partition sorting");
-    sortGroup->add_option("--sort-by", sortBy, "Sort by: name, size, type, table")
-        ->check(CLI::IsMember({"name", "size", "type", "table"}));
-    sortGroup->add_flag("-r,--reverse", reverseSort, "Reverse sort order");
+    auto *sortGroup = cmd->addOptionGroup("Sorting", "Control partition sorting");
+    cmd->addOption("--sort-by", sortBy, "Sort by: name, size, type, table", sortGroup)
+        ->check(Helper::CMDLine::Checkers::IsMember({"name", "size", "type", "table"}));
+    cmd->addFlag("-r,--reverse", reverseSort, "Reverse sort order", sortGroup);
 
     // Size unit options
-    auto unitGroup = cmd->add_option_group("Size Units", "Control size display units");
-    unitGroup->add_option("--unit", sizeUnit, "Size unit: B, KiB, MiB, GiB")->check(CLI::IsMember({"B", "KiB", "MiB", "GiB"}));
+    auto *unitGroup = cmd->addOptionGroup("Size Units", "Control size display units");
+    cmd->addOption("--unit", sizeUnit, "Size unit: B, KiB, MiB, GiB", unitGroup)
+        ->check(Helper::CMDLine::Checkers::IsMember({"B", "KiB", "MiB", "GiB"}));
 
     return true;
   }
@@ -113,14 +114,10 @@ public:
 
   PLUGIN_SECTION bool run() override {
     // Validate conflicting options
-    if (onlyLogical && onlyPhysical) {
-      throw CLI::ValidationError("Cannot specify both --logical and --physical");
-    }
+    if (onlyLogical && onlyPhysical) throw Helper::Error("Cannot specify both --logical and --physical");
 
     // Parse partitions if specified
-    if (!rawPartitions.empty()) {
-      partitions = CLI::detail::split(rawPartitions, ',');
-    }
+    if (!rawPartitions.empty()) partitions = Helper::CMDLine::split(rawPartitions, ',');
 
     // Get partition list
     std::vector<PartitionMap::Partition_t> partitionList = getPartitionList();
