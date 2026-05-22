@@ -154,7 +154,7 @@ if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
             SOURCES ${FMTLIB_SOURCES}
             COMPILE_OPTIONS -fno-exceptions -UNDEBUG
     )
-    add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS
+    add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
             SOURCES ${LIBBASE_SOURCES}
             COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
             DEFINATIONS _FILE_OFFSET_BITS=64

@@ -64,31 +64,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="refactor(CommandLine): CLI11 usage has been discontinued.&#10;&#10; - Cleaned from CMake scripts and git modules.">
-      <change afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/cmdline.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.clang-tidy" beforeDir="false" afterPath="$PROJECT_DIR$/.clang-tidy" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="refactor(Out): Move Out namespace to libhelper">
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build/scripts/reformat.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build/scripts/reformat.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/documentation-mainpage.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/CLI11" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/CleanLogPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/MemoryTestPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RebootPlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/definations.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/error.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/error.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Utilities.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -190,7 +171,7 @@
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;vcs.Git&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
@@ -207,12 +188,12 @@
     </key>
   </component>
   <component name="RunManager" selected="Shell Script.Build (Debug)">
-    <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
+    <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -258,16 +239,6 @@
       </method>
     </configuration>
     <configuration name="info_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="info_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="libbase_shared" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libbase_shared" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="libbase_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libbase_static" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -473,8 +444,6 @@
       <item itemvalue="CMake Application.fmtlib_static" />
       <item itemvalue="CMake Application.generate_build_info" />
       <item itemvalue="CMake Application.info_plugin" />
-      <item itemvalue="CMake Application.libbase_shared" />
-      <item itemvalue="CMake Application.libbase_static" />
       <item itemvalue="CMake Application.libcrypto" />
       <item itemvalue="CMake Application.libext2_uuid_shared" />
       <item itemvalue="CMake Application.libext2_uuid_static" />
@@ -636,47 +605,9 @@
       <workItem from="1779121830045" duration="6000" />
       <workItem from="1779122009614" duration="3624000" />
       <workItem from="1779125717074" duration="7305000" />
-      <workItem from="1779133085725" duration="918000" />
-    </task>
-    <task id="LOCAL-00015" summary="pmt: add [] operators to Map_t and builder">
-      <option name="closed" value="true" />
-      <created>1757231642687</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1757231642687</updated>
-    </task>
-    <task id="LOCAL-00016" summary="pmt: Improve libpartition_map types and some functions.&#10; - Add new operators to Map_t.&#10; - Add new flags to info function.&#10; - Move some local pmt function(s) to libhelper.&#10; - Etc...">
-      <option name="closed" value="true" />
-      <created>1757235374753</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1757235374753</updated>
-    </task>
-    <task id="LOCAL-00017" summary="pmt: Improve libhelper and libpartition_map, etc.">
-      <option name="closed" value="true" />
-      <created>1757271277314</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1757271277314</updated>
-    </task>
-    <task id="LOCAL-00018" summary="pmt: Fixup backup function">
-      <option name="closed" value="true" />
-      <created>1757271355802</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1757271355802</updated>
-    </task>
-    <task id="LOCAL-00019" summary="pmt: update latest release date">
-      <option name="closed" value="true" />
-      <created>1757574813840</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1757574813840</updated>
+      <workItem from="1779133085725" duration="1190000" />
+      <workItem from="1779294487979" duration="841000" />
+      <workItem from="1779462251915" duration="3857000" />
     </task>
     <task id="LOCAL-00020" summary="pmt: reformat code and improve workflow">
       <option name="closed" value="true" />
@@ -1030,7 +961,47 @@
       <option name="project" value="LOCAL" />
       <updated>1778516698086</updated>
     </task>
-    <option name="localTasksCounter" value="64" />
+    <task id="LOCAL-00064" summary="refactor(CommandLine): CLI11 usage has been discontinued.&#10;&#10; - Cleaned from CMake scripts and git modules.">
+      <option name="closed" value="true" />
+      <created>1779134007611</created>
+      <option name="number" value="00064" />
+      <option name="presentableId" value="LOCAL-00064" />
+      <option name="project" value="LOCAL" />
+      <updated>1779134007612</updated>
+    </task>
+    <task id="LOCAL-00065" summary="refactor(CommandLine,libhelper)!: Switch to the built-in, dedicated command-line handler.&#10;&#10;- For greater control, a dedicated command-line handler, libhelper!a, has been added in place of CLI11.&#10;  - All necessary code integration has been completed.&#10;  - It's not as good as CLI11, but at least it allows me to have much better control.">
+      <option name="closed" value="true" />
+      <created>1779134259599</created>
+      <option name="number" value="00065" />
+      <option name="presentableId" value="LOCAL-00065" />
+      <option name="project" value="LOCAL" />
+      <updated>1779134259599</updated>
+    </task>
+    <task id="LOCAL-00066" summary="feat(CMDLine,Plugins): Add collections of checkers and callbacks.&#10;&#10;- Apply to plugins.">
+      <option name="closed" value="true" />
+      <created>1779464985484</created>
+      <option name="number" value="00066" />
+      <option name="presentableId" value="LOCAL-00066" />
+      <option name="project" value="LOCAL" />
+      <updated>1779464985485</updated>
+    </task>
+    <task id="LOCAL-00067" summary="fix(CMDLine): fixup CMDLine collections.">
+      <option name="closed" value="true" />
+      <created>1779465369498</created>
+      <option name="number" value="00067" />
+      <option name="presentableId" value="LOCAL-00067" />
+      <option name="project" value="LOCAL" />
+      <updated>1779465369498</updated>
+    </task>
+    <task id="LOCAL-00068" summary="refactor(Out): Move Out namespace to libhelper">
+      <option name="closed" value="true" />
+      <created>1779465399502</created>
+      <option name="number" value="00068" />
+      <option name="presentableId" value="LOCAL-00068" />
+      <option name="project" value="LOCAL" />
+      <updated>1779465399502</updated>
+    </task>
+    <option name="localTasksCounter" value="69" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -1054,10 +1025,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="build.sh: add command for configuring git hooks." />
-    <MESSAGE value="git: Correct the logical fallacy in githooks." />
-    <MESSAGE value="libhelper: finalize documentation.&#10; - git: fixup pre-commit.&#10; - scripts: reformat.sh: Print only the names of the formatted files to the terminal." />
-    <MESSAGE value="git: fixup pre-commit" />
     <MESSAGE value="doxygen: add tagfile of cppreference.com" />
     <MESSAGE value="doxygen: fixup syntax" />
     <MESSAGE value="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc." />
@@ -1079,7 +1046,11 @@
     <MESSAGE value="docs(documentation-mainpage,CONTRUBUTING): update maninpage of wiki and create contributing guide&#10;&#10;- Contributing document should have been included much earlier. Even though it's late, adding it was necessary." />
     <MESSAGE value="docs(README): fixup format, etc." />
     <MESSAGE value="refactor(CommandLine): CLI11 usage has been discontinued.&#10;&#10; - Cleaned from CMake scripts and git modules." />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor(CommandLine): CLI11 usage has been discontinued.&#10;&#10; - Cleaned from CMake scripts and git modules." />
+    <MESSAGE value="refactor(CommandLine,libhelper)!: Switch to the built-in, dedicated command-line handler.&#10;&#10;- For greater control, a dedicated command-line handler, libhelper!a, has been added in place of CLI11.&#10;  - All necessary code integration has been completed.&#10;  - It's not as good as CLI11, but at least it allows me to have much better control." />
+    <MESSAGE value="feat(CMDLine,Plugins): Add collections of checkers and callbacks.&#10;&#10;- Apply to plugins." />
+    <MESSAGE value="fix(CMDLine): fixup CMDLine collections." />
+    <MESSAGE value="refactor(Out): Move Out namespace to libhelper" />
+    <option name="LAST_COMMIT_MESSAGE" value="refactor(Out): Move Out namespace to libhelper" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -34,7 +34,6 @@
 #else
 #include <sys/system_properties.h>
 #endif
-#include <android-base/properties.h>
 #include <cutils/android_reboot.h>
 
 #ifdef __ANDROID__
@@ -196,10 +195,16 @@ bool isRooted() {
   return found;
 }
 
+static void property_callback(void *cookie, const char *name, const char *value, uint32_t serial) {
+  std::string *result = static_cast<std::string *>(cookie);
+  if (value) *result = value;
+}
+
 std::optional<std::string> getProperty(const std::string &prop) {
-  auto &&val = android::base::GetProperty(prop, "ERROR");
-  if (val == "ERROR") return std::nullopt;
-  return val;
+  std::string value = "ERROR";
+  const prop_info *pi = __system_property_find(prop.c_str());
+  if (pi != nullptr) __system_property_read_callback(pi, property_callback, &value);
+  return value;
 }
 
 bool reboot(const std::string &arg) {
