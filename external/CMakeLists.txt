@@ -133,6 +133,15 @@ add_super_library(gptf USE_INTERFACE_NOLIBS_NOFLAGS
         LIBS ext2_uuid
 )
 
+if(ANDROID_NATIVE_API_LEVEL LESS_EQUAL 23)
+    add_static_super_library(crypto_static USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${crypto_sources} ${crypto_sources_asm}
+            CPPSTD 17
+            COMPILE_OPTIONS -fvisibility=hidden -fno-data-sections -fno-function-sections -fno-sanitize=address -Werror -Wno-unused-parameter -Wno-reserved-user-defined-literal
+            DEFINATIONS BORINGSSL_SHARED_LIBRARY BORINGSSL_ANDROID_SYSTEM BORINGSSL_IMPLEMENTATION OPENSSL_SMALL # There is no need for FIPS.
+    )
+endif()
+
 if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
     if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
         set_source_files_properties(
