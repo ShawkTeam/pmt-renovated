@@ -195,16 +195,11 @@ bool isRooted() {
   return found;
 }
 
-static void property_callback(void *cookie, const char *name, const char *value, uint32_t serial) {
-  std::string *result = static_cast<std::string *>(cookie);
-  if (value) *result = value;
-}
-
 std::optional<std::string> getProperty(const std::string &prop) {
-  std::string value = "ERROR";
-  const prop_info *pi = __system_property_find(prop.c_str());
-  if (pi != nullptr) __system_property_read_callback(pi, property_callback, &value);
-  return value;
+  char value[PROP_VALUE_MAX];
+  int len = __system_property_get(prop.c_str(), value);
+  if (len > 0) return value;
+  return "ERROR";
 }
 
 bool reboot(const std::string &arg) {

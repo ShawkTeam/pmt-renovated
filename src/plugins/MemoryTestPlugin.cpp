@@ -123,26 +123,6 @@ public:
       const auto startRead = std::chrono::high_resolution_clock::now();
       size_t total = 0;
       ssize_t bytesRead;
-      while ((bytesRead = rfd.read(bufferRead, bufferSize)) > 0) {
-        total += bytesRead;
-      }
-      const auto endRead = std::chrono::high_resolution_clock::now();
-
-      const double read_time = std::chrono::duration<double>(endRead - startRead).count();
-      Out::println("Sequential read speed: {:3.0f} MB/s", (static_cast<double>(total) / (1024.0 * 1024.0)) / read_time);
-      LOGNF(PLUGIN, logPath, INFO) << "Sequential read test done!" << std::endl;
-    }
-
-    if (!doNotReadTest) {
-      auto rawBuffer = std::make_unique<char[]>(bufferSize + 4096);
-      auto *bufferRead = reinterpret_cast<char *>((reinterpret_cast<uintptr_t>(rawBuffer.get()) + 4096 - 1) & ~(4096 - 1));
-      auto rfd = Helper::UniqueFD(test, O_RDONLY | O_DIRECT);
-      if (rfd < 0) throw Error("Can't open test file: {}", strerror(errno));
-
-      LOGNF(PLUGIN, logPath, INFO) << "Sequential read test started!" << std::endl;
-      const auto startRead = std::chrono::high_resolution_clock::now();
-      size_t total = 0;
-      ssize_t bytesRead;
 
       while (true) {
         bytesRead = rfd.read(bufferRead, bufferSize);
@@ -165,8 +145,8 @@ public:
           break;
         }
       }
-      const auto endRead = std::chrono::high_resolution_clock::now();
 
+      const auto endRead = std::chrono::high_resolution_clock::now();
       const double read_time = std::chrono::duration<double>(endRead - startRead).count();
       Out::println("Sequential read speed: {:3.0f} MB/s", (static_cast<double>(total) / (1024.0 * 1024.0)) / read_time);
       LOGNF(PLUGIN, logPath, INFO) << "Sequential read test done!" << std::endl;
