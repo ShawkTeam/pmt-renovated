@@ -143,7 +143,10 @@ int main(int argc, char **argv) {
 
     if (!Helper::Android::isHasRootPrivileges()) // Root access is a fundamental requirement for this program.
       throw PartitionManager::Error("This program requires super-user privileges.");
-    if (!Tables) throw PartitionManager::Error("Can't found any partition table in /dev/block.");
+    if (Tables.tableNamesEmpty()) throw PartitionManager::Error("Cannot find any partition table on this device.");
+    if (!Tables && !Flags.forceProcess)
+      throw PartitionManager::Error(
+          "Problem(s) have been detected in your device's partition table. Please use -f (--force) to continue.");
 
     if (Flags.onLogical) {
       if (!Tables.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.

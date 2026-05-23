@@ -31,6 +31,19 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Build plugins as built-in or dynamic.
 option(BUILTIN_PLUGINS "Enable builtin plugins." OFF)
 
+# Enable link-time thin optimization (lto-thin).
+option(LINK_TIME_OPTIMIZATION_THIN "Enable link-time thin optimization (lto-thin)." ON)
+include(CheckIPOSupported)
+
+if(LINK_TIME_OPTIMIZATION_THIN)
+	check_ipo_supported(RESULT lto_supported OUTPUT lto_error)
+	if(NOT lto_supported)
+		message(WARNING "LINK_TIME_OPTIMIZATION_THIN is enabled but link-time thin optimization (lto-thin) is not supported: ${lto_error}")
+		message(WARNING "Disabling LINK_TIME_OPTIMIZATION_THIN.")
+		set(LINK_TIME_OPTIMIZATION_THIN OFF)
+	endif()
+endif()
+
 # Set compiler flags
 add_compile_options(-Werror -Wno-deprecated-declarations)
 if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")

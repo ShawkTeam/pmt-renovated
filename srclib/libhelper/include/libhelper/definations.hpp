@@ -323,10 +323,10 @@ template <typename T> using ConstIfCharPointer_t = ConstIfCharPointer<T>::type;
 #define MKVERSION(name)                                                                                                               \
   char vinfo[512];                                                                                                                    \
   sprintf(vinfo,                                                                                                                      \
-          "%s %s-%s [%s %s]\nBuild type: %s\nCMake version: %s\nCompiler version: "                                                   \
+          "%s %s-%s [%s %s]\nBuild type: %s\nTarget Android API: %d\nCMake version: %s\nCompiler version: "                           \
           "%s\nCompiler flags: %s",                                                                                                   \
-          name, BUILD_VERSION, COMMIT_ID, BUILD_DATE, BUILD_TIME, BUILD_TYPE, BUILD_CMAKE_VERSION, BUILD_COMPILER_VERSION,            \
-          BUILD_FLAGS);                                                                                                               \
+          name, BUILD_VERSION, COMMIT_ID, BUILD_DATE, BUILD_TIME, BUILD_TYPE, __ANDROID_API__, BUILD_CMAKE_VERSION,                   \
+          BUILD_COMPILER_VERSION, BUILD_FLAGS);                                                                                       \
   return std::string(vinfo)
 
 #endif // #ifndef LIBHELPER_MACROS_HPP

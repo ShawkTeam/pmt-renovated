@@ -54,9 +54,7 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
 template <typename T> inline std::string getTypeName() {
   using cleanType = std::decay_t<T>;
   if constexpr (std::is_same_v<cleanType, bool>) return "bool";
-  if constexpr (std::is_same_v<cleanType, int>) return "int";
-  if constexpr (std::is_same_v<cleanType, float>) return "float";
-  if constexpr (std::is_same_v<cleanType, double>) return "double";
+  if constexpr (std::is_integral_v<cleanType>) return "number";
   if constexpr (std::is_same_v<cleanType, char *> || std::is_same_v<cleanType, const char *> ||
                 std::is_same_v<cleanType, std::string> || std::is_same_v<cleanType, std::string_view>)
     return "string";
@@ -844,8 +842,8 @@ public:
           has_positional = true;
         }
       }
-      std::cout << " [OPTIONS]\n\n";
-      std::cout << "Description:\n  " << subcmd->description << "\n\n";
+      std::cout << " [OPTIONS]\n";
+      if (!subcmd->description.empty()) std::cout << "\nDescription:\n  " << subcmd->description << "\n\n";
       if (!subcmd->getFooter().empty()) std::cout << indentLines(subcmd->getFooter()) << "\n\n";
 
       if (!subcmd->options.empty()) {
@@ -911,8 +909,11 @@ public:
     } else {
       std::cout << "Usage: " << cmd_name;
       if (!subcommands.empty()) std::cout << " [SUBCOMMAND]";
-      if (!options.empty()) std::cout << " [OPTIONS]";
-      std::cout << "\n\n" << description << "\n\n";
+      if (!options.empty()) std::cout << " [OPTIONS]\n";
+      if (!description.empty())
+        std::cout << "\n" << description << "\n\n";
+      else
+        std::cout << "\n";
 
       if (!subcommands.empty()) {
         std::cout << "Subcommands:\n";
@@ -983,9 +984,6 @@ public:
   }
 
   void parse_earlies(int argc, char *argv[], bool no_unknown_arg_error = true) {
-    for (auto &arg : options)
-      if (arg->getProperties()->default_setter) arg->getProperties()->default_setter();
-
     for (size_t i = 0; i < argc; ++i) {
       const std::string &token = argv[i];
 
@@ -1034,12 +1032,13 @@ public:
       if (arg->getProperties()->is_required && arg->getProperties()->early && !arg->isUsed())
         throw Error("Missing required early option: {}", arg->getProperties()->valid_names[0]).cmdlineError().withCode(EX_USAGE);
     }
+
+    for (auto &arg : options) {
+      if (!arg->isUsed() && arg->getProperties()->default_setter) arg->getProperties()->default_setter();
+    }
   }
 
   void parse(int argc, char *argv[]) {
-    for (auto &arg : options)
-      if (arg->getProperties()->default_setter) arg->getProperties()->default_setter();
-
     cmd_name = argv[0];
     std::vector<std::string> args;
     for (int i = 1; i < argc; ++i)
@@ -1123,6 +1122,10 @@ public:
       if (arg->getProperties()->is_required && !arg->isUsed())
         throw Error("Missing required option: {}", arg->getProperties()->valid_names[0]).cmdlineError().withCode(EX_USAGE);
     }
+    for (auto &arg : options) {
+      if (!arg->isUsed() && arg->getProperties()->default_setter) arg->getProperties()->default_setter();
+    }
+
     for (const auto &grp : groups)
       grp->validate();
 
@@ -1134,6 +1137,10 @@ public:
               .withCode(EX_USAGE);
       }
       active_subcommand->validateGroups();
+
+      for (auto &arg : active_subcommand->options) {
+        if (!arg->isUsed() && arg->getProperties()->default_setter) arg->getProperties()->default_setter();
+      }
     }
   }
 

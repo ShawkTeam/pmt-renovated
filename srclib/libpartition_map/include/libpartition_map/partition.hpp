@@ -96,10 +96,11 @@ namespace PartitionMap {
 template <typename slot_type, typename size_type, typename path_type>
   requires IsSlotType<slot_type> && IsSizeType<size_type> && IsPathTypeLike<path_type>
 class BasicPartition_t {
-  path_type localTablePath;       // The table path to which the partition belongs (like /dev/block/sdc).
-  path_type logicalPartitionPath; // Path of logical partition.
-  slot_type localIndex = 0;       // The actual index of the partition within the table.
-  mutable GPTPart gptPart;        // Complete data for the partition.
+  path_type localTablePath;           // The table path to which the partition belongs (like /dev/block/sdc).
+  path_type logicalPartitionPath;     // Path of logical partition.
+  slot_type localIndex = 0;           // The actual index of the partition within the table.
+  size_type defaultSectorSize = 4096; // Default sector size.
+  mutable GPTPart gptPart;            // Complete data for the partition.
 
   bool isLogical = false; // This class contains a logical partition?
 
@@ -142,8 +143,9 @@ public:
   /// @brief Move constructor.
   BasicPartition_t(BasicPartition_t &&other) noexcept
       : localTablePath(std::move(other.localTablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)),
-        localIndex(other.localIndex), gptPart(other.gptPart), isLogical(other.isLogical) {
+        localIndex(other.localIndex), defaultSectorSize(other.defaultSectorSize), gptPart(other.gptPart), isLogical(other.isLogical) {
     other.localIndex = 0;
+    other.defaultSectorSize = 4096;
     other.gptPart = GPTPart();
     other.isLogical = false;
   }
@@ -370,18 +372,36 @@ public:
   /// @brief Get partition size as formatted string.
   std::string formattedSizeString(const SizeUnit size_unit, bool no_type = false) const {
     size_type size_ = size();
+    double calculated_size = static_cast<double>(size_);
+    std::string unit_str = "B";
+
     switch (size_unit) {
       case BYTE:
-        return no_type ? std::to_string(size_) : std::to_string(size_) + "B";
+        calculated_size = size_;
+        unit_str = "B";
+        break;
       case KiB:
-        return no_type ? std::to_string(TO_KB(size_)) : std::to_string(TO_KB(size_)) + "KiB";
+        calculated_size = static_cast<double>(size_) / 1024.0;
+        unit_str = "KiB";
+        break;
       case MiB:
-        return no_type ? std::to_string(TO_MB(size_)) : std::to_string(TO_MB(size_)) + "MiB";
+        calculated_size = static_cast<double>(size_) / (1024.0 * 1024.0);
+        unit_str = "MiB";
+        break;
       case GiB:
-        return no_type ? std::to_string(TO_GB(size_)) : std::to_string(TO_GB(size_)) + "GiB";
+        calculated_size = static_cast<double>(size_) / (1024.0 * 1024.0 * 1024.0);
+        unit_str = "GiB";
+        break;
     }
 
-    return no_type ? std::to_string(size_) : std::to_string(size_) + "B";
+    std::stringstream ss;
+    if (size_unit == BYTE)
+      ss << size_;
+    else
+      ss << std::fixed << std::setprecision(2) << calculated_size;
+    if (!no_type) ss << unit_str;
+
+    return ss.str();
   }
 
   /// @brief Get partition GUID as string.
@@ -442,7 +462,8 @@ public:
   }
 
   /// @brief Get partition size in bytes.
-  size_type size(size_type sectorSize = 4096) const {
+  size_type size(size_type sectorSize = -1) const {
+    if (sectorSize == static_cast<size_type>(-1)) sectorSize = defaultSectorSize;
     if (isLogical) {
       auto fd = Helper::UniqueFD(std::filesystem::read_symlink(logicalPartitionPath).string(), O_RDONLY);
 
@@ -460,8 +481,9 @@ public:
   }
 
   /// @brief Get starting byte address.
-  size_type start(std::error_code &ec, size_type sectorSize = 4096) const noexcept {
+  size_type start(std::error_code &ec, size_type sectorSize = -1) const noexcept {
     ec.clear();
+    if (sectorSize == static_cast<size_type>(-1)) sectorSize = defaultSectorSize;
     if (isLogical) {
       ec = Errors::IsNotNormalObject;
       return std::numeric_limits<size_type>::max();
@@ -470,8 +492,9 @@ public:
   }
 
   /// @brief Get starting byte address.
-  size_type start(size_type sectorSize = 4096) const {
+  size_type start(size_type sectorSize = -1) const {
     std::error_code ec;
+    if (sectorSize == static_cast<size_type>(-1)) sectorSize = defaultSectorSize;
     const auto result = start(ec, sectorSize);
 
     if (ec) throw Error("{}", ec.message());
@@ -479,8 +502,9 @@ public:
   }
 
   /// @brief Get ending byte address.
-  size_type end(std::error_code &ec, size_type sectorSize = 4096) const noexcept {
+  size_type end(std::error_code &ec, size_type sectorSize = -1) const noexcept {
     ec.clear();
+    if (sectorSize == static_cast<size_type>(-1)) sectorSize = defaultSectorSize;
     if (isLogical) {
       ec = Errors::IsNotNormalObject;
       return std::numeric_limits<size_type>::max();
@@ -489,8 +513,9 @@ public:
   }
 
   /// @brief Get ending byte address.
-  size_type end(size_type sectorSize = 4096) const {
+  size_type end(size_type sectorSize = -1) const {
     std::error_code ec;
+    if (sectorSize == static_cast<size_type>(-1)) sectorSize = defaultSectorSize;
     const auto result = end(ec, sectorSize);
 
     if (ec) throw Error("{}", ec.message());
@@ -548,14 +573,14 @@ public:
       return false;
     }
 
-    const uint64_t bufferSize = std::min<uint64_t>(bufsize, size());
+    const size_type bufferSize = std::min<size_type>(bufsize, size());
     std::vector<char> buffer(bufferSize);
 
-    const uint64_t totalBytesToRead = size();
-    uint64_t bytesReadSoFar = 0;
+    const size_type totalBytesToRead = size();
+    size_type bytesReadSoFar = 0;
 
     while (bytesReadSoFar < totalBytesToRead) {
-      uint64_t toRead = std::min(bufferSize, totalBytesToRead - bytesReadSoFar);
+      size_type toRead = std::min(bufferSize, totalBytesToRead - bytesReadSoFar);
 
       ssize_t bytesRead = partitionfd.read(buffer.data(), toRead);
       if (bytesRead <= 0) {
@@ -616,12 +641,12 @@ public:
       return false;
     }
 
-    uint64_t bytesWrittenSoFar = 0;
-    const uint64_t bufferSize = std::min<uint64_t>(bufsize, size());
+    size_type bytesWrittenSoFar = 0;
+    const size_type bufferSize = std::min<size_type>(bufsize, size());
     std::vector<char> buffer(bufferSize);
 
     while (bytesWrittenSoFar < imageSize) {
-      uint64_t toRead = std::min(bufferSize, imageSize - bytesWrittenSoFar);
+      size_type toRead = std::min<size_type>(bufferSize, imageSize - bytesWrittenSoFar);
 
       ssize_t bytesRead = imagefd.read(buffer.data(), toRead);
       if (bytesRead <= 0) {
@@ -645,11 +670,11 @@ public:
     }
 
     if (bytesWrittenSoFar < size()) {
-      uint64_t remainingBytes = size() - bytesWrittenSoFar;
+      size_type remainingBytes = size() - bytesWrittenSoFar;
       std::ranges::fill(buffer, 0x00);
 
       while (remainingBytes > 0) {
-        uint64_t toWriteSize = std::min<uint64_t>(buffer.size(), remainingBytes);
+        size_type toWriteSize = std::min<uint64_t>(buffer.size(), remainingBytes);
         ssize_t written = partitionfd.write(buffer.data(), toWriteSize);
 
         if (written <= 0) {
@@ -702,6 +727,9 @@ public:
     if (isLogical) throw Error("This is not a normal partition object!");
     gptPart = otherGptPart;
   }
+
+  /// @brief Set default sector size for partition size calculation.
+  void setDefaultSectorSize(size_type sectorSize) { defaultSectorSize = sectorSize; }
 
   /// @brief Checks whether the partition is dynamic or not.
   bool isSuperPartition() const {
@@ -783,7 +811,11 @@ public:
 }; // class BasicPartition_t
 
 /// @brief Template alias for BasicPartition_t.
+#ifdef __LP64__
 using Partition_t = BasicPartition_t<uint32_t, uint64_t, std::filesystem::path>;
+#else
+using Partition_t = BasicPartition_t<uint32_t, uint32_t, std::filesystem::path>;
+#endif
 
 static_assert(IsValidPartitionClass<Partition_t>, "BasicPartition_t is doesn't meet requirements of minimumPartitionClass");
 
@@ -791,16 +823,21 @@ inline std::error_code make_error_code(Errors ec) { return {static_cast<int>(ec)
 
 /// @brief Progress information structure for @c ProgressRenderer.
 struct Progress_t {
+#ifdef __LP64__
+  using size_type = uint64_t;
+#else
+  using size_type = uint32_t;
+#endif
   const std::string name;            ///< Partition name.
-  const uint64_t total;              ///< Total size.
-  std::atomic<uint64_t> done{0};     ///< Done size.
+  const size_type total;             ///< Total size.
+  std::atomic<size_type> done{0};    ///< Done size.
   std::atomic<bool> finished{false}; ///< Process is finished or not.
   std::atomic<bool> failed{false};   ///< Process is failed or not.
 
   /// @brief Deleted constructor.
   Progress_t() = delete;
   /// @brief Main constructor.
-  Progress_t(std::string name, uint64_t total) : name(std::move(name)), total(total) {}
+  Progress_t(std::string name, size_type total) : name(std::move(name)), total(total) {}
 
   Progress_t(const Progress_t &) = delete;            ///< Deleted copy constructor.
   Progress_t &operator=(const Progress_t &) = delete; ///< Deleted copy assignment.
@@ -832,8 +869,8 @@ class ProgressRenderer {
     _drawnCount = 0;
 
     for (const auto &p : _entries) {
-      const uint64_t done = p->done.load(std::memory_order_relaxed);
-      const uint64_t total = p->total;
+      const Progress_t::size_type done = p->done.load(std::memory_order_relaxed);
+      const Progress_t::size_type total = p->total;
 
       if (p->failed.load(std::memory_order_relaxed)) {
         std::cout << "\033[2K\r\n";
@@ -865,7 +902,7 @@ public:
   ~ProgressRenderer() { stop(); }
 
   /// @brief Add a new progress entry.
-  std::shared_ptr<Progress_t> add(const std::string &name, uint64_t total) {
+  std::shared_ptr<Progress_t> add(const std::string &name, Progress_t::size_type total) {
     std::lock_guard lock(_mutex);
     auto p = std::make_shared<Progress_t>(name, total);
     _entries.push_back(p);
