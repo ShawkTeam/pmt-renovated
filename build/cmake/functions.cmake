@@ -109,7 +109,7 @@ function(add_static_super_library TARGET_NAME)
         set(STATIC_TARGET lib${TARGET_NAME})
     endif()
 
-    add_library(${STATIC_TARGET} SHARED ${ARG_SOURCES})
+    add_library(${STATIC_TARGET} STATIC ${ARG_SOURCES})
     set_target_properties(${STATIC_TARGET} PROPERTIES OUTPUT_NAME ${TARGET_NAME})
     set_target_properties(${STATIC_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON)
     if(ARG_NOPREFIX)
