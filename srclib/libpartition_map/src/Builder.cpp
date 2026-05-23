@@ -41,12 +41,16 @@ void Builder::scan() {
     LOGI << "Silencing stdout and stderr for scanning " << std::quoted(p.string()) << "..." << std::endl << std::flush;
     Helper::Silencer silencer;
     if (auto gpt = std::make_shared<GPTData>(); gpt->LoadPartitions(p)) {
+      auto sectorSize = gpt->GetBlockSize();
       gptDataCollection[p] = std::move(gpt); // Add to GPT data list.
 
       auto &storedGpt = *gptDataCollection[p];
+      LOGI << "Sector size of " << std::quoted(p.string()) << ": " << sectorSize << std::endl << std::flush;
       for (uint32_t i = 0; i < storedGpt.GetNumParts(); ++i) {
         if (GPTPart part = storedGpt[i]; part.IsUsed()) {
-          localPartitions.emplace_back(p, part, i); // Add to partition list.
+          Partition_t _part(p, part, i);
+          _part.setDefaultSectorSize(sectorSize);
+          localPartitions.push_back(std::move(_part)); // Add to partition list.
           silencer.stop();
           LOGI << "Registered partition: " << part.GetDescription() << std::endl << std::flush;
           silencer.silenceAgain();

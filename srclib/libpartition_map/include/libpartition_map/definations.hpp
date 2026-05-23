@@ -154,7 +154,7 @@ concept IsValidPartitionClass = requires(Class cls, Class cls2, GUIDData gdata, 
   { cls.absolutePath() } -> std::same_as<std::filesystem::path>;
   { cls.name() } -> std::convertible_to<std::string>;
   { cls.formattedSizeString(unit, no_throw) } -> std::convertible_to<std::string>;
-  { cls.size(sector) } -> std::same_as<uint64_t>;
+  { cls.size(sector) } -> std::integral;
   { cls.empty() } -> std::convertible_to<bool>;
 
   // Check required constructors, etc.
