@@ -29,4 +29,4 @@
 [submodule "external/boringssl"]
 	path = external/boringssl
 	url = https://android.googlesource.com/platform/external/boringssl
-	branch = main
+	branch = main-kernel
