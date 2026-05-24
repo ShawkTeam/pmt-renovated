@@ -26,7 +26,7 @@ It supports **asynchronous operations**, allowing multiple partitions to be proc
 ---
 
 ## Start Using
-Don't forget to check out how to use it with **ADB**! See [Wiki - Using PMT via ADB](@ref using-with-termux)
+Don't forget to check out how to use it with **ADB**! See [Using PMT via ADB](@ref using-with-termux)
 
 ```bash
 pmt [OPTIONS] [SUBCOMMAND]
@@ -34,20 +34,20 @@ pmt [OPTIONS] [SUBCOMMAND]
 
 ### Global Options
 
-| Option | Long Option             | Description                                                        |
-|--------|-------------------------|--------------------------------------------------------------------|
-| `-h`   | `--help`                | Print basic help message and exit.                                 |
-|        | `--help-all`            | Print full help message and exit.                                  |
-| `-L`   | `--log-file TEXT`       | Set log file path. Default: `/sdcard/Documents/last_pmt_logs.log`  |
-| `-f`   | `--force`               | Force the process to be executed even if checks fail.              |
-| `-l`   | `--logical`             | Specify that the target partition is **dynamic** (logical).        |
-| `-q`   | `--quiet`               | Suppress output.                                                   |
-| `-V`   | `--verbose`             | Enable detailed logs during execution.                             |
-| `-v`   | `--version`             | Print version and exit.                                            |
-|        | `--license`             | Print license information and exit.                                |
-| `-s`   | `--select-on-duplicate` | Select partition for work if has input named duplicate partitions. |
-| `-p`   | `--plugins TEXT`        | Load input plugin files (comma-separated).                         |
-| `-d`   | `--plugin-directory DIR | Load plugins from specified directory.                             |
+| Option | Long Option              | Description                                                        |
+|--------|--------------------------|--------------------------------------------------------------------|
+| `-h`   | `--help`                 | Print basic help message and exit.                                 |
+|        | `--help-all`             | Print full help message and exit.                                  |
+| `-L`   | `--log-file TEXT`        | Set log file path. Default: `/sdcard/Documents/last_pmt_logs.log`  |
+| `-f`   | `--force`                | Force the process to be executed even if checks fail.              |
+| `-l`   | `--logical`              | Specify that the target partition is **dynamic** (logical).        |
+| `-q`   | `--quiet`                | Suppress output.                                                   |
+| `-V`   | `--verbose`              | Enable detailed logs during execution.                             |
+| `-v`   | `--version`              | Print version and exit.                                            |
+|        | `--license`              | Print license information and exit.                                |
+| `-s`   | `--select-on-duplicate`  | Select partition for work if has input named duplicate partitions. |
+| `-p`   | `--plugins TEXT`         | Load input plugin files (comma-separated).                         |
+| `-d`   | `--plugin-directory DIR` | Load plugins from specified directory.                             |
 
 **Example usages for global options:**
 `pmt [SUBCOMMAND ...] --quiet`
@@ -369,7 +369,7 @@ pmt clean-logs [OPTIONS]
 
 - **Comma-separated inputs**: All commands (except `reboot`) require multiple inputs to be separated by commas **without spaces**.
 - **Asynchronous execution**: For `backup`, `flash`, and `erase`, each partition is processed in a separate thread for maximum performance.
-- **Error isolation**: A failure in processing one partition will not cancel the others (applies to backup, flash, and erase operations).
+- **Error isolation**: A failure in processing one partition will not cancel the others (applies to back up, flash, and erase operations).
 - **Automatic partition detection**: The tool automatically determines whether a partition is logical or regular. Use `-l/--logical` flag to specify logical partitions explicitly.
 - **Root access requirement**: Root access is required for partition operations. Reboot command works without root when used via ADB.
 - **Plugin system**: Supports loading external plugins via `-p/--plugins` or `-d/--plugin-directory` options.
