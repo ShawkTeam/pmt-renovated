@@ -201,6 +201,8 @@ inline constexpr uint64_t DTBO_IMAGE = 0x1EABB7D7;
 inline constexpr uint64_t VBMETA_IMAGE = 0x425641;
 inline constexpr uint64_t SUPER_IMAGE = 0x61446C67;
 inline constexpr uint64_t SPARSE_IMAGE = 0x3AFF26ED;
+inline constexpr uint64_t DDR_IMAGE = 0x00524444;
+inline constexpr uint64_t ZTECFG = 0x7A7465636667;
 inline constexpr uint64_t ELF = 0x464C457F;
 inline constexpr uint64_t RAW = 0x00000000;
 } // namespace AndroidMagic

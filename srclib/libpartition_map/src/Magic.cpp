@@ -39,6 +39,8 @@ std::map<uint64_t, std::string> AndroidMagics = {{AndroidMagic::BOOT_IMAGE, "And
                                                  {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
                                                  {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
                                                  {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
+                                                 {AndroidMagic::ZTECFG, "ZTE Configuration"},
+                                                 {AndroidMagic::DDR_IMAGE, "DDR Image"},
                                                  {AndroidMagic::ELF, "ELF"},
                                                  {AndroidMagic::RAW, "Raw Data"}};
 
@@ -49,6 +51,8 @@ std::map<uint64_t, std::string> Magics = {{AndroidMagic::BOOT_IMAGE, "Android Bo
                                           {AndroidMagic::VBMETA_IMAGE, "Android VBMeta Image"},
                                           {AndroidMagic::SUPER_IMAGE, "Android Super Image"},
                                           {AndroidMagic::SPARSE_IMAGE, "Android Sparse Image"},
+                                          {AndroidMagic::ZTECFG, "ZTE Configuration"},
+                                          {AndroidMagic::DDR_IMAGE, "DDR Image"},
                                           {AndroidMagic::ELF, "ELF"},
                                           {AndroidMagic::RAW, "Raw Data"},
                                           {FileSystemMagic::EXTFS_FS, "EXT2/3/4"},
