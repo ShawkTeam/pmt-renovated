@@ -87,8 +87,6 @@ public:
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
 
-    // Automatically close file descriptors and delete allocated memories (arrays)
-
     auto pfd = Helper::UniqueFD(partition.absolutePath(), O_WRONLY);
     if (!pfd) return AsyncResult_t::Error("Can't open partition {}: {}", partitionName, strerror(errno));
 
@@ -124,14 +122,12 @@ public:
 
   PLUGIN_SECTION bool run() override {
     Helper::AsyncManager<AsyncResult_t> manager;
-    manager.print = false;
-
     for (const auto &partitionName : partitions) {
       manager.addProcess(&ErasePlugin::runAsync, this, partitionName);
-      LOGNF(PLUGIN, logPath, INFO) << "Created thread for erasing partition " << partitionName << std::endl;
+      LOGNF(PLUGIN, logPath, INFO) << "Created thread for erasing partition: " << std::quoted(partitionName) << std::endl;
     }
 
-    LOGNF(PLUGIN, logPath, INFO) << "Operation successfully completed." << std::endl;
+    manager.startAll();
     return manager();
   }
 
