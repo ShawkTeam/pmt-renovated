@@ -49,10 +49,10 @@ pmt [OPTIONS] [SUBCOMMAND]
 | `-p`   | `--plugins TEXT`         | Load input plugin files (comma-separated).                         |
 | `-d`   | `--plugin-directory DIR` | Load plugins from specified directory.                             |
 
-**Example usages for global options:**
-`pmt [SUBCOMMAND ...] --quiet`
-`pmt [SUBCOMMAND ...] -L /custom/log/path.log`
-`pmt [SUBCOMMAND ...] --select-on-duplicate`
+**Example usages for global options:**\
+`pmt [SUBCOMMAND ...] --quiet`\
+`pmt [SUBCOMMAND ...] -L /custom/log/path.log`\
+`pmt [SUBCOMMAND ...] --select-on-duplicate`\
 `pmt [SUBCOMMAND ...] [GLOBAL OPTIONS ...]`
 
 ---
@@ -85,14 +85,14 @@ pmt backup partition(s) [output(s)] [OPTIONS]
 - Custom output names must match the number of partitions provided.
 - Automatically adjusts permissions so backup files can be accessed without root by default.
 
-**Example usages:**
-`pmt backup boot`  # Creates boot.img in current directory
-`pmt backup boot boot_backup.img`  # Custom filename
-`pmt backup boot,recovery,vendor`  # Multiple partitions
-`pmt backup boot,recovery -O /sdcard`  # Output to directory
-`pmt backup system,vendor --buffer-size=8KB`  # Custom buffer size
-`pmt backup userdata --no-set-perms`  # Keep default permissions
-`pmt backup boot --verify`  # Verify backup integrity
+**Example usages:**\
+`pmt backup boot`  # Creates boot.img in current directory\
+`pmt backup boot boot_backup.img`  # Custom filename\
+`pmt backup boot,recovery,vendor`  # Multiple partitions\
+`pmt backup boot,recovery -O /sdcard`  # Output to directory\
+`pmt backup system,vendor --buffer-size=8KB`  # Custom buffer size\
+`pmt backup userdata --no-set-perms`  # Keep default permissions\
+`pmt backup boot --verify`  # Verify backup integrity\
 `pmt backup system,vendor -O /backups --buffer-size=2MB --verify`
 
 ---
@@ -121,11 +121,11 @@ pmt flash partition(s) image(s) [OPTIONS]
 **Notes:**
 - Multiple partitions and images are separated by commas without spaces.
 
-**Example usages:**
-`pmt flash boot boot_backup.img`
-`pmt flash boot,recovery /sdcard/backups/boot.img,/sdcard/backups/recovery.img`
-`pmt flash boot boot_backup.img,recovery_backup.img -I /sdcard/backups --delete`
-`pmt flash system,vendor system.img,vendor.img -I /backups --buffer-size=8192`
+**Example usages:**\
+`pmt flash boot boot_backup.img`\
+`pmt flash boot,recovery /sdcard/backups/boot.img,/sdcard/backups/recovery.img`\
+`pmt flash boot boot_backup.img,recovery_backup.img -I /sdcard/backups --delete`\
+`pmt flash system,vendor system.img,vendor.img -I /backups --buffer-size=8192`\
 `pmt flash userdata userdata.img --buffer-size=4MB`
 
 ---
@@ -147,10 +147,10 @@ pmt erase partition(s) [OPTIONS]
 - Sequential zero-byte writing with progress tracking
 - Requires explicit confirmation unless `--force` flag used
 
-**Example usages (⚠️ **WARNING**: These operations are destructive and will erase all data on the specified partitions):**
-`pmt erase boot`  # Requires confirmation
-`pmt erase nvdata,nvram --force`  # Skip confirmation
-`pmt erase system,vendor --buffer-size 8KB`  # Custom buffer size
+**Example usages (⚠️ **WARNING**: These operations are destructive and will erase all data on the specified partitions):**\
+`pmt erase boot`  # Requires confirmation\
+`pmt erase nvdata,nvram --force`  # Skip confirmation\
+`pmt erase system,vendor --buffer-size 8KB`  # Custom buffer size\
 `pmt erase userdata --force --buffer-size 1MB`
 
 ---
@@ -179,12 +179,12 @@ pmt sizeof partition(s) [OPTIONS]
 - Special partition selectors for system-wide queries
 - Optimized for quick size retrieval operations
 
-**Example usages:**
-`pmt sizeof boot`  # Output: `boot: 64MB`
-`pmt sizeof boot --as-byte`  # Output: `67108864`
-`pmt sizeof boot --as-kilobyte --only-size`  # Output: `65536`
-`pmt sizeof system,vendor --as-megabyte`  # Multiple partitions
-`pmt sizeof get-all --as-gigabyte`  # All partitions in GB
+**Example usages:**\
+`pmt sizeof boot`  # Output: `boot: 64MB`\
+`pmt sizeof boot --as-byte`  # Output: `67108864`\
+`pmt sizeof boot --as-kilobyte --only-size`  # Output: `65536`\
+`pmt sizeof system,vendor --as-megabyte`  # Multiple partitions\
+`pmt sizeof get-all --as-gigabyte`  # All partitions in GB\
 `pmt sizeof get-logicals --only-size`  # All logical partitions, size only
 
 ---
@@ -220,13 +220,13 @@ pmt info partition(s) [OPTIONS]
 - Special selectors for partition categories
 - Table information included for physical partitions
 
-**Example usages:**
-`pmt info boot`  # Output: `partition=boot table=main size=100663296 isLogical=false`
-`pmt info boot -J`  # JSON output
-`pmt info boot -J --json-partition-name=partitionName`  # Custom field names
-`pmt info get-all -J`  # All partitions in JSON
-`pmt info system,vendor --json-indent-size=4`  # Custom JSON formatting
-`pmt info get-logicals --as-megabyte`  # Logical partitions with MB units
+**Example usages:**\
+`pmt info boot`  # Output: `partition=boot table=main size=100663296 isLogical=false`\
+`pmt info boot -J`  # JSON output\
+`pmt info boot -J --json-partition-name=partitionName`  # Custom field names\
+`pmt info get-all -J`  # All partitions in JSON\
+`pmt info system,vendor --json-indent-size=4`  # Custom JSON formatting\
+`pmt info get-logicals --as-megabyte`  # Logical partitions with MB units\
 `pmt info get-physicals -J --json-table-name=sourceTable`
 
 ---
@@ -248,10 +248,10 @@ pmt real-path partition(s) [OPTIONS]
 - Useful for scripting and automation
 - Validates partition existence before path resolution
 
-**Example usages:**
-`pmt real-path boot`  # Output: `/dev/block/sda25`
-`pmt real-path boot --by-name`  # Output: `/dev/block/by-name/boot`
-`pmt real-path system,vendor`  # Multiple partitions
+**Example usages:**\
+`pmt real-path boot`  # Output: `/dev/block/sda25`\
+`pmt real-path boot --by-name`  # Output: `/dev/block/by-name/boot`\
+`pmt real-path system,vendor`  # Multiple partitions\
 `pmt real-path userdata --by-name`
 
 ---
@@ -278,11 +278,11 @@ pmt type partition(s) [OPTIONS]
 - Configurable search depth via buffer size
 - Special handling for encrypted filesystems
 
-**Example usages:**
-`pmt type boot`  # Android Boot Image detection
-`pmt type vendor_boot.img`  # Image file analysis
-`pmt type system.img --only-check-filesystem-magic`  # Filesystem only
-`pmt type userdata --buffer-size 8KB`  # Custom search depth
+**Example usages:**\
+`pmt type boot`  # Android Boot Image detection\
+`pmt type vendor_boot.img`  # Image file analysis\
+`pmt type system.img --only-check-filesystem-magic`  # Filesystem only\
+`pmt type userdata --buffer-size 8KB`  # Custom search depth\
 `pmt type boot,recovery --only-check-android-magics`  # Android formats only
 
 ---
@@ -310,9 +310,9 @@ pmt reboot [rebootTarget] [OPTIONS]
 - Supports all standard Android reboot modes
 
 **Example usages:**
-`pmt reboot`  # Normal reboot
-`pmt reboot recovery`  # Recovery mode
-`pmt reboot download`  # Download mode
+`pmt reboot`  # Normal reboot\
+`pmt reboot recovery`  # Recovery mode\
+`pmt reboot download`  # Download mode\
 `pmt reboot bootloader`  # Bootloader/fastboot mode
 
 ---
@@ -339,11 +339,11 @@ pmt memtest [testPath] [OPTIONS]
 - **Automatic Cleanup**: Test files removed automatically
 - **Results**: Performance reported in MB/s with precision formatting
 
-**Example Usages:**
-`pmt memtest`  # Default 1GB test in /data/local/tmp
-`pmt memtest /data`  # Custom test directory
-`pmt memtest -s 2GB`  # 2GB test file
-`pmt memtest /data/local/tmp --file-size 512MB --no-read-test`  # Write-only test
+**Example Usages:**\
+`pmt memtest`  # Default 1GB test in /data/local/tmp\
+`pmt memtest /data`  # Custom test directory\
+`pmt memtest -s 2GB`  # 2GB test file\
+`pmt memtest /data/local/tmp --file-size 512MB --no-read-test`  # Write-only test\
 `pmt memtest --file-size 3GB --force`  # Override 2GB warning
 
 ### Cleaning PMT Logs
@@ -359,8 +359,8 @@ pmt clean-logs [OPTIONS]
 - No additional options required
 - Automatic logging reinitialization
 
-**Example Usages:**
-`pmt clean-logs`  # Remove default log file
+**Example Usages:**\
+`pmt clean-logs`  # Remove default log file\
 `pmt clean-logs -L /custom/log/path.log`  # Remove custom log file
 
 ---
