@@ -145,7 +145,6 @@ public:
       : localTablePath(std::move(other.localTablePath)), logicalPartitionPath(std::move(other.logicalPartitionPath)),
         localIndex(other.localIndex), defaultSectorSize(other.defaultSectorSize), gptPart(other.gptPart), isLogical(other.isLogical) {
     other.localIndex = 0;
-    other.defaultSectorSize = 4096;
     other.gptPart = GPTPart();
     other.isLogical = false;
   }
@@ -780,6 +779,7 @@ public:
     if (this != &other) {
       localTablePath = std::move(other.localTablePath);
       localIndex = other.localIndex;
+      defaultSectorSize = other.defaultSectorSize;
       logicalPartitionPath = std::move(other.logicalPartitionPath);
       gptPart = other.gptPart;
       isLogical = other.isLogical;
