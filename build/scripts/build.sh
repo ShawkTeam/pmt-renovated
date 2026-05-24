@@ -156,7 +156,7 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-[ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-30"
+[ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-22"
 parse_args "$@"
 checks
 
