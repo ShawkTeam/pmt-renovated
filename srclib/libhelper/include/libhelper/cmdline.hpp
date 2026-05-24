@@ -1034,7 +1034,11 @@ public:
     }
 
     for (auto &arg : options) {
-      if (!arg->isUsed() && arg->getProperties()->default_setter) arg->getProperties()->default_setter();
+      if (!arg->isUsed() && arg->getProperties()->default_setter) {
+        if (arg->getProperties()->transformer)
+          arg->getProperties()->default_value = arg->getProperties()->transformer(arg->getProperties()->default_value);
+        arg->getProperties()->default_setter();
+      }
     }
   }
 
@@ -1123,7 +1127,11 @@ public:
         throw Error("Missing required option: {}", arg->getProperties()->valid_names[0]).cmdlineError().withCode(EX_USAGE);
     }
     for (auto &arg : options) {
-      if (!arg->isUsed() && arg->getProperties()->default_setter) arg->getProperties()->default_setter();
+      if (!arg->isUsed() && arg->getProperties()->default_setter) {
+        if (arg->getProperties()->transformer)
+          arg->getProperties()->default_value = arg->getProperties()->transformer(arg->getProperties()->default_value);
+        arg->getProperties()->default_setter();
+      }
     }
 
     for (const auto &grp : groups)
@@ -1139,7 +1147,11 @@ public:
       active_subcommand->validateGroups();
 
       for (auto &arg : active_subcommand->options) {
-        if (!arg->isUsed() && arg->getProperties()->default_setter) arg->getProperties()->default_setter();
+        if (!arg->isUsed() && arg->getProperties()->default_setter) {
+          if (arg->getProperties()->transformer)
+            arg->getProperties()->default_value = arg->getProperties()->transformer(arg->getProperties()->default_value);
+          arg->getProperties()->default_setter();
+        }
       }
     }
   }
