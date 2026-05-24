@@ -42,7 +42,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt upgrade -y
-          sudo apt install make ninja-build cmake extra-cmake-modules zip -y
+          sudo apt install make ninja-build cmake extra-cmake-modules zip gh -y
 
       - name: Setup Android NDK
         id: setup-ndk
@@ -54,7 +54,7 @@ jobs:
       - name: Build And Prepare For Release
         id: build
         run: |
-          git submodule update --init --recursive
+          git submodule update --init --recursive --depth 1
           export ANDROID_NDK="${{ github.workspace }}/android-ndk-r29"
         
           bash build/scripts/build.sh clean
@@ -81,10 +81,8 @@ jobs:
           cd ../build_armeabi-v7a-builtin
           cp src/pmt src/pmt_static srclib/libhelper/libhelper.* srclib/libpartition_map/libpartition_map.* .
           zip pmt-armeabi-v7a-builtin.zip pmt libhelper.* libpartition_map.*
-        
-          # Değişkenleri ayarlıyoruz
+
           echo "BUILD_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
-        
           cd ${{ github.workspace }}
           echo -e "Read [Documentation - Release Types](https://documentations.yzbruh.com.tr/pmt-renovated/release-types.html) for getting more information.\n\n### Changes\n" > release.txt
           LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
