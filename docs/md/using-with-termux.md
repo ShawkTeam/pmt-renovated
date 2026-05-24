@@ -1,6 +1,6 @@
 @page using-with-termux Using with Termux
 
-This guide shows you how to use PMT with Termux and ADB. After that, you might want to read [Usage](Usage)!
+This guide shows you how to use PMT with Termux and ADB. After that, you might want to read [Usage](@ref usage-guide)!
 
 ## Using PMT via Termux
 
@@ -59,16 +59,47 @@ To remove PMT from your Termux environment:
 bash manager.sh uninstall
 ```
 
-## Troubleshooting Termux Issues
+## Troubleshooting Termux, ADB and Recovery Mode Issues
 
 ### Common Problems and Solutions
 
-| Issue                        | Solution                                                       |
-|------------------------------|----------------------------------------------------------------|
-| **Permission denied errors** | Run `termux-setup-storage` and ensure proper permissions       |
-| **Command not found**        | Reinstall PMT using the installation script                    |
-| **Storage access issues**    | Check if storage permission was granted during setup           |
-| **Root access denied**       | Ensure your device is properly rooted and grant su permissions |
+| Issue                                 | Solution                                                                                               |
+|---------------------------------------|--------------------------------------------------------------------------------------------------------|
+| **Permission denied errors (termux)** | Run `termux-setup-storage` and ensure proper permissions                                               |
+| **Command not found (termux)**        | Reinstall PMT using the installation script                                                            |
+| **Storage access issues (termux)**    | Check if storage permission was granted during setup                                                   |
+| **Root access denied (termux)**       | Ensure your device is properly rooted and grant su permissions                                         |
+| **Permission denied errors (adb)**    | Ensure ADB is authorized and device is connected via USB                                               |
+| **Command not found (adb)**           | Install Android SDK Platform Tools from Android Developer                                              |
+| **Storage access issues (adb)**       | Check ADB connection and ensure proper permissions                                                     |
+| **Root access denied (adb)**          | Ensure device is rooted and grant su permissions                                                       |
+| **Command not found (recovery mode)** | You're sure the file exists, but it says it can't be found. Check the "Recovery Linker Issue" section. |
+
+### Recovery Linker Issue
+
+If you're getting a "No such file or directory" or "Command not found" error when you try to run the PMT in recovery mode, even though you've correctly mounted it, you're reading the right section.
+PMT, like any other binary, needs another binary called a 'linker' to function.
+However, in some recoveries (especially older ones), the linker isn't located in the exact right place for PMT to work.
+Mounting the system partition usually solves this problem. However, if the problem persists, it can be solved with a simple solution.
+Just one command is enough to solve this problem.
+
+**For 32-bit devices:**
+```bash
+# With ADB
+adb shell ln -sf /sbin/linker /system/bin/linker
+
+# With any shell access (like ADB shell or custom recovery terminal)
+ln -sf /sbin/linker /system/bin/linker
+```
+
+**For 64-bit devices:**
+```bash
+# With ADB
+adb shell ln -sf /sbin/linker64 /system/bin/linker64
+
+# With any shell access (like ADB shell or custom recovery terminal)
+ln -sf /sbin/linker64 /system/bin/linker64
+```
 
 ---
 

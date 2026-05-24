@@ -26,7 +26,7 @@ It supports **asynchronous operations**, allowing multiple partitions to be proc
 ---
 
 ## Start Using
-Don't forget to check out how to use it with **ADB**! See [Wiki - Using PMT via ADB](https://github.com/ShawkTeam/pmt-renovated/wiki/Using-PMT-via-Termux-or-ADB#using-pmt-via-adb)
+Don't forget to check out how to use it with **ADB**! See [Wiki - Using PMT via ADB](@ref using-with-termux)
 
 ```bash
 pmt [OPTIONS] [SUBCOMMAND]
