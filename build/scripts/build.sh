@@ -145,15 +145,46 @@ parse_args() {
     PARSED_CMAKE_ARGS=("${cmake_args[@]}")
 }
 
-if [ $# -eq 0 ]; then
-    command echo -e "Usage: $0 build|rebuild|clean [--arch ABI]... [EXTRA_CMAKE_FLAGS]
-  HINT: Export ANDROID_PLATFORM if you set min Android target.
-  HINT: Use --arch to override target ABI list (default: ${TARGET_ABI_LIST[*]})
-  Example: $0 build --arch arm64-v8a --working-directory \$PWD/other-pmt-renovated-src
-  Example: $0 rebuild --arch armeabi-v7a
-  Example: $0 build --arch arm64-v8a --arch armeabi-v7a
-  Example: $0 clean --arch armeabi-v7a"
+show_help() {
+  cat << EOF
+Usage: $0 COMMAND [OPTIONS]
+
+OPTIONS:
+    --arch ABI               # Specify target ABI(s)
+    --working-directory PATH # Specify working directory
+    -h, --help               # Show this help message
+
+COMMANDS:
+    build                    # Build PMT (don't clean)
+    rebuild                  # Rebuild PMT (clean first)
+    clean                    # Clean build artifacts
+    cleanup-generated-docs   # Cleanup generated doxgen documentation
+    only-configure-git-hooks # Only configure git hooks
+    help                     # Show this help message
+
+HINTS:
+    Export ANDROID_PLATFORM if you set min Android target.
+    Use --arch to override target ABI list (default: ${TARGET_ABI_LIST[*]})
+
+EXAMPLES:
+    $0 build                                                                    # Build PMT with defaults
+    $0 build --arch arm64-v8a --working-directory \$PWD/other-pmt-renovated-src # Build for arm64-v8a with custom working directory
+    $0 rebuild --arch armeabi-v7a                                               # Build for armeabi-v7a
+    $0 build --arch arm64-v8a --arch armeabi-v7a                                # Build for arm64-v8a and armeabi-v7a
+    $0 clean                                                                    # Clean build artifacts
+    $0 only-configure-git-hooks                                                 # Configure git hooks (only)
+    $0 cleanup-generated-docs                                                   # Cleanup generated doxgen documentation
+EOF
+}
+
+if [ -z $1 ]; then
+    show_help
     exit 1
+fi
+
+if [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    show_help
+    exit 0
 fi
 
 [ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-22"
