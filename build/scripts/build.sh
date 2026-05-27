@@ -17,6 +17,7 @@
 #
 
 WORK_DIR="$(pwd)"
+BUILD_PROPERTY="full"
 THIS="$(basename "$0")"
 TARGET_ABI_LIST=("arm64-v8a" "armeabi-v7a")
 
@@ -39,42 +40,67 @@ checks() {
 
 clean() {
     echo "Cleaning workspace."
-    for a in "${TARGET_ABI_LIST[@]}"; do rm -rf "build_$a" && rm -rf "build_$a-builtin"; done
+    for a in "${TARGET_ABI_LIST[@]}"; do rm -rf "build_$a"; rm -rf "build_$a-builtin"; done
     rm -rf "${WORK_DIR}/srclib/libhelper/tests/dir" \
         "${WORK_DIR}/srclib/libhelper/tests/linkdir" \
         "${WORK_DIR}/srclib/libhelper/tests/file.txt"
 }
 
 build() {
+    local -a targets=()
     set -e
-    command echo -e "BUILDING PMT!!! BUILD INFO:
+    command echo -e "Building PMT. About the build..:
     ARCH(S): ${TARGET_ABI_LIST[*]}
     ANDROID_PLATFORM: $ANDROID_PLATFORM
     ANDROID_TOOLCHAIN_FILE: $ANDROID_NDK/build/cmake/android.toolchain.cmake\n"
 
     for a in "${TARGET_ABI_LIST[@]}"; do
         echo "Configuring for $a..."
-        mkdir -p "${WORK_DIR}/build_$a" "${WORK_DIR}/build_$a-builtin"
-        cmake -B "${WORK_DIR}/build_$a" -G Ninja -S "${WORK_DIR}" "$@" \
-            -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
-            -DANDROID_ABI="$a" \
-            -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
-            -DANDROID_STL=c++_static
-        cmake -B "${WORK_DIR}/build_$a-builtin" -G Ninja -S "${WORK_DIR}" "$@" \
-            -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
-            -DANDROID_ABI="$a" \
-            -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
-            -DANDROID_STL=c++_static \
-            -DBUILTIN_PLUGINS=ON
+
+        if [ "$BUILD_PROPERTY" = "full" ]; then
+            mkdir -p "${WORK_DIR}/build_$a" "${WORK_DIR}/build_$a-builtin"
+            cmake -B "${WORK_DIR}/build_$a" -G Ninja -S "${WORK_DIR}" "$@" \
+                -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+                -DANDROID_ABI="$a" \
+                -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
+                -DANDROID_STL=c++_static
+            cmake -B "${WORK_DIR}/build_$a-builtin" -G Ninja -S "${WORK_DIR}" "$@" \
+                -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+                -DANDROID_ABI="$a" \
+                -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
+                -DANDROID_STL=c++_static \
+                -DBUILTIN_PLUGINS=ON
+        elif [ "$BUILD_PROPERTY" = "no-builtins" ]; then
+            mkdir -p "${WORK_DIR}/build_$a"
+            cmake -B "${WORK_DIR}/build_$a" -G Ninja -S "${WORK_DIR}" "$@" \
+                -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+                -DANDROID_ABI="$a" \
+                -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
+                -DANDROID_STL=c++_static
+        elif [ "$BUILD_PROPERTY" = "only-builtins" ]; then
+            mkdir -p "${WORK_DIR}/build_$a-builtin"
+            cmake -B "${WORK_DIR}/build_$a-builtin" -G Ninja -S "${WORK_DIR}" "$@" \
+                -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+                -DANDROID_ABI="$a" \
+                -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
+                -DANDROID_STL=c++_static \
+                -DBUILTIN_PLUGINS=ON
+        fi
     done
 
     for a in "${TARGET_ABI_LIST[@]}"; do
-        echo "Building $a artifacts... Using $(($(nproc) - 2)) thread."
-        cmake --build "${WORK_DIR}/build_$a" -j$(($(nproc) - 2))
-        echo "$a build complete, artifacts: ${WORK_DIR}/build_$a"
-        echo "Building $a-builtin artifacts... Using $(($(nproc) - 2)) thread."
-        cmake --build "${WORK_DIR}/build_$a-builtin" -j$(($(nproc) - 2))
-        echo "$a-builtin build complete, artifacts: ${WORK_DIR}/build_$a-builtin"
+        if [ -d "${WORK_DIR}/build_$a" ]; then
+            targets+=("build_$a")
+        fi
+        if [ -d "${WORK_DIR}/build_$a-builtin" ]; then
+            targets+=("build_$a-builtin")
+        fi
+    done
+
+    for t in "${targets[@]}"; do
+        echo "Starting build of $t. Using $(($(nproc) - 2)) thread."
+        cmake --build "${WORK_DIR}/$t" -j$(($(nproc) - 2))
+        echo "$t build complete, artifacts: ${WORK_DIR}/$t"
     done
 }
 
@@ -127,6 +153,14 @@ parse_args() {
                 fi
                 shift
                 ;;
+            --no-builtin-variants)
+                BUILD_PROPERTY="no-builtins"
+                shift
+                ;;
+            --only-builtin-variants)
+                BUILD_PROPERTY="only-builtins"
+                shift
+                ;;
             -D*|-C*|-U*|-W*)
                 cmake_args+=("$1")
                 shift
@@ -152,6 +186,8 @@ Usage: $0 COMMAND [OPTIONS]
 OPTIONS:
     --arch ABI               # Specify target ABI(s)
     --working-directory PATH # Specify working directory
+    --no-builtin-variants    # Do not build builtin variants
+    --only-builtin-variants  # Only build builtin variants
     -h, --help               # Show this help message
 
 COMMANDS:
