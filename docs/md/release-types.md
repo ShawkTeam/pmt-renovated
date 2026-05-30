@@ -15,9 +15,7 @@ This project provides multiple release configurations tailored for specific Andr
 | **Dynamic**            | ARM64 (arm64-v8a) | 64-bit  | Dynamic (.so) | External plugins | Uses shared libraries. Requires `libhelper.so` and `libpartition_map.so`. |
 | **Static**             | ARM64 (arm64-v8a) | 64-bit  | Static (.a)   | External plugins | Fully self-contained executable with no external dependencies.            |
 | **Dynamic + Built-in** | ARM64 (arm64-v8a) | 64-bit  | Dynamic (.so) | Built-in plugins | Dynamic linking with plugins compiled directly into the binary.           |
-| **Static + Built-in**  | ARM64 (arm64-v8a) | 64-bit  | Static (.a)   | Built-in plugins | Fully static with built-in plugins - the most portable option.            |
 | **Dynamic**            | ARM (armeabi-v7a) | 32-bit  | Dynamic (.so) | External plugins | Uses shared libraries. Requires `libhelper.so` and `libpartition_map.so`. |
-| **Static**             | ARM (armeabi-v7a) | 32-bit  | Static (.a)   | External plugins | Fully self-contained executable with no external dependencies.            |
 | **Dynamic + Built-in** | ARM (armeabi-v7a) | 32-bit  | Dynamic (.so) | Built-in plugins | Dynamic linking with plugins compiled directly into the binary.           |
 | **Static + Built-in**  | ARM (armeabi-v7a) | 32-bit  | Static (.a)   | Built-in plugins | Fully static with built-in plugins - the most portable option.            |
 

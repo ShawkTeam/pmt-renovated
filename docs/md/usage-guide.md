@@ -7,7 +7,7 @@ This is the **renovated version** of PMT, rewritten in C++ for improved performa
 
 It supports **asynchronous operations**, allowing multiple partitions to be processed in parallel, and includes safety measures to prevent a single error from breaking the entire operation batch.
 
-**This guide is for version 1.2.0.**
+**This guide is for version 1.7.0+.**
 
 ---
 
