@@ -811,11 +811,7 @@ public:
 }; // class BasicPartition_t
 
 /// @brief Template alias for BasicPartition_t.
-#ifdef __LP64__
-using Partition_t = BasicPartition_t<uint32_t, uint64_t, std::filesystem::path>;
-#else
-using Partition_t = BasicPartition_t<uint32_t, uint32_t, std::filesystem::path>;
-#endif
+using Partition_t = BasicPartition_t<uint32_t, GenericSizeType, std::filesystem::path>;
 
 static_assert(IsValidPartitionClass<Partition_t>, "BasicPartition_t is doesn't meet requirements of minimumPartitionClass");
 
@@ -823,11 +819,7 @@ inline std::error_code make_error_code(Errors ec) { return {static_cast<int>(ec)
 
 /// @brief Progress information structure for @c ProgressRenderer.
 struct Progress_t {
-#ifdef __LP64__
-  using size_type = uint64_t;
-#else
-  using size_type = uint32_t;
-#endif
+  using size_type = GenericSizeType;
   const std::string name;            ///< Partition name.
   const size_type total;             ///< Total size.
   std::atomic<size_type> done{0};    ///< Done size.

@@ -40,6 +40,13 @@
 
 namespace PartitionMap {
 
+/// @brief Generic size type (arch-spefic).
+#ifdef __LP64__
+using GenericSizeType = uint64_t;
+#else
+using GenericSizeType = uint32_t;
+#endif
+
 /// @brief /// @brief Short names used in dimension type conversions.
 enum SizeUnit : int { BYTE = 1, KiB = 2, MiB = 3, GiB = 4 };
 
