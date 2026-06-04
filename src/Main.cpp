@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
     }
 
-    if (Flags.quietProcess) silencer.silenceAgain();
+    if (Flags.quietProcess) silencer.silence();
     if (Flags.viewLicense) {
       Out::println("Copyright (C) 2026 Yağız Zengin\n\nThis program is free software: you can redistribute it and/or modify\nit under "
                    "the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of "

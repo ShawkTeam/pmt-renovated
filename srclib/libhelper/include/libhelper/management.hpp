@@ -1016,46 +1016,68 @@ inline auto openDir(Args &&...args) noexcept {
                    })};
 }
 
-/// @brief Silence @c stdout and @c stderr.
+/// @brief Redirect stdout and stderr to /dev/null and block std::cout and std::cerr.
 class Silencer {
-  int16_t saved_stdout = -1, saved_stderr = -1, dev_null = -1;
+  std::streambuf *saved_cout = nullptr;
+  std::streambuf *saved_cerr = nullptr;
+  std::ofstream null_stream;
+  int saved_stdout_fd = -1;
+  int saved_stderr_fd = -1;
+  int null_fd = -1;
 
 public:
-  /// @brief Initially, muting is optional; it's not mandatory.
-  explicit Silencer(bool silence = true) {
-    if (silence) silenceAgain();
+  explicit Silencer(bool do_silence = true) {
+    if (do_silence) silence();
   }
 
-  /// @brief Stops silencer.
-  ~Silencer() {
-    if (saved_stdout != -1 && dev_null != -1) stop();
+  ~Silencer() { stop(); }
+
+  Silencer(const Silencer &) = delete;
+  Silencer &operator=(const Silencer &) = delete;
+
+  /// @brief Silence the output.
+  void silence() {
+    if (saved_cout || null_fd != -1) return;
+    fflush(stdout);
+    fflush(stderr);
+
+    null_stream.open("/dev/null");
+    saved_cout = std::cout.rdbuf(null_stream.rdbuf());
+    saved_cerr = std::cerr.rdbuf(null_stream.rdbuf());
+
+    null_fd = open("/dev/null", O_WRONLY);
+    if (null_fd == -1) return;
+
+    saved_stdout_fd = dup(STDOUT_FILENO);
+    saved_stderr_fd = dup(STDERR_FILENO);
+    dup2(null_fd, STDOUT_FILENO);
+    dup2(null_fd, STDERR_FILENO);
   }
 
-  /// @brief Stop silencer.
+  /// @brief Stop muting.
   void stop() {
-    if (saved_stdout == -1 && saved_stderr == -1 && dev_null == -1) return;
-    fflush(stdout);
-    fflush(stderr);
-    dup2(saved_stdout, STDOUT_FILENO);
-    dup2(saved_stderr, STDERR_FILENO);
-    close(saved_stdout);
-    close(saved_stderr);
-    close(dev_null);
-    saved_stdout = -1;
-    saved_stderr = -1;
-    dev_null = -1;
-  }
+    if (!saved_cout && null_fd == -1) return;
 
-  /// @brief (Re)start silencer.
-  void silenceAgain() {
-    if (saved_stdout != -1 && saved_stderr != -1 && dev_null != -1) return;
-    fflush(stdout);
-    fflush(stderr);
-    saved_stdout = dup(STDOUT_FILENO);
-    saved_stderr = dup(STDERR_FILENO);
-    dev_null = open("/dev/null", O_WRONLY);
-    dup2(dev_null, STDOUT_FILENO);
-    dup2(dev_null, STDERR_FILENO);
+    if (saved_cout) {
+      std::cout.rdbuf(saved_cout);
+      std::cerr.rdbuf(saved_cerr);
+      null_stream.close();
+      saved_cout = nullptr;
+      saved_cerr = nullptr;
+    }
+
+    if (null_fd != -1) {
+      fflush(stdout);
+      fflush(stderr);
+      dup2(saved_stdout_fd, STDOUT_FILENO);
+      dup2(saved_stderr_fd, STDERR_FILENO);
+      close(saved_stdout_fd);
+      close(saved_stderr_fd);
+      close(null_fd);
+      saved_stdout_fd = -1;
+      saved_stderr_fd = -1;
+      null_fd = -1;
+    }
   }
 };
 
