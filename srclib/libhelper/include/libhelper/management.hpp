@@ -1018,7 +1018,7 @@ inline auto openDir(Args &&...args) noexcept {
 
 /// @brief Silence @c stdout and @c stderr.
 class Silencer {
-  int saved_stdout = -1, saved_stderr = -1, dev_null = -1;
+  int16_t saved_stdout = -1, saved_stderr = -1, dev_null = -1;
 
 public:
   /// @brief Initially, muting is optional; it's not mandatory.
