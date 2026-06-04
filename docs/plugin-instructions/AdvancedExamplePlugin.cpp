@@ -73,22 +73,22 @@ public:
 
     // Partition selection options
     auto *partitionGroup = cmd->addOptionGroup("Partition Selection", "Select which partitions to analyze");
-    cmd->add_option("partition(s)", rawPartitions, "Specific partition name(s) to analyze", partitionGroup)->delimiter(',');
-    cmd->add_flag("-l,--logical", onlyLogical, "Analyze only logical partitions", partitionGroup);
-    cmd->add_flag("-p,--physical", onlyPhysical, "Analyze only physical partitions", partitionGroup);
+    cmd->addOption("partition(s)", rawPartitions, "Specific partition name(s) to analyze", partitionGroup)->delimiter(',');
+    cmd->addFlag("-l,--logical", onlyLogical, "Analyze only logical partitions", partitionGroup);
+    cmd->addFlag("-p,--physical", onlyPhysical, "Analyze only physical partitions", partitionGroup);
 
     // Size filtering options
     auto *sizeGroup = cmd->addOptionGroup("Size Filtering", "Filter partitions by size");
-    cmd->add_option("--min-size", minSize, "Minimum partition size (bytes)", sizeGroup)
+    cmd->addOption("--min-size", minSize, "Minimum partition size (bytes)", sizeGroup)
         ->transform(Helper::CMDLine::Transformers::AsSizeValue());
-    cmd->add_option("--max-size", maxSize, "Maximum partition size (bytes)", sizeGroup)
+    cmd->addOption("--max-size", maxSize, "Maximum partition size (bytes)", sizeGroup)
         ->transform(Helper::CMDLine::Transformers::AsSizeValue());
 
     // Output options
     auto *outputGroup = cmd->addOptionGroup("Output Options", "Control output format and content");
-    cmd->add_flag("-j,--json", jsonFormat, "Output in JSON format", outputGroup);
-    cmd->add_flag("-t,--tables", includeTables, "Include table information", outputGroup);
-    cmd->add_option("-o,--output", outputFile, "Output to file instead of stdout", outputGroup);
+    cmd->addFlag("-j,--json", jsonFormat, "Output in JSON format", outputGroup);
+    cmd->addFlag("-t,--tables", includeTables, "Include table information", outputGroup);
+    cmd->addOption("-o,--output", outputFile, "Output to file instead of stdout", outputGroup);
 
     // Sorting options
     auto *sortGroup = cmd->addOptionGroup("Sorting", "Control partition sorting");
@@ -110,7 +110,7 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION bool run() override {
     // Validate conflicting options
