@@ -39,7 +39,7 @@ void Builder::scan() {
     p /= name; // Append device.
 
     LOGI << "Silencing stdout and stderr for scanning " << std::quoted(p.string()) << "..." << std::endl << std::flush;
-    Helper::Silencer silencer;
+    Helper::Silencer silencer(true);
     if (auto gpt = std::make_shared<GPTData>(); gpt->LoadPartitions(p)) {
       auto sectorSize = gpt->GetBlockSize();
       gptDataCollection[p] = std::move(gpt); // Add to GPT data list.
@@ -53,7 +53,7 @@ void Builder::scan() {
           localPartitions.push_back(std::move(_part)); // Add to partition list.
           silencer.stop();
           LOGI << "Registered partition: " << part.GetDescription() << std::endl << std::flush;
-          silencer.silenceAgain();
+          silencer.silence();
         }
       }
     }
