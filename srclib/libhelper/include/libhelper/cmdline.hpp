@@ -15,6 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file cmdline.hpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Command line parsing library. Inspired by the CLI11 project.
+ */
+
 #ifndef LIBHELPER_CMDLINE_HPP
 #define LIBHELPER_CMDLINE_HPP
 
@@ -36,12 +42,19 @@
 
 /**
  * @namespace Helper::CMDLine
- * @brief Command line parsing library. Inspired by the CLI11 project.
+ * @brief Main namespace of command line parsing library.
  */
 namespace Helper::CMDLine {
 
 using Error = Helper::Error;
 
+/**
+ * @brief Splits a string into tokens.
+
+ * @param s String.
+ * @param delim Delimiter.
+ * @return std::vector<std::string> Tokens.
+ */
 inline std::vector<std::string> split(const std::string &s, char delim) {
   std::vector<std::string> tokens;
   std::stringstream ss(s);
@@ -51,6 +64,11 @@ inline std::vector<std::string> split(const std::string &s, char delim) {
   return tokens;
 }
 
+/**
+ * @brief Get type name of @a T .
+ * @tparam T Type.
+ * @return std::string Type name.
+ */
 template <typename T> inline std::string getTypeName() {
   using cleanType = std::decay_t<T>;
   if constexpr (std::is_same_v<cleanType, bool>) return "bool";
@@ -63,11 +81,13 @@ template <typename T> inline std::string getTypeName() {
   return typeid(T).name();
 }
 
+/// @brief Convert a string to uppercase.
 inline std::string toUpper(std::string s) {
   std::transform(s.begin(), s.end(), s.begin(), [](unsigned char c) { return std::toupper(c); });
   return s;
 }
 
+/// @brief Indent each line of a string.
 inline std::string indentLines(const std::string &s, const std::string &indent = "  ") {
   std::string result;
   std::istringstream ss(s);
@@ -77,6 +97,7 @@ inline std::string indentLines(const std::string &s, const std::string &indent =
   return result;
 }
 
+/// @brief Convert a string to a value of type @a T.
 template <typename T> T from_string(const std::string &s);
 
 template <> inline int from_string<int>(const std::string &s) { return std::stoi(s); }
@@ -123,14 +144,15 @@ template <> inline std::vector<int> from_string<std::vector<int>>(const std::str
 
 template <> inline std::vector<std::string> from_string<std::vector<std::string>>(const std::string &s) { return split(s, ','); }
 
+/// @brief Properties of a command line option.
 struct OptionProperties {
   OptionProperties() = default;
 
-  OptionProperties(OptionProperties &&other) = default;
-  OptionProperties &operator=(OptionProperties &&other) = default;
+  OptionProperties(OptionProperties &&other) = default;            ///< Move constructor.
+  OptionProperties &operator=(OptionProperties &&other) = default; ///< Move assignment.
 
-  OptionProperties(const OptionProperties &other) = default;
-  OptionProperties &operator=(const OptionProperties &other) = default;
+  OptionProperties(const OptionProperties &other) = default;            ///< Copy constructor.
+  OptionProperties &operator=(const OptionProperties &other) = default; ///> Copy assignment operator.
 
   std::vector<std::string> valid_names;
   std::function<void(const std::string &)> setter;
@@ -147,7 +169,22 @@ struct OptionProperties {
   bool is_flag = false;
   bool is_found = false;
   bool is_used_as_long = false;
+
+  /**
+   * What is the early flag?
+   * ----------------------
+   * The early flag is used to mark options that should be processed
+   * before the rest of the options. This is useful for options that
+   * need to be processed before the rest of the options.
+   */
   bool early = false;
+
+  /**
+   * What is the superior?
+   * ---------------------
+   * The logic is quite simple. If an option marked as superior is used,
+   * then everything else that is mandatory or similar is ignored.
+   */
   bool superior = false;
 
   bool operator==(const OptionProperties &other) const {
@@ -160,6 +197,7 @@ struct OptionProperties {
   bool operator!=(const OptionProperties &other) const { return !(*this == other); }
 };
 
+/// @brief Usage type for options.
 typedef enum { WITH_LONG_NAME, WITH_SHORT_NAME } UsageType;
 
 /**
@@ -225,24 +263,28 @@ inline std::function<std::string(const std::string &)> AsSizeValue(bool use_si =
  */
 namespace Checkers {
 
+/// @brief Checks if the entry exists.
 inline std::function<void(const std::string &)> Exists() {
   return [](const std::string &s) {
     if (!Helper::isExists(s)) throw Error("{}: Entry is not exists.", s).withCode(EX_USAGE);
   };
 }
 
+/// @brief Checks if the directory exists.
 inline std::function<void(const std::string &)> ExistingDirectory() {
   return [](const std::string &s) {
     if (!Helper::directoryIsExists(s)) throw Error("{}: Directory is not exists.", s).withCode(EX_USAGE);
   };
 }
 
+/// @brief Checks if the file exists.
 inline std::function<void(const std::string &)> ExistingFile() {
   return [](const std::string &s) {
     if (!Helper::fileIsExists(s)) throw Error("{}: File is not exists.", s).withCode(EX_USAGE);
   };
 }
 
+/// @brief Checks if the buffer size is within the specified range.
 template <typename T> inline std::function<void(const std::string &)> BufferSizeCheck(T min, T max) {
   return [&](const std::string &s) {
     try {
@@ -254,6 +296,7 @@ template <typename T> inline std::function<void(const std::string &)> BufferSize
   };
 }
 
+/// @brief Checks if the value is a member of the allowed list.
 inline std::function<void(const std::string &)> IsMember(std::initializer_list<std::string> allowed) {
   return [vals = std::vector<std::string>(allowed)](const std::string &s) {
     if (std::find(vals.begin(), vals.end(), s) == vals.end()) {
@@ -267,6 +310,7 @@ inline std::function<void(const std::string &)> IsMember(std::initializer_list<s
   };
 }
 
+/// @brief Checks if the value is a member of the allowed list (case-insensitive).
 inline std::function<void(const std::string &)> IsMemberIgnoreCase(std::initializer_list<std::string> allowed) {
   return [vals = std::vector<std::string>(allowed)](const std::string &s) {
     std::string lower_s = s;
@@ -295,6 +339,7 @@ inline std::function<void(const std::string &)> IsMemberIgnoreCase(std::initiali
  */
 namespace Callbacks {
 
+/// @brief A callback for viewing plugin version.
 inline std::function<void()> ViewPluginVersion(const std::string_view name, const std::string_view &ver, bool do_exit = true) {
   return [&]() {
     Out::println("{} v{}", name, ver);
@@ -304,6 +349,7 @@ inline std::function<void()> ViewPluginVersion(const std::string_view name, cons
 
 } // namespace Callbacks
 
+/// @brief A class for representing command-line options.
 class Option {
 public:
   std::unique_ptr<OptionProperties> properties;
@@ -314,9 +360,17 @@ public:
   Option(const Option &) = delete;
   Option &operator=(const Option &) = delete;
 
-  Option(Option &&other) noexcept = default;
-  Option &operator=(Option &&other) noexcept = default;
+  Option(Option &&other) noexcept = default;            ///< Move constructor.
+  Option &operator=(Option &&other) noexcept = default; ///< Move assignment operator.
 
+  /**
+   * @brief Constructs an option.
+   *
+   * @tparam T Destination type.
+   * @param spec Option specification.
+   * @param dest Destination.
+   * @param desc Description.
+   */
   template <typename T>
   explicit Option(const std::string &spec, T &dest, const std::string &desc = "") : properties(std::make_unique<OptionProperties>()) {
     properties->valid_names = split(spec, ',');
@@ -336,6 +390,12 @@ public:
     properties->option_typename = getTypeName<T>();
   }
 
+  /**
+   * @brief Construct an option (with no destination)
+   *
+   * @param spec Option spefication.
+   * @param desc Description.
+   */
   explicit Option(const std::string &spec, std::nullptr_t, const std::string &desc = "")
       : properties(std::make_unique<OptionProperties>()) {
     properties->valid_names = split(spec, ',');
@@ -355,6 +415,7 @@ public:
     properties->option_typename = getTypeName<bool>();
   }
 
+  /// @brief Do the necessary actions for the option.
   void doToDoList(std::string raw) {
     if (properties->transformer) raw = properties->transformer(raw);
     if (properties->checker) properties->checker(raw);
@@ -363,45 +424,58 @@ public:
     if (properties->callback) properties->callback();
   }
 
+  /// @brief Set the option as required.
   Option *required(bool v = true) {
     properties->is_required = v;
     return this;
   }
 
+  /// @brief Set the option as required.
   void setRequired(bool v = true) { properties->is_required = v; }
 
+  /// @brief Set the option as superior.
   Option *superior(bool v = true) {
     properties->superior = v;
     return this;
   }
 
+  /// @brief Set the option as superior.
   void setSuperior(bool v = true) { properties->superior = v; }
 
+  /// @brief Set the callback function.
   Option *callback(std::function<void()> func) {
     properties->callback = std::move(func);
     return this;
   }
 
+  /// @brief Set the callback function.
   void setCallback(std::function<void()> func) { properties->callback = std::move(func); }
 
+  /// @brief Get the callback function.
   const std::function<void()> &getCallback() const { return properties->callback; }
 
+  /// @brief Set the checker function.
   Option *check(std::function<void(const std::string &)> func) {
     properties->checker = std::move(func);
     return this;
   }
 
+  /// @brief Set the checker function.
   void setChecker(std::function<void(const std::string &)> func) { properties->checker = std::move(func); }
 
+  /// @brief Set the transformer function.
   Option *transform(std::function<std::string(const std::string &)> func) {
     properties->transformer = std::move(func);
     return this;
   }
 
+  /// @brief Set the transformer function.
   void setTransform(std::function<std::string(const std::string &)> func) { properties->transformer = std::move(func); }
 
+  /// @brief Get the transformer function.
   const std::function<std::string(const std::string &)> &getTransform() const { return properties->transformer; }
 
+  /// @brief Set the default value.
   template <typename T> Option *defaultValue(T &&v) {
     if constexpr (std::is_same_v<std::decay_t<T>, const char *> || std::is_same_v<std::decay_t<T>, char *>)
       properties->default_value = v;
@@ -411,6 +485,7 @@ public:
     return this;
   }
 
+  /// @brief Set the default value.
   template <typename T> void setDefaultValue(T &&v) {
     if constexpr (std::is_same_v<std::decay_t<T>, const char *> || std::is_same_v<std::decay_t<T>, char *>)
       properties->default_value = v;
@@ -419,57 +494,73 @@ public:
     properties->default_setter = [this]() { properties->setter(properties->default_value); };
   }
 
+  /// @brief Get the default value.
   const std::string &getDefaultValue() const { return properties->default_value; }
 
+  /// @brief Set as early flag.
   Option *early(bool v = true) {
     properties->early = v;
     return this;
   }
 
+  /// @brief Set as early flag.
   void setEarly(bool v = true) { properties->early = v; }
 
+  /// @brief Set the delimiter.
   Option *delimiter(char delim) {
     properties->option_delimiter = delim;
     return this;
   }
 
+  /// @brief Set the delimiter.
   void setDelimiter(char delim) { properties->option_delimiter = delim; }
 
+  /// @brief Get the delimiter.
   char getDelimiter() const { return properties->option_delimiter; }
 
+  /// @brief Set as flag.
   Option *isFlag(bool v = true) {
     if (properties->is_positional) throw Error("Options marked as positional cannot be flagged.").cmdlineError().withCode(EX_CONFIG);
     properties->is_flag = v;
     return this;
   }
 
+  /// @brief Get the properties.
   OptionProperties *getProperties() { return properties.get(); }
 
+  /// @brief Get the properties.
   const OptionProperties *getProperties() const { return properties.get(); }
 
+  /// @brief Get the short name.
   std::string shortName() const {
     for (auto &name : properties->valid_names)
       if (name.starts_with("-") && !name.starts_with("--")) return name;
     return {};
   }
 
+  /// @brief Get the long name.
   std::string longName() const {
     for (auto &name : properties->valid_names)
       if (name.starts_with("--")) return name;
     return {};
   }
 
+  /// @brief Get the positional name.
   std::string positionalName() const {
     if (properties->is_positional) return properties->valid_names[0];
     return {};
   }
 
+  /// @brief Get the usage type.
   UsageType getUsageType() const { return properties->is_used_as_long ? WITH_LONG_NAME : WITH_SHORT_NAME; }
 
+  /// @brief Check if the option was used.
   bool isUsed() const { return properties->is_found; }
 
+  /// @brief Check if the option is superior.
   bool isSuperior() const { return properties->superior; }
 
+  /// @brief Get the description.
   std::string getDescription() const { return properties->description; }
 
   bool operator==(const Option &other) const { return properties == other.properties; }
@@ -478,6 +569,7 @@ public:
   explicit operator bool() const { return properties->is_found; }
 };
 
+/// @brief Option group.
 class OptionGroup {
   friend class App;
   friend class Subcommand;
@@ -491,39 +583,45 @@ public:
   int max_required = -1; ///< Max usable option count (-1 = no limit)
 
   OptionGroup() = default;
-  OptionGroup(const std::string &name, const std::string &desc = "") : name(name), description(desc) {}
+  OptionGroup(const std::string &name, const std::string &desc = "") : name(name), description(desc) {} ///< Construct an option group.
 
   OptionGroup(const OptionGroup &) = delete;
   OptionGroup &operator=(const OptionGroup &) = delete;
-  OptionGroup(OptionGroup &&) = default;
-  OptionGroup &operator=(OptionGroup &&) = default;
+  OptionGroup(OptionGroup &&) = default;            ///< Move constructor.
+  OptionGroup &operator=(OptionGroup &&) = default; ///< Move assignment operator.
 
+  /// @brief Set the required options.
   OptionGroup *require(int min, int max = -1) {
     min_required = min;
     max_required = max;
     return this;
   }
 
+  /// @brief Set the required options.
   OptionGroup *requireExactly(int n) {
     min_required = n;
     max_required = n;
     return this;
   }
 
+  /// @brief Set the required options.
   OptionGroup *requireAtMostOne() {
     min_required = 0;
     max_required = 1;
     return this;
   }
 
+  /// @brief Set the required options.
   OptionGroup *requireAtLeastOne() {
     min_required = 1;
     max_required = -1;
     return this;
   }
 
+  /// @brief Get the options.
   const std::vector<Option *> &getOptions() const { return group_options; }
 
+  /// @brief Validate the options.
   void validate() const {
     if (min_required <= 0 && max_required < 0) return; // No rule.
 
@@ -543,6 +641,7 @@ public:
   }
 };
 
+/// @brief Subcommand.
 class Subcommand {
   friend class App;
 
@@ -556,32 +655,36 @@ public:
   std::vector<std::unique_ptr<OptionGroup>> groups;
 
   Subcommand() = default;
-  Subcommand(const std::string &name, const std::string desc = "") : name(name), description(desc) {}
+  Subcommand(const std::string &name, const std::string desc = "") : name(name), description(desc) {} ///< Construct a subcommand.
 
   Subcommand(const Subcommand &) = delete;
   Subcommand &operator=(const Subcommand &) = delete;
 
-  Subcommand(Subcommand &&other) = default;
-  Subcommand &operator=(Subcommand &&other) = default;
+  Subcommand(Subcommand &&other) = default;            ///< Move constructor.
+  Subcommand &operator=(Subcommand &&other) = default; ///< Move assignment operator.
 
+  /// @brief Add an option.
   template <typename T> Option *addOption(const std::string &spec, T &dest, const std::string &desc = "") {
     auto arg = std::make_unique<Option>(spec, dest, desc);
     options.push_back(std::move(arg));
     return options.back().get();
   }
 
+  /// @brief Add an option to a group.
   template <typename T> Option *addOption(const std::string &spec, T &dest, const std::string &desc, OptionGroup *group) {
     auto *opt = addOption(spec, dest, desc);
     if (group) group->group_options.push_back(opt);
     return opt;
   }
 
+  /// @brief Add an option.
   void addOption(Option *orig) {
     if (orig == nullptr) throw Error("Input option pointer is null.").cmdlineError().withCode(EX_CONFIG);
     std::unique_ptr<Option> arg(orig);
     options.push_back(std::move(arg));
   }
 
+  /// @brief Add a flag.
   template <typename T> Option *addFlag(const std::string &spec, T &dest, const std::string &desc = "") {
     auto arg = std::make_unique<Option>(spec, dest, desc);
     arg->getProperties()->is_flag = true;
@@ -589,6 +692,7 @@ public:
     return options.back().get();
   }
 
+  /// @brief Add a flag.
   Option *addFlag(const std::string &spec, std::nullptr_t, const std::string &desc = "") {
     auto arg = std::make_unique<Option>(spec, nullptr, desc);
     arg->getProperties()->is_flag = true;
@@ -596,18 +700,21 @@ public:
     return options.back().get();
   }
 
+  /// @brief Add a flag to a group.
   Option *addFlag(const std::string &spec, std::nullptr_t, const std::string &desc, OptionGroup *group) {
     auto *opt = addFlag(spec, nullptr, desc);
     if (group) group->group_options.push_back(opt);
     return opt;
   }
 
+  /// @brief Add a flag to a group.
   template <typename T> Option *addFlag(const std::string &spec, T &dest, const std::string &desc, OptionGroup *group) {
     auto *opt = addFlag(spec, dest, desc);
     if (group) group->group_options.push_back(opt);
     return opt;
   }
 
+  /// @brief Add an option.
   void addFlag(Option *orig) {
     if (orig == nullptr) throw Error("Input option pointer is null.").cmdlineError().withCode(EX_CONFIG);
     orig->getProperties()->is_flag = true;
@@ -615,43 +722,54 @@ public:
     options.push_back(std::move(arg));
   }
 
+  /// @brief Add an option group.
   OptionGroup *addOptionGroup(const std::string &_name, const std::string &desc = "") {
     auto grp = std::make_unique<OptionGroup>(_name, desc);
     groups.push_back(std::move(grp));
     return groups.back().get();
   }
 
+  /// @brief Set the footer.
   Subcommand *footer(const std::string &s) {
     _footer = s;
     return this;
   }
 
+  /// @brief Set the footer.
   void setFooter(const std::string &s) { _footer = s; }
 
+  /// @brief Validate the groups.
   void validateGroups() const {
     for (const auto &grp : groups)
       grp->validate();
   }
 
+  /// @brief Check if the subcommand contains a superior option.
   bool containsSuperiorOption() const {
     for (const auto &arg : options)
       if (arg->getProperties()->superior) return true;
     return false;
   }
 
+  /// @brief Check if any superior option is used.
   bool anySuperiorIsUsed() const {
     for (const auto &arg : options)
       if (arg->getProperties()->superior && arg->isUsed()) return true;
     return false;
   }
 
+  /// @brief Check if the subcommand is used.
   bool isUsed() const { return is_found; }
 
+  /// @brief Get the description.
   std::string getDescription() const { return description; }
+  /// @brief Get the footer.
   std::string getFooter() const { return _footer; }
 
+  /// @brief Get the options.
   std::vector<std::unique_ptr<Option>> &getOptions() { return options; }
 
+  /// @brief Get the options.
   const std::vector<std::unique_ptr<Option>> &getOptions() const { return options; }
 
   bool operator==(const Subcommand &other) const {
@@ -663,6 +781,7 @@ public:
   explicit operator bool() const { return is_found; }
 };
 
+/// @brief A command-line application.
 class App {
   std::string name;
   std::string cmd_name;
@@ -676,6 +795,7 @@ class App {
   std::vector<std::unique_ptr<Option>> options;
   std::vector<std::unique_ptr<OptionGroup>> groups;
 
+  /// @brief Find an option by name.
   Option *findOption(const std::string &_name, const std::vector<std::unique_ptr<Option>> &arg_list) {
     for (const auto &arg : arg_list) {
       auto props = arg->getProperties();
@@ -686,6 +806,7 @@ class App {
     return nullptr;
   }
 
+  /// @brief Find a positional option by index.
   Option *getPositionalOption(size_t index, const std::vector<std::unique_ptr<Option>> &arg_list) {
     size_t count = 0;
     for (const auto &arg : arg_list) {
@@ -699,6 +820,7 @@ class App {
     return nullptr;
   }
 
+  /// @brief Print an option in a formatted way.
   void printAlignedOption(const std::string &left_part, const std::string &_description) {
     const size_t indent_width = 8;
     const size_t max_line_width = 75;
@@ -730,34 +852,40 @@ class App {
 public:
   App() = default;
   App(const std::string &name, const std::string &desc = "")
-      : name(name), cmd_name(name), description(desc), subcmd_required(false), auto_help_enabled(true) {}
+      : name(name), cmd_name(name), description(desc), subcmd_required(false), auto_help_enabled(true) {
+  } ///< Construct a new App object.
 
-  App(App &&other) = default;
-  App &operator=(App &&other) = default;
+  App(App &&other) = default;            ///< Move constructor.
+  App &operator=(App &&other) = default; ///< Move assignment operator.
 
   App(const App &) = delete;
   App &operator=(const App &) = delete;
 
+  /// @brief Set auto help.
   void setAutoHelp(bool enabled) { auto_help_enabled = enabled; }
 
+  /// @brief Add an option.
   template <typename T> Option *addOption(const std::string &spec, T &dest, const std::string &desc = "") {
     auto arg = std::make_unique<Option>(spec, dest, desc);
     options.push_back(std::move(arg));
     return options.back().get();
   }
 
+  /// @brief Add an option to a group.
   template <typename T> Option *addOption(const std::string &spec, T &dest, const std::string &desc, OptionGroup *group) {
     auto *opt = addOption(spec, dest, desc);
     if (group) group->group_options.push_back(opt);
     return opt;
   }
 
+  /// @brief Add an option.
   void addOption(Option *orig) {
     if (orig == nullptr) throw Error("Input option pointer is null.").cmdlineError().withCode(EX_CONFIG);
     std::unique_ptr<Option> arg(orig);
     options.push_back(std::move(arg));
   }
 
+  /// @brief Add a flag.
   template <typename T> Option *addFlag(const std::string &spec, T &dest, const std::string &desc = "") {
     auto arg = std::make_unique<Option>(spec, dest, desc);
     arg->getProperties()->is_flag = true;
@@ -765,6 +893,7 @@ public:
     return options.back().get();
   }
 
+  /// @brief Add a flag.
   Option *addFlag(const std::string &spec, std::nullptr_t, const std::string &desc = "") {
     auto arg = std::make_unique<Option>(spec, nullptr, desc);
     arg->getProperties()->is_flag = true;
@@ -772,18 +901,21 @@ public:
     return options.back().get();
   }
 
+  /// @brief Add a flag to a group.
   Option *addFlag(const std::string &spec, std::nullptr_t, const std::string &desc, OptionGroup *group) {
     auto *opt = addFlag(spec, nullptr, desc);
     if (group) group->group_options.push_back(opt);
     return opt;
   }
 
+  /// @brief Add a flag to a group.
   template <typename T> Option *addFlag(const std::string &spec, T &dest, const std::string &desc, OptionGroup *group) {
     auto *opt = addFlag(spec, dest, desc);
     if (group) group->group_options.push_back(opt);
     return opt;
   }
 
+  /// @brief Add a flag.
   void addFlag(Option *orig) {
     if (orig == nullptr) throw Error("Input option pointer is null.").cmdlineError().withCode(EX_CONFIG);
     orig->getProperties()->is_flag = true;
@@ -791,18 +923,21 @@ public:
     options.push_back(std::move(arg));
   }
 
+  /// @brief Add a subcommand.
   Subcommand *addSubcommand(const std::string &spec, const std::string &desc = "") {
     auto cmd = std::make_unique<Subcommand>(spec, desc);
     subcommands.push_back(std::move(cmd));
     return subcommands.back().get();
   }
 
+  /// @brief Add a subcommand.
   void addSubcommand(Subcommand *orig) {
     if (orig == nullptr) throw Error("Input subcommand pointer is null.").cmdlineError().withCode(EX_CONFIG);
     std::unique_ptr<Subcommand> arg(orig);
     subcommands.push_back(std::move(arg));
   }
 
+  /// @brief Get a subcommand.
   Subcommand *getSubcommand(const std::string &_name) {
     for (auto &subcmd : subcommands) {
       if (subcmd->name == _name) {
@@ -812,6 +947,7 @@ public:
     return nullptr;
   }
 
+  /// @brief Get the used subcommand name.
   std::optional<std::string> getUsedSubcommandName() {
     for (const auto &subcmd : subcommands) {
       if (subcmd->isUsed()) {
@@ -821,16 +957,20 @@ public:
     return std::nullopt;
   }
 
+  /// @brief Add an option group.
   OptionGroup *addOptionGroup(const std::string &_name, const std::string &desc = "") {
     auto grp = std::make_unique<OptionGroup>(_name, desc);
     groups.push_back(std::move(grp));
     return groups.back().get();
   }
 
+  /// @brief Set license text.
   void setLicenseString(const std::string &s) { license_string = s; }
 
+  /// @brief Set fallback mode.
   void setFallback(bool v = true) { fallback = v; }
 
+  /// @brief Print help.
   void help(const Subcommand *subcmd = nullptr) {
     if (subcmd) {
       std::cout << "Usage: " << cmd_name << " " << subcmd->name;
@@ -983,6 +1123,7 @@ public:
     }
   }
 
+  /// @brief Parse early arguments.
   void parse_earlies(int argc, char *argv[], bool no_unknown_arg_error = true) {
     for (size_t i = 0; i < argc; ++i) {
       const std::string &token = argv[i];
@@ -1042,6 +1183,7 @@ public:
     }
   }
 
+  /// @brief Parse arguments.
   void parse(int argc, char *argv[]) {
     cmd_name = argv[0];
     std::vector<std::string> args;
@@ -1156,6 +1298,7 @@ public:
     }
   }
 
+  /// @brief Check if any option is superior.
   bool containsSuperiorOption() const {
     for (const auto &arg : options)
       if (arg->getProperties()->superior) return true;
@@ -1164,6 +1307,7 @@ public:
     return false;
   }
 
+  /// @brief Check if any option is used.
   bool anySuperiorIsUsed() const {
     for (const auto &arg : options)
       if (arg->getProperties()->superior && arg->isUsed()) return true;
