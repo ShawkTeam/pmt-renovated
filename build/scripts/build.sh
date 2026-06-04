@@ -181,7 +181,7 @@ parse_args() {
 
 show_help() {
   cat << EOF
-Usage: $0 COMMAND [OPTIONS]
+Usage: $THIS COMMAND [OPTIONS]
 
 OPTIONS:
     --arch ABI               # Specify target ABI(s)
@@ -203,13 +203,13 @@ HINTS:
     Use --arch to override target ABI list (default: ${TARGET_ABI_LIST[*]})
 
 EXAMPLES:
-    $0 build                                                                    # Build PMT with defaults
-    $0 build --arch arm64-v8a --working-directory \$PWD/other-pmt-renovated-src # Build for arm64-v8a with custom working directory
-    $0 rebuild --arch armeabi-v7a                                               # Build for armeabi-v7a
-    $0 build --arch arm64-v8a --arch armeabi-v7a                                # Build for arm64-v8a and armeabi-v7a
-    $0 clean                                                                    # Clean build artifacts
-    $0 only-configure-git-hooks                                                 # Configure git hooks (only)
-    $0 cleanup-generated-docs                                                   # Cleanup generated doxgen documentation
+    $THIS build                                                                    # Build PMT with defaults
+    $THIS build --arch arm64-v8a --working-directory \$PWD/other-pmt-renovated-src # Build for arm64-v8a with custom working directory
+    $THIS rebuild --arch armeabi-v7a                                               # Build for armeabi-v7a
+    $THIS build --arch arm64-v8a --arch armeabi-v7a                                # Build for arm64-v8a and armeabi-v7a
+    $THIS clean                                                                    # Clean build artifacts
+    $THIS only-configure-git-hooks                                                 # Configure git hooks (only)
+    $THIS cleanup-generated-docs                                                   # Cleanup generated doxgen documentation
 EOF
 }
 

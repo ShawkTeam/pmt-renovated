@@ -93,7 +93,7 @@ cleanup() {
 
 show_help() {
 	cat << EOF
-Usage: $0 COMMAND [OPTIONS]
+Usage: $THIS COMMAND [OPTIONS]
 
 COMMANDS:
     install [TAG]      Install PMT. If TAG is not specified, uses the latest release.
@@ -102,11 +102,11 @@ COMMANDS:
     help               Show this help message.
 
 EXAMPLES:
-    $0 install                    # Install latest release
-    $0 install v20260207          # Install specific tag/release
-    $0 reinstall                  # Reinstall latest release
-    $0 reinstall v20260115        # Reinstall specific tag/release
-    $0 uninstall                  # Uninstall PMT
+    $THIS install                    # Install latest release
+    $THIS install v20260207          # Install specific tag/release
+    $THIS reinstall                  # Reinstall latest release
+    $THIS reinstall v20260115        # Reinstall specific tag/release
+    $THIS uninstall                  # Uninstall PMT
 
 VARIANTS:
     The script automatically detects your architecture (arm64-v8a or armeabi-v7a).
