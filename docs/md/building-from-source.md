@@ -119,7 +119,7 @@ git tag --sort=-version:refname
 
 PMT uses a sophisticated build system with the following components:
 
-### Builder & Helper Scripts (`build/scripts/`)
+### ClassicPartitionData & Helper Scripts (`build/scripts/`)
 
 #### `build.sh` - Main Build Script
 - **Purpose**: Orchestrates the entire build process
@@ -132,7 +132,7 @@ PMT uses a sophisticated build system with the following components:
 - **Features**: Directory exclusion support, file change detection
 
 #### `android_genrule.sh` - Build Information Generation
-- **Purpose**: Generates build metadata headers
+- **Purpose**: Generates build lpMetadata headers
 - **Information**: Version, build date, compiler info, commit ID
 
 ### CMake Configuration (`build/cmake/`)
@@ -277,7 +277,7 @@ The build system automatically configures git hooks for:
 
 ### Build Information
 
-Build metadata is automatically generated and includes:
+Build lpMetadata is automatically generated and includes:
 - Version from CMakeLists.txt
 - Build date and time
 - Compiler information

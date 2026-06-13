@@ -74,16 +74,18 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   /**
    * @brief Async worker function that processes a single partition.
    */
   PLUGIN_SECTION AsyncResult_t processPartitionAsync(const std::string &partitionName) const {
+    auto pTab = Flags.partitionTables.first.get();
+    auto dTab = Flags.partitionTables.second.get();
     LOGNF(PLUGIN, logPath, INFO) << "Processing partition: " << partitionName << std::endl;
 
     // Check if partition exists
-    if (!Tables.hasPartition(partitionName) && !Tables.hasLogicalPartition(partitionName)) {
+    if (!pTab->hasPartition(partitionName) && !dTab->hasPartition(partitionName)) {
       return AsyncResult_t::Error("Partition not found: {}", partitionName);
     }
 
@@ -93,22 +95,28 @@ public:
     }
 
     // Get partition information
-    if (Tables.hasPartition(partitionName)) {
-      const auto &partition = Tables.partitionWithDupCheck(partitionName)->get();
+    if (pTab->hasPartition(partitionName)) {
+      const auto &partition = pTab->partitionWithDupCheck(partitionName)->get();
       return AsyncResult_t::Success("Processed partition: {} (size: {})", partitionName,
                                     partition.formattedSizeString(PartitionMap::MiB, true));
     } else {
-      const auto &partition = Tables.partition(partitionName)->get();
+      const auto &partition = dTab->partition(partitionName)->get();
       return AsyncResult_t::Success("Processed logical partition: {} (size: {})", partitionName,
                                     partition.formattedSizeString(PartitionMap::MiB, true));
     }
   }
 
   PLUGIN_SECTION bool run() override {
+    auto pTab = Flags.partitionTables.first.get();
+    auto dTab = Flags.partitionTables.second.get();
+
     if (rawPartitions.empty()) {
       // If no partitions specified, process all partitions
-      auto allParts = Tables.allPartitions();
-      for (const auto &part : allParts)
+      auto pParts = pTab->partitions();
+      auto dParts = dTab->partitions();
+      for (const auto &part : pParts)
+        partitions.push_back(part.get().name());
+      for (const auto &part : dParts)
         partitions.push_back(part.get().name());
     } else
       partitions = Helper::CMDLine::split(rawPartitions, ',');

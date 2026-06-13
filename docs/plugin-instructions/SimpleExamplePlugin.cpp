@@ -69,18 +69,21 @@ public:
     return true;
   }
 
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION bool run() override {
+    auto pTab = Flags.partitionTables.first.get();
+    auto dTab = Flags.partitionTables.second.get();
+
     // Check if partition exists
-    if (!Tables.hasPartition(partitionName) && !Tables.hasLogicalPartition(partitionName)) {
+    if (!pTab->hasPartition(partitionName) && !dTab->hasPartition(partitionName)) {
       Out::println("Error: Partition '{}' not found!", partitionName);
       return false;
     }
 
     // Get partition information
-    if (Tables.hasPartition(partitionName)) {
-      const auto &partition = Tables.partitionWithDupCheck(partitionName)->get();
+    if (pTab->hasPartition(partitionName)) {
+      const auto &partition = pTab->partitionWithDupCheck(partitionName)->get();
 
       Out::println("=== Partition Information ===");
       Out::println("Name: {}", partition.name());
@@ -92,7 +95,7 @@ public:
       Out::println("Path: {}", partition.absolutePath().string());
 
     } else {
-      const auto &partition = Tables.partition(partitionName)->get();
+      const auto &partition = dTab->partition(partitionName)->get();
 
       Out::println("=== Logical Partition Information ===");
       Out::println("Name: {}", partition.name());

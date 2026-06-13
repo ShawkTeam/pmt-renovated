@@ -223,7 +223,7 @@ pmt info partition(s) [OPTIONS]
 - `get-physicals` → Information only for physical partitions
 
 **Technical Details:**
-- Comprehensive partition metadata display
+- Comprehensive partition lpMetadata display
 - JSON output with customizable field names and formatting
 - Multiple size unit support
 - Batch processing capabilities

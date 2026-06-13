@@ -74,7 +74,7 @@ The plugin follows this basic structure:
 - `onUnload()` - Clean up resources
 - `used()` - Check if the plugin was invoked
 - `run()` - Main plugin execution logic
-- `getName()`/`getVersion()` - Plugin metadata
+- `getName()`/`getVersion()` - Plugin lpMetadata
 
 ### Learning Points
 

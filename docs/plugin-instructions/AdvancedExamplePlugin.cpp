@@ -24,6 +24,7 @@
 #include <chrono>
 #include <future>
 #include <map>
+#include <algorithm>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 #include <nlohmann/json.hpp>
@@ -144,21 +145,23 @@ private:
    */
   std::vector<PartitionMap::Partition_t> getPartitionList() {
     std::vector<PartitionMap::Partition_t> result;
+    auto pTab = Flags.partitionTables.first.get();
+    auto dTab = Flags.partitionTables.second.get();
 
     if (!partitions.empty()) {
       // Use specified partitions
       for (const auto &name : partitions) {
-        if (Tables.hasPartition(name)) {
-          result.push_back(Tables.partitionWithDupCheck(name)->get());
-        } else if (Tables.hasLogicalPartition(name)) {
-          result.push_back(Tables.partition(name)->get());
+        if (pTab->hasPartition(name)) {
+          result.push_back(pTab->partitionWithDupCheck(name)->get());
+        } else if (dTab->hasPartition(name)) {
+          result.push_back(dTab->partition(name)->get());
         } else {
           throw PluginError("Partition not found: {}", name);
         }
       }
     } else if (onlyLogical) {
       // Use only logical partitions
-      auto logicalParts = Tables.logicalPartitions();
+      auto logicalParts = dTab->partitions();
       for (const auto &part : logicalParts) {
         result.push_back(part.get());
       }
@@ -170,10 +173,12 @@ private:
       }
     } else {
       // Use all partitions
-      auto allParts = Tables.allPartitions();
-      for (const auto &part : allParts) {
+      auto pParts = pTab->partitions();
+      auto dParts = dTab->partitions();
+      for (const auto &part : pParts)
         result.push_back(part.get());
-      }
+      for (const auto &part : dParts)
+        result.push_back(part.get());
     }
 
     return result;
