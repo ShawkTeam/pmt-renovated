@@ -25,6 +25,7 @@ set(LIBCRYPTO_UTILS ${CMAKE_CURRENT_SOURCE_DIR}/core/libcrypto_utils)
 set(LIBSPARSE ${CMAKE_CURRENT_SOURCE_DIR}/core/libsparse)
 set(LIBEXT4_UTILS ${CMAKE_CURRENT_SOURCE_DIR}/extras/ext4_utils)
 set(LIBLP ${CMAKE_CURRENT_SOURCE_DIR}/core/fs_mgr/liblp)
+set(PATCHES ${CMAKE_CURRENT_SOURCE_DIR}/patches)
 
 # Include BoringSSL's pre-created source list (for android)
 set(BORINGSSL_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/boringssl/)
@@ -73,19 +74,19 @@ set(LIBBASE_SOURCES
         ${LIBBASE}/cmsg.cpp
         ${LIBBASE}/file.cpp
         ${LIBBASE}/hex.cpp
-        ${LIBBASE}/logging.cpp
         ${LIBBASE}/mapped_file.cpp
         ${LIBBASE}/parsebool.cpp
         ${LIBBASE}/parsenetaddress.cpp
         ${LIBBASE}/posix_strerror_r.cpp
         ${LIBBASE}/process.cpp
-        ${LIBBASE}/properties.cpp
         ${LIBBASE}/result.cpp
         ${LIBBASE}/stringprintf.cpp
         ${LIBBASE}/strings.cpp
         ${LIBBASE}/threads.cpp
         ${LIBBASE}/test_utils.cpp
         ${LIBBASE}/errors_unix.cpp
+        ${PATCHES}/libbase/properties.cpp
+        ${PATCHES}/libbase/logging.cpp
         ${LIBCUTILS}/android_get_control_file.cpp
 )
 
