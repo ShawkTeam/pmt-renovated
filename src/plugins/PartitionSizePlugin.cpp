@@ -84,17 +84,23 @@ public:
       return true;
     };
 
-    if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
-      Tables.forEach(getter);
-    else if (partitions.back() == "get-logicals")
-      Tables.forEachLogicalPartitions(getter);
+    auto pTab = GET_PARTITION_TABLE_DATA_PTR();
+    auto dTab = GET_DYNAMIC_TABLE_DATA_PTR();
+
+    if (partitions.back() == "get-all" || partitions.back() == "getvar-all") {
+      pTab->forEach(getter);
+      dTab->forEach(getter);
+    } else if (partitions.back() == "get-logicals")
+      dTab->forEach(getter);
     else if (partitions.back() == "get-physicals")
-      Tables.forEachPartitions(getter);
+      pTab->forEach(getter);
     else {
       for (const auto &partition : partitions) {
-        if (!Tables.hasPartition(partition)) throw Error("Couldn't find partition: %s", partition.c_str());
+        if (!pTab->hasPartition(partition) && !dTab->hasPartition(partition))
+          throw Error("Couldn't find partition: %s", partition.c_str());
       }
-      Tables.forEachFor(partitions, getter);
+      pTab->forEachFor(partitions, getter);
+      dTab->forEachFor(partitions, getter);
     }
 
     return true;

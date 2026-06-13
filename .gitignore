@@ -6,3 +6,6 @@ build_*
 
 # Don't add generated documentations
 docs/html
+
+# Don't add IDE files.
+.idea

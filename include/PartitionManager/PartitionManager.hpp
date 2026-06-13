@@ -47,8 +47,10 @@ class BasicFlags {
 public:
   BasicFlags();
 
-  std::unique_ptr<PartitionMap::Builder> partitionTables; ///< Partition tables.
-  std::string logFile;                                    ///< Log file path.
+  std::pair<std::unique_ptr<PartitionMap::PartitionTableData>,
+            std::unique_ptr<PartitionMap::DynamicTableData>>
+      partitionTables; ///< Partition tables.
+  std::string logFile; ///< Log file path.
 
   bool onLogical;    ///< Only process logical partitions.
   bool quietProcess; ///< Turn on/off quiet processing.

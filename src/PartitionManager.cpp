@@ -27,7 +27,8 @@ BasicFlags::BasicFlags()
     : logFile(Helper::Logger::Properties::FILE), onLogical(false), quietProcess(false), verboseMode(false), viewVersion(false),
       viewLicense(false), forceProcess(false), noWorkOnUsed(false) {
   try {
-    partitionTables = std::make_unique<PartitionMap::Builder>();
+    partitionTables.first = std::make_unique<PartitionMap::PartitionTableData>();
+    partitionTables.second = std::make_unique<PartitionMap::DynamicTableData>();
   } catch (...) {
   }
 }

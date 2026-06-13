@@ -33,8 +33,10 @@
 
 // clang-format off
 #define Flags          (*flags) ///< Flags pointer
-#define Tables         (*Flags.partitionTables) ///< Partition tables pointer
+#define Tables         (*(Flags.partitionTables.first)) ///< Partition tables pointer
 #define DEFAULT_PLUGIN_CONSTRUCTOR : flags(nullptr) {} ///< Recommended plugin constructor boddy. @deprecated Don't use this!
+#define GET_PARTITION_TABLE_DATA_PTR Flags.partitionTables.first.get
+#define GET_DYNAMIC_TABLE_DATA_PTR Flags.partitionTables.second.get
 
 #define PLUGIN_END_WITH_RENDERER(r, m) \
   if (r) { r->start(); } \
@@ -475,9 +477,9 @@ inline auto processCommandLine = [](std::vector<std::string> &vec1, std::vector<
 };
 
 /// @brief Setting ups correct buffer size for input entry.
-inline auto setupBufferSize = [](uint64_t &size, const std::filesystem::path &entry, PartitionMap::Builder &builder) {
-  if (builder.hasPartition(entry.filename())) {
-    const uint64_t psize = builder.partition(entry.filename().string())->get().size();
+inline auto setupBufferSize = [](uint64_t &size, const std::filesystem::path &entry, PartitionMap::BaseTableData *table) {
+  if (table->hasPartition(entry.filename())) {
+    const uint64_t psize = table->partition(entry.filename().string())->get().size();
 
     if (psize % size != 0) {
       Out::println("{}WARNING{}: Specified buffer size is invalid for {}! Using "
