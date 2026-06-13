@@ -75,23 +75,26 @@ public:
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &imageName,
                                         PartitionMap::ProgressRenderer *renderer) const {
     if (!Helper::fileIsExists(imageName)) return AsyncResult_t::Error("Couldn't find image file: {}", imageName);
-    if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
 
-    auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed)->get();
-    if (partition.size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
+    std::optional<PartitionMap::TableType> tType;
+    auto *table = getCorrectTableObj(partitionName, Flags.partitionTables.first.get(), Flags.partitionTables.second.get(), tType);
+
+    PartitionMap::Partition_t *partition = setupPartition(partitionName, table);
+    if (!partition) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
+    if (partition->size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
 
     const uint64_t imageSize = Helper::fileSize(imageName);
     if (imageSize == 0) return AsyncResult_t::Error("Image file {} is empty", imageName);
 
-    const uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition.size()));
+    const uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition->size()));
 
-    if (imageSize > partition.size())
+    if (imageSize > partition->size())
       return AsyncResult_t::Error("Image file {} ({} bytes) is larger than partition {} ({} bytes)", imageName, imageSize,
-                                  partitionName, partition.size());
+                                  partitionName, partition->size());
 
     LOGNF(PLUGIN, logPath, INFO) << "Flashing " << imageName << " to " << partitionName << std::endl;
 
-    if (Flags.onLogical && !Tables.isLogical(partitionName)) {
+    if (Flags.onLogical && tType != PartitionMap::DYNAMIC) {
       if (Flags.forceProcess)
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " exists but is not logical. Ignoring (from --force, -f)."
                                         << std::endl;
@@ -102,7 +105,7 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
 
     std::shared_ptr<PartitionMap::Progress_t> progress;
-    if (renderer) progress = renderer->add(partitionName, partition.size());
+    if (renderer) progress = renderer->add(partitionName, partition->size());
 
     std::error_code ec;
     PartitionMap::Partition_t::IOCallback cb = nullptr;
@@ -110,7 +113,7 @@ public:
       cb = [&progress](uint64_t done, uint64_t) { progress->done.store(done, std::memory_order_relaxed); };
     }
 
-    if (!partition.write(ec, imageName, buf, cb)) {
+    if (!partition->write(ec, imageName, buf, cb)) {
       if (progress) progress->failed.store(true, std::memory_order_relaxed);
       return AsyncResult_t::Error("Failed to write image {} to partition {}: {}", imageName, partitionName, ec.message());
     }

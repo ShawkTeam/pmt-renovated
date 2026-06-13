@@ -59,10 +59,12 @@ public:
 
   PLUGIN_SECTION bool run() override {
     for (const auto &partition : partitions) {
-      if (!Tables.hasPartition(partition)) throw Error("Couldn't find partition: {}", partition);
+      std::optional<PartitionMap::TableType> tType;
+      auto *table = getCorrectTableObj(partition, Flags.partitionTables.first.get(), Flags.partitionTables.second.get(), tType);
+      const PartitionMap::Partition_t *part = setupPartition(partition, table);
 
-      auto &part = Tables.partitionWithDupCheck(partition, Flags.noWorkOnUsed)->get();
-      if (Flags.onLogical && !part.isLogicalPartition()) {
+      if (!tType && !part) throw Error("Couldn't find partition: {}", partition);
+      if (Flags.onLogical && !part->isLogicalPartition()) {
         if (Flags.forceProcess)
           LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
                                           << std::endl;
@@ -71,9 +73,9 @@ public:
       }
 
       if (byName)
-        Out::println("{}", part.pathByName().string());
+        Out::println("{}", part->pathByName().string());
       else
-        Out::println("{}", part.absolutePath().string());
+        Out::println("{}", part->absolutePath().string());
     }
 
     return true;

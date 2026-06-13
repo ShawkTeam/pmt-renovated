@@ -69,12 +69,14 @@ public:
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName) const {
-    if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
+    std::optional<PartitionMap::TableType> tType;
+    auto *table = getCorrectTableObj(partitionName, Flags.partitionTables.first.get(), Flags.partitionTables.second.get(), tType);
+    const PartitionMap::Partition_t *partition = setupPartition(partitionName, table);
 
-    const auto &partition = Tables.partitionWithDupCheck(partitionName, Flags.noWorkOnUsed)->get();
-    if (partition.size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
+    if (!partition) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
+    if (partition->size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
 
-    if (Flags.onLogical && !Tables.isLogical(partitionName)) {
+    if (Flags.onLogical && tType != PartitionMap::DYNAMIC) {
       if (Flags.forceProcess)
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " exists but is not logical. Ignoring (from --force, -f)."
                                         << std::endl;
@@ -82,12 +84,12 @@ public:
         return AsyncResult_t::Error("Used --logical (-l) flag but partition is not logical: {}", partitionName);
     }
 
-    uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition.size()));
-    setupBufferSize(buf, partitionName, Tables);
+    uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition->size()));
+    setupBufferSize(buf, partitionName, table);
 
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
 
-    auto pfd = Helper::UniqueFD(partition.absolutePath(), O_WRONLY);
+    auto pfd = Helper::UniqueFD(partition->absolutePath(), O_WRONLY);
     if (!pfd) return AsyncResult_t::Error("Can't open partition {}: {}", partitionName, strerror(errno));
 
     if (!Flags.forceProcess) {
@@ -103,7 +105,7 @@ public:
     std::memset(buffer.get(), 0, buf);
 
     ssize_t bytesWritten = 0;
-    const uint64_t partitionSize = partition.size();
+    const uint64_t partitionSize = partition->size();
 
     while (bytesWritten < partitionSize) {
       size_t toWrite = std::min<uint64_t>(buf, partitionSize - bytesWritten);

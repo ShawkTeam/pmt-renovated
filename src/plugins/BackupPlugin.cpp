@@ -76,16 +76,18 @@ public:
 
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &outputName,
                                         PartitionMap::ProgressRenderer *renderer) const {
-    if (!Tables.hasPartition(partitionName)) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
+    std::optional<PartitionMap::TableType> tType;
+    auto *table = getCorrectTableObj(partitionName, Flags.partitionTables.first.get(), Flags.partitionTables.second.get(), tType);
+    const PartitionMap::Partition_t *partition = setupPartition(partitionName, table);
 
-    const auto &partition = Tables.partitionWithDupCheck(partitionName)->get();
-    if (partition.size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
+    if (!partition) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
+    if (partition->size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
 
-    const uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition.size()));
+    const uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition->size()));
 
     LOGNF(PLUGIN, logPath, INFO) << "Backing up " << partitionName << " to " << outputName << std::endl;
 
-    if (Flags.onLogical && !Tables.isLogical(partitionName)) {
+    if (Flags.onLogical && tType != PartitionMap::DYNAMIC) {
       if (Flags.forceProcess)
         LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
                                         << std::endl;
@@ -100,7 +102,7 @@ public:
     LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for backing up " << partitionName << "): " << buf << std::endl;
 
     std::shared_ptr<PartitionMap::Progress_t> progress;
-    if (renderer) progress = renderer->add(partitionName, partition.size());
+    if (renderer) progress = renderer->add(partitionName, partition->size());
 
     std::error_code ec;
     PartitionMap::Partition_t::IOCallback cb = nullptr;
@@ -108,16 +110,16 @@ public:
       cb = [&progress](uint64_t done, uint64_t) { progress->done.store(done, std::memory_order_relaxed); };
     }
 
-    if (!partition.dump(ec, outputName, buf, cb)) {
+    if (!partition->dump(ec, outputName, buf, cb)) {
       if (progress) progress->failed.store(true, std::memory_order_relaxed);
       return AsyncResult_t::Error("Failed to write partition {} to image {}: {}", partitionName, outputName, ec.message());
     }
     if (progress) progress->finished.store(true, std::memory_order_relaxed);
 
     if (verify) {
-      if (!Helper::sha256Compare(partition.absolutePath(), outputName)) {
-        return AsyncResult_t::Error("Verification failed: {} and {} have different SHA-256 hashes.", partition.absolutePath().string(),
-                                    outputName);
+      if (!Helper::sha256Compare(partition->absolutePath(), outputName)) {
+        return AsyncResult_t::Error("Verification failed: {} and {} have different SHA-256 hashes.",
+                                    partition->absolutePath().string(), outputName);
       }
       LOGNF(PLUGIN, logPath, INFO) << "SHA-256 verification successful for " << outputName << std::endl;
     }

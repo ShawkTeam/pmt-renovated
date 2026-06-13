@@ -89,7 +89,7 @@ public:
   /**
    * @brief Check if this plugin was used in the command line.
    */
-  PLUGIN_SECTION bool used() override { return cmd->parsed(); }
+  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   /**
    * @brief Main plugin execution logic.
@@ -122,19 +122,21 @@ private:
    * @brief Show total partition count.
    */
   bool showPartitionCount() {
-    auto allParts = Tables.allPartitions();
-    auto logicalParts = Tables.logicalPartitions();
+    auto pTab = Flags.partitionTables.first.get();
+    auto dTab = Flags.partitionTables.second.get();
+    auto pParts = pTab->partitions();
+    auto dParts = dTab->partitions();
 
     if (jsonFormat) {
       nlohmann::json j;
-      j["total_partitions"] = allParts.size();
-      j["logical_partitions"] = logicalParts.size();
-      j["physical_partitions"] = allParts.size() - logicalParts.size();
+      j["total_partitions"] = pParts.size() + dParts.size();
+      j["logical_partitions"] = dParts.size();
+      j["physical_partitions"] = pParts.size();
       Out::println("{}", j.dump(2));
     } else {
-      Out::println("Total partitions: {}", allParts.size());
-      Out::println("Logical partitions: {}", logicalParts.size());
-      Out::println("Physical partitions: {}", allParts.size() - logicalParts.size());
+      Out::println("Total partitions: {}", pParts.size() + dParts.size());
+      Out::println("Logical partitions: {}", dParts.size());
+      Out::println("Physical partitions: {}", pParts.size());
     }
 
     return true;
@@ -201,9 +203,12 @@ private:
    * @brief Analyze specific partitions.
    */
   bool analyzeSpecificPartitions() {
+    auto pTab = Flags.partitionTables.first.get();
+    auto dTab = Flags.partitionTables.second.get();
+
     // Validate that all requested partitions exist
     for (const auto &partition : partitions) {
-      if (!Tables.hasPartition(partition) && !Tables.hasLogicalPartition(partition))
+      if (!pTab->hasPartition(partition) && !dTab->hasPartition(partition))
         throw PluginError("Couldn't find partition: {}", partition);
     }
 
@@ -217,14 +222,16 @@ private:
    * @brief Analyze specific partitions in text format.
    */
   bool analyzeSpecificPartitionsText() {
+    auto pTab = Flags.partitionTables.first.get();
+    auto dTab = Flags.partitionTables.second.get();
     Out::println("=== Partition Analysis ===");
 
     for (const auto &partitionName : partitions) {
-      if (Tables.hasPartition(partitionName)) {
-        const auto &partition = Tables.partitionWithDupCheck(partitionName)->get();
+      if (pTab->hasPartition(partitionName)) {
+        const auto &partition = pTab->partitionWithDupCheck(partitionName)->get();
         analyzePartitionText(partition);
-      } else if (Tables.hasLogicalPartition(partitionName)) {
-        const auto &partition = Tables.partition(partitionName)->get();
+      } else if (dTab->hasPartition(partitionName)) {
+        const auto &partition = dTab->partition(partitionName)->get();
         analyzePartitionText(partition);
       }
     }
@@ -253,15 +260,17 @@ private:
    * @brief Analyze specific partitions in JSON format.
    */
   bool analyzeSpecificPartitionsJson() {
+    auto pTab = Flags.partitionTables.first.get();
+    auto dTab = Flags.partitionTables.second.get();
     nlohmann::json j;
     j["analysis"] = nlohmann::json::array();
 
     for (const auto &partitionName : partitions) {
-      if (Tables.hasPartition(partitionName)) {
-        const auto &partition = Tables.partitionWithDupCheck(partitionName)->get();
+      if (pTab->hasPartition(partitionName)) {
+        const auto &partition = pTab->partitionWithDupCheck(partitionName)->get();
         j["analysis"].push_back(analyzePartitionJson(partition));
-      } else if (Tables.hasLogicalPartition(partitionName)) {
-        const auto &partition = Tables.partition(partitionName)->get();
+      } else if (dTab->hasPartition(partitionName)) {
+        const auto &partition = dTab->partition(partitionName)->get();
         j["analysis"].push_back(analyzePartitionJson(partition));
       }
     }

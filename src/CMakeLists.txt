@@ -41,5 +41,10 @@ if(BUILTIN_PLUGINS)
 endif()
 target_link_options(pmt_static PRIVATE "-Wl,-T,${CMAKE_SOURCE_DIR}/build/ld/builtin_modules.ld")
 
+if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
+	target_link_options(pmt_static PRIVATE "-Wl,--whole-archive" -lc++_static "-Wl,--no-whole-archive")
+	target_link_options(pmt PRIVATE "-Wl,--whole-archive" -lc++_static "-Wl,--no-whole-archive")
+endif()
+
 # Include plugins.
 add_subdirectory(plugins)

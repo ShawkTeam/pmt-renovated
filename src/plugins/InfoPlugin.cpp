@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <fcntl.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 #include <nlohmann/json.hpp>
@@ -42,13 +41,13 @@ public:
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
     logPath = logpath;
     LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+    flags = &mainFlags;
     cmd = mainApp.addSubcommand("info", "Tell info(s) of input partition list.")
               ->footer("Use get-all or getvar-all as partition name for getting "
                        "info's of all partitions.\nUse get-logicals as partition "
                        "name for getting info's of logical partitions.\n"
                        "Use get-physical as partition name for getting info's of "
                        "physical partitions.");
-    flags = &mainFlags;
     cmd->addOption("partition(s)", partitions, "Partition name(s).")->required();
     cmd->addFlag("-J,--json", jsonFormat,
                  "Print info(s) as JSON body. The body of each partition will "
@@ -97,17 +96,22 @@ public:
       return true;
     };
 
-    if (partitions.back() == "get-all" || partitions.back() == "getvar-all")
-      Tables.forEach(getter);
-    else if (partitions.back() == "get-logicals")
-      Tables.forEachLogicalPartitions(getter);
+    auto pTab = GET_PARTITION_TABLE_DATA_PTR();
+    auto dTab = GET_DYNAMIC_TABLE_DATA_PTR();
+
+    if (partitions.back() == "get-all" || partitions.back() == "getvar-all") {
+      pTab->forEach(getter);
+      dTab->forEach(getter);
+    } else if (partitions.back() == "get-logicals")
+      dTab->forEach(getter);
     else if (partitions.back() == "get-physicals")
-      Tables.forEachPartitions(getter);
+      pTab->forEach(getter);
     else {
       for (const auto &partition : partitions) {
-        if (!Tables.hasPartition(partition)) throw Error("Couldn't find partition: {}", partition);
+        if (!pTab->hasPartition(partition) && !dTab->hasPartition(partition)) throw Error("Couldn't find partition: {}", partition);
       }
-      Tables.forEachFor(partitions, getter);
+      pTab->forEachFor(partitions, getter);
+      dTab->forEachFor(partitions, getter);
     }
 
     if (jsonFormat) {

@@ -129,6 +129,7 @@ add_super_library(ext2_uuid USE_INTERFACE_NOLIBS_NOFLAGS
 )
 add_super_library(gptf USE_INTERFACE_NOLIBS_NOFLAGS
         SOURCES ${LIBGPTF_SOURCES}
+        CPPSTD 17
         COMPILE_OPTIONS -Wno-unused-parameter -Wno-macro-redefined -Wno-pragma-pack -std=c++11 -fno-strict-aliasing
         DEFINATIONS _FILE_OFFSET_BITS=64
         LIBS ext2_uuid
@@ -140,6 +141,43 @@ if(ANDROID_NATIVE_API_LEVEL LESS_EQUAL 23)
             CPPSTD 17
             COMPILE_OPTIONS -fvisibility=hidden -fno-data-sections -fno-function-sections -fno-sanitize=address -Werror -Wno-unused-parameter -Wno-reserved-user-defined-literal
             DEFINATIONS BORINGSSL_SHARED_LIBRARY BORINGSSL_ANDROID_SYSTEM BORINGSSL_IMPLEMENTATION OPENSSL_SMALL # There is no need for FIPS.
+    )
+    add_static_super_library(fmtlib_static USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
+            SOURCES ${FMTLIB_SOURCES}
+            CPPSTD 17
+            COMPILE_OPTIONS -fno-exceptions -UNDEBUG
+    )
+    add_static_super_library(base_static USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBBASE_SOURCES}
+            CPPSTD 20
+            COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
+            DEFINATIONS _FILE_OFFSET_BITS=64
+            LIBS fmtlib_static log
+    )
+    add_static_super_library(crypto_utils_static USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBCRYPTO_UTILS_SOURCES}
+            CPPSTD 17
+            LIBS libcrypto_static
+    )
+    add_static_super_library(sparse_static USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBSPARSE_SOURCES}
+            CPPSTD 17
+            COMPILE_OPTIONS -Wno-macro-redefined
+            LIBS z
+    )
+    add_static_super_library(ext4_utils_static USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBEXT4_UTILS_SOURCES}
+            CPPSTD 17
+            COMPILE_OPTIONS -fno-strict-aliasing
+            DEFINATIONS _FILE_OFFSET_BITS=64 REAL_UUID
+            LIBS ext2_uuid
+    )
+    add_static_super_library(lp_static USE_INTERFACE_NOLIBS_NOFLAGS
+            SOURCES ${LIBLP_SOURCES}
+            CPPSTD 17
+            COMPILE_OPTIONS -Wno-error
+            DEFINATIONS _FILE_OFFSET_BITS=64
+            LIBS libbase_static libcrypto_utils_static libcrypto_static libsparse_static libext4_utils_static
     )
 endif()
 
@@ -159,35 +197,41 @@ if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
             LINKER_OPTIONS -Wl,-Bsymbolic
             DEFINATIONS BORINGSSL_SHARED_LIBRARY BORINGSSL_ANDROID_SYSTEM BORINGSSL_IMPLEMENTATION OPENSSL_SMALL # There is no need for FIPS.
     )
-
-    add_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
+    add_static_super_library(fmtlib_static USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
             SOURCES ${FMTLIB_SOURCES}
+            CPPSTD 17
             COMPILE_OPTIONS -fno-exceptions -UNDEBUG
     )
-    add_super_library(base USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
+    add_static_super_library(base_static USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBBASE_SOURCES}
+            CPPSTD 20
             COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
             DEFINATIONS _FILE_OFFSET_BITS=64
-            LIBS fmtlib log
+            LIBS fmtlib_static log
     )
-    add_super_library(crypto_utils USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
+    add_shared_super_library(crypto_utils USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBCRYPTO_UTILS_SOURCES}
+            CPPSTD 17
             LIBS libcrypto
     )
-    add_super_library(sparse USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
+    add_shared_super_library(sparse USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBSPARSE_SOURCES}
-            LIBS base z
+            CPPSTD 17
+            COMPILE_OPTIONS -Wno-macro-redefined
+            LIBS libbase_static z
     )
-    add_super_library(ext4_utils USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
+    add_shared_super_library(ext4_utils USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBEXT4_UTILS_SOURCES}
+            CPPSTD 17
             COMPILE_OPTIONS -fno-strict-aliasing
             DEFINATIONS _FILE_OFFSET_BITS=64 REAL_UUID
-            LIBS base ext2_uuid
+            LIBS libbase_static ext2_uuid
     )
-    add_super_library(lp USE_INTERFACE_NOLIBS_NOFLAGS DISABLE
+    add_static_super_library(lp_static USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBLP_SOURCES}
+            CPPSTD 17
             COMPILE_OPTIONS -Wno-error
             DEFINATIONS _FILE_OFFSET_BITS=64
-            LIBS base crypto_utils libcrypto sparse ext4_utils
+            LIBS libbase_static libcrypto_utils libcrypto libsparse libext4_utils
     )
 endif()

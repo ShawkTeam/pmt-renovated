@@ -74,16 +74,16 @@ public:
       magics.merge(PartitionMap::Extra::Magics);
 
     for (const auto &content : contents) {
-      if (!Tables.hasPartition(content) && !Helper::fileIsExists(content))
-        throw Error("Couldn't find partition or image file: {}", content);
+      std::optional<PartitionMap::TableType> tType;
+      auto *table = getCorrectTableObj(content, Flags.partitionTables.first.get(), Flags.partitionTables.second.get(), tType);
+      const PartitionMap::Partition_t *partition = setupPartition(content, table);
+
+      if ((!tType && !partition) && !Helper::fileIsExists(content)) throw Error("Couldn't find partition or image file: {}", content);
 
       bool found = false;
       for (const auto &[magic, name] : magics) {
-        if (PartitionMap::Extra::hasMagic(
-                magic, static_cast<ssize_t>(bufferSize),
-                Helper::fileIsExists(content)
-                    ? content
-                    : Tables.partitionWithDupCheck(content, Flags.noWorkOnUsed)->get().absolutePath().c_str())) {
+        if (PartitionMap::Extra::hasMagic(magic, static_cast<ssize_t>(bufferSize),
+                                          Helper::fileIsExists(content) ? content : partition->absolutePath().c_str())) {
           Out::println("{} contains {} magic ({})", content, name, PartitionMap::Extra::formatMagic(magic));
           found = true;
           break;
