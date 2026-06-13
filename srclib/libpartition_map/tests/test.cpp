@@ -17,9 +17,7 @@
 
 #include <algorithm>
 #include <filesystem>
-#include <fstream>
 #include <iostream>
-#include <unistd.h>
 #include <libhelper/error.hpp>
 #include <libhelper/functions.hpp>
 #include <libhelper/android.hpp>
@@ -31,13 +29,14 @@ int main() {
   if (!Android::isHasRootPrivileges()) return 2; // Check root access.
 
   try {
-    PartitionMap::Builder partitions;
+    PartitionMap::PartitionTableData partitions;
+    PartitionMap::DynamicTableData dPartitions;
 
     if (!partitions.valid() && !partitions) throw Error("Tables not valid (UNEXPECTED?)");
 
     if (partitions.empty()) throw Error("Class is empty (UNEXPECTED)");
 
-    PartitionMap::Builder partitions2 = partitions;
+    PartitionMap::PartitionTableData partitions2 = partitions;
     if (partitions2 == partitions)
       std::cout << "partitions2 and partitions is same" << std::endl;
     else
@@ -67,7 +66,7 @@ int main() {
     for (auto &part : partitions_of_disk)
       std::cout << std::setw(16) << part.get().name() << std::endl;
 
-    auto logical_partitions = partitions.logicalPartitions();
+    auto logical_partitions = dPartitions.partitions();
     std::cout << "Listing logical partitions:" << std::endl;
     for (auto &part : logical_partitions)
       std::cout << std::setw(10) << part.get().name() << std::endl;
@@ -80,14 +79,14 @@ int main() {
     auto data2 = partitions.hasTable("mmcblk0") ? partitions.GPTDataOf("mmcblk0") : partitions.GPTDataOf("sda");
     if (data2->GetNumParts() == 0) throw Error("Can't get gpt data of mmcblk0 or sda (UNEXPECTED?)");
 
-    if (auto logical_partition_data = partitions.dataOfLogicalPartitions(); logical_partition_data.empty())
+    if (auto logical_partition_data = dPartitions.aboutPartitions(); logical_partition_data.empty())
       std::cerr << "WARNING: Can't get data of logical partitions" << std::endl;
 
-    if (auto partition_data = partitions.dataOfPartitions(); partition_data.empty())
+    if (auto partition_data = partitions.aboutPartitions(); partition_data.empty())
       std::cerr << "WARNING: Can't get data of partitions" << std::endl;
 
-    if (auto partition_data2 = partitions.dataOfPartitionsByTable("mmcblk0"); partition_data2.empty()) {
-      partition_data2 = partitions.dataOfPartitionsByTable("sda");
+    if (auto partition_data2 = partitions.aboutPartitionsByTable("mmcblk0"); partition_data2.empty()) {
+      partition_data2 = partitions.aboutPartitionsByTable("sda");
       if (partition_data2.empty())
         std::cerr << "WARNING: Can't get data of partitions (with "
                      "getDataOfPartititonsByDisk())"
@@ -95,7 +94,7 @@ int main() {
     }
 
     std::cout << "Boot partition is exists?: " << std::boolalpha << partitions.hasPartition("boot") << std::endl;
-    std::cout << "System (logical) partition is exists?: " << std::boolalpha << partitions.hasLogicalPartition("system") << std::endl;
+    std::cout << "System (logical) partition is exists?: " << std::boolalpha << dPartitions.hasPartition("system") << std::endl;
     std::cout << "mmcblk0, sda tables is exists?: " << std::boolalpha << partitions.hasTable("mmcblk0") << ", "
               << partitions.hasTable("sda") << std::endl;
     std::cout << "Has super partition?: " << std::boolalpha << partitions.isHasSuperPartition() << std::endl;
@@ -126,8 +125,8 @@ int main() {
       std::cout << "    Block size: " << gptData->GetBlockSize() << std::endl;
       return true;
     };
-    partitions.forEachLogicalPartitions(logicalPartTest);
-    partitions.forEachPartitions(partitionTest);
+    dPartitions.forEach(logicalPartTest);
+    partitions.forEach(partitionTest);
     partitions.forEachGptData(gptDataTest);
 
     partitions.reScan();

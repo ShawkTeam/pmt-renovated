@@ -28,432 +28,90 @@
 #include <filesystem>
 #include <map>
 #include <unordered_set>
+#include <optional>
 #include <gpt.h>
 #include <libhelper/definations.hpp>
-#include <libpartition_map/partition.hpp>
+#include <libpartition_map/table_data_collection.hpp>
 
-/**
- * @namespace PartitionMap
- * @brief Main namespace of libpartition_map library.
- */
 namespace PartitionMap {
 
-/**
- * @brief A class that examines and neatly lists all storage units on the device. It records information about the partitions, etc.
- * @note This class collects data using the Partition_t class.
- * @see PartitionMap::Partition_t
- * @see [GPT fdisk](https://android.googlesource.com/platform/external/gptfdisk)
- */
 class Builder {
-  std::map<std::filesystem::path, std::shared_ptr<GPTData>> gptDataCollection;
-  std::vector<Partition_t> localPartitions;
-  std::unordered_set<std::string> localTableNames;
-
-  bool buildAutoOnDiskChanges, isUFS;
-
-  void scan();
-  void scanLogicalPartitions();
-  void findTablePaths();
-  void reScan(bool auto_toggled);
-
 public:
-  /// @brief List type.
-  using list_t = std::vector<std::reference_wrapper<Partition_t>>;
-  /// @brief Constant list type.
-  using const_list_t = std::vector<std::reference_wrapper<const Partition_t>>;
-
-  /// @brief Iterator.
-  using iterator = std::vector<Partition_t>::iterator;
-  /// @brief Constant iterator.
-  using const_iterator = std::vector<Partition_t>::const_iterator;
-
-  /// @note This class cannot be constructible; its purpose is to function like a namespace.
-  class Extra {
-  public:
-    Extra() = delete;
-
-    /// @brief Verify that the entry provided is a partition table.
-    static bool isReallyTable(const std::string &name);
-  };
-
-  /// @brief Default constructor, initializes variables, etc.
-  Builder() : buildAutoOnDiskChanges(true), isUFS(false) {
-    findTablePaths();
-    scan();
-    scanLogicalPartitions();
-  }
-
-  /// @brief Copy constructor.
-  Builder(const Builder &other) = default;
-
-  /// @brief Move constructor.
-  Builder(Builder &&other) noexcept
-      : gptDataCollection(std::move(other.gptDataCollection)), localPartitions(std::move(other.localPartitions)),
-        localTableNames(std::move(other.localTableNames)), buildAutoOnDiskChanges(other.buildAutoOnDiskChanges), isUFS(other.isUFS) {
-    other.buildAutoOnDiskChanges = true;
-    other.isUFS = false;
-  }
-
-  /// @brief Get references of all partitions.
-  list_t allPartitions();
-  /// @brief Get references of all partitions.
-  const_list_t allPartitions() const;
-  /// @brief Get references of partitions.
-  list_t partitions();
-  /// @brief Get references of partitions.
-  const_list_t partitions() const;
-  /// @brief Get references of logical partitions.
-  list_t logicalPartitions();
-  /// @brief Get references of logical partitions.
-  const_list_t logicalPartitions() const;
-  /// @brief Get references of partitions of table by name.
-  list_t partitionsByTable(const std::string &name);
-  /// @brief Get references of partitions of table by name.
-  const_list_t partitionsByTable(const std::string &name) const;
-
-  /**
-   * @brief Find the partition with the same names.
-   * @param name Partition name.
-   * @note The first parameter of the pair actively provides used partition. For actively used partition, the value is @c true.
-   *       The second parameter holds the name of the table where the partition is located. If the partition being searched is logical,
-   * it is always empty.
-   */
-  std::vector<std::pair<bool, std::string>> duplicatePartitionPositions(const std::string &name) const;
-
-  /// @brief Get references of table names (constant).
-  const std::unordered_set<std::string> &tableNames() const;
-  /// @brief Get references of table names (non-constant).
-  std::unordered_set<std::string> &tableNames();
-  /// @brief Get table paths (from @c gptDataCollection ).
-  std::unordered_set<std::filesystem::path> tablePaths() const;
-
-  /**
-   * @brief Get @c gptDataCollection.
-   * @note The first parameter holds the path to the partition table.
-   *       The second parameter holds GPTData as a std::shared_ptr.
-   */
-  const std::map<std::filesystem::path, std::shared_ptr<GPTData>> &allGPTData() const;
-
-  /**
-   * @brief Get gpt data of table by name.
-   * @param name Table name.
-   * @return <tt>const std::shared_ptr</tt> as it is stored.
-   */
-  const std::shared_ptr<GPTData> &GPTDataOf(const std::string &name) const;
-
-  /**
-   * @brief Get gpt data of table by name.
-   * @param name Table name.
-   * @return @c std::shared_ptr as it is stored.
-   */
-  std::shared_ptr<GPTData> &GPTDataOf(const std::string &name);
-
-  /**
-   * @brief Get logical partition informations.
-   * @note The first parameter of the pair holds the name of the partition.
-   *       The second parameter holds the size of the partition.
-   */
-  std::vector<std::pair<std::string, uint64_t>> dataOfLogicalPartitions() const;
-
-  /// @brief Get information about partitions.
-  std::vector<BasicInfo> dataOfPartitions() const;
-  /// @brief Get information about partitions by table name.
-  std::vector<BasicInfo> dataOfPartitionsByTable(const std::string &name) const;
-
-  /**
-   * @brief Get Partition_t object of needed partition.
-   * @param name Partition name.
-   * @param from Table name to search for the partition.
-   * @retval std::nullopt Partition not found.
-   * @retval "std::reference_wrapper<const Partition_t>" Partition is found.
-   */
-  std::optional<std::reference_wrapper<const Partition_t>> partition(const std::string &name, const std::string &from = "") const;
-
-  /**
-   * @brief Get Partition_t object of needed partition.
-   * @param name Partition name.
-   * @param from Table name to search for the partition.
-   * @retval std::nullopt Partition not found.
-   * @retval std::reference_wrapper<Partition_t> Partition is found.
-   */
-  std::optional<std::reference_wrapper<Partition_t>> partition(const std::string &name, const std::string &from = "");
-
-  /**
-   * @brief Get Partition_t object of needed partition.
-   * @param name Partition name.
-   * @param check Before retrieving the partition object, perform a duplicate check using @c duplicatePartitionPositions.
-   *              Default is true.
-   * @retval std::nullopt Partition not found.
-   * @retval "std::reference_wrapper<const Partition_t>" Partition is found.
-   */
-  std::optional<std::reference_wrapper<const Partition_t>> partitionWithDupCheck(const std::string &name, bool check = true) const;
-
-  /**
-   * @brief Get Partition_t object of needed partition.
-   * @param name Partition name.
-   * @param check Before retrieving the partition object, perform a duplicate check using @c duplicatePartitionPositions. Default is
-   * false.
-   * @retval std::nullopt Partition not found.
-   * @retval std::reference_wrapper<Partition_t> Partition is found.
-   */
-  std::optional<std::reference_wrapper<Partition_t>> partitionWithDupCheck(const std::string &name, bool check = true);
-
-  /// @brief Get free space of the partition table.
-  uint64_t freeSpaceOf(const std::string &name) const;
-
-  /// @brief Check if there are any duplicate partitions.
-  int hasDuplicateNamedPartition(const std::string &name) const;
-
-  /// @brief Check the availability of the partition.
-  bool hasPartition(const std::string &name) const;
-  /// @brief Check whether the partition is logical.
-  bool hasLogicalPartition(const std::string &name) const;
-  /// @brief Check whether the partition table is available.
-  bool hasTable(const std::string &name) const;
-  /// @brief Check the device is uses UFS.
-  bool isUsesUFS() const;
-  /// @brief Check whether the super partition exists in any partition table.
-  bool isHasSuperPartition() const;
-  /// @brief Check whether the partition is logical. Same as @c hasLogicalPartition().
-  bool isLogical(const std::string &name) const;
-
-  /// @brief Checks @c partitions, @c logicalPartitions and @c gptDataCollection is empty.
-  bool empty() const;
-
-  /// @brief Checks @c tableNames is empty.
-  bool tableNamesEmpty() const;
-
-  /// @brief Validate GPTData collection integrity. Checks with @c GPTData::Verify() and @c GPTData::CheckHeaderValidity().
-  bool valid() const;
-
-  /// @brief For-each input function for all partitions (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
-  bool forEach(F &&function) const {
-    LOGI << "Foreaching input function for all partitions." << std::endl;
-    bool isSuccess = true;
-    for (auto &part : localPartitions)
-      isSuccess &= function(part);
-
-    return isSuccess;
-  }
-
-  /// @brief For-each input function for all partitions (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
-  bool forEach(F &&function) {
-    LOGI << "Foreaching input function for all partitions." << std::endl;
-    bool isSuccess = true;
-    for (auto &part : localPartitions)
-      isSuccess &= function(part);
-
-    return isSuccess;
-  }
-
-  /// @brief For-each input function for partitions (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
-  bool forEachPartitions(F &&function) const {
-    LOGI << "Foreaching input function for normal partitions." << std::endl;
-    bool isSuccess = true;
-    for (auto &part : partitions())
-      isSuccess &= function(part);
-
-    return isSuccess;
-  }
-
-  /// For-each input function for partitions (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
-  bool forEachPartitions(F &&function) {
-    LOGI << "Foreaching input function for normal partitions." << std::endl;
-    bool isSuccess = true;
-    for (auto &part : partitions())
-      isSuccess &= function(part);
-
-    return isSuccess;
-  }
-
-  /// @brief For-each input function for logical partitions (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
-  bool forEachLogicalPartitions(F &&function) const {
-    LOGI << "Foreaching input function for logical partitions." << std::endl;
-    bool isSuccess = true;
-    for (auto &part : logicalPartitions())
-      isSuccess &= function(part);
-
-    return isSuccess;
-  }
-
-  /// @brief For-each input function for logical partitions (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
-  bool forEachLogicalPartitions(F &&function) {
-    LOGI << "Foreaching input function for logical partitions." << std::endl;
-    bool isSuccess = true;
-    for (auto &part : logicalPartitions())
-      isSuccess &= function(part);
-
-    return isSuccess;
-  }
-
-  /// @brief For-each input function for gpt data collection (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const std::filesystem::path &, const std::shared_ptr<GPTData> &>
-  bool forEachGptData(F &&function) const {
-    LOGI << "Foreaching input function for all GPTData data." << std::endl;
-    bool isSuccess = true;
-    for (auto &[path, gptData] : gptDataCollection)
-      isSuccess &= function(path, gptData);
-
-    return isSuccess;
-  }
-
-  /// @brief For-each input function for gpt data collection (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const std::filesystem::path &, std::shared_ptr<GPTData> &>
-  bool forEachGptData(F &&function) {
-    LOGI << "Foreaching input function for all GPTData data." << std::endl;
-    bool isSuccess = true;
-    for (auto &[path, gptData] : gptDataCollection)
-      isSuccess &= function(path, gptData);
-
-    return isSuccess;
-  }
-
-  /// @brief For-each input function for input partition list (all types, constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
-  bool forEachFor(const std::vector<std::string> &list, F &&function) const {
-    LOGI << "Foreaching input function for input list." << std::endl;
-    bool isSuccess = true;
-    for (auto &name : list) {
-      if (hasPartition(name) || hasLogicalPartition(name)) isSuccess &= function(partition(name)->get());
+  template <TableType type, typename... Args> static auto *create(Args &&...args) {
+    if constexpr (type == TableType::CLASSIC) {
+      return new PartitionTableData(std::forward<Args>(args)...);
+    } else if constexpr (type == TableType::DYNAMIC) {
+      return new DynamicTableData(std::forward<Args>(args)...);
+    } else {
+      static_assert(false, "Unknown TableType");
     }
-
-    return isSuccess;
   }
 
-  /// @brief For-each input function for input partition list (all types, non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
-  bool forEachFor(const std::vector<std::string> &list, F &&function) {
-    LOGI << "Foreaching input function for input list." << std::endl;
-    bool isSuccess = true;
-    for (auto &name : list) {
-      if (hasPartition(name) || hasLogicalPartition(name)) isSuccess &= function(partition(name)->get());
+  template <TableType type> static BaseTableData *getInstance();
+
+  template <> BaseTableData *getInstance<TableType::CLASSIC>() {
+    static PartitionTableData instance;
+    return &instance;
+  }
+
+  template <> BaseTableData *getInstance<TableType::DYNAMIC>() {
+    static DynamicTableData instance;
+    return &instance;
+  }
+
+  static std::pair<BaseTableData *, BaseTableData *> getInstances() {
+    return {getInstance<TableType::CLASSIC>(), getInstance<TableType::DYNAMIC>()};
+  }
+
+  template <TableType type> static auto *cast(BaseTableData *base) {
+    if constexpr (type == TableType::CLASSIC) {
+      assert(dynamic_cast<PartitionTableData *>(base) != nullptr);
+      return static_cast<PartitionTableData *>(base);
+    } else if constexpr (type == TableType::DYNAMIC) {
+      assert(dynamic_cast<DynamicTableData *>(base) != nullptr);
+      return static_cast<DynamicTableData *>(base);
+    } else {
+      static_assert(false, "Unknown TableType");
     }
-
-    return isSuccess;
   }
 
-  /// @brief For-each input function for input partition list (only logical partitions, constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
-  bool forEachForLogicalPartitions(const std::vector<std::string> &list, F &&function) const {
-    LOGI << "Foreaching input function for input list (only for logical partitions)." << std::endl;
-    bool isSuccess = true;
-    for (auto &name : list) {
-      if (hasLogicalPartition(name)) isSuccess &= function(partition(name));
-    }
-
-    return isSuccess;
+  static const PartitionTableData *cast(const BaseTableData *base) {
+    assert(dynamic_cast<const PartitionTableData *>(base) != nullptr);
+    return static_cast<const PartitionTableData *>(base);
   }
 
-  /// @brief For-each input function for input partition list (only logical partitions, non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
-  bool forEachForLogicalPartitions(const std::vector<std::string> &list, F &&function) {
-    LOGI << "Foreaching input function for input list (only for logical partitions)." << std::endl;
-    bool isSuccess = true;
-    for (auto &name : list) {
-      if (hasLogicalPartition(name)) isSuccess &= function(partition(name));
-    }
-
-    return isSuccess;
+  static std::pair<PartitionTableData *, DynamicTableData *> cast(BaseTableData *base1, BaseTableData *base2) {
+    assert(dynamic_cast<PartitionTableData *>(base1) != nullptr);
+    assert(dynamic_cast<DynamicTableData *>(base2) != nullptr);
+    return {static_cast<PartitionTableData *>(base1), static_cast<DynamicTableData *>(base2)};
   }
 
-  /// @brief For-each input function for input partition list (only normal partitions, constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
-  bool forEachPartitions(const std::vector<std::string> &list, F &&function) const {
-    LOGI << "Foreaching input function for input list (only normal partitions)." << std::endl;
-    bool isSuccess = true;
-    for (auto &name : list) {
-      if (hasPartition(name)) isSuccess &= function(partition(name));
-    }
-
-    return isSuccess;
+  static std::pair<const PartitionTableData *, const DynamicTableData *> cast(const BaseTableData *base1, const BaseTableData *base2) {
+    assert(dynamic_cast<const PartitionTableData *>(base1) != nullptr);
+    assert(dynamic_cast<const DynamicTableData *>(base2) != nullptr);
+    return {static_cast<const PartitionTableData *>(base1), static_cast<const DynamicTableData *>(base2)};
   }
+}; // namespace Builder
 
-  /// @brief For-each input function for input partition list (only normal partitions, non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
-  bool forEachPartitions(const std::vector<std::string> &list, F &&function) {
-    LOGI << "Foreaching input function for input list (only normal partitions)." << std::endl;
-    bool isSuccess = true;
-    for (auto &name : list) {
-      if (hasPartition(name)) isSuccess &= function(partition(name));
-    }
+inline BaseTableData *getCorrectTableObj(const std::string &name, BaseTableData *c1, BaseTableData *c2,
+                                         std::optional<TableType> &tType) {
+  if (!c1 || !c2) return nullptr;
+  if (c1->hasPartition(name)) tType = c1->type();
+  if (c2->hasPartition(name)) tType = c2->type();
+  if (!tType.has_value()) return nullptr;
+  if (tType == PartitionMap::TableType::CLASSIC) return c1;
+  return c2;
+}
 
-    return isSuccess;
-  }
-
-  /// @brief Rescan tables.
-  void reScan();
-  /// @brief Removes table.
-  void removeTable(const std::string &name);
-
-  /// @brief Set tables by names (like @c sda, @c sdc, @c sdg ).
-  void setTables(const std::unordered_set<std::string> &tables);
-
-  /// @brief Set tables (chain function) by names (like @c sda, @c sdc, @c sdg).
-  Builder &withTables(const std::unordered_set<std::string> &tables);
-
-  /// @brief Change auto scanning state.
-  void setAutoScan(bool state);
-  /// @brief Change auto scanning state (chain function).
-  Builder &withAutoScan(bool state);
-
-  /// @brief Set GPTData of the table.
-  void setGPTDataOf(const std::string &name, std::shared_ptr<GPTData> data);
-
-  /// @brief Cleanup data (excepts auto scan state and seek name).
-  void clear();
-  /// @brief Cleanup (<tt>clear()</tt>) and reset variables.
-  void reset();
-
-  /**
-   * @name Builder's iterators and operators.
-   * @brief Iterator and operator functions of @c Builder.
-   * @{
-   */
-  iterator begin();              ///< Non-const begin iterator for range-based loop.
-  iterator end();                ///< Non-const end iterator for range-based loop.
-  const_iterator begin() const;  ///< Const begin iterator for range-based loop.
-  const_iterator end() const;    ///< Const end iterator for range-based loop.
-  const_iterator cbegin() const; ///< Const begin iterator for modern C++ range-based loop.
-  const_iterator cend() const;   ///< Const begin iterator for modern C++ range-based loop.
-
-  bool operator==(const Builder &other) const; ///< @c == assignment.
-  bool operator!=(const Builder &other) const; ///< @c != assignment.
-  explicit operator bool() const;              ///< Same as @c valid().
-  bool operator!() const;                      ///< Same as @c valid().
-
-  const_list_t operator*() const; ///< <tt>std::vector<const Partition_t *> = *pd;</tt>
-  list_t operator*();             ///< <tt>std::vector<Partition_t *> = *pd;</tt>
-  const std::shared_ptr<GPTData> &
-  operator[](const std::string &name) const;                     ///< <tt>const std::shared_ptr<GPTData> data = pd["sda"];</tt>
-  std::shared_ptr<GPTData> &operator[](const std::string &name); ///< <tt>std::shared_ptr<GPTData> data = pd["sda"];</tt>
-  const GPTPart *operator()(const std::string &name, uint32_t index) const; ///< <tt>const GPTPart* part = pd("sda", 3);</tt>
-  GPTPart *operator()(const std::string &name, uint32_t index);             ///< <tt>GPTPart* part = pd("sda", 3);</tt>F
-
-  Builder &operator=(const Builder &other) = default; ///< Copier @c = operator.
-  Builder &operator=(Builder &&other) noexcept;       ///< Mover @c = operator.
-
-  /** @} */
-}; // class Builder
+inline Partition_t *setupPartition(const std::string &name, BaseTableData *table) {
+  if (!table) return nullptr;
+  Partition_t *partition = nullptr;
+  if (table->type() == PartitionMap::CLASSIC)
+    partition = &PartitionMap::Builder::cast<PartitionMap::CLASSIC>(table)->partitionWithDupCheck(name)->get();
+  else if (table->type() == PartitionMap::DYNAMIC)
+    partition = &table->partition(name)->get();
+  return partition;
+}
 
 } // namespace PartitionMap
 

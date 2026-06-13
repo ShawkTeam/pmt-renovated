@@ -31,7 +31,7 @@
 #include <libpartition_map/functions.hpp>
 #include <libpartition_map/definations.hpp>
 #include <libpartition_map/partition.hpp>
+#include <libpartition_map/table_data_collection.hpp>
 #include <libpartition_map/builder.hpp>
-#include <libpartition_map/super.hpp>
 
 #endif // #ifndef LIBPARTITION_MAP_LIB_HPP

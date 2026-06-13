@@ -19,7 +19,8 @@
 filegroup {
     name: "libpartition_map_srcs",
     srcs: [
-        "src/Builder.cpp",
+        "src/ClassicPartitionData.cpp",
+        "src/DynamicPartitionTable.cpp",
         "src/Magic.cpp"
     ],
 }
@@ -34,6 +35,7 @@ cc_library {
     shared_libs: [
         "libhelper",
         "libext2_uuid",
+        "liblp",
     ],
     static_libs: [
         "libc++fs",

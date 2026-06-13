@@ -38,6 +38,10 @@
 #undef NONE
 #endif
 
+/**
+ * @namespace PartitionMap
+ * @brief Main namespace of libpartition_map library.
+ */
 namespace PartitionMap {
 
 /// @brief Generic size type (arch-spefic).
@@ -49,6 +53,8 @@ using GenericSizeType = uint32_t;
 
 /// @brief /// @brief Short names used in dimension type conversions.
 enum SizeUnit : int { BYTE = 1, KiB = 2, MiB = 3, GiB = 4 };
+
+enum TableType : int { DYNAMIC = 1, CLASSIC = 2 };
 
 /// @brief A struct that holds basic data about a partition.
 template <typename slot_type>
@@ -222,10 +228,12 @@ extern std::map<uint64_t, std::string> Magics;
 } // namespace PartitionMap
 
 // clang-format off
-#define FOREACH_PARTITIONS_LAMBDA_PARAMETERS         (PartitionMap::Partition_t & partition)
-#define FOREACH_PARTITIONS_LAMBDA_PARAMETERS_CONST   (const PartitionMap::Partition_t & partition)
-#define FOREACH_GPT_DATA_LAMBDA_PARAMETERS           (const std::filesystem::path &path, std::shared_ptr<GPTData> &gptData)
-#define FOREACH_GPT_DATA_LAMBDA_PARAMETERS_CONST     (const std::filesystem::path &path, const std::shared_ptr<GPTData> &gptData)
+#define FOREACH_PARTITIONS_LAMBDA_PARAMETERS            (PartitionMap::Partition_t & partition)
+#define FOREACH_PARTITIONS_LAMBDA_PARAMETERS_CONST      (const PartitionMap::Partition_t & partition)
+#define FOREACH_LP_METADATA_PARTITION_PARAMETERS        (LpMetadataPartition & metadata)
+#define FOREACH_LP_METADATA_PARTITION_PARAMETERS_CONST  (const LpMetadataPartition & metadata)
+#define FOREACH_GPT_DATA_LAMBDA_PARAMETERS              (const std::filesystem::path &path, std::shared_ptr<GPTData> &gptData)
+#define FOREACH_GPT_DATA_LAMBDA_PARAMETERS_CONST        (const std::filesystem::path &path, const std::shared_ptr<GPTData> &gptData)
 // clang-format on
 
 #endif // #ifndef LIBPARTITION_MAP_DEFINATIONS_HPP
