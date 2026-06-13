@@ -63,12 +63,12 @@ build() {
                 -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
                 -DANDROID_ABI="$a" \
                 -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
-                -DANDROID_STL=c++_static
+                -DANDROID_STL:STRING=c++_static
             cmake -B "${WORK_DIR}/build_$a-builtin" -G Ninja -S "${WORK_DIR}" "$@" \
                 -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
                 -DANDROID_ABI="$a" \
                 -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
-                -DANDROID_STL=c++_static \
+                -DANDROID_STL:STRING=c++_static \
                 -DBUILTIN_PLUGINS=ON
         elif [ "$BUILD_PROPERTY" = "no-builtins" ]; then
             mkdir -p "${WORK_DIR}/build_$a"
@@ -76,14 +76,14 @@ build() {
                 -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
                 -DANDROID_ABI="$a" \
                 -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
-                -DANDROID_STL=c++_static
+                -DANDROID_STL:STRING=c++_static
         elif [ "$BUILD_PROPERTY" = "only-builtins" ]; then
             mkdir -p "${WORK_DIR}/build_$a-builtin"
             cmake -B "${WORK_DIR}/build_$a-builtin" -G Ninja -S "${WORK_DIR}" "$@" \
                 -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
                 -DANDROID_ABI="$a" \
                 -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
-                -DANDROID_STL=c++_static \
+                -DANDROID_STL:STRING=c++_static \
                 -DBUILTIN_PLUGINS=ON
         fi
     done

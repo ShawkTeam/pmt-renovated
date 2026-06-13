@@ -7,7 +7,14 @@
   <component name="CidrRootsConfiguration">
     <excludeRoots>
       <file path="$PROJECT_DIR$/docs/html" />
-      <file path="$PROJECT_DIR$/external" />
+      <file path="$PROJECT_DIR$/external/boringssl" />
+      <file path="$PROJECT_DIR$/external/core" />
+      <file path="$PROJECT_DIR$/external/e2fsprogs" />
+      <file path="$PROJECT_DIR$/external/extras" />
+      <file path="$PROJECT_DIR$/external/fmtlib" />
+      <file path="$PROJECT_DIR$/external/gptfdisk" />
+      <file path="$PROJECT_DIR$/external/json" />
+      <file path="$PROJECT_DIR$/external/libbase" />
     </excludeRoots>
   </component>
 </project>

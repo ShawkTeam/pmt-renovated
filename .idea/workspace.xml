@@ -24,6 +24,7 @@
       <config projectName="pmt" targetName="libpartition_map_static" />
       <config projectName="pmt" targetName="libpartition_map_test" />
       <config projectName="pmt" targetName="libext2_uuid_shared" />
+      <config projectName="pmt" targetName="liblp_static" />
       <config projectName="pmt" targetName="libhelper_static" />
       <config projectName="pmt" targetName="helper_static" />
       <config projectName="pmt" targetName="fmtlib_static" />
@@ -32,11 +33,13 @@
       <config projectName="pmt" targetName="libgptf_static" />
       <config projectName="pmt" targetName="info_plugin" />
       <config projectName="pmt" targetName="flash_plugin" />
-      <config projectName="pmt" targetName="libcrypto" />
+      <config projectName="pmt" targetName="libcrypto_static" />
       <config projectName="pmt" targetName="helper_shared" />
+      <config projectName="pmt" targetName="libext4_utils_static" />
       <config projectName="pmt" targetName="generate_build_info" />
       <config projectName="pmt" targetName="libhelper_shared" />
       <config projectName="pmt" targetName="partition_size_plugin" />
+      <config projectName="pmt" targetName="libsparse_static" />
       <config projectName="pmt" targetName="libext2_uuid_static" />
       <config projectName="pmt" targetName="reboot_plugin" />
       <config projectName="pmt" targetName="real_path_plugin" />
@@ -44,33 +47,52 @@
       <config projectName="pmt" targetName="backup_plugin" />
       <config projectName="pmt" targetName="partition_map_static" />
       <config projectName="pmt" targetName="erase_plugin" />
-      <config projectName="pmt" targetName="clean_log_plugin" />
       <config projectName="pmt" targetName="docs" />
+      <config projectName="pmt" targetName="clean_log_plugin" />
       <config projectName="pmt" targetName="pmt_static" />
+      <config projectName="pmt" targetName="libbase_static" />
       <config projectName="pmt" targetName="pmt" />
       <config projectName="pmt" targetName="type_plugin" />
       <config projectName="pmt" targetName="CLI11-generate-single-file" folderName="Scripts" />
       <config projectName="pmt" targetName="memory_test_plugin" />
-      <config projectName="pmt" targetName="fmtlib_shared" />
       <config projectName="pmt" targetName="partition_map_shared" />
+      <config projectName="pmt" targetName="metadata_reader_plugin" />
+      <config projectName="pmt" targetName="libcrypto_utils_static" />
     </generated>
   </component>
   <component name="CMakeSettings">
     <configurations>
-      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_PLATFORM=&quot;android-30&quot; -DANDROID_ABI=&quot;arm64-v8a&quot;&quot;" />
-      <configuration PROFILE_NAME="Release" ENABLED="true" CONFIG_NAME="Release" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_PLATFORM=&quot;android-30&quot; -DANDROID_ABI=&quot;arm64-v8a&quot;&quot;" />
+      <configuration PROFILE_NAME="Debug" ENABLED="true" CONFIG_NAME="Debug" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_PLATFORM=&quot;android-22&quot; -DANDROID_ABI=&quot;arm64-v8a&quot;&quot;" />
+      <configuration PROFILE_NAME="Release" ENABLED="true" CONFIG_NAME="Release" GENERATION_OPTIONS="-DCMAKE_TOOLCHAIN_FILE=/opt/android-ndk/build/cmake/android.toolchain.cmake -DANDROID_PLATFORM=&quot;android-22&quot; -DANDROID_ABI=&quot;arm64-v8a&quot;&quot;" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="refactor(android): Fixup soong files">
-      <change beforePath="$PROJECT_DIR$/.gitmodules" beforeDir="false" afterPath="$PROJECT_DIR$/.gitmodules" afterDir="false" />
+    <list default="true" id="ec3fe6b0-9519-4d29-a93d-56529b724e14" name="Changes" comment="feat(libpartition_map)!: Add support for reading super metadata with liblp&#10;&#10;- This commit only includes the necessary changes to the library.">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/external/picosha2" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/Android.bp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/Android.bp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/cmdline.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/include/libhelper/cmdline.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/srclib/libhelper/src/Sha256.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/functions.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/functions.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/cmake/interface.cmake" beforeDir="false" afterPath="$PROJECT_DIR$/build/cmake/interface.cmake" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build/scripts/build.sh" beforeDir="false" afterPath="$PROJECT_DIR$/build/scripts/build.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/md/building-from-source.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/building-from-source.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/md/example-plugins.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/example-plugins.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/md/usage-guide.md" beforeDir="false" afterPath="$PROJECT_DIR$/docs/md/usage-guide.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/AdvancedExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/AdvancedExamplePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/AsyncExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/AsyncExamplePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/ExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/ExamplePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/plugin-instructions/SimpleExamplePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/docs/plugin-instructions/SimpleExamplePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/external/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/external/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/PartitionManager.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/include/PartitionManager/Plugin.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/src/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/PartitionManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/PartitionManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/BackupPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/ErasePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/FlashPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/InfoPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/PartitionSizePlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/RealPathPlugin.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/plugins/TypePlugin.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,14 +128,18 @@
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
     &quot;url&quot;: &quot;https://github.com/ShawkTeam/pmt-renovated&quot;,
-    &quot;accountId&quot;: &quot;b6e7faad-2390-46dd-bf83-a55cbb3e1086&quot;
+    &quot;accountId&quot;: &quot;d86625ba-20f7-4cb7-bebd-bd9a29b0db94&quot;
   }
 }</component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="iAhVS1Gg" />
   </component>
+  <component name="OCResolveContextSettings">
+    <option name="configuration" value="1-Release-type_plugin" />
+  </component>
   <component name="ProblemsViewState">
     <option name="autoscrollToSource" value="true" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectApplicationVersion">
     <option name="ide" value="CLion" />
@@ -137,6 +163,7 @@
   </component>
   <component name="PropertiesComponent">{
   &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
     &quot;C/C++ File.main.cpp.executor&quot;: &quot;Run&quot;,
     &quot;CMake Application.CLI11-generate-single-file.executor&quot;: &quot;Run&quot;,
     &quot;CMake Application.docs.executor&quot;: &quot;Run&quot;,
@@ -152,6 +179,7 @@
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
     &quot;SHELLCHECK.PATH&quot;: &quot;I do mind&quot;,
     &quot;Shell Script.Build (Debug).executor&quot;: &quot;Run&quot;,
+    &quot;Shell Script.Build (Debug, only-builtins).executor&quot;: &quot;Run&quot;,
     &quot;Shell Script.Build.executor&quot;: &quot;Run&quot;,
     &quot;Shell Script.Cleanup generated docs.executor&quot;: &quot;Run&quot;,
     &quot;Shell Script.Cleanup.executor&quot;: &quot;Run&quot;,
@@ -166,34 +194,32 @@
     &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
     &quot;deletionFromPopupRequiresConfirmation&quot;: &quot;false&quot;,
     &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/IdeaProjects/pmt-renovated/build/scripts/build.sh&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/yzbruh/IdeaProjects/pmt-renovated/external/patches/libbase&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
     &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
     &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
     &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
     &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;org.rust.cargo.project.model.PROJECT_DISCOVERY&quot;: &quot;true&quot;,
     &quot;settings.editor.selected.configurable&quot;: &quot;project.propVCSSupport.DirectoryMappings&quot;,
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/external/patches/libbase" />
+      <recent name="$PROJECT_DIR$/include/android-base" />
       <recent name="$PROJECT_DIR$/include" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/external/patches/libbase/include" />
+      <recent name="$PROJECT_DIR$/external/patches/libbase" />
       <recent name="$PROJECT_DIR$/docs/md" />
       <recent name="$PROJECT_DIR$/docs/various" />
       <recent name="$PROJECT_DIR$/docs" />
-      <recent name="$PROJECT_DIR$/srclib/libhelper/include" />
-      <recent name="$PROJECT_DIR$/include/nlohmann" />
     </key>
   </component>
-  <component name="RunManager" selected="Shell Script.Build (Debug)">
-    <configuration name="CLI11-generate-single-file" type="CMakeRunConfiguration" factoryName="Application" folderName="Scripts" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="CLI11-generate-single-file" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
+  <component name="RunManager" selected="Shell Script.Open Shell">
     <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -234,11 +260,6 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="group_metadata_reader_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="group_metadata_reader_plugin" CONFIG_NAME="Debug">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="info_plugin" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="info_plugin" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -249,12 +270,12 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="libcrypto" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libcrypto" CONFIG_NAME="Debug">
+    <configuration name="libcrypto_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libcrypto_static" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="libcrypto_utils" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libcrypto_utils" CONFIG_NAME="Debug">
+    <configuration name="libcrypto_utils_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libcrypto_utils_static" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -269,7 +290,7 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="libext4_utils" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libext4_utils" CONFIG_NAME="Debug">
+    <configuration name="libext4_utils_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libext4_utils_static" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -309,7 +330,7 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="libsparse" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libsparse" CONFIG_NAME="Debug">
+    <configuration name="libsparse_static" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" EMULATE_TERMINAL="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="pmt" TARGET_NAME="libsparse_static" CONFIG_NAME="Debug">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -344,6 +365,21 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration name="Build (Debug, only-builtins)" type="ShConfigurationType">
+      <option name="SCRIPT_TEXT" value="" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build/scripts/build.sh" />
+      <option name="SCRIPT_OPTIONS" value="rebuild --only-builtin-variants -DCMAKE_BUILD_TYPE=Debug" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="/usr/bin/zsh" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="true" />
+      <envs />
+      <method v="2" />
+    </configuration>
     <configuration name="Build (Debug)" type="ShConfigurationType">
       <option name="SCRIPT_TEXT" value="" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
@@ -353,6 +389,21 @@
       <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
       <option name="INTERPRETER_PATH" value="/bin/zsh" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <option name="EXECUTE_SCRIPT_FILE" value="true" />
+      <envs />
+      <method v="2" />
+    </configuration>
+    <configuration name="Build (only-builtins)" type="ShConfigurationType">
+      <option name="SCRIPT_TEXT" value="" />
+      <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+      <option name="SCRIPT_PATH" value="$PROJECT_DIR$/build/scripts/build.sh" />
+      <option name="SCRIPT_OPTIONS" value="rebuild --only-builtin-variants -DCMAKE_BUILD_TYPE=Release" />
+      <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+      <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+      <option name="INTERPRETER_PATH" value="/usr/bin/zsh" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="EXECUTE_IN_TERMINAL" value="true" />
       <option name="EXECUTE_SCRIPT_FILE" value="true" />
@@ -420,7 +471,7 @@
       <method v="2" />
     </configuration>
     <configuration name="Push To Device" type="ShConfigurationType">
-      <option name="SCRIPT_TEXT" value="adb push build_arm64-v8a/src/pmt_static /data/local/tmp;" />
+      <option name="SCRIPT_TEXT" value="adb push build_arm64-v8a-builtin/src/pmt_static /data/local/tmp;" />
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
       <option name="SCRIPT_PATH" value="" />
       <option name="SCRIPT_OPTIONS" value="" />
@@ -465,45 +516,48 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="CMake Application.CLI11-generate-single-file" />
-      <item itemvalue="CMake Application.backup_plugin" />
-      <item itemvalue="CMake Application.clean_log_plugin" />
       <item itemvalue="CMake Application.docs" />
-      <item itemvalue="CMake Application.erase_plugin" />
-      <item itemvalue="CMake Application.flash_plugin" />
-      <item itemvalue="CMake Application.group_metadata_reader_plugin" />
+      <item itemvalue="CMake Application.generate_build_info" />
       <item itemvalue="CMake Application.fmtlib_static" />
       <item itemvalue="CMake Application.libbase_static" />
-      <item itemvalue="CMake Application.generate_build_info" />
-      <item itemvalue="CMake Application.info_plugin" />
-      <item itemvalue="CMake Application.libcrypto" />
-      <item itemvalue="CMake Application.libcrypto_utils" />
+      <item itemvalue="CMake Application.libcrypto_static" />
+      <item itemvalue="CMake Application.libcrypto_utils_static" />
       <item itemvalue="CMake Application.libext2_uuid_shared" />
       <item itemvalue="CMake Application.libext2_uuid_static" />
-      <item itemvalue="CMake Application.libext4_utils" />
+      <item itemvalue="CMake Application.libext4_utils_static" />
       <item itemvalue="CMake Application.libgptf_shared" />
       <item itemvalue="CMake Application.libgptf_static" />
       <item itemvalue="CMake Application.liblp_static" />
-      <item itemvalue="CMake Application.libsparse" />
-      <item itemvalue="CMake Application.libhelper_shared" />
-      <item itemvalue="CMake Application.libhelper_static" />
-      <item itemvalue="CMake Application.libpartition_map_shared" />
-      <item itemvalue="CMake Application.libpartition_map_static" />
+      <item itemvalue="CMake Application.libsparse_static" />
+      <item itemvalue="CMake Application.backup_plugin" />
+      <item itemvalue="CMake Application.clean_log_plugin" />
+      <item itemvalue="CMake Application.erase_plugin" />
+      <item itemvalue="CMake Application.flash_plugin" />
+      <item itemvalue="CMake Application.info_plugin" />
       <item itemvalue="CMake Application.memory_test_plugin" />
       <item itemvalue="CMake Application.metadata_reader_plugin" />
       <item itemvalue="CMake Application.partition_size_plugin" />
       <item itemvalue="CMake Application.real_path_plugin" />
       <item itemvalue="CMake Application.reboot_plugin" />
       <item itemvalue="CMake Application.type_plugin" />
+      <item itemvalue="CMake Application.libhelper_shared" />
+      <item itemvalue="CMake Application.libhelper_static" />
+      <item itemvalue="CMake Application.libpartition_map_shared" />
+      <item itemvalue="CMake Application.libpartition_map_static" />
       <item itemvalue="Shell Script.Build (Debug)" />
+      <item itemvalue="Shell Script.Build (Debug, only-builtins)" />
       <item itemvalue="Shell Script.Build" />
-      <item itemvalue="Shell Script.Cleanup generated docs" />
-      <item itemvalue="Shell Script.Cleanup" />
-      <item itemvalue="Shell Script.Open Shell" />
-      <item itemvalue="Shell Script.Push To Device" />
-      <item itemvalue="Shell Script.Reformat And Push Code" />
+      <item itemvalue="Shell Script.Build (only-builtins)" />
       <item itemvalue="Shell Script.Reformat Code" />
+      <item itemvalue="Shell Script.Cleanup" />
+      <item itemvalue="Shell Script.Cleanup generated docs" />
+      <item itemvalue="Shell Script.Reformat And Push Code" />
+      <item itemvalue="Shell Script.Push To Device" />
+      <item itemvalue="Shell Script.Open Shell" />
     </list>
+  </component>
+  <component name="RustProjectSettings">
+    <option name="toolchainHomeDirectory" value="/usr/bin" />
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
@@ -644,303 +698,22 @@
       <workItem from="1779125717074" duration="7305000" />
       <workItem from="1779133085725" duration="1190000" />
       <workItem from="1779294487979" duration="841000" />
-      <workItem from="1779462251915" duration="5154000" />
-    </task>
-    <task id="LOCAL-00022" summary="pmt: improve libhelper, etc.">
-      <option name="closed" value="true" />
-      <created>1757752591542</created>
-      <option name="number" value="00022" />
-      <option name="presentableId" value="LOCAL-00022" />
-      <option name="project" value="LOCAL" />
-      <updated>1757752591542</updated>
-    </task>
-    <task id="LOCAL-00023" summary="pmt: add stdin parsing support, etc.">
-      <option name="closed" value="true" />
-      <created>1757883715347</created>
-      <option name="number" value="00023" />
-      <option name="presentableId" value="LOCAL-00023" />
-      <option name="project" value="LOCAL" />
-      <updated>1757883715347</updated>
-    </task>
-    <task id="LOCAL-00024" summary="pmt: add random number generator class (compile-time, with templates)">
-      <option name="closed" value="true" />
-      <created>1758058106235</created>
-      <option name="number" value="00024" />
-      <option name="presentableId" value="LOCAL-00024" />
-      <option name="project" value="LOCAL" />
-      <updated>1758058106235</updated>
-    </task>
-    <task id="LOCAL-00025" summary="pmt: cleanup PureTuple class.">
-      <option name="closed" value="true" />
-      <created>1758478745007</created>
-      <option name="number" value="00025" />
-      <option name="presentableId" value="LOCAL-00025" />
-      <option name="project" value="LOCAL" />
-      <updated>1758478745007</updated>
-    </task>
-    <task id="LOCAL-00026" summary="pmt: improve PureTuple class.">
-      <option name="closed" value="true" />
-      <created>1758561378507</created>
-      <option name="number" value="00026" />
-      <option name="presentableId" value="LOCAL-00026" />
-      <option name="project" value="LOCAL" />
-      <updated>1758561378507</updated>
-    </task>
-    <task id="LOCAL-00027" summary="pmt: improve PureTuple class and improve function manager.">
-      <option name="closed" value="true" />
-      <created>1758626016334</created>
-      <option name="number" value="00027" />
-      <option name="presentableId" value="LOCAL-00027" />
-      <option name="project" value="LOCAL" />
-      <updated>1758626016334</updated>
-    </task>
-    <task id="LOCAL-00028" summary="pmt: reformat code, etc.">
-      <option name="closed" value="true" />
-      <created>1758741265262</created>
-      <option name="number" value="00028" />
-      <option name="presentableId" value="LOCAL-00028" />
-      <option name="project" value="LOCAL" />
-      <updated>1758741265262</updated>
-    </task>
-    <task id="LOCAL-00029" summary="pmt: Add new type (class) to libhelper, etc.&#10; - Add Helper::Capsule.&#10; - Fix some compilation errors.">
-      <option name="closed" value="true" />
-      <created>1759085142978</created>
-      <option name="number" value="00029" />
-      <option name="presentableId" value="LOCAL-00029" />
-      <option name="project" value="LOCAL" />
-      <updated>1759085142978</updated>
-    </task>
-    <task id="LOCAL-00030" summary="pmt: Improve libhelper, etc.">
-      <option name="closed" value="true" />
-      <created>1759255635908</created>
-      <option name="number" value="00030" />
-      <option name="presentableId" value="LOCAL-00030" />
-      <option name="project" value="LOCAL" />
-      <updated>1759255635908</updated>
-    </task>
-    <task id="LOCAL-00031" summary="pmt: Improve libpartition_map, etc.">
-      <option name="closed" value="true" />
-      <created>1777193040295</created>
-      <option name="number" value="00031" />
-      <option name="presentableId" value="LOCAL-00031" />
-      <option name="project" value="LOCAL" />
-      <updated>1777193040295</updated>
-    </task>
-    <task id="LOCAL-00032" summary="pmt: continue working.&#10; - Improve libhelper's android functions.">
-      <option name="closed" value="true" />
-      <created>1777792430503</created>
-      <option name="number" value="00032" />
-      <option name="presentableId" value="LOCAL-00032" />
-      <option name="project" value="LOCAL" />
-      <updated>1777792430503</updated>
-    </task>
-    <task id="LOCAL-00033" summary="github: fixup workflow&#10; - Use `cp src/plugins/*plugin.so` instead of `cp src/*plugin.so`.">
-      <option name="closed" value="true" />
-      <created>1777793829497</created>
-      <option name="number" value="00033" />
-      <option name="presentableId" value="LOCAL-00033" />
-      <option name="project" value="LOCAL" />
-      <updated>1777793829497</updated>
-    </task>
-    <task id="LOCAL-00034" summary="build.sh: Improve argument processing and add new flags (to make architectural selection easier).">
-      <option name="closed" value="true" />
-      <created>1777812608927</created>
-      <option name="number" value="00034" />
-      <option name="presentableId" value="LOCAL-00034" />
-      <option name="project" value="LOCAL" />
-      <updated>1777812608927</updated>
-    </task>
-    <task id="LOCAL-00035" summary="libcrypto: Instead of using the prebuilt libcrypto, compile from source. &#10; - Add new CMake functions (functions.cmake).">
-      <option name="closed" value="true" />
-      <created>1777812685838</created>
-      <option name="number" value="00035" />
-      <option name="presentableId" value="LOCAL-00035" />
-      <option name="project" value="LOCAL" />
-      <updated>1777812685838</updated>
-    </task>
-    <task id="LOCAL-00036" summary="pmt: start working on 1.7.0">
-      <option name="closed" value="true" />
-      <created>1777812727301</created>
-      <option name="number" value="00036" />
-      <option name="presentableId" value="LOCAL-00036" />
-      <option name="project" value="LOCAL" />
-      <updated>1777812727301</updated>
-    </task>
-    <task id="LOCAL-00037" summary="build.sh: Stop embroidering -G* flags">
-      <option name="closed" value="true" />
-      <created>1777813017618</created>
-      <option name="number" value="00037" />
-      <option name="presentableId" value="LOCAL-00037" />
-      <option name="project" value="LOCAL" />
-      <updated>1777813017618</updated>
-    </task>
-    <task id="LOCAL-00038" summary="scripts: move scripts into build/scripts and fixup argument processing of build.sh and reformat.sh">
-      <option name="closed" value="true" />
-      <created>1777815136152</created>
-      <option name="number" value="00038" />
-      <option name="presentableId" value="LOCAL-00038" />
-      <option name="project" value="LOCAL" />
-      <updated>1777815136152</updated>
-    </task>
-    <task id="LOCAL-00039" summary="pmt: reformat code, etc.&#10; - Add git hook for pushs.">
-      <option name="closed" value="true" />
-      <created>1777816589295</created>
-      <option name="number" value="00039" />
-      <option name="presentableId" value="LOCAL-00039" />
-      <option name="project" value="LOCAL" />
-      <updated>1777816589295</updated>
-    </task>
-    <task id="LOCAL-00040" summary="build.sh: add command for configuring git hooks.">
-      <option name="closed" value="true" />
-      <created>1777816961804</created>
-      <option name="number" value="00040" />
-      <option name="presentableId" value="LOCAL-00040" />
-      <option name="project" value="LOCAL" />
-      <updated>1777816961804</updated>
-    </task>
-    <task id="LOCAL-00041" summary="git: Correct the logical fallacy in githooks.">
-      <option name="closed" value="true" />
-      <created>1777997805758</created>
-      <option name="number" value="00041" />
-      <option name="presentableId" value="LOCAL-00041" />
-      <option name="project" value="LOCAL" />
-      <updated>1777997805758</updated>
-    </task>
-    <task id="LOCAL-00042" summary="libhelper: finalize documentation.&#10; - git: fixup pre-commit.&#10; - scripts: reformat.sh: Print only the names of the formatted files to the terminal.">
-      <option name="closed" value="true" />
-      <created>1778254648480</created>
-      <option name="number" value="00042" />
-      <option name="presentableId" value="LOCAL-00042" />
-      <option name="project" value="LOCAL" />
-      <updated>1778254648480</updated>
-    </task>
-    <task id="LOCAL-00043" summary="git: fixup pre-commit">
-      <option name="closed" value="true" />
-      <created>1778254730276</created>
-      <option name="number" value="00043" />
-      <option name="presentableId" value="LOCAL-00043" />
-      <option name="project" value="LOCAL" />
-      <updated>1778254730276</updated>
-    </task>
-    <task id="LOCAL-00044" summary="doxygen: add tagfile of cppreference.com">
-      <option name="closed" value="true" />
-      <created>1778261020080</created>
-      <option name="number" value="00044" />
-      <option name="presentableId" value="LOCAL-00044" />
-      <option name="project" value="LOCAL" />
-      <updated>1778261020080</updated>
-    </task>
-    <task id="LOCAL-00045" summary="doxygen: fixup syntax">
-      <option name="closed" value="true" />
-      <created>1778263112064</created>
-      <option name="number" value="00045" />
-      <option name="presentableId" value="LOCAL-00045" />
-      <option name="project" value="LOCAL" />
-      <updated>1778263112065</updated>
-    </task>
-    <task id="LOCAL-00046" summary="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc.">
-      <option name="closed" value="true" />
-      <created>1778326761533</created>
-      <option name="number" value="00046" />
-      <option name="presentableId" value="LOCAL-00046" />
-      <option name="project" value="LOCAL" />
-      <updated>1778326761534</updated>
-    </task>
-    <task id="LOCAL-00047" summary="doxygen: add main page content">
-      <option name="closed" value="true" />
-      <created>1778327485269</created>
-      <option name="number" value="00047" />
-      <option name="presentableId" value="LOCAL-00047" />
-      <option name="project" value="LOCAL" />
-      <updated>1778327485269</updated>
-    </task>
-    <task id="LOCAL-00048" summary="doxygen: improve build instructions on the main page">
-      <option name="closed" value="true" />
-      <created>1778327613336</created>
-      <option name="number" value="00048" />
-      <option name="presentableId" value="LOCAL-00048" />
-      <option name="project" value="LOCAL" />
-      <updated>1778327613337</updated>
-    </task>
-    <task id="LOCAL-00049" summary="github: setting up pages.">
-      <option name="closed" value="true" />
-      <created>1778337201925</created>
-      <option name="number" value="00049" />
-      <option name="presentableId" value="LOCAL-00049" />
-      <option name="project" value="LOCAL" />
-      <updated>1778337201925</updated>
-    </task>
-    <task id="LOCAL-00050" summary="doxygen: fixup main page">
-      <option name="closed" value="true" />
-      <created>1778337666079</created>
-      <option name="number" value="00050" />
-      <option name="presentableId" value="LOCAL-00050" />
-      <option name="project" value="LOCAL" />
-      <updated>1778337666082</updated>
-    </task>
-    <task id="LOCAL-00051" summary="doxygen: improve documentation">
-      <option name="closed" value="true" />
-      <created>1778354595523</created>
-      <option name="number" value="00051" />
-      <option name="presentableId" value="LOCAL-00051" />
-      <option name="project" value="LOCAL" />
-      <updated>1778354595523</updated>
-    </task>
-    <task id="LOCAL-00052" summary="manager: improve installer script">
-      <option name="closed" value="true" />
-      <created>1778354635403</created>
-      <option name="number" value="00052" />
-      <option name="presentableId" value="LOCAL-00052" />
-      <option name="project" value="LOCAL" />
-      <updated>1778354635403</updated>
-    </task>
-    <task id="LOCAL-00053" summary="documentation: add new doc, etc.">
-      <option name="closed" value="true" />
-      <created>1778355425857</created>
-      <option name="number" value="00053" />
-      <option name="presentableId" value="LOCAL-00053" />
-      <option name="project" value="LOCAL" />
-      <updated>1778355425857</updated>
-    </task>
-    <task id="LOCAL-00054" summary="doxygen: add missing md file to inputs.">
-      <option name="closed" value="true" />
-      <created>1778355544378</created>
-      <option name="number" value="00054" />
-      <option name="presentableId" value="LOCAL-00054" />
-      <option name="project" value="LOCAL" />
-      <updated>1778355544378</updated>
-    </task>
-    <task id="LOCAL-00055" summary="documentation: add new documentation: Example Plugins (Writing plugins)">
-      <option name="closed" value="true" />
-      <created>1778356357281</created>
-      <option name="number" value="00055" />
-      <option name="presentableId" value="LOCAL-00055" />
-      <option name="project" value="LOCAL" />
-      <updated>1778356357281</updated>
-    </task>
-    <task id="LOCAL-00056" summary="github: fixup deployer">
-      <option name="closed" value="true" />
-      <created>1778392641672</created>
-      <option name="number" value="00056" />
-      <option name="presentableId" value="LOCAL-00056" />
-      <option name="project" value="LOCAL" />
-      <updated>1778392641672</updated>
-    </task>
-    <task id="LOCAL-00057" summary="manager: fixup installing from wrong tag">
-      <option name="closed" value="true" />
-      <created>1778393863749</created>
-      <option name="number" value="00057" />
-      <option name="presentableId" value="LOCAL-00057" />
-      <option name="project" value="LOCAL" />
-      <updated>1778393863749</updated>
-    </task>
-    <task id="LOCAL-00058" summary="documentation: add plugin examples to documentation, etc.">
-      <option name="closed" value="true" />
-      <created>1778395947618</created>
-      <option name="number" value="00058" />
-      <option name="presentableId" value="LOCAL-00058" />
-      <option name="project" value="LOCAL" />
-      <updated>1778395947618</updated>
+      <workItem from="1779462251915" duration="8337000" />
+      <workItem from="1779527232014" duration="735000" />
+      <workItem from="1779549703312" duration="16759000" />
+      <workItem from="1779609439240" duration="8823000" />
+      <workItem from="1779639270577" duration="8524000" />
+      <workItem from="1779867562689" duration="5758000" />
+      <workItem from="1779901952772" duration="4058000" />
+      <workItem from="1780165826502" duration="357000" />
+      <workItem from="1780592557530" duration="9404000" />
+      <workItem from="1780849371776" duration="4023000" />
+      <workItem from="1780853425524" duration="8142000" />
+      <workItem from="1781018831965" duration="12366000" />
+      <workItem from="1781108472695" duration="7457000" />
+      <workItem from="1781243329497" duration="7611000" />
+      <workItem from="1781276443137" duration="16198000" />
+      <workItem from="1781372910178" duration="2531000" />
     </task>
     <task id="LOCAL-00059" summary="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc.">
       <option name="closed" value="true" />
@@ -1038,11 +811,310 @@
       <option name="project" value="LOCAL" />
       <updated>1779466509474</updated>
     </task>
-    <option name="localTasksCounter" value="71" />
+    <task id="LOCAL-00071" summary="refactor(crypto): Use libcrypto instead of picosha2.">
+      <option name="closed" value="true" />
+      <created>1779467615347</created>
+      <option name="number" value="00071" />
+      <option name="presentableId" value="LOCAL-00071" />
+      <option name="project" value="LOCAL" />
+      <updated>1779467615347</updated>
+    </task>
+    <task id="LOCAL-00072" summary="refactor(PartitionMananger): Use checker collection of libhelper.">
+      <option name="closed" value="true" />
+      <created>1779467682331</created>
+      <option name="number" value="00072" />
+      <option name="presentableId" value="LOCAL-00072" />
+      <option name="project" value="LOCAL" />
+      <updated>1779467682331</updated>
+    </task>
+    <task id="LOCAL-00073" summary="feat(CMDLine): Add new checkers to checker collection.">
+      <option name="closed" value="true" />
+      <created>1779469803828</created>
+      <option name="number" value="00073" />
+      <option name="presentableId" value="LOCAL-00073" />
+      <option name="project" value="LOCAL" />
+      <updated>1779469803828</updated>
+    </task>
+    <task id="LOCAL-00074" summary="docs(PluginInstructures): Update plugin examples.">
+      <option name="closed" value="true" />
+      <created>1779469836877</created>
+      <option name="number" value="00074" />
+      <option name="presentableId" value="LOCAL-00074" />
+      <option name="project" value="LOCAL" />
+      <updated>1779469836877</updated>
+    </task>
+    <task id="LOCAL-00075" summary="feat(CMake): Add LTO-Thin support">
+      <option name="closed" value="true" />
+      <created>1779566633754</created>
+      <option name="number" value="00075" />
+      <option name="presentableId" value="LOCAL-00075" />
+      <option name="project" value="LOCAL" />
+      <updated>1779566633755</updated>
+    </task>
+    <task id="LOCAL-00076" summary="refactor(libcrypto): Also included is static compilation to ensure compatibility up to Android 5.">
+      <option name="closed" value="true" />
+      <created>1779566711995</created>
+      <option name="number" value="00076" />
+      <option name="presentableId" value="LOCAL-00076" />
+      <option name="project" value="LOCAL" />
+      <updated>1779566711996</updated>
+    </task>
+    <task id="LOCAL-00077" summary="fix(CMake)!: Fix common errors in the code.&#10;&#10;- Remove libbase includes.&#10; - Add boringssl includes (publicly)">
+      <option name="closed" value="true" />
+      <created>1779566827008</created>
+      <option name="number" value="00077" />
+      <option name="presentableId" value="LOCAL-00077" />
+      <option name="project" value="LOCAL" />
+      <updated>1779566827008</updated>
+    </task>
+    <task id="LOCAL-00078" summary="refactor(MemoryTestPlugin,libhelper)!: Also included is static compilation to ensure compatibility up to Android 5.">
+      <option name="closed" value="true" />
+      <created>1779566911842</created>
+      <option name="number" value="00078" />
+      <option name="presentableId" value="LOCAL-00078" />
+      <option name="project" value="LOCAL" />
+      <updated>1779566911842</updated>
+    </task>
+    <task id="LOCAL-00079" summary="fix(libpartition_map): Automatically identify sector sizes used on older devices to ensure compatibility up to Android 5.">
+      <option name="closed" value="true" />
+      <created>1779566986625</created>
+      <option name="number" value="00079" />
+      <option name="presentableId" value="LOCAL-00079" />
+      <option name="project" value="LOCAL" />
+      <updated>1779566986625</updated>
+    </task>
+    <task id="LOCAL-00080" summary="refactor(boringssl): Use main-kernel branch instead of main">
+      <option name="closed" value="true" />
+      <created>1779609959492</created>
+      <option name="number" value="00080" />
+      <option name="presentableId" value="LOCAL-00080" />
+      <option name="project" value="LOCAL" />
+      <updated>1779609959493</updated>
+    </task>
+    <task id="LOCAL-00081" summary="refactor(boringssl): Merge     7c758f7b0cc0ce62397c2567fd1e6908fb964a9b">
+      <option name="closed" value="true" />
+      <created>1779610351246</created>
+      <option name="number" value="00081" />
+      <option name="presentableId" value="LOCAL-00081" />
+      <option name="project" value="LOCAL" />
+      <updated>1779610351246</updated>
+    </task>
+    <task id="LOCAL-00082" summary="refactor(build.sh): Set default ANDROID_PLATFORM to android-22 (android 5 support)">
+      <option name="closed" value="true" />
+      <created>1779611780791</created>
+      <option name="number" value="00082" />
+      <option name="presentableId" value="LOCAL-00082" />
+      <option name="project" value="LOCAL" />
+      <updated>1779611780791</updated>
+    </task>
+    <task id="LOCAL-00083" summary="refactor(build.yml): Upgrade to NDK r29, create more streamlined release bodies with conventional commits.">
+      <option name="closed" value="true" />
+      <created>1779611842654</created>
+      <option name="number" value="00083" />
+      <option name="presentableId" value="LOCAL-00083" />
+      <option name="project" value="LOCAL" />
+      <updated>1779611842654</updated>
+    </task>
+    <task id="LOCAL-00084" summary="fix(build.yml): Add missing package(s), etc.">
+      <option name="closed" value="true" />
+      <created>1779612759117</created>
+      <option name="number" value="00084" />
+      <option name="presentableId" value="LOCAL-00084" />
+      <option name="project" value="LOCAL" />
+      <updated>1779612759117</updated>
+    </task>
+    <task id="LOCAL-00085" summary="refactor(build.yml): Use softprops/action-gh-release@v2 to create releases.">
+      <option name="closed" value="true" />
+      <created>1779612994312</created>
+      <option name="number" value="00085" />
+      <option name="presentableId" value="LOCAL-00085" />
+      <option name="project" value="LOCAL" />
+      <updated>1779612994313</updated>
+    </task>
+    <task id="LOCAL-00086" summary="fix(CMake): Set CMP0053 policy.">
+      <option name="closed" value="true" />
+      <created>1779614804844</created>
+      <option name="number" value="00086" />
+      <option name="presentableId" value="LOCAL-00086" />
+      <option name="project" value="LOCAL" />
+      <updated>1779614804845</updated>
+    </task>
+    <task id="LOCAL-00087" summary="docs(doxygen): Describe a problem that might occur in recovery mode, and use references.">
+      <option name="closed" value="true" />
+      <created>1779617490505</created>
+      <option name="number" value="00087" />
+      <option name="presentableId" value="LOCAL-00087" />
+      <option name="project" value="LOCAL" />
+      <updated>1779617490505</updated>
+    </task>
+    <task id="LOCAL-00088" summary="docs(doxygen): fixup syntax">
+      <option name="closed" value="true" />
+      <created>1779617641508</created>
+      <option name="number" value="00088" />
+      <option name="presentableId" value="LOCAL-00088" />
+      <option name="project" value="LOCAL" />
+      <updated>1779617641508</updated>
+    </task>
+    <task id="LOCAL-00089" summary="docs(doxygen): fixup lining">
+      <option name="closed" value="true" />
+      <created>1779617903785</created>
+      <option name="number" value="00089" />
+      <option name="presentableId" value="LOCAL-00089" />
+      <option name="project" value="LOCAL" />
+      <updated>1779617903786</updated>
+    </task>
+    <task id="LOCAL-00090" summary="docs(doxygen): Use code blocks instead of code lines">
+      <option name="closed" value="true" />
+      <created>1779618919700</created>
+      <option name="number" value="00090" />
+      <option name="presentableId" value="LOCAL-00090" />
+      <option name="project" value="LOCAL" />
+      <updated>1779618919701</updated>
+    </task>
+    <task id="LOCAL-00091" summary="fix(Partition_t): Fixup move = assignment">
+      <option name="closed" value="true" />
+      <created>1779643185381</created>
+      <option name="number" value="00091" />
+      <option name="presentableId" value="LOCAL-00091" />
+      <option name="project" value="LOCAL" />
+      <updated>1779643185387</updated>
+    </task>
+    <task id="LOCAL-00092" summary="fix(ErasePlugin): Start threads after creating.">
+      <option name="closed" value="true" />
+      <created>1779645530645</created>
+      <option name="number" value="00092" />
+      <option name="presentableId" value="LOCAL-00092" />
+      <option name="project" value="LOCAL" />
+      <updated>1779645530646</updated>
+    </task>
+    <task id="LOCAL-00093" summary="fix(CMDLine): Fixup default value handling with transformer.">
+      <option name="closed" value="true" />
+      <created>1779646933844</created>
+      <option name="number" value="00093" />
+      <option name="presentableId" value="LOCAL-00093" />
+      <option name="project" value="LOCAL" />
+      <updated>1779646933844</updated>
+    </task>
+    <task id="LOCAL-00094" summary="feat(libpartition_map): Start working on 1.8.0&#10;&#10;- Add new magics to definations, etc.">
+      <option name="closed" value="true" />
+      <created>1779648197304</created>
+      <option name="number" value="00094" />
+      <option name="presentableId" value="LOCAL-00094" />
+      <option name="project" value="LOCAL" />
+      <updated>1779648197305</updated>
+    </task>
+    <task id="LOCAL-00095" summary="refactor(scripts): Improve build.sh and manager.sh">
+      <option name="closed" value="true" />
+      <created>1779874102430</created>
+      <option name="number" value="00095" />
+      <option name="presentableId" value="LOCAL-00095" />
+      <option name="project" value="LOCAL" />
+      <updated>1779874102431</updated>
+    </task>
+    <task id="LOCAL-00096" summary="refactor(scripts): Improve build.sh.">
+      <option name="closed" value="true" />
+      <created>1779875500323</created>
+      <option name="number" value="00096" />
+      <option name="presentableId" value="LOCAL-00096" />
+      <option name="project" value="LOCAL" />
+      <updated>1779875500323</updated>
+    </task>
+    <task id="LOCAL-00097" summary="refactor(libpartition_map)">
+      <option name="closed" value="true" />
+      <created>1780166037575</created>
+      <option name="number" value="00097" />
+      <option name="presentableId" value="LOCAL-00097" />
+      <option name="project" value="LOCAL" />
+      <updated>1780166037576</updated>
+    </task>
+    <task id="LOCAL-00098" summary="chore(CMake)!: Set minimum required CMake version to 3.40">
+      <option name="closed" value="true" />
+      <created>1780166136431</created>
+      <option name="number" value="00098" />
+      <option name="presentableId" value="LOCAL-00098" />
+      <option name="project" value="LOCAL" />
+      <updated>1780166136431</updated>
+    </task>
+    <task id="LOCAL-00099" summary="docs(doxygen): Fixup missinformations.">
+      <option name="closed" value="true" />
+      <created>1780166161580</created>
+      <option name="number" value="00099" />
+      <option name="presentableId" value="LOCAL-00099" />
+      <option name="project" value="LOCAL" />
+      <updated>1780166161580</updated>
+    </task>
+    <task id="LOCAL-00100" summary="chore(clang-format,scripts): Fixup .clang-format settings, etc.">
+      <option name="closed" value="true" />
+      <created>1780593374259</created>
+      <option name="number" value="00100" />
+      <option name="presentableId" value="LOCAL-00100" />
+      <option name="project" value="LOCAL" />
+      <updated>1780593374259</updated>
+    </task>
+    <task id="LOCAL-00101" summary="docs(AdvancedExamplePlugin): Fixup wrong library usage.">
+      <option name="closed" value="true" />
+      <created>1780593546891</created>
+      <option name="number" value="00101" />
+      <option name="presentableId" value="LOCAL-00101" />
+      <option name="project" value="LOCAL" />
+      <updated>1780593546891</updated>
+    </task>
+    <task id="LOCAL-00102" summary="perf(libhelper): Reduce the Helper::Silencer class size from 12 bytes to 6 bytes.">
+      <option name="closed" value="true" />
+      <created>1780593945463</created>
+      <option name="number" value="00102" />
+      <option name="presentableId" value="LOCAL-00102" />
+      <option name="project" value="LOCAL" />
+      <updated>1780593945463</updated>
+    </task>
+    <task id="LOCAL-00103" summary="docs(libhelper): Add cmdline.hpp documentation.">
+      <option name="closed" value="true" />
+      <created>1780595603102</created>
+      <option name="number" value="00103" />
+      <option name="presentableId" value="LOCAL-00103" />
+      <option name="project" value="LOCAL" />
+      <updated>1780595603102</updated>
+    </task>
+    <task id="LOCAL-00104" summary="refactor(libhelper)!: Improve Silencer class.">
+      <option name="closed" value="true" />
+      <created>1780601810797</created>
+      <option name="number" value="00104" />
+      <option name="presentableId" value="LOCAL-00104" />
+      <option name="project" value="LOCAL" />
+      <updated>1780601810797</updated>
+    </task>
+    <task id="LOCAL-00105" summary="refactor(libhelper)!: Improve Silencer class.">
+      <option name="closed" value="true" />
+      <created>1780601817988</created>
+      <option name="number" value="00105" />
+      <option name="presentableId" value="LOCAL-00105" />
+      <option name="project" value="LOCAL" />
+      <updated>1780601817988</updated>
+    </task>
+    <task id="LOCAL-00106" summary="fix(libbase)!: Some patches have been made for compatibility with lower Android API's">
+      <option name="closed" value="true" />
+      <created>1781375227934</created>
+      <option name="number" value="00106" />
+      <option name="presentableId" value="LOCAL-00106" />
+      <option name="project" value="LOCAL" />
+      <updated>1781375227936</updated>
+    </task>
+    <task id="LOCAL-00107" summary="feat(libpartition_map)!: Add support for reading super metadata with liblp&#10;&#10;- This commit only includes the necessary changes to the library.">
+      <option name="closed" value="true" />
+      <created>1781375379943</created>
+      <option name="number" value="00107" />
+      <option name="presentableId" value="LOCAL-00107" />
+      <option name="project" value="LOCAL" />
+      <updated>1781375379943</updated>
+    </task>
+    <option name="localTasksCounter" value="108" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="*.in" />
   </component>
   <component name="VCPKGProject">
     <isAutomaticCheckingOnLaunch value="false" />
@@ -1062,32 +1134,35 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="doxygen: finalize documentation, etc.&#10; - libhelper &amp; libpartition_map: improve concepts, etc." />
-    <MESSAGE value="doxygen: add main page content" />
-    <MESSAGE value="doxygen: improve build instructions on the main page" />
-    <MESSAGE value="github: setting up pages." />
-    <MESSAGE value="doxygen: fixup main page" />
-    <MESSAGE value="doxygen: improve documentation" />
-    <MESSAGE value="manager: improve installer script" />
-    <MESSAGE value="documentation: add new doc, etc." />
-    <MESSAGE value="doxygen: add missing md file to inputs." />
-    <MESSAGE value="documentation: add new documentation: Example Plugins (Writing plugins)" />
-    <MESSAGE value="github: fixup deployer" />
-    <MESSAGE value="manager: fixup installing from wrong tag" />
-    <MESSAGE value="documentation: add plugin examples to documentation, etc." />
-    <MESSAGE value="plugins: update BackupPlugin, FlashPlugin and ErasePlugin&#10; - Add buffer size limits, etc." />
-    <MESSAGE value="plugins: simplify the structure" />
-    <MESSAGE value="plugins: update plugin examples." />
-    <MESSAGE value="docs(documentation-mainpage,CONTRUBUTING): update maninpage of wiki and create contributing guide&#10;&#10;- Contributing document should have been included much earlier. Even though it's late, adding it was necessary." />
-    <MESSAGE value="docs(README): fixup format, etc." />
-    <MESSAGE value="refactor(CommandLine): CLI11 usage has been discontinued.&#10;&#10; - Cleaned from CMake scripts and git modules." />
-    <MESSAGE value="refactor(CommandLine,libhelper)!: Switch to the built-in, dedicated command-line handler.&#10;&#10;- For greater control, a dedicated command-line handler, libhelper!a, has been added in place of CLI11.&#10;  - All necessary code integration has been completed.&#10;  - It's not as good as CLI11, but at least it allows me to have much better control." />
-    <MESSAGE value="feat(CMDLine,Plugins): Add collections of checkers and callbacks.&#10;&#10;- Apply to plugins." />
-    <MESSAGE value="fix(CMDLine): fixup CMDLine collections." />
-    <MESSAGE value="refactor(Out): Move Out namespace to libhelper" />
-    <MESSAGE value="refactor(libbase)!: Disable libbase (for now)&#10;&#10;- Use __system_property_read_callback instead of android::base::getProperty" />
-    <MESSAGE value="refactor(android): Fixup soong files" />
-    <option name="LAST_COMMIT_MESSAGE" value="refactor(android): Fixup soong files" />
+    <ignored-roots>
+      <path value="$PROJECT_DIR$/.." />
+    </ignored-roots>
+    <MESSAGE value="refactor(build.yml): Upgrade to NDK r29, create more streamlined release bodies with conventional commits." />
+    <MESSAGE value="fix(build.yml): Add missing package(s), etc." />
+    <MESSAGE value="refactor(build.yml): Use softprops/action-gh-release@v2 to create releases." />
+    <MESSAGE value="fix(CMake): Set CMP0053 policy." />
+    <MESSAGE value="docs(doxygen): Describe a problem that might occur in recovery mode, and use references." />
+    <MESSAGE value="docs(doxygen): fixup syntax" />
+    <MESSAGE value="docs(doxygen): fixup lining" />
+    <MESSAGE value="docs(doxygen): Use code blocks instead of code lines" />
+    <MESSAGE value="fix(Partition_t): Fixup move = assignment" />
+    <MESSAGE value="fix(ErasePlugin): Start threads after creating." />
+    <MESSAGE value="fix(CMDLine): Fixup default value handling with transformer." />
+    <MESSAGE value="feat(libpartition_map): Start working on 1.8.0&#10;&#10;- Add new magics to definations, etc." />
+    <MESSAGE value="refactor(scripts): Improve build.sh and manager.sh" />
+    <MESSAGE value="refactor(scripts): Improve build.sh." />
+    <MESSAGE value="refactor(libpartition_map)" />
+    <MESSAGE value="chore(CMake)!: Set minimum required CMake version to 3.40" />
+    <MESSAGE value="docs(doxygen): Fixup missinformations." />
+    <MESSAGE value="chore(clang-format,scripts): Fixup .clang-format settings, etc." />
+    <MESSAGE value="docs(AdvancedExamplePlugin): Fixup wrong library usage." />
+    <MESSAGE value="perf(libhelper): Reduce the Helper::Silencer class size from 12 bytes to 6 bytes." />
+    <MESSAGE value="docs(libhelper): Add cmdline.hpp documentation." />
+    <MESSAGE value="refactor(libpartition_map)!: Apply changes of Silencer class." />
+    <MESSAGE value="refactor(libpartition_map)!: Apply changes of Silencer class." />
+    <MESSAGE value="fix(libbase)!: Some patches have been made for compatibility with lower Android API's" />
+    <MESSAGE value="feat(libpartition_map)!: Add support for reading super metadata with liblp&#10;&#10;- This commit only includes the necessary changes to the library." />
+    <option name="LAST_COMMIT_MESSAGE" value="feat(libpartition_map)!: Add support for reading super metadata with liblp&#10;&#10;- This commit only includes the necessary changes to the library." />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
