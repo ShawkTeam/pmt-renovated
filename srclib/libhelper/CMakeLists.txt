@@ -22,6 +22,9 @@ set(LIBHELPER_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/Utilities.cpp
 )
 
+# Define include directories.
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+
 if(ANDROID_NATIVE_API_LEVEL LESS_EQUAL 23)
 	add_super_library(helper USE_INTERFACE_NOLIBS SOURCES ${LIBHELPER_SOURCES} MANUAL_LIBS libcrypto_static)
 else()

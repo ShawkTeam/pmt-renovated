@@ -22,6 +22,9 @@ set(LIBPARTITION_MAP_SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/src/Magic.cpp
 )
 
+# Define include directories.
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
+
 # Add targets
 if(ANDROID_NATIVE_API_LEVEL LESS_EQUAL 23)
 	add_super_library(partition_map USE_INTERFACE_NOLIBS

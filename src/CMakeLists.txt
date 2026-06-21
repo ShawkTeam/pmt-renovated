@@ -21,6 +21,9 @@ set(PMT_SOURCES
 		${CMAKE_CURRENT_SOURCE_DIR}/Main.cpp
 )
 
+# Define include directories.
+add_include_directories("${CMAKE_SOURCE_DIR}/include")
+
 # Add pmt to build targets
 add_executable(pmt ${PMT_SOURCES})
 add_executable(pmt_static ${PMT_SOURCES})

@@ -26,27 +26,8 @@ add_library(pmt::interface::static ALIAS pmt_interface_static)
 add_library(pmt::interface::nolibs ALIAS pmt_interface_nolibs)
 add_library(pmt::interface::nolibs_and_flags ALIAS pmt_interface_nolibs_and_flags)
 
-set(INCLUDE_DIRECTORIES
-        "${CMAKE_SOURCE_DIR}/include"
-        "${CMAKE_SOURCE_DIR}/external/e2fsprogs/lib"
-        "${CMAKE_SOURCE_DIR}/external/e2fsprogs/lib/uuid"
-        "${CMAKE_SOURCE_DIR}/external/gptfdisk"
-        "${CMAKE_SOURCE_DIR}/external/json/single_include"
-        "${CMAKE_SOURCE_DIR}/external/picosha2"
-        "${CMAKE_SOURCE_DIR}/external/core/libcutils/include"
-        "${CMAKE_SOURCE_DIR}/external/core/libcutils"
-        "${CMAKE_SOURCE_DIR}/external/core/fs_mgr/include"
-        "${CMAKE_SOURCE_DIR}/external/core/libsparse/include"
-        "${CMAKE_SOURCE_DIR}/external/core/libcrypto_utils/include"
-        "${CMAKE_SOURCE_DIR}/external/core/fs_mgr/liblp/include"
-        "${CMAKE_SOURCE_DIR}/external/extras/ext4_utils/include"
-        "${CMAKE_SOURCE_DIR}/external/fmtlib/include"
-        "${CMAKE_SOURCE_DIR}/external/boringssl/src/include"
-        "${CMAKE_SOURCE_DIR}/external/patches/libbase/include"
-        "${CMAKE_SOURCE_DIR}/external/libbase/include"
-        "${CMAKE_SOURCE_DIR}/srclib/libhelper/include"
-        "${CMAKE_SOURCE_DIR}/srclib/libpartition_map/include"
-)
+# Export an empty include dir list.
+set_property(GLOBAL PROPERTY PMT_INCLUDE_DIRECTORIES "")
 
 target_link_options(pmt_interface_shared INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
 target_link_options(pmt_interface_static INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
@@ -55,11 +36,6 @@ target_link_options(pmt_interface_nolibs_and_flags INTERFACE "-Wl,-rpath,/data/d
 
 target_link_libraries(pmt_interface_shared INTERFACE libhelper_shared libpartition_map_shared libgptf_static libext2_uuid_static)
 target_link_libraries(pmt_interface_static INTERFACE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static)
-
-target_include_directories(pmt_interface_shared INTERFACE ${INCLUDE_DIRECTORIES})
-target_include_directories(pmt_interface_static INTERFACE ${INCLUDE_DIRECTORIES})
-target_include_directories(pmt_interface_nolibs INTERFACE ${INCLUDE_DIRECTORIES})
-target_include_directories(pmt_interface_nolibs_and_flags INTERFACE ${INCLUDE_DIRECTORIES})
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     target_link_options(pmt_interface_shared INTERFACE -fsanitize=address)
@@ -86,3 +62,10 @@ if(ANDROID_NATIVE_API_LEVEL LESS_EQUAL 23)
     target_compile_options(pmt_interface_nolibs INTERFACE -U_FILE_OFFSET_BITS -D_FILE_OFFSET_BITS=32)
     target_compile_options(pmt_interface_nolibs_and_flags INTERFACE -U_FILE_OFFSET_BITS -D_FILE_OFFSET_BITS=32)
 endif()
+
+function(init_include_directories)
+    get_property(dirs GLOBAL PROPERTY PMT_INCLUDE_DIRECTORIES)
+    foreach(target pmt_interface_shared pmt_interface_static pmt_interface_nolibs pmt_interface_nolibs_and_flags)
+        target_include_directories(${target} INTERFACE ${dirs})
+    endforeach()
+endfunction()

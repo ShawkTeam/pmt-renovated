@@ -31,6 +31,23 @@ set(PATCHES ${CMAKE_CURRENT_SOURCE_DIR}/patches)
 set(BORINGSSL_ROOT ${CMAKE_CURRENT_SOURCE_DIR}/boringssl/)
 include(boringssl/android-sources.cmake)
 
+# Define include directories.
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/e2fsprogs/lib")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/e2fsprogs/lib/uuid")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/gptfdisk")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/json/single_include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/core/libcutils")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/core/libcutils/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/core/fs_mgr/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/core/libsparse/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/core/libcrypto_utils/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/core/fs_mgr/liblp/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/extras/ext4_utils/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/fmtlib/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/boringssl/src/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/patches/libbase/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/libbase/include")
+
 # libext2_uuid sources
 set(LIBEXT2_UUID_SOURCES
         ${E2FSPROGS}/lib/uuid/clear.c

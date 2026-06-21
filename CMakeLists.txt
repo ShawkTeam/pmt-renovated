@@ -64,6 +64,8 @@ add_subdirectory(external)
 add_subdirectory(srclib)
 add_subdirectory(src)
 
+init_include_directories()
+
 # Doxygen integration
 find_package(Doxygen OPTIONAL_COMPONENTS dot)
 
