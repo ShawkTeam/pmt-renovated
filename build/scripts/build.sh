@@ -51,6 +51,7 @@ build() {
     set -e
     command echo -e "Building PMT. About the build..:
     ARCH(S): ${TARGET_ABI_LIST[*]}
+    BUILD-SPEFIC CMAKE FLAGS: $@
     ANDROID_PLATFORM: $ANDROID_PLATFORM
     ANDROID_TOOLCHAIN_FILE: $ANDROID_NDK/build/cmake/android.toolchain.cmake\n"
 
