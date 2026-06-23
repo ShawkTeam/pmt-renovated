@@ -75,7 +75,8 @@ cc_defaults {
 // Add libraries
 subdirs = [
     "srclib/libhelper",
-    "srclib/libpartition_map"
+    "srclib/libpartition_map",
+    "srclib/libopenpart"
 ]
 
 // pmt executable target
