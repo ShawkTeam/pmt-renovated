@@ -30,3 +30,7 @@
 	path = external/boringssl
 	url = https://android.googlesource.com/platform/external/boringssl
 	branch = main-kernel
+[submodule "external/f2fs-tools"]
+	path = external/f2fs-tools
+	url = https://android.googlesource.com/platform/external/f2fs-tools
+	branch = main
