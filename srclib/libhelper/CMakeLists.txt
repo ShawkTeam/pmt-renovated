@@ -25,11 +25,10 @@ set(LIBHELPER_SOURCES
 # Define include directories.
 add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-if(ANDROID_NATIVE_API_LEVEL LESS_EQUAL 23)
-	add_super_library(helper USE_INTERFACE_NOLIBS SOURCES ${LIBHELPER_SOURCES} MANUAL_LIBS libcrypto_static)
-else()
-	add_super_library(helper USE_INTERFACE_NOLIBS SOURCES ${LIBHELPER_SOURCES} MANUAL_LIBS libcrypto)
-endif()
+add_super_library(helper USE_INTERFACE_NOLIBS
+		SOURCES ${LIBHELPER_SOURCES}
+		MANUAL_LIBS $<IF:$<VERSION_LESS:${ANDROID_NATIVE_API_LEVEL},23>,libcrypto_static,libcrypto>
+)
 
 # Add target of tests
 add_executable(libhelper_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)

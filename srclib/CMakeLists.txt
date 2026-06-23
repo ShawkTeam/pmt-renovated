@@ -17,4 +17,5 @@
 
 # Add libraries
 add_subdirectory(libhelper)
+add_subdirectory(libopenpart)
 add_subdirectory(libpartition_map)

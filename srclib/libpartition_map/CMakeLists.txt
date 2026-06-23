@@ -25,26 +25,14 @@ set(LIBPARTITION_MAP_SOURCES
 # Define include directories.
 add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 
-# Add targets
-if(ANDROID_NATIVE_API_LEVEL LESS_EQUAL 23)
-	add_super_library(partition_map USE_INTERFACE_NOLIBS
-			SOURCES ${LIBPARTITION_MAP_SOURCES}
-			DEFINATIONS _FILE_OFFSET_BITS=64
-			LIBS helper ext2_uuid
-			MANUAL_LIBS liblp_static
-			MANUAL_LIBS_OF_SHARED libgptf_static
-			MANUAL_LIBS_OF_STATIC libgptf_static
-	)
-else()
-	add_super_library(partition_map USE_INTERFACE_NOLIBS
-			SOURCES ${LIBPARTITION_MAP_SOURCES}
-			DEFINATIONS _FILE_OFFSET_BITS=64
-			LIBS helper ext2_uuid
-			MANUAL_LIBS liblp_static
-			MANUAL_LIBS_OF_SHARED libgptf_static
-			MANUAL_LIBS_OF_STATIC libgptf_static
-	)
-endif()
+add_super_library(partition_map USE_INTERFACE_NOLIBS
+		SOURCES ${LIBPARTITION_MAP_SOURCES}
+		DEFINATIONS _FILE_OFFSET_BITS=64
+		LIBS helper ext2_uuid openpart
+		MANUAL_LIBS liblp_static
+		MANUAL_LIBS_OF_SHARED libgptf_static
+		MANUAL_LIBS_OF_STATIC libgptf_static
+)
 
 # Add tests
 add_executable(libpartition_map_test ${CMAKE_CURRENT_SOURCE_DIR}/tests/test.cpp)

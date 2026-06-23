@@ -17,6 +17,8 @@
 
 # Set directory paths
 set(E2FSPROGS ${CMAKE_CURRENT_SOURCE_DIR}/e2fsprogs)
+set(F2FS_TOOLS ${CMAKE_CURRENT_SOURCE_DIR}/f2fs-tools)
+set(EROFS_UTILS ${CMAKE_CURRENT_SOURCE_DIR}/erofs-utils)
 set(GPTFDISK ${CMAKE_CURRENT_SOURCE_DIR}/gptfdisk)
 set(FMTLIB ${CMAKE_CURRENT_SOURCE_DIR}/fmtlib)
 set(LIBBASE ${CMAKE_CURRENT_SOURCE_DIR}/libbase)
@@ -34,6 +36,9 @@ include(boringssl/android-sources.cmake)
 # Define include directories.
 add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/e2fsprogs/lib")
 add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/e2fsprogs/lib/uuid")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/f2fs-tools/include")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/f2fs-tools/fsck")
+add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/f2fs-tools/mkfs")
 add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/gptfdisk")
 add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/json/single_include")
 add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/core/libcutils")

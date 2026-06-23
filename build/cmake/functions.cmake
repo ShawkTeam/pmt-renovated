@@ -173,7 +173,7 @@ endfunction()
 # Usage: add_super_library(<name> <NO_INTERFACE | USE_INTERFACE | USE_INTERFACE_NOLIBS | USE_INTERFACE_NOLIBS_NOFLAGS> <source(s)> [LIBS <libs> MANUAL_LIBS <libs> MANUAL_LIBS_OF_SHARED <libs> MANUAL_LIBS_OF_STATIC <libs> INCLUDES <includes> COMPILE_OPTIONS <options> LINKER_OPTIONS <linker-options> LINKER_SCRIPT <linker-script> (CPPSTD <cppstd> OR CSTD <cstd>) DEFINATIONS <definations>])
 function(add_super_library TARGET_NAME)
     set(options DISABLE NOPREFIX NO_INTERFACE USE_INTERFACE USE_INTERFACE_NOLIBS USE_INTERFACE_NOLIBS_NOFLAGS SUPER_LIBS)
-    set(oneValueArgs LINKER_SCRIPT CPPSTD)
+    set(oneValueArgs LINKER_SCRIPT CPPSTD CSTD)
     set(multiValueArgs SOURCES LIBS MANUAL_LIBS MANUAL_LIBS_OF_SHARED MANUAL_LIBS_OF_STATIC INCLUDES COMPILE_OPTIONS LINKER_OPTIONS DEFINATIONS)
     cmake_parse_arguments(ARG "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
@@ -198,8 +198,8 @@ function(add_super_library TARGET_NAME)
     add_library(${STATIC_TARGET} STATIC ${ARG_SOURCES})
     add_library(${SHARED_TARGET} SHARED ${ARG_SOURCES})
 
-    # Ortak Özellikler
     foreach(LIB_TARGET ${STATIC_TARGET} ${SHARED_TARGET})
+        set_target_properties(${LIB_TARGET} PROPERTIES OUTPUT_NAME ${TARGET_NAME})
         set_target_properties(${LIB_TARGET} PROPERTIES POSITION_INDEPENDENT_CODE ON)
         if(ARG_NOPREFIX)
             set_target_properties(${LIB_TARGET} PROPERTIES PREFIX "")
