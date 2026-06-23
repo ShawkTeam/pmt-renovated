@@ -331,6 +331,24 @@ int openpart_get(openpart_t *op, int info, void **out)
       *out = part_name;
       return 0;
     }
+    case OP_INFO_PART_PATH: {
+      const char *path = path_from_fd(op->fd);
+      if (!path) { op->err = errno; return -1; }
+      char *result = malloc(strlen(path) + 1);
+      if (!result) { op->err = errno; return -1; }
+      strcpy(result, path);
+      *out = result;
+      return 0;
+    }
+    case OP_INFO_DISK_PATH: {
+      const char* path = openpart_get_disk_path(op);
+      if (!path) { op->err = errno; return -1; }
+      char* result = malloc(strlen(path) + 1);
+      if (!result) { op->err = errno; return -1; }
+      strcpy(result, path);
+      *out = result;
+      return 0;
+    }
     default:
       op->err = EINVAL;
       return -1;

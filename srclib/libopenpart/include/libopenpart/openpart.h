@@ -38,6 +38,8 @@ __BEGIN_DECLS
 #define OP_INFO_SECTOR_SIZE 0x5
 #define OP_INFO_IS_BLKDEV 0x6
 #define OP_INFO_PART_NAME 0x7
+#define OP_INFO_PART_PATH 0x8
+#define OP_INFO_DISK_PATH 0x9
 
 /* Mount flags */
 #define OP_MOUNT_RDONLY 0x1
@@ -102,6 +104,8 @@ const char *openpart_strerror(openpart_t *op);
 #define openpart_get_sector_size2(op, out) openpart_get((op), OP_INFO_SECTOR_SIZE, (void **)(out))
 #define openpart_get_is_blkdev2(op, out) openpart_get((op), OP_INFO_IS_BLKDEV, (void **)(out))
 #define openpart_get_part_name2(op, out) openpart_get((op), OP_INFO_PART_NAME, (void **)(out))
+#define openpart_get_part_path2(op, out) openpart_get((op), OP_INFO_PART_PATH, (void **)(out))
+#define openpart_get_disk_path2(op, out) openpart_get((op), OP_INFO_DISK_PATH, (void **)(out))
 
 __END_DECLS
 #endif // #ifndef LIB_OPENPART__OPENPART_H
