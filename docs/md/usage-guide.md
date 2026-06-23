@@ -17,6 +17,8 @@ It supports **asynchronous operations**, allowing multiple partitions to be proc
 - **Flash** image files directly to partitions.
 - **Erase** partitions by filling them with zero bytes.
 - **Get** partition sizes in various units.
+- **Read metadata** of logical partitions.
+- **Read metadata** of dynamic partition groups.
 - **Display** partition information in plain text or JSON format.
 - **Retrieve** real paths and symbolic link paths of partitions.
 - **Identify** file system or image types by checking magic numbers.
@@ -387,6 +389,62 @@ pmt clean-logs -L /custom/log/path.log  # Remove custom log file
 
 ---
 
+### Reading logical partition metadata
+Read detailed metadata for logical partitions including group, size, and attributes. General syntax:
+```bash
+pmt read-metadata partition(s) [OPTIONS]
+```
+
+**Options:**
+- `[partition(s)]` → Partition name(s) to read metadata for (required).
+- `-v`, `--version` → View version of plugin.
+
+**Special Partition Names:**
+- `get-all` or `getvar-all` → Read metadata for all logical partitions.
+
+**Technical Details:**
+- Requires device support for dynamic partitions
+- Displays partition name, group name, size, and attributes
+- Attribute flags include: readonly, slot_suffixed, updated, disabled
+- Uses ioctl(BLKGETSIZE64) for accurate size detection
+- Resolves actual block device paths via symbolic links
+- Batch processing support for multiple partitions
+- Validates partition existence before reading metadata
+
+**Example Usages:**
+```bash
+pmt read-metadata system  # Read metadata for system partition
+pmt read-metadata system,vendor  # Read metadata for multiple partitions
+pmt read-metadata get-all  # Read metadata for all logical partitions
+pmt read-metadata getvar-all  # Same as get-all
+```
+
+---
+
+### Reading logical partition groups metadata
+Display metadata for logical partition groups including name, maximum size, and flags. General syntax:
+```bash
+pmt read-groups-metadata [OPTIONS]
+```
+
+**Options:**
+- `-v`, `--version` → View version of plugin.
+
+**Technical Details:**
+- Requires device support for dynamic partitions
+- Displays all logical partition groups in the system
+- Shows group name, maximum size, and flags (e.g., slot_suffixed)
+- No arguments required - reads all available groups
+- Useful for understanding dynamic partition layout
+- Direct access to liblp metadata format
+
+**Example Usages:**
+```bash
+pmt read-groups-metadata  # Display all logical partition groups
+```
+
+---
+
 ## Additional Notes
 
 - **Comma-separated inputs**: All commands (except `reboot`) require multiple inputs to be separated by commas **without spaces**.
@@ -404,7 +462,7 @@ pmt clean-logs -L /custom/log/path.log  # Remove custom log file
 
 - **Core System**: C++20-based main application with CLI11 command-line interface
 - **Plugin Framework**: Dynamic loading of functionality via plugin system
-- **Built-in Plugins**: 10 core plugins providing all major operations
+- **Built-in Plugins**: 12 core plugins providing all major operations
 - **Asynchronous Processing**: Multi-threaded operations for backup, flash, and erase
 - **Error Handling**: Comprehensive error isolation and recovery
 - **Logging System**: Detailed logging with configurable output destinations
@@ -420,6 +478,8 @@ pmt clean-logs -L /custom/log/path.log  # Remove custom log file
 - **RebootPlugin**: Device reboot management supporting all Android reboot modes
 - **MemoryTestPlugin**: Sequential storage performance testing with direct I/O and synchronized writes
 - **CleanLogPlugin**: Log management utilities for cleanup and rotation
+- **MetadataReaderPlugin**: Logical partition metadata reader with group, size, and attribute information
+- **GroupMetadataReaderPlugin**: Logical partition groups metadata reader with name, maximum size, and flags
 
 ---
 
