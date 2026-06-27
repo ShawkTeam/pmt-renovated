@@ -28,7 +28,7 @@ It supports **asynchronous operations**, allowing multiple partitions to be proc
 ---
 
 ## Start Using
-Don't forget to check out how to use it with **ADB**! See [Using PMT via ADB](@ref using-with-termux)
+Don't forget to check out how to use it with **ADB**! See [Using PMT via ADB](@ref using-with-termux-and-adb)
 
 ```bash
 pmt [OPTIONS] [SUBCOMMAND]
@@ -40,7 +40,7 @@ pmt [OPTIONS] [SUBCOMMAND]
 |--------|--------------------------|--------------------------------------------------------------------|
 | `-h`   | `--help`                 | Print basic help message and exit.                                 |
 |        | `--help-all`             | Print full help message and exit.                                  |
-| `-L`   | `--log-file TEXT`        | Set log file path. Default: `/sdcard/Documents/last_pmt_logs.log`  |
+| `-L`   | `--log-file TEXT`        | Set log file path. Default: `<current directory>/last_logs.log`    |
 | `-f`   | `--force`                | Force the process to be executed even if checks fail.              |
 | `-l`   | `--logical`              | Specify that the target partition is **dynamic** (logical).        |
 | `-q`   | `--quiet`                | Suppress output.                                                   |

@@ -1,4 +1,4 @@
-@page using-with-termux Using with Termux
+@page using-with-termux-and-adb Using with Termux or ADB
 
 This guide shows you how to use PMT with Termux and ADB. After that, you might want to read [Usage](@ref usage-guide)!
 

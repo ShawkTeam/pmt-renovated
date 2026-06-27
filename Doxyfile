@@ -48,7 +48,7 @@ PROJECT_NAME           = "PMT Renovated"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = main
+PROJECT_NUMBER         = 1.8.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewers a
@@ -1033,7 +1033,7 @@ INPUT                  = include/PartitionManager \
                          docs/md/building-from-source.md \
                          docs/md/usage-guide.md \
                          docs/md/release-types.md \
-                         docs/md/using-with-termux.md \
+                         docs/md/using-with-termux-and-adb.md \
                          docs/md/example-plugins.md \
                          docs/plugin-instructions/ExamplePlugin.cpp \
                          docs/plugin-instructions/SimpleExamplePlugin.cpp \
