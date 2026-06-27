@@ -242,9 +242,8 @@ ssize_t openpart_read_sector(openpart_t *op, void *buf, uint64_t sector, size_t 
     return -1;
   }
 
-  uint64_t sector_size = op->sector_size;
-  uint64_t offset = sector * sector_size;
-  return openpart_read(op, buf, count * sector_size, offset);
+  uint64_t offset = sector * op->sector_size;
+  return openpart_read(op, buf, count * op->sector_size, offset);
 }
 
 ssize_t openpart_write_sector(openpart_t *op, const void *buf, uint64_t sector, size_t count)
@@ -388,6 +387,14 @@ uint64_t openpart_get_sector_size(openpart_t* op)
 int openpart_get_is_blkdev(openpart_t* op)
 {
   QUICK_GET_CONTROLS(op, -1);
+
+  if (op->flags & OP_IGNTYPE) {
+    struct stat st;
+    if (fstat(op->fd, &st) < 0)
+      return 0;
+    if (!S_ISBLK(st.st_mode))
+      return 0;
+  }
   return 1;
 }
 
