@@ -113,10 +113,13 @@ public:
       cb = [&progress](uint64_t done, uint64_t) { progress->done.store(done, std::memory_order_relaxed); };
     }
 
-    if (!partition->write(ec, imageName, buf, cb)) {
+    try {
+      partition->write(imageName, buf, cb);
+    } catch (Error &err) {
       if (progress) progress->failed.store(true, std::memory_order_relaxed);
-      return AsyncResult_t::Error("Failed to write image {} to partition {}: {}", imageName, partitionName, ec.message());
+      return AsyncResult_t::Error("Failed to write image {} to partition {}: {}", imageName, partitionName, err.what());
     }
+
     if (progress) progress->finished.store(true, std::memory_order_relaxed);
 
     if (deleteAfterProgress) {
