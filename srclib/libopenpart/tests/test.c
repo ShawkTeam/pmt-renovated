@@ -255,14 +255,14 @@ int main(int argc, char** argv)
   openpart_t *op3 = openpart_open("test.img", OP_RDWR | OP_IGNTYPE, 0);
   if (!op3) {
     fprintf(stderr, "Failed to open: %s\n", strerror(errno));
-    openpart_close(op);
-    openpart_close(op2);
+    openpart_close(&op);
+    openpart_close(&op2);
     return 1;
   }
   test_write(op3);
 
-  openpart_close(op);
-  openpart_close(op2);
-  openpart_close(op3);
+  openpart_close(&op);
+  openpart_close(&op2);
+  openpart_close(&op3);
   return 0;
 }

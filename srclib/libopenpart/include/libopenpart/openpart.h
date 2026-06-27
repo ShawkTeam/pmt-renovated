@@ -56,7 +56,7 @@ typedef struct openpart openpart_t;
 /* Core */
 openpart_t *openpart_open(const char *path, int flags, uint32_t extra_oflags);
 openpart_t *openpart_read_data_from_file(const char *path, int flags, uint32_t extra_oflags);
-void openpart_close(openpart_t *op);
+void openpart_close(openpart_t **op);
 
 /* Read, sync */
 ssize_t openpart_read(openpart_t *op, void *buf, size_t count, uint64_t offset);

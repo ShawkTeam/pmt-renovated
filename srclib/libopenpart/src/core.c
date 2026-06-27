@@ -224,13 +224,16 @@ openpart_t *openpart_read_data_from_file(const char *path, int flags, uint32_t e
   return op;
 }
 
-void openpart_close(openpart_t *op)
+void openpart_close(openpart_t **op)
 {
-  if (!op)
+  if (!op || !*op)
     return;
-
-  close(op->fd);
-  free(op);
+  if ((*op)->fd > 0) {
+    close((*op)->fd);
+    (*op)->fd = -1;
+  }
+  free(*op);
+  *op = NULL;
 }
 
 int openpart_is_valid_save(const char* path)
