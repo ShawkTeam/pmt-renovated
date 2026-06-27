@@ -20,7 +20,7 @@
 #include <nlohmann/json.hpp>
 
 #define PLUGIN "InfoPlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -33,14 +33,12 @@ class InfoPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION InfoPlugin() = default;
   PLUGIN_SECTION ~InfoPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     flags = &mainFlags;
     cmd = mainApp.addSubcommand("info", "Tell info(s) of input partition list.")
               ->footer("Use get-all or getvar-all as partition name for getting "
@@ -70,7 +68,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -89,7 +87,7 @@ public:
       if (jsonFormat)
         jParts.push_back(partition);
       else
-        Out::println("partition={} table={} size={} isLogical={}", partition.name(),
+        Log::println("partition={} table={} size={} isLogical={}", partition.name(),
                      partition.isLogicalPartition() ? "" : partition.tableName(), partition.formattedSizeString(multiple, true),
                      partition.isLogicalPartition());
 
@@ -124,7 +122,7 @@ public:
                                    {jNameSize, std::stoull(part.formattedSizeString(multiple, true))},
                                    {jNameLogical, part.isLogicalPartition()}});
 
-      Out::println("{}", j.dump(jIndentSize));
+      Log::println("{}", j.dump(jIndentSize));
     }
 
     return true;

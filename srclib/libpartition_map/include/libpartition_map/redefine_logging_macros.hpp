@@ -19,7 +19,13 @@
  * @file redefine_logging_macros.hpp
  * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
  * @brief Redefines logging macros for @c libpartition_map.
+ * @deprecated Use new @c libhelper logging functions.
  */
+
+#include <generated/buildInfo.hpp>
+#if BUILD_VERSION_MINOR >= 8
+#error "This header is only available for version 1.7.0 and older"
+#endif
 
 #ifndef LIBPARTITION_MAP_REDEFINE_LOGGING_MACROS_HPP
 #define LIBPARTITION_MAP_REDEFINE_LOGGING_MACROS_HPP

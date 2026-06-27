@@ -17,13 +17,12 @@
 
 #include <cerrno>
 #include <future>
-#include <unistd.h>
 #include <fcntl.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "ErasePlugin"
-#define PLUGIN_VERSION "1.2"
+#define PLUGIN_VERSION "1.3"
 
 namespace PartitionManager {
 
@@ -38,14 +37,12 @@ class ErasePlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION ErasePlugin() = default;
   PLUGIN_SECTION ~ErasePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("erase", "Writes zero bytes to partition(s).");
     flags = &mainFlags;
     cmd->addOption("partition(s)", partitions, "Partition name(s)")->required();
@@ -61,7 +58,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -78,16 +75,14 @@ public:
 
     if (Flags.onLogical && tType != PartitionMap::DYNAMIC) {
       if (Flags.forceProcess)
-        LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " exists but is not logical. Ignoring (from --force, -f)."
-                                        << std::endl;
+        Log::warning("Partition {} exists but is not logical. Ignoring (from --force, -f).", partitionName);
       else
         return AsyncResult_t::Error("Used --logical (-l) flag but partition is not logical: {}", partitionName);
     }
 
     uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition->size()));
     setupBufferSize(buf, partitionName, table);
-
-    LOGNF(PLUGIN, logPath, INFO) << "Using buffer size: " << buf << std::endl;
+    Log::info("Using buffer size: {}", buf);
 
     auto pfd = Helper::UniqueFD(partition->absolutePath(), O_WRONLY);
     if (!pfd) return AsyncResult_t::Error("Can't open partition {}: {}", partitionName, strerror(errno));
@@ -100,7 +95,7 @@ public:
       }
     }
 
-    LOGNF(PLUGIN, logPath, INFO) << "Writing zero bytes to partition: " << partitionName << std::endl;
+    Log::info("Writing zero bytes to partition: {}", partitionName);
     auto buffer = std::make_unique<char[]>(buf);
     std::memset(buffer.get(), 0, buf);
 
@@ -126,7 +121,7 @@ public:
     Helper::AsyncManager<AsyncResult_t> manager;
     for (const auto &partitionName : partitions) {
       manager.addProcess(&ErasePlugin::runAsync, this, partitionName);
-      LOGNF(PLUGIN, logPath, INFO) << "Created thread for erasing partition: " << std::quoted(partitionName) << std::endl;
+      Log::info("Created thread for erasing partition: {}", partitionName);
     }
 
     manager.startAll();

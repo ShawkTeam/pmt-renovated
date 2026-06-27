@@ -18,13 +18,12 @@
 #include <chrono>
 #include <fcntl.h>
 #include <future>
-#include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 #include <private/android_filesystem_config.h>
 
 #define PLUGIN "BackupPlugin"
-#define PLUGIN_VERSION "1.2"
+#define PLUGIN_VERSION "1.3"
 
 namespace PartitionManager {
 
@@ -40,14 +39,12 @@ class BackupPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION BackupPlugin() = default;
   PLUGIN_SECTION ~BackupPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     flags = &mainFlags;
     cmd = mainApp.addSubcommand("backup", "Backup partition(s) to file(s).");
     cmd->addOption("partition(s)", rawPartitions, "Partition name(s)")->required();
@@ -67,7 +64,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(getName(), logPath, INFO) << getName() << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -84,13 +81,11 @@ public:
     if (partition->size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
 
     const uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition->size()));
-
-    LOGNF(PLUGIN, logPath, INFO) << "Backing up " << partitionName << " to " << outputName << std::endl;
+    Log::info("Backing up {} to {}", partitionName, outputName);
 
     if (Flags.onLogical && tType != PartitionMap::DYNAMIC) {
       if (Flags.forceProcess)
-        LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partitionName << " is exists but not logical. Ignoring (from --force, -f)."
-                                        << std::endl;
+        Log::warning("Partition {} is exists but not logical. Ignoring (from --force, -f).", partitionName);
       else
         return AsyncResult_t::Error("Used --logical (-l) flag but is not logical partition: {}", partitionName);
     }
@@ -98,8 +93,7 @@ public:
     if (Helper::fileIsExists(outputName) && !Flags.forceProcess) {
       return AsyncResult_t::Error("File {} already exists. Remove it, or use --force (-f) flag.", outputName);
     }
-
-    LOGNF(PLUGIN, logPath, INFO) << "Using buffer size (for backing up " << partitionName << "): " << buf << std::endl;
+    Log::info("Using buffer size (for backing up {}): {}", partitionName, buf);
 
     std::shared_ptr<PartitionMap::Progress_t> progress;
     if (renderer) progress = renderer->add(partitionName, partition->size());
@@ -124,18 +118,15 @@ public:
         return AsyncResult_t::Error("Verification failed: {} and {} have different SHA-256 hashes.",
                                     partition->absolutePath().string(), outputName);
       }
-      LOGNF(PLUGIN, logPath, INFO) << "SHA-256 verification successful for " << outputName << std::endl;
+      Log::info("SHA-256 verification successful for {}", outputName);
     }
 
     if (!noSetPermissions) {
-      if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY)) {
-        LOGNF(PLUGIN, logPath, WARNING) << "Failed to change owner of output file: " << outputName
-                                        << ". Access problems may occur in non-root mode" << std::endl;
-      }
-      if (!Helper::changeMode(outputName, DEFAULT_FILE_PERMS)) {
-        LOGNF(PLUGIN, logPath, WARNING) << "Failed to change mode of output file to " << std::oct << DEFAULT_FILE_PERMS << ": "
-                                        << outputName << ". Access problems may occur in non-root mode" << std::endl;
-      }
+      if (!Helper::changeOwner(outputName, AID_EVERYBODY, AID_EVERYBODY))
+        Log::info("Failed to change owner of output file: {}. Access problems may occur in non-root users.");
+      if (!Helper::changeMode(outputName, DEFAULT_FILE_PERMS))
+        Log::info("Failed to change mode of output file to {:o}: {}. Access problems may occur in non-root users.", DEFAULT_FILE_PERMS,
+                  outputName);
     }
 
     return AsyncResult_t::Success("Partition {} successfully backed up to {}", partitionName, outputName);
@@ -157,7 +148,7 @@ public:
       if (!outputDirectory.empty()) outputName.insert(0, outputDirectory + '/');
 
       manager.addProcess(&BackupPlugin::runAsync, this, partitionName, outputName, renderer.get());
-      LOGNF(PLUGIN, logPath, INFO) << "Created thread for backing up " << partitionName << std::endl;
+      Log::info("Created thread for backing up {}", partitionName);
     }
 
     PLUGIN_END_WITH_RENDERER(renderer, manager);

@@ -129,13 +129,11 @@ template <typename PathType> bool linkIsExists(PathType &&entry) {
 template <typename PathType, typename StringType = std::string> bool writeFile(PathType &&file, StringType &&text) {
   std::filesystem::path p(std::forward<PathType>(file));
   std::string str(std::forward<StringType>(text));
-  LOGN(HELPER, INFO) << "write input string to " << std::quoted_string(p) << " requested." << std::endl;
+  Log::info("Writing input string to {}.", std::quoted_string(p));
 
   auto fp = UniqueFP(p, "a");
   if (!fp) return false;
   fp.printf("{}", str);
-
-  LOGN(HELPER, INFO) << "write " << std::quoted_string(p) << " successfully." << std::endl;
   return true;
 }
 
@@ -154,7 +152,7 @@ template <typename PathType, typename StringType = std::string> bool writeFile(P
 template <typename PathType, typename StringType = std::string>
 std::optional<ConstIfCharPointer_t<StringType>> readFile(PathType &&file) {
   std::filesystem::path p(std::forward<PathType>(file));
-  LOGN(HELPER, INFO) << "read " << std::quoted_string(p) << " requested." << std::endl;
+  Log::info("Reading file content from {}.", std::quoted_string(p));
 
   auto fp = UniqueFP(p, "r");
   if (!fp) return std::nullopt;
@@ -164,7 +162,6 @@ std::optional<ConstIfCharPointer_t<StringType>> readFile(PathType &&file) {
   while (fp.gets(buffer, sizeof(buffer)))
     str += buffer;
 
-  LOGN(HELPER, INFO) << "read " << p << " successfull." << std::endl;
   ConstIfCharPointer_t<StringType> res = str.c_str();
   return res;
 }
@@ -177,7 +174,7 @@ std::optional<ConstIfCharPointer_t<StringType>> readFile(PathType &&file) {
 template <typename PathType> bool copyFile(PathType &&file, PathType &&dest) {
   std::filesystem::path _file(std::forward<PathType>(file));
   std::filesystem::path _dest(std::forward<PathType>(dest));
-  LOGN(HELPER, INFO) << "copy " << std::quoted_string(_file) << " to " << std::quoted_string(_dest) << " requested." << std::endl;
+  Log::info("Copying file from {} to {}.", std::quoted_string(_file), std::quoted_string(_dest));
 
   const auto src_fd = UniqueFD(_file, O_RDONLY);
   if (!src_fd) return false;
@@ -192,7 +189,6 @@ template <typename PathType> bool copyFile(PathType &&file, PathType &&dest) {
   }
 
   if (br == -1) return false;
-  LOGN(HELPER, INFO) << "copy " << std::quoted_string(_file) << " to " << std::quoted_string(_dest) << " successfully." << std::endl;
   return true;
 }
 
@@ -222,7 +218,7 @@ bool eraseDirectoryRecursive(const std::filesystem::path &directory);
 template <typename ReturnType = int64_t>
   requires std::is_integral_v<ReturnType>
 ReturnType fileSize(const std::filesystem::path &file) {
-  LOGN(HELPER, INFO) << "get file size request: " << std::quoted(file.string()) << std::endl;
+  Log::info("Getting file size of {}.", file.string());
   struct stat st{};
   if (stat(file.c_str(), &st) != 0) return -1;
   return static_cast<ReturnType>(st.st_size);
@@ -288,7 +284,7 @@ std::string currentTime();
 template <typename ExitCodeType = int>
   requires std::is_integral_v<ExitCodeType>
 std::pair<std::string, ExitCodeType> runCommandWithOutput(const std::string &cmd) {
-  LOGN(HELPER, INFO) << "run command and catch out request: " << cmd << std::endl;
+  Log::info("Running command and catch output: {}.", cmd);
 
   int pipefd[2];
   if (pipe(pipefd) < 0) return {{}, (ExitCodeType)-1};

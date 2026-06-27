@@ -32,8 +32,7 @@ static std::string bytesToHexString(const unsigned char *bytes, size_t length) {
 }
 
 std::optional<std::string> sha256Of(const std::filesystem::path &path) {
-  LOGN(HELPER, INFO) << "get sha256 of " << std::quoted(path.string()) << " request. Getting full path (if input is link and exists)."
-                     << std::endl;
+  Log::info("Trying to get sha256 of {}.", std::quoted_string(path));
 
   const std::string fp = (isLink(path)) ? readSymlink(path) : path.string();
   if (!isExists(fp)) throw Error("Is not exists or not file: {}", fp);
@@ -56,16 +55,16 @@ std::optional<std::string> sha256Of(const std::filesystem::path &path) {
     throw Error("SHA256_Final failed for: {}", fp);
   }
 
-  LOGN(HELPER, INFO) << "get sha256 of " << std::quoted(path.string()) << " successfully." << std::endl;
+  Log::info("Readed sha256 of {}", std::quoted_string(path));
   return bytesToHexString(hash, SHA256_DIGEST_LENGTH);
 }
 
 bool sha256Compare(const std::filesystem::path &file1, const std::filesystem::path &file2) {
-  LOGN(HELPER, INFO) << "comparing sha256 signatures of input files." << std::endl;
+  Log::info("Comparing sha256 values of input files.");
   const auto f1 = sha256Of(file1);
   const auto f2 = sha256Of(file2);
   if (!f1 || !f2 || f1->empty() || f2->empty()) return false;
-  LOGN_IF(HELPER, INFO, *f1 == *f2) << "(): input files is contains same sha256 signature." << std::endl;
+  Log::info("Input files are {}.", *f1 == *f2 ? "same" : "not same");
   return *f1 == *f2;
 }
 

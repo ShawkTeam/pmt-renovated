@@ -249,16 +249,16 @@ auto physicalParts = Tables.partitions();
 nlohmann::json j;
 j["key"] = "value";
 j["array"] = nlohmann::json::array();
-Out::println("{}", j.dump(2));
+Log::println("{}", j.dump(2));
 
 // Formatted text output
-Out::println("Name: {} | Size: {}", name, size);
+Log::println("Name: {} | Size: {}", name, size);
 
 // File output
 std::ofstream file(outputFile);
 if (file) {
     file << content;
-    Out::println("Output written to: {}", outputFile);
+    Log::println("Output written to: {}", outputFile);
 }
 ```
 

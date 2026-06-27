@@ -342,7 +342,7 @@ namespace Callbacks {
 /// @brief A callback for viewing plugin version.
 inline std::function<void()> ViewPluginVersion(const std::string_view name, const std::string_view &ver, bool do_exit = true) {
   return [&]() {
-    Out::println("{} v{}", name, ver);
+    Log::println("{} v{}", name, ver);
     if (do_exit) std::exit(0);
   };
 }
@@ -783,10 +783,7 @@ public:
 
 /// @brief A command-line application.
 class App {
-  std::string name;
-  std::string cmd_name;
-  std::string description;
-  std::string license_string;
+  std::string name, cmd_name, description, license_string, version_string;
   bool subcmd_required;
   bool auto_help_enabled;
   bool help_triggered = false;
@@ -851,8 +848,8 @@ class App {
 
 public:
   App() = default;
-  App(const std::string &name, const std::string &desc = "")
-      : name(name), cmd_name(name), description(desc), subcmd_required(false), auto_help_enabled(true) {
+  App(const std::string &name, const std::string &version, const std::string &desc = "")
+      : name(name), cmd_name(name), description(desc), version_string(version), subcmd_required(false), auto_help_enabled(true) {
   } ///< Construct a new App object.
 
   App(App &&other) = default;            ///< Move constructor.
@@ -967,6 +964,9 @@ public:
   /// @brief Set license text.
   void setLicenseString(const std::string &s) { license_string = s; }
 
+  /// @brief Set version string.
+  void setVersionString(const std::string &s) { version_string = s; }
+
   /// @brief Set fallback mode.
   void setFallback(bool v = true) { fallback = v; }
 
@@ -1047,6 +1047,7 @@ public:
       std::cout << "See " << cmd_name << " -h or --help for global options.\n";
       if (!license_string.empty()) std::cout << license_string << std::endl;
     } else {
+      std::cout << name << " v" << version_string << "\n";
       std::cout << "Usage: " << cmd_name;
       if (!subcommands.empty()) std::cout << " [SUBCOMMAND]";
       if (!options.empty()) std::cout << " [OPTIONS]\n";

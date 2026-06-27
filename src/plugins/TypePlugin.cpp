@@ -20,7 +20,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "TypePlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -32,14 +32,12 @@ class TypePlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION TypePlugin() = default;
   PLUGIN_SECTION ~TypePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("type", "Get type of the partition(s) or image(s).");
     flags = &mainFlags;
     cmd->addOption("content(s)", contents, "Content(s)")->required();
@@ -57,7 +55,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -84,7 +82,7 @@ public:
       for (const auto &[magic, name] : magics) {
         if (PartitionMap::Extra::hasMagic(magic, static_cast<ssize_t>(bufferSize),
                                           Helper::fileIsExists(content) ? content : partition->absolutePath().c_str())) {
-          Out::println("{} contains {} magic ({})", content, name, PartitionMap::Extra::formatMagic(magic));
+          Log::println("{} contains {} magic ({})", content, name, PartitionMap::Extra::formatMagic(magic));
           found = true;
           break;
         }

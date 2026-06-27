@@ -16,16 +16,14 @@
  */
 
 #include <chrono>
-#include <cstdlib>
 #include <cstring>
 #include <random>
 #include <fcntl.h>
-#include <unistd.h>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "MemoryTestPlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -37,14 +35,12 @@ class MemoryTestPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION MemoryTestPlugin() = default;
   PLUGIN_SECTION ~MemoryTestPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("memtest", "Test your write/read speed of device.");
     flags = &mainFlags;
     cmd->addOption("testDirectory", testPath, "Path to test directory")
@@ -71,7 +67,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -83,10 +79,10 @@ public:
       throw Error("File size is more than 2GB! Sizes over 2GB may not give accurate "
                   "results in the write test. Use -f (--force) for skip this error.");
 
-    LOGNF(PLUGIN, logPath, INFO) << "Starting memory test on " << testPath << std::endl;
+    Log::info("Starting memory test on {}.", testPath.string());
     const std::string test = Helper::pathJoin(testPath, "test.bin");
 
-    LOGNF(PLUGIN, logPath, INFO) << "Generating random data for testing" << std::endl;
+    Log::info("Generating random data for testing");
     auto buffer = std::make_unique<char[]>(bufferSize);
 
     for (size_t i = 0; i < bufferSize; i++)
@@ -97,7 +93,7 @@ public:
     auto wfd = Helper::UniqueFD(test, O_WRONLY | O_CREAT | O_TRUNC | O_SYNC, 0644);
     if (!wfd) throw Error("Can't open/create test file: {}", strerror(errno));
 
-    LOGNF(PLUGIN, logPath, INFO) << "Sequential write test started!" << std::endl;
+    Log::info("Sequential write test started!");
     const auto startWrite = std::chrono::high_resolution_clock::now();
     ssize_t bytesWritten = 0;
     while (bytesWritten < testFileSize) {
@@ -109,8 +105,8 @@ public:
     const auto endWrite = std::chrono::high_resolution_clock::now();
 
     const double writeTime = std::chrono::duration<double>(endWrite - startWrite).count();
-    Out::println("Sequential write speed: {:3.0f} MB/s", (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / writeTime);
-    LOGNF(PLUGIN, logPath, INFO) << "Sequential write test done!" << std::endl;
+    Log::println("Sequential write speed: {:3.0f} MB/s", (static_cast<double>(testFileSize) / (1024.0 * 1024.0)) / writeTime);
+    Log::info("Sequential write test done!");
     wfd.close();
 
     if (!doNotReadTest) {
@@ -119,7 +115,7 @@ public:
       auto rfd = Helper::UniqueFD(test, O_RDONLY | O_DIRECT);
       if (rfd < 0) throw Error("Can't open test file: {}", strerror(errno));
 
-      LOGNF(PLUGIN, logPath, INFO) << "Sequential read test started!" << std::endl;
+      Log::info("Sequential read test started!");
       const auto startRead = std::chrono::high_resolution_clock::now();
       size_t total = 0;
       ssize_t bytesRead;
@@ -148,8 +144,8 @@ public:
 
       const auto endRead = std::chrono::high_resolution_clock::now();
       const double read_time = std::chrono::duration<double>(endRead - startRead).count();
-      Out::println("Sequential read speed: {:3.0f} MB/s", (static_cast<double>(total) / (1024.0 * 1024.0)) / read_time);
-      LOGNF(PLUGIN, logPath, INFO) << "Sequential read test done!" << std::endl;
+      Log::println("Sequential read speed: {:3.0f} MB/s", (static_cast<double>(total) / (1024.0 * 1024.0)) / read_time);
+      Log::info("Sequential read test done!");
     }
 
     return true;

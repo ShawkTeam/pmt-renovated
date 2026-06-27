@@ -73,7 +73,7 @@ int android_reboot(const unsigned cmd, int /*flags*/, const char *arg) {
 namespace Helper {
 
 bool runCommand(const std::string &cmd) {
-  LOGN(HELPER, INFO) << "run command request: " << cmd << std::endl;
+  Log::info("Trying to run command: {}.", std::quoted_string(cmd));
 
   const std::array<const char *, 4> args = {
 #ifdef __ANDROID__
@@ -97,7 +97,7 @@ bool runCommand(const std::string &cmd) {
 }
 
 bool confirmPropt(const std::string &message, int maxTries) {
-  LOGN(HELPER, INFO) << "create confirm propt request." << std::endl;
+  Log::info("Trying to get confirmation from user.");
   static int total_tries = 1;
   char p;
 
@@ -156,12 +156,12 @@ std::filesystem::path pathBasename(const std::filesystem::path &entry) { return 
 std::filesystem::path pathDirname(const std::filesystem::path &entry) { return entry.parent_path(); }
 
 bool changeMode(const std::filesystem::path &file, const mode_t mode) {
-  LOGN(HELPER, INFO) << "change mode request: " << file << ". As mode: " << mode << std::endl;
+  Log::info("Trying to change mode of {}.", std::quoted_string(file));
   return chmod(file.c_str(), mode) == 0;
 }
 
 bool changeOwner(const std::filesystem::path &file, const uid_t uid, const gid_t gid) {
-  LOGN(HELPER, INFO) << "change owner request: " << file << ". As owner:group: " << uid << ":" << gid << std::endl;
+  Log::info("Trying to change owner of {}.", std::quoted_string(file));
   return chown(file.c_str(), uid, gid) == 0;
 }
 
@@ -180,18 +180,18 @@ std::set<std::string> getPaths() {
 }
 
 bool isRooted() {
-  LOGN(HELPER, INFO) << "Searching su binary..." << std::endl;
+  Log::info("Trying to find su binary.");
   bool found;
 
   for (const auto &path : KNOWN_SU_BINARY_PATHS) {
     std::string full = pathJoin(path, BINARY_SU);
     if (isExists(full)) {
-      LOGN(HELPER, INFO) << "Found su binary: " << full << std::endl;
+      Log::info("Found su binary: {}.", full);
       found = true;
     }
   }
 
-  LOGN_IF(HELPER, INFO, found) << "This device has su binary, so it's rooted!" << std::endl;
+  Log::info("{}", found ? "This device has su binary, so it's rooted!" : "This device does not have su binary, so it's not rooted!");
   return found;
 }
 
@@ -203,7 +203,7 @@ std::optional<std::string> getProperty(const std::string &prop) {
 }
 
 bool reboot(const std::string &arg) {
-  LOGN(HELPER, INFO) << "reboot request sent!!!" << std::endl;
+  Log::info("Trying to reboot device to {}.", arg.empty() ? "system" : arg);
 
   unsigned cmd = ANDROID_RB_RESTART2;
   if (const auto &prop = getProperty("ro.build.version.sdk"); prop) {

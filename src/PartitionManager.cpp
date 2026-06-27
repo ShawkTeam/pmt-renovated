@@ -33,11 +33,7 @@ BasicFlags::BasicFlags()
   }
 }
 
-__attribute__((constructor)) void init() {
-  Helper::Logger::Properties::setLogging(true);
-  Helper::Logger::Properties::setName("pmt");
-  Helper::Logger::Properties::setFile("/sdcard/Documents/last_pmt_logs.log");
-}
+__attribute__((constructor)) void init() { Helper::Logger::Properties::setLogging(true); }
 
 std::string getAppVersion() { MKVERSION("pmt"); }
 

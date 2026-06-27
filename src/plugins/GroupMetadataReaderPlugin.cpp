@@ -20,7 +20,7 @@
 #include <liblp/metadata_format.h>
 
 #define PLUGIN "GroupMetadataReaderPlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -28,15 +28,13 @@ class GroupMetadataReaderPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION GroupMetadataReaderPlugin() = default;
   PLUGIN_SECTION ~GroupMetadataReaderPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     flags = &mainFlags;
-    LOGI << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
     cmd = mainApp.addSubcommand("read-groups-metadata", "Read logical partition groups metadata.");
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
         ->superior()
@@ -46,7 +44,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -58,7 +56,7 @@ public:
     if (!dTab->isSupported()) throw Error("This device doesn't support dynamic partitions.");
 
     for (const auto &group : dTab->getGroups()) {
-      Out::println("name={} max_size={} flags={}", std::string(group.name), group.maximum_size,
+      Log::println("name={} max_size={} flags={}", std::string(group.name), group.maximum_size,
                    (group.flags & LP_GROUP_SLOT_SUFFIXED ? "slot_suffixed" : ""));
     }
 

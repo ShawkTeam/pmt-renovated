@@ -22,6 +22,7 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include <generated/buildInfo.hpp>
 #include <libhelper/cmdline.hpp>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
@@ -45,7 +46,7 @@ static void sigHandler(int sig) {
 }
 
 int main(int argc, char **argv) {
-  Helper::CMDLine::App app("Partition Manager Tool");
+  Helper::CMDLine::App app("Partition Manager Tool", BUILD_VERSION);
   std::vector<char *> argvStorage;
   std::vector<std::string> args;
   Helper::Silencer silencer(
@@ -105,7 +106,7 @@ int main(int argc, char **argv) {
 
     Helper::Logger::Properties::setPrinting(Flags.verboseMode);
     Helper::Logger::Properties::setFile(Flags.logFile, true);
-    PartitionManager::BasicManager manager(app, Flags.logFile, Flags);
+    PartitionManager::BasicManager manager(app, Flags);
 
     manager.loadBuiltinPlugins(); // Load built-in plugins if existed.
     if (!plugins.empty()) {
@@ -122,13 +123,13 @@ int main(int argc, char **argv) {
     app.parse(argc, argv);
 
     if (argc < 2 || (argc == 3 && (!plugins.empty() || !pluginPath.empty()))) {
-      Out::println("Usage: {} [OPTIONS] [SUBCOMMAND]\nUse --help for more information.", argv[0]);
+      Log::println("Usage: {} [OPTIONS] [SUBCOMMAND]\nUse --help for more information.", argv[0]);
       return EXIT_FAILURE;
     }
 
     if (Flags.quietProcess) silencer.silence();
     if (Flags.viewLicense) {
-      Out::println("Copyright (C) 2026 Yağız Zengin\n\nThis program is free software: you can redistribute it and/or modify\nit under "
+      Log::println("Copyright (C) 2026 Yağız Zengin\n\nThis program is free software: you can redistribute it and/or modify\nit under "
                    "the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of "
                    "the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be "
                    "useful,\nbut WITHOUT ANY WARRANTY; without even the implied warranty of\nMERCHANTABILITY or FITNESS FOR A "
@@ -137,7 +138,7 @@ int main(int argc, char **argv) {
       return EXIT_SUCCESS;
     }
     if (Flags.viewVersion) {
-      Out::println("{}", PartitionManager::getAppVersion());
+      Log::println("{}", PartitionManager::getAppVersion());
       return EXIT_SUCCESS;
     }
 

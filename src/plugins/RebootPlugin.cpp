@@ -19,7 +19,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "RebootPlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -29,17 +29,15 @@ class RebootPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION RebootPlugin() = default;
   PLUGIN_SECTION ~RebootPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("reboot", "Reboot the device.");
     flags = &mainFlags;
-    cmd->addOption("rebootTarget", rebootTarget, "Reboot target (default: normal)");
+    cmd->addOption("rebootTarget", rebootTarget, "Reboot target")->defaultValue("normal");
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
         ->superior()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
@@ -47,7 +45,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -55,11 +53,10 @@ public:
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION bool run() override {
-    LOGNF(PLUGIN, logPath, INFO) << "Rebooting device!!! (custom reboot target: " << (rebootTarget.empty() ? "none" : rebootTarget)
-                                 << std::endl;
+    Log::info("Rebooting device!!! (reboot target: {})", rebootTarget);
 
     if (Helper::Android::reboot(rebootTarget))
-      Out::println("Reboot command was sent");
+      Log::println("Reboot command was sent");
     else
       throw Error("Cannot reboot device!");
 

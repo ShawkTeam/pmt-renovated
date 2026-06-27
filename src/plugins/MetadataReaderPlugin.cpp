@@ -18,9 +18,10 @@
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 #include <liblp/metadata_format.h>
+#include <libopenpart/openpart.h>
 
 #define PLUGIN "MetadataReaderPlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -30,15 +31,13 @@ class MetadataReaderPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION MetadataReaderPlugin() = default;
   PLUGIN_SECTION ~MetadataReaderPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     flags = &mainFlags;
-    LOGI << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("read-metadata", "Read logical partition metadata of input partition(s)")
               ->footer("Use get-all or getvar-all as partition name for reading "
                        "all logical partition metadata of all logical partitions.");
@@ -51,7 +50,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGN(PLUGIN, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -66,12 +65,19 @@ public:
     auto reader = [&tableMetadata] FOREACH_LP_METADATA_PARTITION_PARAMETERS_CONST -> bool {
       const auto &group = tableMetadata.groups[metadata.group_index];
       const auto &path = Helper::pathJoin("/dev/block/mapper", metadata.name);
-      uint64_t size = 0;
-      auto fd = Helper::UniqueFD(std::filesystem::read_symlink(path).string(), O_RDONLY);
+      openpart_t *op = openpart_open(path.c_str(), OP_RDONLY, 0);
+      if (!op) {
+        Log::error("Failed to open partition: {}", path.string());
+        return false;
+      }
 
-      if (fd.ioctl(static_cast<unsigned int>(BLKGETSIZE64), &size) != 0)
-        LOGE << "ioctl(BLKGETSIZE64) failed: " << std::quoted_string(path.c_str()) << ": " << std::strerror(errno) << std::endl;
+      uint64_t size = openpart_get_size(op);
+      if (size == UINT64_MAX) {
+        Log::error("Failed to get size of partition: {}: {}", path.string(), openpart_strerror(op));
+        size = 0;
+      }
 
+      openpart_close(&op);
       std::vector<std::string> attr_strs;
       attr_strs.reserve(4);
       if (metadata.attributes & LP_PARTITION_ATTR_READONLY) attr_strs.push_back("readonly");
@@ -79,12 +85,12 @@ public:
       if (metadata.attributes & LP_PARTITION_ATTR_UPDATED) attr_strs.push_back("updated");
       if (metadata.attributes & LP_PARTITION_ATTR_DISABLED) attr_strs.push_back("disabled");
 
-      Out::print("name={} group={} size={} attributes=", std::string(metadata.name), std::string(group.name), size);
+      Log::print("name={} group={} size={} attributes=", std::string(metadata.name), std::string(group.name), size);
       for (const auto &attr : attr_strs) {
-        Out::print("{}", attr);
-        if (&attr != &attr_strs.back()) Out::print(",");
+        Log::print("{}", attr);
+        if (&attr != &attr_strs.back()) Log::print(",");
       }
-      Out::print("\n");
+      Log::print("\n");
 
       return true;
     };

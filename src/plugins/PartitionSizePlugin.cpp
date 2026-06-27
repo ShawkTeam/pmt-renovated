@@ -19,7 +19,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "PartitionSizePlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -30,14 +30,12 @@ class PartitionSizePlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION PartitionSizePlugin() = default;
   PLUGIN_SECTION ~PartitionSizePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("sizeof", "Tell size(s) of input partition list.")
               ->footer("Use get-all or getvar-all as partition name for getting "
                        "sizes of all partitions.\nUse get-logicals as partition "
@@ -61,7 +59,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -77,9 +75,9 @@ public:
 
     auto getter = [this, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS_CONST -> bool {
       if (onlySize)
-        Out::println("{}", partition.formattedSizeString(multiple, true));
+        Log::println("{}", partition.formattedSizeString(multiple, true));
       else
-        Out::println("{}: {}", partition.name().c_str(), partition.formattedSizeString(multiple));
+        Log::println("{}: {}", partition.name().c_str(), partition.formattedSizeString(multiple));
 
       return true;
     };

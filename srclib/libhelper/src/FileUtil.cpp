@@ -29,15 +29,14 @@ namespace Helper {
 
 bool makeDirectory(const std::filesystem::path &path) {
   if (isExists(path)) return false;
-  LOGN(HELPER, INFO) << "trying make directory: " << std::quoted(path.string()) << std::endl;
+  Log::info("Trying make directory: {}.", std::quoted_string(path));
   return mkdir(path.c_str(), DEFAULT_DIR_PERMS) == 0;
 }
 
 bool makeRecursiveDirectory(const std::filesystem::path &paths) {
-  LOGN(HELPER, INFO) << "make recursive directory requested: " << std::quoted(paths.string()) << std::endl;
+  Log::info("Trying make recursive directory: {}.", std::quoted_string(paths));
 
   char tmp[PATH_MAX];
-
   snprintf(tmp, sizeof(tmp), "%s", paths.c_str());
   if (const size_t len = strlen(tmp); tmp[len - 1] == '/') tmp[len - 1] = '\0';
 
@@ -55,42 +54,39 @@ bool makeRecursiveDirectory(const std::filesystem::path &paths) {
     if (mkdir(tmp, DEFAULT_DIR_PERMS) != 0 && errno != EEXIST) return false;
   }
 
-  LOGN(HELPER, INFO) << std::quoted(paths.string()) << " successfully created." << std::endl;
+  Log::info("{} successfully created.", std::quoted_string(paths));
   return true;
 }
 
 bool createFile(const std::filesystem::path &path) {
-  LOGN(HELPER, INFO) << "create file request: " << std::quoted(path.string()) << std::endl;
+  Log::info("Trying create file: {}.", std::quoted_string(path));
 
   if (isExists(path)) return false;
-
   const auto fd = UniqueFD(path.c_str(), O_RDONLY | O_CREAT, DEFAULT_FILE_PERMS);
   if (!fd) return false;
 
-  LOGN(HELPER, INFO) << "create file " << std::quoted(path.string()) << " successfull." << std::endl;
+  Log::info("{} successfully created.", std::quoted_string(path));
   return true;
 }
 
 bool createSymlink(const std::filesystem::path &entry1, const std::filesystem::path &entry2) {
-  LOGN(HELPER, INFO) << "symlink " << std::quoted(entry1.string()) << " to " << std::quoted(entry2.string()) << " requested."
-                     << std::endl;
-  if (const int ret = symlink(entry1.c_str(), entry2.c_str()); ret != 0) return false;
+  Log::info("Trying symlink {} to {}.", std::quoted_string(entry1), std::quoted_string(entry2));
 
-  LOGN(HELPER, INFO) << std::quoted(entry1.string()) << " symlinked to " << std::quoted(entry2.string()) << " successfully."
-                     << std::endl;
+  if (const int ret = symlink(entry1.c_str(), entry2.c_str()); ret != 0) return false;
+  Log::info("{} successfully symlinked to {}.", std::quoted_string(entry1), std::quoted_string(entry2));
   return true;
 }
 
 bool eraseEntry(const std::filesystem::path &entry) {
-  LOGN(HELPER, INFO) << "erase " << std::quoted(entry.string()) << " requested." << std::endl;
+  Log::info("Trying to remove {}.", std::quoted_string(entry));
   if (const int ret = remove(entry.c_str()); ret != 0) return false;
 
-  LOGN(HELPER, INFO) << std::quoted(entry.string()) << " erased successfully." << std::endl;
+  Log::info("{} removed.", std::quoted_string(entry));
   return true;
 }
 
 bool eraseDirectoryRecursive(const std::filesystem::path &directory) {
-  LOGN(HELPER, INFO) << "erase recursive requested: " << std::quoted(directory.string()) << std::endl;
+  Log::info("Trying to remove {} recursively.", std::quoted_string(directory));
   struct stat buf{};
   dirent *entry;
 
@@ -117,19 +113,20 @@ bool eraseDirectoryRecursive(const std::filesystem::path &directory) {
 
   if (rmdir(directory.c_str()) == -1) return false;
 
-  LOGN(HELPER, INFO) << std::quoted(directory.string()) << " successfully erased." << std::endl;
+  Log::info("{} removed recursively.", std::quoted_string(directory));
   return true;
 }
 
 std::string readSymlink(const std::filesystem::path &entry) {
-  LOGN(HELPER, INFO) << "read symlink request: " << std::quoted(entry.string()) << std::endl;
+  Log::info("Trying to read {} symlink.", std::quoted_string(entry));
 
   char target[PATH_MAX];
   const ssize_t len = readlink(entry.c_str(), target, (sizeof(target) - 1));
   if (len == -1) return entry.c_str();
 
   target[len] = '\0';
-  LOGN(HELPER, INFO) << std::quoted(entry.string()) << " is symlink to " << std::quoted(target) << std::endl;
+  Log::info("{} symlink read.", std::quoted_string(entry));
   return target;
 }
+
 } // namespace Helper

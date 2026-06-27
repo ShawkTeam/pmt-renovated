@@ -27,6 +27,7 @@
 /**
  * @name Logging Macros
  * @brief Macro shortcuts for logging.
+ * @deprecated Use new functions for doing this. See @c Log namespace.
  *
  * @code
  * // Basic logging.
@@ -45,26 +46,28 @@
  *
  * @{
  */
-#define LOG(level)                                                                                                                    \
-  Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), Helper::Logger::Properties::NAME.c_str(), __FILE__,       \
-                 __LINE__)
-#define LOGF(file, level) Helper::Logger(level, __func__, file, Helper::Logger::Properties::NAME.c_str(), __FILE__, __LINE__)
+#define LOG(level) Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), __FILE__, __LINE__)
+#define LOGF(file, level) Helper::Logger(level, __func__, file, __FILE__, __LINE__)
+
+/// @warning This macro is unusable.
 #define LOGN(name, level) Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), name, __FILE__, __LINE__)
+/// @warning This macro is unusable.
 #define LOGNF(name, file, level) Helper::Logger(level, __func__, file, name, __FILE__, __LINE__)
 
 #define LOG_IF(level, condition)                                                                                                      \
   if (!(condition)) {                                                                                                                 \
   } else                                                                                                                              \
-    Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), Helper::Logger::Properties::NAME.c_str(), __FILE__,     \
-                   __LINE__)
+    Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), __FILE__, __LINE__)
 #define LOGF_IF(file, level, condition)                                                                                               \
   if (!(condition)) {                                                                                                                 \
   } else                                                                                                                              \
-    Helper::Logger(level, __func__, file, Helper::Logger::Properties::NAME.c_str(), __FILE__, __LINE__)
+    Helper::Logger(level, __func__, file, __FILE__, __LINE__)
+/// @warning This macro is unusable.
 #define LOGN_IF(name, level, condition)                                                                                               \
   if (!(condition)) {                                                                                                                 \
   } else                                                                                                                              \
     Helper::Logger(level, __func__, Helper::Logger::Properties::FILE.c_str(), name, __FILE__, __LINE__)
+/// @warning This macro is unusable.
 #define LOGNF_IF(name, file, level, condition)                                                                                        \
   if (!(condition)) {                                                                                                                 \
   } else                                                                                                                              \
@@ -75,6 +78,8 @@
 #include <string>
 #include <fstream>
 #include <iomanip>
+#include <source_location>
+
 #include <libhelper/definations.hpp>
 
 namespace std {
@@ -115,8 +120,13 @@ enum LogLevels {
 class Logger {
   LogLevels level;
   std::ostringstream oss;
-  std::string function, logFile, name, file;
+  std::string function, logFile, file;
   int line;
+
+  std::string stripQuotes(const std::string &s) {
+    if (s.size() >= 2 && s.front() == '"' && s.back() == '"') return s.substr(1, s.size() - 2);
+    return s;
+  }
 
 public:
   /**
@@ -145,7 +155,7 @@ public:
    */
   class Properties final {
   public:
-    inline static std::string FILE = "last_logs.log", NAME = "main";
+    inline static std::string FILE = "last_logs.log";
     inline static bool PRINT_TO_STDOUT = false, DISABLE = false;
 
     /**
@@ -157,12 +167,6 @@ public:
       moveOldLogs(FILE, file, remove);
       FILE = file;
     }
-
-    /**
-     * @brief Change program name.
-     * @param name Program name.
-     */
-    static void setName(const std::string &name) { NAME = name; }
 
     /**
      * @brief Change whether logs are written to @c stdout.
@@ -179,7 +183,6 @@ public:
     /// @brief Reset logging properties to defaults.
     static void reset() {
       FILE = "last_logs.log";
-      NAME = "main";
       PRINT_TO_STDOUT = false;
       DISABLE = false;
     }
@@ -193,17 +196,16 @@ public:
     const tm *date = localtime(&t);
     std::ostringstream __oss;
     __oss << "<" << static_cast<char>(level) << "> [ "
-          << "<prog " << name << "> "
-          << "<on " << std::filesystem::path(file).filename() << ":" << line << "> " << date->tm_mday << "/" << date->tm_mon + 1 << "/"
-          << date->tm_year + 1900 << " " << date->tm_hour << ":" << date->tm_min << ":" << date->tm_sec << "] " << function
-          << "(): " << oss.str();
+          << "<on " << stripQuotes(std::filesystem::path(file).filename()) << ":" << line << "> " << date->tm_mday << "/"
+          << date->tm_mon + 1 << "/" << date->tm_year + 1900 << " " << date->tm_hour << ":" << date->tm_min << ":" << date->tm_sec
+          << "] " << function << "(): " << oss.str();
     std::string logLine = __oss.str();
 
     if (!std::filesystem::exists(logFile)) {
       if (std::ofstream tempFile(logFile, std::ios::out); !tempFile) {
         Properties::setFile("last_logs.log");
-        LOGN(HELPER, INFO) << "Cannot create log file: " << logFile << ": " << strerror(errno) << std::endl;
-        LOGN(HELPER, INFO) << "New logging file: last_logs.log" << std::endl;
+        LOG(INFO) << "Cannot create log file: " << logFile << ": " << strerror(errno) << std::endl;
+        LOG(INFO) << "New logging file: last_logs.log" << std::endl;
       }
     }
 
@@ -215,8 +217,8 @@ public:
       fileStream << logLine;
     } else {
       Properties::setFile("last_logs.log");
-      LOGN(HELPER, INFO) << "Cannot write logs to log file: " << logFile << ": " << strerror(errno)
-                         << " Logging file setting up as: last_logs.log." << std::endl;
+      LOG(INFO) << "Cannot write logs to log file: " << logFile << ": " << strerror(errno)
+                << " Logging file setting up as: last_logs.log." << std::endl;
     }
 
     if (Properties::PRINT_TO_STDOUT) fprintf(stdout, "%s", logLine.c_str());
@@ -224,9 +226,8 @@ public:
 
   Logger() = delete;
   Logger(const Logger &) = delete;
-  Logger(const LogLevels level, std::string function, std::string logFile, std::string name, std::string file, int line)
-      : level(level), function(std::move(function)), logFile(std::move(logFile)), name(std::move(name)), file(std::move(file)),
-        line(line) {}
+  Logger(const LogLevels level, std::string function, std::string logFile, std::string file, int line)
+      : level(level), function(std::move(function)), logFile(std::move(logFile)), file(std::move(file)), line(line) {}
 
   /// @brief To use the @c << operator for receiving non-function-like inputs.
   template <typename T> Logger &operator<<(const T &msg) {
@@ -266,20 +267,105 @@ inline Helper::LogLevels ABORT = Helper::LogLevels::ABORT;
  * @namespace Out
  * @brief Output namespace.
  */
-namespace Out {
+namespace Log {
+
+/// @brief Parses the function name from a full function decleration (from std::source_location::function_name()).
+inline std::string parseFunctionName(const std::string &full) {
+  auto end = full.find('(');
+  if (end == std::string_view::npos) return full;
+  auto begin = full.rfind(':', end);
+  if (begin == std::string_view::npos)
+    begin = full.rfind(' ', end);
+  else
+    ++begin;
+  if (begin == std::string_view::npos) return full.substr(0, end);
+  return full.substr(begin, end - begin);
+}
+
+/// @brief Custom format struct for logger.
+struct log_fmt {
+  std::string_view fmt;
+  std::source_location loc;
+
+  consteval log_fmt(const char *f, std::source_location l = std::source_location::current()) : fmt(f), loc(l) {}
+};
 
 /// @brief Prints a formatted string to stdout.
-template <typename... Args> static void print(const std::format_string<Args...> &fmt, Args &&...args) {
+template <typename... Args> inline void print(const std::format_string<Args...> &fmt, Args &&...args) {
   const std::string message = std::format(fmt, std::forward<Args>(args)...);
   fprintf(stdout, "%s", message.c_str());
 }
 
 /// @brief Prints a formatted string to stdout and appends a newline.
-template <typename... Args> static void println(const std::format_string<Args...> &fmt, Args &&...args) {
+template <typename... Args> inline void println(const std::format_string<Args...> &fmt, Args &&...args) {
   const std::string message = std::format(fmt, std::forward<Args>(args)...);
   fprintf(stdout, "%s\n", message.c_str());
 }
 
-} // namespace Out
+/// @brief Logs an @c INFO level message.
+template <typename... Args> inline void info(const log_fmt &fmt, Args &&...args) {
+  std::string message;
+  try {
+    message = std::vformat(fmt.fmt, std::make_format_args(args...));
+  } catch (std::format_error &err) {
+    Log::println("Failed to format string: {}", err.what());
+    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name(), parseFunctionName(fmt.loc.function_name()),
+                 fmt.loc.line());
+    exit(EINVAL);
+  }
+  Helper::Logger(INFO, parseFunctionName(fmt.loc.function_name()), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name(),
+                 fmt.loc.line())
+      << message << std::endl;
+}
+
+/// @brief Logs a @c WARNING level message.
+template <typename... Args> inline void warning(const log_fmt &fmt, Args &&...args) {
+  std::string message;
+  try {
+    message = std::vformat(fmt.fmt, std::make_format_args(args...));
+  } catch (std::format_error &err) {
+    Log::println("Failed to format string: {}", err.what());
+    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name(), parseFunctionName(fmt.loc.function_name()),
+                 fmt.loc.line());
+    exit(EINVAL);
+  }
+  Helper::Logger(WARNING, parseFunctionName(fmt.loc.function_name()), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name(),
+                 fmt.loc.line())
+      << message << std::endl;
+}
+
+/// @brief Logs an @c ERROR level message.
+template <typename... Args> inline void error(const log_fmt &fmt, Args &&...args) {
+  std::string message;
+  try {
+    message = std::vformat(fmt.fmt, std::make_format_args(args...));
+  } catch (std::format_error &err) {
+    Log::println("Failed to format string: {}", err.what());
+    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name(), parseFunctionName(fmt.loc.function_name()),
+                 fmt.loc.line());
+    exit(EINVAL);
+  }
+  Helper::Logger(ERROR, parseFunctionName(fmt.loc.function_name()), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name(),
+                 fmt.loc.line())
+      << message << std::endl;
+}
+
+/// @brief Logs an @c ABORT level message.
+template <typename... Args> inline void abort(const log_fmt &fmt, Args &&...args) {
+  std::string message;
+  try {
+    message = std::vformat(fmt.fmt, std::make_format_args(args...));
+  } catch (std::format_error &err) {
+    Log::println("Failed to format string: {}", err.what());
+    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name(), parseFunctionName(fmt.loc.function_name()),
+                 fmt.loc.line());
+    exit(EINVAL);
+  }
+  Helper::Logger(INFO, parseFunctionName(fmt.loc.function_name()), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name(),
+                 fmt.loc.line())
+      << message << std::endl;
+}
+
+} // namespace Log
 
 #endif // #ifndef LIBHELPER_LOGGING_HPP

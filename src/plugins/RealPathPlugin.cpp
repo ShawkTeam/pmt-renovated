@@ -19,7 +19,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "RealPathPlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -30,14 +30,12 @@ class RealPathPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION RealPathPlugin() = default;
   PLUGIN_SECTION ~RealPathPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("real-path", "Tell real paths of partition(s).");
     flags = &mainFlags;
     cmd->addOption("partition(s)", partitions, "Partition name(s)")->required();
@@ -50,7 +48,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -66,16 +64,15 @@ public:
       if (!tType && !part) throw Error("Couldn't find partition: {}", partition);
       if (Flags.onLogical && !part->isLogicalPartition()) {
         if (Flags.forceProcess)
-          LOGNF(PLUGIN, logPath, WARNING) << "Partition " << partition << " is exists but not logical. Ignoring (from --force, -f)."
-                                          << std::endl;
+          Log::warning("Partition {} is exists but not logical. Ignoring (from --force, -f).", partition);
         else
           throw Error("Used --logical (-l) flag but is not logical partition: {}", partition);
       }
 
       if (byName)
-        Out::println("{}", part->pathByName().string());
+        Log::println("{}", part->pathByName().string());
       else
-        Out::println("{}", part->absolutePath().string());
+        Log::println("{}", part->absolutePath().string());
     }
 
     return true;

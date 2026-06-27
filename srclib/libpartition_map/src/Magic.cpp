@@ -19,12 +19,10 @@
 #include <map>
 #include <sstream>
 #include <string>
-#include <unistd.h>
 #include <fcntl.h>
 #include <libhelper/lib.hpp>
 #include <libpartition_map/definations.hpp>
 #include <libpartition_map/functions.hpp>
-#include <libpartition_map/redefine_logging_macros.hpp>
 
 namespace PartitionMap::Extra {
 std::map<uint64_t, std::string> FileSystemMagics = {
@@ -74,13 +72,12 @@ size_t getMagicLength(const uint64_t magic) {
 }
 
 bool hasMagic(const uint64_t magic, const ssize_t buf, const std::string &path) {
-  LOGI << "Checking magic of " << path << " with using " << buf << " byte buffer size (has magic 0x" << std::hex << magic << "?)"
-       << std::endl;
+  Log::info("Checking magic of {} with using {} byte buffer size (has magic {:#x}?)", path, buf, magic);
 
   const auto fd = Helper::UniqueFD(path, O_RDONLY);
   if (!fd) return false;
   if (buf < 1) {
-    LOGE << "Buffer size is older than 1" << std::endl;
+    Log::error("Buffer size older than 1.");
     return false;
   }
 
@@ -97,12 +94,12 @@ bool hasMagic(const uint64_t magic, const ssize_t buf, const std::string &path) 
     for (size_t j = 0; j < magicLength; ++j)
       value |= static_cast<uint64_t>(buffer[i + j]) << (8 * j);
     if (value == magic) {
-      LOGI << path << " contains 0x" << std::hex << magic << std::endl;
+      Log::info("{} contains {:#x}", path, magic);
       return true;
     }
   }
 
-  LOGI << path << " is not contains 0x" << std::hex << magic << std::endl;
+  Log::info("{} is not contains {:#x}", path, magic);
   return false;
 }
 

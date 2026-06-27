@@ -19,7 +19,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "CleanLogPlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN_VERSION "1.2"
 
 namespace PartitionManager {
 
@@ -27,14 +27,12 @@ class CleanLogPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION CleanLogPlugin() = default;
   PLUGIN_SECTION ~CleanLogPlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("clean-logs", "Clean PMT logs.");
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
         ->superior()
@@ -44,7 +42,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -52,7 +50,7 @@ public:
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
   PLUGIN_SECTION bool run() override {
-    LOGNF(PLUGIN, logPath, INFO) << "Removing log file: " << Flags.logFile << std::endl;
+    Log::info("Removing log file: {}", Flags.logFile);
     Helper::Logger::Properties::setLogging(true); // eraseEntry writes log!
     return Helper::eraseEntry(Flags.logFile);
   }

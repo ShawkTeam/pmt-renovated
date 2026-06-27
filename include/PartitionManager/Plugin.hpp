@@ -90,14 +90,13 @@ public:
   /**
    * CLI::App *cmd = nullptr;
    * BasicFlags *flags = nullptr;
-   * std::string logPath;
    */
 
   PLUGIN_SECTION BasicPlugin() = default;
   virtual PLUGIN_SECTION ~BasicPlugin() = default;
 
   /// @brief Called when the plugin is loaded.
-  virtual PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &, const std::string &, BasicFlags &) = 0;
+  virtual PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &, BasicFlags &) = 0;
   /// @brief Called when the plugin is unloaded.
   virtual PLUGIN_SECTION bool onUnload() = 0;
   /// @brief Returns true if the plugin is used in command line.
@@ -172,7 +171,6 @@ class PluginManager {
 
   std::vector<std::unique_ptr<BasePluginClass>> builtinPlugins;
   std::vector<Plugin> plugins;
-  std::string logPath;
   Helper::CMDLine::App &mainApp;
   BasicFlags &mainFlags;
 
@@ -180,12 +178,11 @@ public:
   PluginManager() = delete; /// @brief Deleted constructor.
 
   /// @brief Main constructor.
-  explicit PluginManager(Helper::CMDLine::App &cmd, std::string logpath, BasicFlags &flags)
-      : logPath(std::move(logpath)), mainApp(cmd), mainFlags(flags) {}
+  explicit PluginManager(Helper::CMDLine::App &cmd, BasicFlags &flags) : mainApp(cmd), mainFlags(flags) {}
 
   /// @brief Destructor.
   ~PluginManager() {
-    LOGN(PM, INFO) << "Destructing all loaded plugins." << std::endl;
+    Log::info("Destructing all loaded plugins.");
 
     for (auto &plugin : plugins) {
       plugin.instance->onUnload();
@@ -197,11 +194,11 @@ public:
 
   /// @brief Load built-in plugins.
   bool loadBuiltinPlugins() {
-    LOGN(PM, INFO) << "Loading built-in plugins." << std::endl;
+    Log::info("Loading built-in plugins.");
     for (auto &plugin : BuiltinPluginRegistry<BasePluginClass>::getInstance().getPlugins()) {
       auto pluginHandle = plugin();
-      LOGN(PM, INFO) << "Loading built-in plugin: " << pluginHandle->getName() << std::endl;
-      if (!pluginHandle->onLoad(mainApp, logPath, mainFlags)) return false;
+      Log::info("Loading built-in plugin: {}.", pluginHandle->getName());
+      if (!pluginHandle->onLoad(mainApp, mainFlags)) return false;
       builtinPlugins.emplace_back(std::move(pluginHandle));
     }
 
@@ -210,8 +207,7 @@ public:
 
   /// @brief Load external plugin.
   bool loadPlugin(const std::string &pluginPath) {
-    LOGN(PM, INFO) << "Loading external plugin: " << pluginPath << std::endl;
-
+    Log::info("Loading external plugin: {}.", std::quoted_string(pluginPath));
     void *handle = dlopen(pluginPath.c_str(), RTLD_NOW | RTLD_GLOBAL);
     if (!handle) throw PluginError("dlopen failed: {}: {}", pluginPath, dlerror());
 
@@ -223,12 +219,12 @@ public:
 
     auto plugin = std::unique_ptr<BasePluginClass>(create());
     if (alreadyExists(plugin->getName())) {
-      LOGN(PM, ERROR) << plugin->getName() << " already exists!" << std::endl;
+      Log::error("{} alerady exists.", plugin->getName());
       return false;
     }
-    plugin->onLoad(mainApp, logPath, mainFlags);
+    plugin->onLoad(mainApp, mainFlags);
 
-    LOGN(PM, INFO) << "Loaded external plugin: " << pluginPath << std::endl;
+    Log::info("Loaded external plugin: {}.", plugin->getName());
     plugins.push_back({plugin->getName(), handle, std::move(plugin)});
 
     return true;
@@ -236,7 +232,7 @@ public:
 
   /// @brief Run a plugin.
   bool run(const std::string &name) {
-    LOGN(PM, INFO) << "Running " << std::quoted(name) << " plugin if exists." << std::endl;
+    Log::info("Running {} plugin if exists.", std::quoted_string(name));
     for (auto &plugin : plugins) {
       if (plugin.name == name) return plugin.instance->run();
     }
@@ -249,7 +245,7 @@ public:
 
   /// @brief Run a plugin that is used in command line.
   bool runUsed() {
-    LOGN(PM, INFO) << "Running caught subcommand in command line (if has)." << std::endl;
+    Log::info("Running used plugin if exists.");
     for (auto &plugin : plugins) {
       if (plugin.instance->used()) return plugin.instance->run();
     }
@@ -262,13 +258,13 @@ public:
 
   /// @brief Check if a plugin is already loaded.
   bool alreadyExists(const std::string &name) const {
-    LOGN(PM, INFO) << "Checking " << std::quoted(name) << " named plugin is exists or not." << std::endl;
+    Log::info("Checking {} named plugin is exists or not.", std::quoted_string(name));
     for (auto &plugin : plugins)
       if (plugin.name == name) return true;
     for (auto &plugin : builtinPlugins)
       if (plugin->getName() == name) return true;
 
-    LOGN(PM, INFO) << std::quoted(name) << " named plugin is not exists." << std::endl;
+    Log::info("{} named plugin is not exists.", std::quoted_string(name));
     return false;
   }
 
@@ -282,13 +278,13 @@ public:
     for (auto &plugin : builtinPlugins)
       if (plugin->used()) return plugin->getName();
 
-    LOGN(PM, INFO) << "Don't used any used main command...." << std::endl;
+    Log::info("Don't used any used main command.");
     return {};
   }
 
   /// @brief Get plugin object.
   std::optional<std::reference_wrapper<BasePluginClass>> getPlugin(const std::string &name) {
-    LOGN(PM, INFO) << "Considering plugin structure: " << name << std::endl;
+    Log::info("Getting {} named plugin object.", std::quoted_string(name));
 
     if (!exists(name)) return std::nullopt;
     for (auto &plugin : plugins)
@@ -301,7 +297,7 @@ public:
 
   /// @brief Get plugin object (as const).
   std::optional<std::reference_wrapper<BasePluginClass>> getPlugin(const std::string &name) const {
-    LOGN(PM, INFO) << "Considering plugin structure (as const): " << name << std::endl;
+    Log::info("Getting {} named plugin object (as const).", std::quoted_string(name));
 
     if (!exists(name)) return std::nullopt;
     for (auto &plugin : plugins)
@@ -482,14 +478,14 @@ inline auto setupBufferSize = [](uint64_t &size, const std::filesystem::path &en
     const uint64_t psize = table->partition(entry.filename().string())->get().size();
 
     if (psize % size != 0) {
-      Out::println("{}WARNING{}: Specified buffer size is invalid for {}! Using "
+      Log::println("{}WARNING{}: Specified buffer size is invalid for {}! Using "
                    "different buffer size for {}.",
                    YELLOW, STYLE_RESET, entry.string(), entry.string());
       size = psize % 4096 == 0 ? 4096 : 1;
     }
   } else if (Helper::fileIsExists(entry)) {
     if (Helper::fileSize(entry) % size != 0) {
-      Out::println("{}WARNING{}: Specified buffer size is invalid for {}! Using "
+      Log::println("{}WARNING{}: Specified buffer size is invalid for {}! Using "
                    "different buffer size for {}.",
                    YELLOW, STYLE_RESET, entry.string(), entry.string());
       size = Helper::fileSize(entry) % 4096 == 0 ? 4096 : 1;
