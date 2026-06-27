@@ -33,6 +33,7 @@
 #include <map>
 #include <type_traits>
 #include <gpt.h>
+#include <libopenpart/openpart.h>
 
 #ifdef NONE
 #undef NONE
@@ -61,6 +62,7 @@ template <typename slot_type>
   requires std::is_integral_v<slot_type>
 struct basic_data_base {
   GPTPart gptPart;                 ///< @c GPTPart object.
+  openpart_t *op;                  ///< @c openpart_t object.
   slot_type index;                 ///< Index of partition.
   std::filesystem::path tablePath; ///< Table path.
 };
@@ -84,6 +86,22 @@ using BasicInfo = basic_info_base<uint64_t>;
  */
 template <typename T>
 concept IsStringOrPath = !std::is_reference_v<T> && (std::is_same_v<T, std::filesystem::path> || std::is_same_v<T, std::string>);
+
+/**
+ * @brief Verify that the type is @c openpart_t*.
+ * @tparam T Type.
+ * @note References are not accepted.
+ */
+template <typename T>
+concept IsOpenPartPtr = !std::is_reference_v<T> && std::is_same_v<T, openpart_t *>;
+
+/**
+ * @brief Verify that the type is non-const @c openpart_t*.
+ * @tparam T Type.
+ * @note References are not accepted.
+ */
+template <typename T>
+concept IsNonConstOpenPartPtr = !std::is_reference_v<T> && !std::is_const_v<T> && std::is_same_v<T, openpart_t *>;
 
 /**
  * @brief Verify that the type is a size type (unsigned, integral or floating point).
@@ -135,6 +153,20 @@ concept HasStringOrPath = (IsStringOrPath<std::decay_t<Args>> || ...);
 template <typename... Args>
 concept HasGPTPart = (std::is_same_v<std::decay_t<Args>, GPTPart> || ...);
 
+/**
+ * @brief Verify that the argument package has a @c openpart_t* type.
+ * @tparam Args Template argument package.
+ */
+template <typename... Args>
+concept HasOpenPartPtr = (IsOpenPartPtr<std::decay_t<Args>> || ...);
+
+/**
+ * @brief Verify that the argument package has a non-const @c openpart_t* type.
+ * @tparam Args Template argument package.
+ */
+template <typename... Args>
+concept HasNonConstOpenPartPtr = (IsOpenPartPtr<std::decay_t<Args>> || ...);
+
 } // namespace FindInArgs
 
 /// @brief Verify that the type has similar properties to @c std::filesystem::path.
@@ -157,36 +189,6 @@ concept IsPathTypeLike = requires(T v1, T v2, std::string s, const char *cp) {
   v1 != v2;
   v1 = std::move(v2);
 };
-
-/// @brief It checks that the type meets the requirements to be the partition class.
-template <typename Class>
-concept IsValidPartitionClass = requires(Class cls, Class cls2, GUIDData gdata, SizeUnit unit, uint32_t sector, bool no_throw) {
-  // Check required functions
-  { cls.path() } -> std::same_as<std::filesystem::path>;
-  { cls.pathByName() } -> std::same_as<std::filesystem::path>;
-  { cls.absolutePath() } -> std::same_as<std::filesystem::path>;
-  { cls.name() } -> std::convertible_to<std::string>;
-  { cls.formattedSizeString(unit, no_throw) } -> std::convertible_to<std::string>;
-  { cls.size(sector) } -> std::integral;
-  { cls.empty() } -> std::convertible_to<bool>;
-
-  // Check required constructors, etc.
-  std::is_constructible_v<Class>;
-  std::is_constructible_v<Class, std::filesystem::path>;
-  std::is_constructible_v<Class, const BasicData &>;
-  std::is_copy_constructible_v<Class>;
-  std::is_nothrow_move_constructible_v<Class>;
-
-  // Check required operators
-  { cls == cls2 } -> std::convertible_to<bool>;
-  { cls == gdata } -> std::convertible_to<bool>;
-  { cls != cls2 } -> std::convertible_to<bool>;
-  { cls != gdata } -> std::convertible_to<bool>;
-  { static_cast<bool>(cls) } -> std::convertible_to<bool>;
-  { !cls } -> std::convertible_to<bool>;
-  std::is_copy_assignable_v<Class>;
-  std::is_nothrow_move_assignable_v<Class>;
-}; // concept minimumPartitionClass
 
 using Error = Helper::Error;
 

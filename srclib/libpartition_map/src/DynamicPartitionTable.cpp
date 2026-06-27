@@ -16,14 +16,11 @@
  */
 
 #include <algorithm>
-#include <filesystem>
-#include <iostream>
 #include <ranges>
 #include <utility>
 #include <libhelper/functions.hpp>
 #include <libpartition_map/table_data_collection.hpp>
 #include <libpartition_map/definations.hpp>
-#include <libpartition_map/redefine_logging_macros.hpp>
 #include <liblp/liblp.h>
 
 using namespace android;
@@ -32,23 +29,23 @@ namespace PartitionMap {
 
 void DynamicTableData::scan() {
   if (!Helper::isExists("/dev/block/by-name/super")) {
-    LOGI << "This device not uses logical partitions." << std::endl;
+    Log::info("This device not uses logical partitions.");
     return;
   } else
     supported = true;
 
-  LOGI << "Scanning super metadata and partitions with liblp..." << std::endl;
+  Log::info("Scanning super metadata and partitions with liblp...");
   lpMetadata = std::move(fs_mgr::ReadMetadata("/dev/block/by-name/super", 0));
 
   for (const auto &partition : lpMetadata->partitions) {
     Partition_t part;
     localPartitions.push_back(std::move(Partition_t::AsLogicalPartition(part, Helper::pathJoin("/dev/block/mapper", partition.name))));
-    LOGI << "Registered logical partition: " << partition.name << std::endl;
+    Log::info("Registered logical partition: {}", std::quoted_string(partition.name));
   }
 }
 
 DynamicTableData::list_t DynamicTableData::partitions() {
-  LOGI << "Providing references of logical partitions." << std::endl;
+  Log::info("Providing references of logical partitions.");
   list_t parts;
   for (auto &part : localPartitions)
     parts.push_back(std::ref(part));
@@ -57,7 +54,7 @@ DynamicTableData::list_t DynamicTableData::partitions() {
 }
 
 DynamicTableData::const_list_t DynamicTableData::partitions() const {
-  LOGI << "Providing references of logical partitions." << std::endl;
+  Log::info("Providing references of logical partitions.");
   const_list_t parts;
   for (auto &part : localPartitions)
     parts.push_back(std::cref(part));
@@ -66,12 +63,12 @@ DynamicTableData::const_list_t DynamicTableData::partitions() const {
 }
 
 android::fs_mgr::LpMetadata &DynamicTableData::getMetadata() {
-  LOGI << "Providing super metadata." << std::endl;
+  Log::info("Providing super metadata.");
   return *lpMetadata;
 }
 
 const android::fs_mgr::LpMetadata &DynamicTableData::getMetadata() const {
-  LOGI << "Providing super metadata." << std::endl;
+  Log::info("Providing super metadata.");
   return *lpMetadata;
 }
 
@@ -80,7 +77,7 @@ std::vector<LpMetadataPartitionGroup> &DynamicTableData::getGroups() { return lp
 const std::vector<LpMetadataPartitionGroup> &DynamicTableData::getGroups() const { return lpMetadata->groups; }
 
 std::vector<BasicInfo> DynamicTableData::aboutPartitions() const {
-  LOGI << "Providing data of logical partitions." << std::endl;
+  Log::info("Providing data of logical partitions.");
   std::vector<BasicInfo> parts;
   for (const auto &p : partitions()) {
     const Partition_t &part = p;
@@ -94,7 +91,7 @@ std::optional<std::reference_wrapper<Partition_t>> DynamicTableData::partition(c
   auto it = std::ranges::find_if(localPartitions, [&](const Partition_t &p) { return p.name() == name; });
   if (it == localPartitions.end()) return std::nullopt;
 
-  LOGI << "Providing Partition_t object of " << std::quoted(name) << " logical partition." << std::endl;
+  Log::info("Providing Partition_t object of {} logical partition.", std::quoted_string(name));
   return std::ref(*it);
 }
 
@@ -103,7 +100,7 @@ std::optional<std::reference_wrapper<const Partition_t>> DynamicTableData::parti
   auto it = std::ranges::find_if(localPartitions, [&](const Partition_t &p) { return p.name() == name; });
   if (it == localPartitions.end()) return std::nullopt;
 
-  LOGI << "Providing Partition_t object of " << std::quoted(name) << " logical partition." << std::endl;
+  Log::info("Providing Partition_t object of {} logical partition.", std::quoted_string(name));
   return std::cref(*it);
 }
 
@@ -111,7 +108,7 @@ std::optional<std::reference_wrapper<LpMetadataPartition>> DynamicTableData::met
   auto it = std::ranges::find_if(lpMetadata->partitions, [&](const LpMetadataPartition &p) { return name == p.name; });
   if (it == lpMetadata->partitions.end()) return std::nullopt;
 
-  LOGI << "Providing LpMetadataPartition object of " << std::quoted(name) << " logical partition." << std::endl;
+  Log::info("Providing LpMetadataPartition object of {} logical partition.", std::quoted_string(name));
   return std::ref(*it);
 }
 
@@ -119,12 +116,12 @@ std::optional<std::reference_wrapper<const LpMetadataPartition>> DynamicTableDat
   auto it = std::ranges::find_if(lpMetadata->partitions, [&](const LpMetadataPartition &p) { return name == p.name; });
   if (it == lpMetadata->partitions.end()) return std::nullopt;
 
-  LOGI << "Providing LpMetadataPartition object of " << std::quoted(name) << " logical partition." << std::endl;
+  Log::info("Providing LpMetadataPartition object of {} logical partition.", std::quoted_string(name));
   return std::cref(*it);
 }
 
 uint64_t DynamicTableData::freeSpace() const {
-  LOGI << "Providing free space of super partition." << std::endl;
+  Log::info("Providing free space of super partition.");
   uint64_t total_part_sizes = 0;
 
   for (const auto &p : localPartitions)
@@ -134,7 +131,7 @@ uint64_t DynamicTableData::freeSpace() const {
 }
 
 uint64_t DynamicTableData::freeSpace(const std::string &name) const {
-  LOGI << "Providing free space of " << std::quoted(name) << " group." << std::endl;
+  Log::info("Providing free space of {} group.", std::quoted_string(name));
   auto it = std::ranges::find_if(lpMetadata->groups, [&](const LpMetadataPartitionGroup &group) { return name == group.name; });
 
   if (it == lpMetadata->groups.end()) return UINT64_MAX;
@@ -148,12 +145,12 @@ uint64_t DynamicTableData::freeSpace(const std::string &name) const {
 }
 
 uint64_t DynamicTableData::size() const {
-  LOGI << "Providing size of super partition." << std::endl;
+  Log::info("Providing size of super partition.");
   return lpMetadata->block_devices[0].size;
 }
 
 uint64_t DynamicTableData::size(const std::string &name) {
-  LOGI << "Providing maximum size of " << std::quoted(name) << " group." << std::endl;
+  Log::info("Providing maximum size of {} group.", std::quoted_string(name));
   auto it = std::ranges::find_if(lpMetadata->groups, [&](const LpMetadataPartitionGroup &group) { return name == group.name; });
 
   if (it == lpMetadata->groups.end()) return UINT64_MAX;
@@ -161,7 +158,7 @@ uint64_t DynamicTableData::size(const std::string &name) {
 }
 
 bool DynamicTableData::hasPartition(const std::string &name) const {
-  LOGI << "Checking " << std::quoted(name) << " named logical partition is exists." << std::endl;
+  Log::info("Checking {} named logical partition is exists.", std::quoted_string(name));
   bool found = false;
   std::ranges::for_each(localPartitions, [&](auto &part) {
     if (part.name() == name) found = true;
@@ -171,20 +168,20 @@ bool DynamicTableData::hasPartition(const std::string &name) const {
 }
 
 bool DynamicTableData::empty() const {
-  LOGI << "Checking whether the logical partition list is empty." << std::endl;
+  Log::info("Checking whether the logical partition list is empty.");
   return localPartitions.empty();
 }
 
 bool DynamicTableData::valid() const {
-  LOGI << "Checking whether the logical partition list and metadata is valid." << std::endl;
+  Log::info("Checking whether the logical partition list and metadata is valid.");
   return !localPartitions.empty() && validMetadata();
 }
 
 bool DynamicTableData::validMetadata() const {
-  LOGI << "Checking whether the metadata is valid." << std::endl;
+  Log::info("Checking whether the metadata is valid.");
   if (static_cast<bool>(lpMetadata)) {
     if (lpMetadata->header.magic != LP_METADATA_HEADER_MAGIC) {
-      LOGE << "Super partition is not contains " << LP_METADATA_HEADER_MAGIC << " magic." << std::endl;
+      Log::error("Super partition is not contains {:#x} magic.", LP_METADATA_HEADER_MAGIC);
       return false;
     }
 
@@ -197,7 +194,7 @@ bool DynamicTableData::validMetadata() const {
       }
 
       if (total > group.maximum_size) {
-        LOGE << "Group limits have been exceeded." << std::endl;
+        Log::error("Group limits have been exceeded.");
         return false;
       }
     }
@@ -209,7 +206,7 @@ bool DynamicTableData::validMetadata() const {
       uint64_t end = (extent.target_data + extent.num_sectors) * 512;
 
       if (end > bd.size) {
-        LOGE << "Extent Block Device limit has been exceeded." << std::endl;
+        Log::error("Extent Block Device limit has been exceeded.");
         return false;
       }
     }
@@ -217,7 +214,7 @@ bool DynamicTableData::validMetadata() const {
     for (const auto &partition : lpMetadata->partitions) {
       uint32_t max_index = partition.first_extent_index + partition.num_extents;
       if (max_index > lpMetadata->extents.size()) {
-        LOGE << "The number of partition extents is inconsistent." << std::endl;
+        Log::error("The number of partition extents is inconsistent.");
         return false;
       }
     }
@@ -229,13 +226,13 @@ bool DynamicTableData::validMetadata() const {
 }
 
 void DynamicTableData::reScan() {
-  LOGI << "Rescanning logical partitions." << std::endl;
+  Log::info("Rescanning logical partitions.");
   localPartitions.clear();
   scan();
 }
 
 void DynamicTableData::clear() {
-  LOGI << "Clearing data." << std::endl;
+  Log::info("Clearing data.");
   localPartitions.clear();
   lpMetadata.reset();
 }

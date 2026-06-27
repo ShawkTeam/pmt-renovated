@@ -275,7 +275,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, const Partition_t &>
   bool forEach(F &&function) const {
-    LOGI << "Foreaching input function for all partitions." << std::endl;
+    Log::info("Foreaching input function for all partitions.");
     bool isSuccess = true;
     for (auto &part : localPartitions)
       isSuccess &= function(part);
@@ -287,7 +287,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, Partition_t &>
   bool forEach(F &&function) {
-    LOGI << "Foreaching input function for all partitions." << std::endl;
+    Log::info("Foreaching input function for all partitions.");
     bool isSuccess = true;
     for (auto &part : localPartitions)
       isSuccess &= function(part);
@@ -299,7 +299,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, const std::filesystem::path &, const std::shared_ptr<GPTData> &>
   bool forEachGptData(F &&function) const {
-    LOGI << "Foreaching input function for all GPTData data." << std::endl;
+    Log::info("Foreaching input function for all GPTData data.");
     bool isSuccess = true;
     for (auto &[path, gptData] : gptDataCollection)
       isSuccess &= function(path, gptData);
@@ -311,7 +311,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, const std::filesystem::path &, std::shared_ptr<GPTData> &>
   bool forEachGptData(F &&function) {
-    LOGI << "Foreaching input function for all GPTData data." << std::endl;
+    Log::info("Foreaching input function for all GPTData data.");
     bool isSuccess = true;
     for (auto &[path, gptData] : gptDataCollection)
       isSuccess &= function(path, gptData);
@@ -323,7 +323,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, const Partition_t &>
   bool forEachFor(const std::vector<std::string> &list, F &&function) const {
-    LOGI << "Foreaching input function for input list." << std::endl;
+    Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
     for (auto &name : list) {
       if (hasPartition(name)) isSuccess &= function(partition(name)->get());
@@ -336,7 +336,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, Partition_t &>
   bool forEachFor(const std::vector<std::string> &list, F &&function) {
-    LOGI << "Foreaching input function for input list." << std::endl;
+    Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
     for (auto &name : list) {
       if (hasPartition(name)) isSuccess &= function(partition(name)->get());
@@ -537,7 +537,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, const Partition_t &>
   bool forEach(F &&function) const {
-    LOGI << "Foreaching input function for all partitions." << std::endl;
+    Log::info("Foreaching input function for all partitions.");
     bool isSuccess = true;
     for (auto &part : localPartitions)
       isSuccess &= function(part);
@@ -549,7 +549,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, const LpMetadataPartition &>
   bool forEach(F &&function) const {
-    LOGI << "Foreaching input function for all partitions." << std::endl;
+    Log::info("Foreaching input function for all partition metadatas.");
     bool isSuccess = true;
     for (const auto &part : lpMetadata->partitions)
       isSuccess &= function(part);
@@ -561,7 +561,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, Partition_t &>
   bool forEach(F &&function) {
-    LOGI << "Foreaching input function for all partitions." << std::endl;
+    Log::info("Foreaching input function for all partitions.");
     bool isSuccess = true;
     for (auto &part : localPartitions)
       isSuccess &= function(part);
@@ -572,7 +572,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, LpMetadataPartition &>
   bool forEach(F &&function) {
-    LOGI << "Foreaching input function for all partitions." << std::endl;
+    Log::info("Foreaching input function for all partition metadatas.");
     bool isSuccess = true;
     for (auto &part : lpMetadata->partitions)
       isSuccess &= function(part);
@@ -584,7 +584,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, const Partition_t &>
   bool forEachFor(const std::vector<std::string> &list, F &&function) const {
-    LOGI << "Foreaching input function for input list." << std::endl;
+    Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
     for (auto &name : list) {
       if (hasPartition(name)) isSuccess &= function(partition(name)->get());
@@ -597,7 +597,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, const LpMetadataPartition &>
   bool forEachFor(const std::vector<std::string> &list, F &&function) const {
-    LOGI << "Foreaching input function for input list." << std::endl;
+    Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
     for (auto &name : list) {
       if (hasPartition(name)) isSuccess &= function(metadata(name)->get());
@@ -610,7 +610,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, Partition_t &>
   bool forEachFor(const std::vector<std::string> &list, F &&function) {
-    LOGI << "Foreaching input function for input list." << std::endl;
+    Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
     for (auto &name : list) {
       if (hasPartition(name)) isSuccess &= function(partition(name)->get());
@@ -623,7 +623,7 @@ public:
   template <typename F>
     requires Helper::Invocable<F, bool, LpMetadataPartition &>
   bool forEachFor(const std::vector<std::string> &list, F &&function) {
-    LOGI << "Foreaching input function for input list." << std::endl;
+    Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
     for (auto &name : list) {
       if (hasPartition(name)) isSuccess &= function(metadata(name)->get());
