@@ -34,8 +34,8 @@ target_link_options(pmt_interface_static INTERFACE "-Wl,-rpath,/data/data/com.te
 target_link_options(pmt_interface_nolibs INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
 target_link_options(pmt_interface_nolibs_and_flags INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
 
-target_link_libraries(pmt_interface_shared INTERFACE libhelper_shared libpartition_map_shared libgptf_static libext2_uuid_static)
-target_link_libraries(pmt_interface_static INTERFACE libhelper_static libpartition_map_static libgptf_static libext2_uuid_static)
+target_link_libraries(pmt_interface_shared INTERFACE libhelper_shared libopenpart_shared libpartition_map_shared libgptf_static libext2_uuid_static)
+target_link_libraries(pmt_interface_static INTERFACE libhelper_static libopenpart_static libpartition_map_static libgptf_static libext2_uuid_static)
 
 if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     target_link_options(pmt_interface_shared INTERFACE -fsanitize=address)
