@@ -1028,6 +1028,7 @@ WARN_LOGFILE           =
 
 INPUT                  = include/PartitionManager \
                          srclib/libhelper/include/libhelper/ \
+                         srclib/libopenpart/include/libopenpart/ \
                          srclib/libpartition_map/include/libpartition_map/ \
                          docs/md/documentation-mainpage.md \
                          docs/md/building-from-source.md \
