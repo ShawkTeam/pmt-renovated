@@ -113,7 +113,7 @@ parse_args() {
 
     while [ $# -gt 0 ]; do
         case "$1" in
-            build|rebuild|clean|only-configure-git-hooks|cleanup-generated-docs)
+            build|rebuild|clean|cleanup-generated-docs)
                 [ -n "$command" ] && { command echo "$THIS: Multiple commands specified: '$command' and '$1'"; exit 1; }
                 command="$1"
                 shift
@@ -196,7 +196,6 @@ COMMANDS:
     rebuild                  # Rebuild PMT (clean first)
     clean                    # Clean build artifacts
     cleanup-generated-docs   # Cleanup generated doxgen documentation
-    only-configure-git-hooks # Only configure git hooks
     help                     # Show this help message
 
 HINTS:
@@ -233,12 +232,4 @@ case "$PARSED_COMMAND" in
     "clean")   clean ;;
     "rebuild") clean; build "${PARSED_CMAKE_ARGS[@]}" ;;
     "cleanup-generated-docs") rm -rf "${WORK_DIR}/docs/html" ;;
-    "only-configure-git-hooks")
-        if [ "$(basename $(git config core.hooksPath))" != ".githooks" ]; then
-          git config core.hooksPath "${WORK_DIR}/.githooks"
-          echo "Git hooks configured."
-        else
-          echo "Git hooks are already configured."
-        fi
-    ;;
 esac
