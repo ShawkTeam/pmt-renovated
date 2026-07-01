@@ -348,6 +348,13 @@ int openpart_get(openpart_t *op, int info, void **out)
       *out = result;
       return 0;
     }
+    case OP_INFO_FD: {
+      int *fd = malloc(sizeof(int));
+      if (!fd) { op->err = errno; return -1; }
+      *fd = op->fd;
+      *out = fd;
+      return 0;
+    }
     default:
       op->err = EINVAL;
       return -1;
@@ -382,6 +389,12 @@ uint64_t openpart_get_sector_size(openpart_t* op)
 {
   QUICK_GET_CONTROLS(op, UINT64_MAX);
   return op->sector_size;
+}
+
+int openpart_get_fd(openpart_t* op)
+{
+  QUICK_GET_CONTROLS(op, -1);
+  return op->fd;
 }
 
 int openpart_get_is_blkdev(openpart_t* op)

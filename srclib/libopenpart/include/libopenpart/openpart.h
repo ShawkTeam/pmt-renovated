@@ -51,6 +51,7 @@ __BEGIN_DECLS
 #define OP_INFO_PART_NAME 0x7   ///< Get partition name (finds partition name from partition table, founding with using sysfs).
 #define OP_INFO_PART_PATH 0x8   ///< Get partition path.
 #define OP_INFO_DISK_PATH 0x9   ///< Get partition table path (reading from sysfs).
+#define OP_INFO_FD 0xA          ///< Get file descriptor.
 
 #define OP_MOUNT_RDONLY 0x1 ///< Mount as read-only.
 #define OP_MOUNT_RDWR 0x2   ///< Mount as read-write.
@@ -77,6 +78,8 @@ __BEGIN_DECLS
   openpart_get((op), OP_INFO_PART_PATH, (void **)(out)) ///< @c openpart_get() implementation for @c OP_INFO_PART_PATH.
 #define openpart_get_disk_path2(op, out)                                                                                              \
   openpart_get((op), OP_INFO_DISK_PATH, (void **)(out)) ///< @c openpart_get() implementation for @c OP_INFO_DISK_PATH.
+#define openpart_get_fd2(op, out)                                                                                                     \
+  openpart_get((op), OP_INFO_FD, (void **)(out)) ///< @c openpart_get() implementation for @c OP_INFO_FD.
 
 typedef struct openpart
     openpart_t; ///< Opaque @c openpart_t type defination. The struct body is available in the @c src/internal.h file.
@@ -292,6 +295,14 @@ const char *openpart_get_fstype(openpart_t *op);
  * @return Actual sector size on success, otherwise -1 or 0.
  */
 uint64_t openpart_get_sector_size(openpart_t *op);
+
+/**
+ * @brief Get file descriptor.
+ *
+ * @param op @c openpart_t* object.
+ * @return File descriptor.
+ */
+int openpart_get_fd(openpart_t *op);
 
 /**
  * @brief Get opened path is block device or not.
