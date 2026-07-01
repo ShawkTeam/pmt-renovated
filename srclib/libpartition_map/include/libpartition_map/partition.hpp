@@ -433,6 +433,9 @@ public:
   /// @brief Checks whether the partition info is empty or not.
   bool empty() const { return isLogical ? logicalPartitionPath.empty() : !gptPart.IsUsed() && localTablePath.empty(); }
 
+  /// @brief Closes the file descriptor.
+  bool closeFdNow() { return close(openpart_get_fd(op)) == 0; }
+
   /**
    * @name @c BasicPartition_t's operators.
    * @brief Operators of @c BasicPartition_t class.
