@@ -79,6 +79,14 @@ std::string formatMagic(uint64_t magic);
  */
 std::string getSizeUnitAsString(SizeUnit size);
 
+/**
+ * @brief Re read input partition table. With ioctl() call.
+ *
+ * @param path Table path.
+ * @return True if successful, false otherwise.
+ */
+bool reReadTable(const std::string &path);
+
 } // namespace Extra
 } // namespace PartitionMap
 

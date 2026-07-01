@@ -124,4 +124,21 @@ std::string getSizeUnitAsString(SizeUnit size) {
   }
 }
 
+bool reReadTable(const std::string &path) {
+  auto fd = Helper::UniqueFD(path, O_RDONLY | O_EXCL);
+  if (fd < 0) {
+    Log::error("Failed to open {}: {}", path, strerror(errno));
+    return false;
+  }
+
+  Log::info("Calling ioctl() for {}...", path);
+  if (ioctl(fd.fd(), BLKRRPART) < 0) {
+    Log::error("ioctl(BLKRRPART) failed: {}", strerror(errno));
+    return false;
+  }
+
+  Log::info("ioctl() returned 0, re-read partition table successfully.");
+  return true;
+}
+
 } // namespace PartitionMap::Extra
