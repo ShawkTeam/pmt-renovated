@@ -25,7 +25,7 @@ on:
         required: true
         default: '/var/www/documentations/pmt-renovated-git'
       USE_GIT_CID:
-        description: 'Project number (for doc page)'
+        description: 'Use git commit ID as project number'
         required: true
         default: 'true'
         type: boolean
