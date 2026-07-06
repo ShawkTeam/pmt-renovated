@@ -13,6 +13,8 @@ This tool provides a comprehensive solution for managing Android device partitio
 - **Retrieve** partition sizes in multiple units.
 - **Display** partition info (name, size, logical status) in text or JSON.
 - **Resolve** real block device paths and symbolic links.
+- **Read** super metadata and super group metadata.
+- **Re-read** partition tables.
 - **Identify** partition or image file types via magic number checks.
 - **Reboot** the device into multiple modes (normal, recovery, etc.).
 - **Asynchronous processing** for speed — each partition runs in its own thread.

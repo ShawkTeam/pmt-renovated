@@ -443,6 +443,21 @@ pmt read-groups-metadata [OPTIONS]
 pmt read-groups-metadata  # Display all logical partition groups
 ```
 
+### Re-reading partition tables.
+Send *"read partition table"* command (with `ioctl()`) to kernel.
+```bash
+pmt re-read-table table(s)
+```
+
+**Options:**
+- `-v`, `--version` → View version of plugin.
+
+**Technical Details:**
+- I recommend using this command in recovery mode, etc.
+- The probability of errors is high in normal mode (on normal system).
+- A command is sent to the Linux kernel to reread the partition tables, and the GPT table is read again.
+- This could cause the device to restart suddenly.
+
 ---
 
 ## Additional Notes
@@ -480,6 +495,7 @@ pmt read-groups-metadata  # Display all logical partition groups
 - **CleanLogPlugin**: Log management utilities for cleanup and rotation
 - **MetadataReaderPlugin**: Logical partition metadata reader with group, size, and attribute information
 - **GroupMetadataReaderPlugin**: Logical partition groups metadata reader with name, maximum size, and flags
+- **ReReadTablePlugin**: Re-read partition tables
 
 ---
 
