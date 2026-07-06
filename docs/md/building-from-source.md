@@ -79,8 +79,8 @@ sudo zypper install git cmake ninja python3
 
 ### Optional Environment Variables
 ```bash
-# Set minimum Android API level (default: android-30)
-export ANDROID_PLATFORM="android-30"
+# Set minimum Android API level (default: android-22)
+export ANDROID_PLATFORM="android-22"
 ```
 
 ## Repository Setup
@@ -116,6 +116,17 @@ git tag --sort=-version:refname
 ## Build System Overview
 
 PMT uses a sophisticated build system with the following components:
+
+### Modern C++20 Toolchain
+- Uses **CMake 3.20+** with **Ninja** generator for fast builds
+- **C++20** standard with modern features (concepts, modules, etc.)
+- Supports both **Android NDK** cross-compilation and native builds
+
+### Build Options
+- `BUILTIN_PLUGINS=ON/OFF` - Enable/disable built-in plugin compilation
+- `LINK_TIME_OPTIMIZATION_THIN=ON/OFF` - Enable/disable link time optimization (thin)
+- `CMAKE_BUILD_TYPE=Debug/Release` - Build configuration
+- `ANDROID_PLATFORM` - Minimum Android API level (default: android-22)
 
 ### ClassicPartitionData & Helper Scripts (`build/scripts/`)
 
@@ -192,9 +203,6 @@ bash build/scripts/build.sh build --arch arm64-v8a --arch x86_64
 # Supported ABIs: arm64-v8a, armeabi-v7a, x86_64, x86
 ```
 
-**Modify default architectures**:
-Edit `TARGET_ABI_LIST` in `build/scripts/build.sh` (line 21).
-
 ### Build Commands
 
 | Command                    | Description                    |
@@ -202,7 +210,6 @@ Edit `TARGET_ABI_LIST` in `build/scripts/build.sh` (line 21).
 | `build`                    | Standard build                 |
 | `rebuild`                  | Clean then build               |
 | `clean`                    | Remove build artifacts         |
-| `only-configure-git-hooks` | Setup git hooks only           |
 | `cleanup-generated-docs`   | Remove generated documentation |
 
 ### Advanced Configuration
@@ -218,7 +225,7 @@ bash build/scripts/build.sh build --working-directory /path/to/source
 ```
 
 **Thread count optimization**:
-Build uses `$(nproc - 2)` threads by default. Modify in `build.sh` (line 72-73).
+Build uses `$(nproc - 2)` threads by default. Modify in `build.sh`.
 
 ## Troubleshooting
 

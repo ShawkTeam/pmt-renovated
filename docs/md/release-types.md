@@ -111,44 +111,21 @@ PMT supports a modular plugin architecture for extending functionality.
 
 ---
 
-## Build System
-
-### Modern C++20 Toolchain
-- Uses **CMake 3.20+** with **Ninja** generator for fast builds
-- **C++20** standard with modern features (concepts, modules, etc.)
-- Supports both **Android NDK** cross-compilation and native builds
-
-### Build Options
-- `BUILTIN_PLUGINS=ON/OFF` - Enable/disable built-in plugin compilation
-- `CMAKE_BUILD_TYPE=Debug/Release` - Build configuration
-- `ANDROID_PLATFORM` - Minimum Android API level (default: android-30)
-
-### Automated Build Script
-The `build/scripts/build.sh` script provides:
-- Multi-architecture compilation (arm64-v8a, armeabi-v7a)
-- Parallel builds using available CPU cores
-- Clean and rebuild operations
-- Git hook configuration
-
----
-
-## Recent Changes (v1.7.0)
+## Recent Changes (v1.8.0)
 
 ### Core Improvements
-- **Enhanced Plugin System**: Better plugin discovery and loading mechanisms
-- **Modern C++ Features**: Utilizes C++20 concepts and modern library features
-- **Improved Build System**: Better CMake integration and Android build support
-- **File Management**: New `UniqueFD` and file pointer management classes
-- **Logging System**: Enhanced logging with content transfer capabilities
+- **Enhanced Partition I/O**: Added new library `libopenpart` for partition I/O
+- **Improved Build System**: Better CMake integration
+- **Logging System**: Switched to modern logging methods
+- **Plugins**: Added new plugins like `ReReadTablePlugin` etc.
 
 ### Library Enhancements
-- **libhelper**: Improved file descriptor management, better logging infrastructure
-- **libpartition_map**: Cleaner builder patterns, header-only optimizations
-- **Plugin Architecture**: Custom result holders, async operation support
+- **libhelper**: Improved logging
+- **libpartition_map**: Improved partition parsing
+- **libopenpart**: Improved partition I/O with this new library
 
 ### Build & Deployment
 - **Android Integration**: Updated Android.bp files for better system integration
-- **CMake Improvements**: Better header generation and plugin management
 - **Documentation**: Enhanced build and usage documentation
 
 ---
