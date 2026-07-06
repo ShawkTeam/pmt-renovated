@@ -322,7 +322,7 @@ template <typename T> using ConstIfCharPointer_t = ConstIfCharPointer<T>::type;
  */
 #define MKVERSION(name)                                                                                                               \
   char vinfo[512];                                                                                                                    \
-  sprintf(vinfo, "%s %s-%s-%s-aapi%d [%s %s]\n%s", name, BUILD_VERSION, COMMIT_ID, BUILD_TYPE, __ANDROID_API__, BUILD_DATE,           \
+  sprintf(vinfo, "%s %s %s-%s-%s-aapi%d [%s %s]\n%s", name, BUILD_ABI, BUILD_VERSION, COMMIT_ID, BUILD_TYPE, __ANDROID_API__, BUILD_DATE,           \
           BUILD_TIME, BUILD_COMPILER_VERSION);                                                                                        \
   return std::string(vinfo)
 

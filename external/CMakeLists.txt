@@ -202,7 +202,7 @@ if(ANDROID_NATIVE_API_LEVEL LESS 30)
             LIBS libbase_static libcrypto_utils_static libcrypto_static libsparse_static libext4_utils_static
     )
 else()
-    if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
+    if(CMAKE_ANDROID_ARCH STREQUAL "arm64")
         set_source_files_properties(
                 ${crypto_sources_asm}
                 PROPERTIES
