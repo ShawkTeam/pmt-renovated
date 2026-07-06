@@ -61,7 +61,15 @@ jobs:
       - name: Run Doxygen
         run: |
           if $USE_GIT_CID; then
-            sed -i "s/^PROJECT_NUMBER *=.*/PROJECT_NUMBER         = git-$(git rev-parse --short HEAD)/" Doxyfile
+            git config --global --add safe.directory "$GITHUB_WORKSPACE"
+            SHORT_SHA=$(git rev-parse --short HEAD)
+            if ! [ $? -eq 0 ]; then
+              echo "::error::git rev-parse fail."
+              exit 1
+            else
+              echo "Resolved SHORT_SHA: $SHORT_SHA"
+            fi
+            sed -i "s/^PROJECT_NUMBER *=.*/PROJECT_NUMBER         = git-$[SHORT_SHA}/" Doxyfile
           fi
           doxygen Doxyfile
 
