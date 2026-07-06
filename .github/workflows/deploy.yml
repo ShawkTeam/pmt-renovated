@@ -53,11 +53,17 @@ jobs:
       id-token: write
 
     steps:
+      - name: Pre-install Git for Checkout
+        run: pacman -Sy && pacman -S --noconfirm git
+
       - uses: actions/checkout@v4
 
-      - name: Install Doxygen
+      - name: Install Required Packages
+        run: pacman -S --noconfirm doxygen graphviz rsync openssh
+
+      - name: Fix Environment and Git Safe Directory
         run: |
-          pacman -Sy && pacman -S --noconfirm doxygen graphviz rsync openssh git
+          chown -R root:root .
           git config --global --add safe.directory '*'
 
       - name: Run Doxygen
