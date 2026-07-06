@@ -124,6 +124,6 @@ jobs:
         id: gen-latest-docs
         uses: benc-uk/workflow-dispatch@v1
         with:
-          workflow: build.yml
+          workflow: deploy.yml
           token: ${{ secrets.PAT_TOKEN }}
-          inputs: '{"DOCS_PATH": "/var/www/documentations/pmt-renovated"}'
+          inputs: '{"DOCS_PATH": "/var/www/documentations/pmt-renovated", "USE_GIT_CID": "false"}'
