@@ -30,7 +30,8 @@ add_include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 add_super_library(openpart USE_INTERFACE_NOLIBS
 		SOURCES ${LIBOPENPART_SOURCES}
 		LIBS ext2_uuid
-		MANUAL_LIBS z $<IF:$<VERSION_LESS:${ANDROID_NATIVE_API_LEVEL},23>,libcrypto_static,libcrypto>
+		DEFINATIONS _FILE_OFFSET_BITS=64
+		MANUAL_LIBS z $<IF:$<VERSION_LESS:${ANDROID_NATIVE_API_LEVEL},30>,libcrypto_static,libcrypto>
 )
 
 # Add tests

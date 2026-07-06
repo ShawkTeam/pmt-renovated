@@ -157,7 +157,7 @@ add_super_library(gptf USE_INTERFACE_NOLIBS_NOFLAGS
         LIBS ext2_uuid
 )
 
-if(ANDROID_NATIVE_API_LEVEL LESS_EQUAL 23)
+if(ANDROID_NATIVE_API_LEVEL LESS 30)
     add_static_super_library(crypto_static USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${crypto_sources} ${crypto_sources_asm}
             CPPSTD 17
@@ -201,9 +201,7 @@ if(ANDROID_NATIVE_API_LEVEL LESS_EQUAL 23)
             DEFINATIONS _FILE_OFFSET_BITS=64
             LIBS libbase_static libcrypto_utils_static libcrypto_static libsparse_static libext4_utils_static
     )
-endif()
-
-if(ANDROID_NATIVE_API_LEVEL GREATER_EQUAL 30)
+else()
     if(CMAKE_ANDROID_ARCH_ABI STREQUAL "arm64-v8a")
         set_source_files_properties(
                 ${crypto_sources_asm}
