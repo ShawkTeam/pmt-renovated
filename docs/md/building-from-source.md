@@ -128,7 +128,7 @@ PMT uses a sophisticated build system with the following components:
 - `CMAKE_BUILD_TYPE=Debug/Release` - Build configuration
 - `ANDROID_PLATFORM` - Minimum Android API level (default: android-22)
 
-### ClassicPartitionData & Helper Scripts (`build/scripts/`)
+### Helper Scripts (`build/scripts/`)
 
 #### `build.sh` - Main Build Script
 - **Purpose**: Orchestrates the entire build process
@@ -272,13 +272,6 @@ bash build/scripts/reformat.sh
 ```bash
 bash build/scripts/reformat.sh --ignore-file /path/to/.clang-format-ignore
 ```
-
-### Git Hooks
-
-The build system automatically configures git hooks for:
-- Pre-commit formatting checks
-- Commit message validation
-- Submodule synchronization
 
 ### Build Information
 
