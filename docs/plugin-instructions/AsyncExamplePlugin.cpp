@@ -27,7 +27,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "AsyncExamplePlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -49,17 +49,18 @@ class AsyncExamplePlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION AsyncExamplePlugin() = default;
   PLUGIN_SECTION ~AsyncExamplePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
 
     flags = &mainFlags;
     cmd = mainApp.addSubcommand("async-example", "Example plugin demonstrating async operations");
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     cmd->addOption("partition(s)", rawPartitions, "Partition name(s) to process asynchronously")->delimiter(',');
     cmd->addOption("--delay", delayMs, "Delay in milliseconds for simulated work")->defaultValue(1000);
@@ -69,7 +70,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -82,7 +83,7 @@ public:
   PLUGIN_SECTION AsyncResult_t processPartitionAsync(const std::string &partitionName) const {
     auto pTab = Flags.partitionTables.first.get();
     auto dTab = Flags.partitionTables.second.get();
-    LOGNF(PLUGIN, logPath, INFO) << "Processing partition: " << partitionName << std::endl;
+    Log::info("Processing partition: {}", partitionName);
 
     // Check if partition exists
     if (!pTab->hasPartition(partitionName) && !dTab->hasPartition(partitionName)) {
@@ -122,7 +123,7 @@ public:
       partitions = Helper::CMDLine::split(rawPartitions, ',');
 
     if (partitions.empty()) {
-      Out::println("No partitions to process.");
+      Log::println("No partitions to process.");
       return true;
     }
 
@@ -133,7 +134,7 @@ public:
     // Add async tasks
     for (const auto &partition : partitions) {
       manager.addProcess(&AsyncExamplePlugin::processPartitionAsync, this, partition);
-      LOGNF(PLUGIN, logPath, INFO) << "Added async task for partition: " << partition << std::endl;
+      Log::info("Addes async task for partition: {}", partition);
     }
 
     // Start all async operations
@@ -149,17 +150,17 @@ public:
     for (const auto &result : results) {
       if (result.isSuccess()) {
         successCount++;
-        Out::println("✓ {}", result.getMessage());
+        Log::println("✓ {}", result.getMessage());
       } else {
         errorCount++;
-        Out::println("✗ {}", result.getMessage());
+        Log::println("✗ {}", result.getMessage());
       }
     }
 
-    Out::println("\nAsync processing completed:");
-    Out::println("Successful: {}", successCount);
-    Out::println("Failed: {}", errorCount);
-    Out::println("Total: {}", successCount + errorCount);
+    Log::println("\nAsync processing completed:");
+    Log::println("Successful: {}", successCount);
+    Log::println("Failed: {}", errorCount);
+    Log::println("Total: {}", successCount + errorCount);
 
     return manager.finalize();
   }

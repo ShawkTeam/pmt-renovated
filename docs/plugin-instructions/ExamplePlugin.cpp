@@ -26,7 +26,7 @@
 #include <nlohmann/json.hpp>
 
 #define PLUGIN "ExamplePlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -50,7 +50,6 @@ class ExamplePlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION ExamplePlugin() = default;
   PLUGIN_SECTION ~ExamplePlugin() override = default;
@@ -59,13 +58,15 @@ public:
    * @brief Called when the plugin is loaded.
    * This is where you set up your CLI command and options.
    */
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
 
     flags = &mainFlags;
     // Create the subcommand for this plugin
     cmd = mainApp.addSubcommand("example", "Example plugin demonstrating partition operations");
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     // Add command line options
     cmd->addOption("partition(s)", rawPartitions, "Partition name(s) to analyze")->delimiter(',');
@@ -81,7 +82,7 @@ public:
    * Clean up any resources here.
    */
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -132,11 +133,11 @@ private:
       j["total_partitions"] = pParts.size() + dParts.size();
       j["logical_partitions"] = dParts.size();
       j["physical_partitions"] = pParts.size();
-      Out::println("{}", j.dump(2));
+      Log::println("{}", j.dump(2));
     } else {
-      Out::println("Total partitions: {}", pParts.size() + dParts.size());
-      Out::println("Logical partitions: {}", dParts.size());
-      Out::println("Physical partitions: {}", pParts.size());
+      Log::println("Total partitions: {}", pParts.size() + dParts.size());
+      Log::println("Logical partitions: {}", dParts.size());
+      Log::println("Physical partitions: {}", pParts.size());
     }
 
     return true;
@@ -156,16 +157,16 @@ private:
    * @brief Show all partitions in text format.
    */
   bool showAllPartitionsText() {
-    Out::println("=== All Partitions ===");
+    Log::println("=== All Partitions ===");
 
     auto getter = [this](const PartitionMap::Partition_t &partition) -> bool {
       if (detailed)
-        Out::println("Name: {} | Table: {} | Size: {} | Logical: {} | Path: {}", partition.name(),
+        Log::println("Name: {} | Table: {} | Size: {} | Logical: {} | Path: {}", partition.name(),
                      partition.isLogicalPartition() ? "N/A" : partition.tableName(),
                      partition.formattedSizeString(PartitionMap::MiB, true), partition.isLogicalPartition(),
                      partition.absolutePath().string());
       else
-        Out::println("partition={} table={} size={} isLogical={}", partition.name(),
+        Log::println("partition={} table={} size={} isLogical={}", partition.name(),
                      partition.isLogicalPartition() ? "" : partition.tableName(),
                      partition.formattedSizeString(PartitionMap::MiB, true), partition.isLogicalPartition());
       return true;
@@ -195,7 +196,7 @@ private:
     };
 
     Tables.forEach(getter);
-    Out::println("{}", j.dump(2));
+    Log::println("{}", j.dump(2));
     return true;
   }
 
@@ -224,7 +225,7 @@ private:
   bool analyzeSpecificPartitionsText() {
     auto pTab = Flags.partitionTables.first.get();
     auto dTab = Flags.partitionTables.second.get();
-    Out::println("=== Partition Analysis ===");
+    Log::println("=== Partition Analysis ===");
 
     for (const auto &partitionName : partitions) {
       if (pTab->hasPartition(partitionName)) {
@@ -243,16 +244,16 @@ private:
    * @brief Analyze a single partition in text format.
    */
   void analyzePartitionText(const PartitionMap::Partition_t &partition) {
-    Out::println("\n--- Partition: {} ---", partition.name());
-    Out::println("Type: {}", partition.isLogicalPartition() ? "Logical" : "Physical");
-    if (!partition.isLogicalPartition()) Out::println("Table: {}", partition.tableName());
-    Out::println("Size: {} ({})", partition.formattedSizeString(PartitionMap::MiB, true), partition.size());
-    Out::println("Path: {}", partition.absolutePath().string());
+    Log::println("\n--- Partition: {} ---", partition.name());
+    Log::println("Type: {}", partition.isLogicalPartition() ? "Logical" : "Physical");
+    if (!partition.isLogicalPartition()) Log::println("Table: {}", partition.tableName());
+    Log::println("Size: {} ({})", partition.formattedSizeString(PartitionMap::MiB, true), partition.size());
+    Log::println("Path: {}", partition.absolutePath().string());
 
     if (detailed) {
       // Additional detailed information
-      Out::println("Device: {}", partition.absolutePath().parent_path().string());
-      Out::println("Readable: {}", std::filesystem::exists(partition.absolutePath()));
+      Log::println("Device: {}", partition.absolutePath().parent_path().string());
+      Log::println("Readable: {}", std::filesystem::exists(partition.absolutePath()));
     }
   }
 
@@ -275,7 +276,7 @@ private:
       }
     }
 
-    Out::println("{}", j.dump(2));
+    Log::println("{}", j.dump(2));
     return true;
   }
 

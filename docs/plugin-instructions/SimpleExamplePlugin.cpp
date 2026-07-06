@@ -25,7 +25,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "SimpleExamplePlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -44,14 +44,12 @@ class SimpleExamplePlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION SimpleExamplePlugin() = default;
   PLUGIN_SECTION ~SimpleExamplePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
 
     flags = &mainFlags;
     // Create a simple subcommand
@@ -60,11 +58,16 @@ public:
     // Add a single option for partition name
     cmd->addOption("partition", partitionName, "Partition name to examine")->required();
 
+    // Add version flag
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
+
     return true;
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -77,7 +80,7 @@ public:
 
     // Check if partition exists
     if (!pTab->hasPartition(partitionName) && !dTab->hasPartition(partitionName)) {
-      Out::println("Error: Partition '{}' not found!", partitionName);
+      Log::println("Error: Partition '{}' not found!", partitionName);
       return false;
     }
 
@@ -85,22 +88,22 @@ public:
     if (pTab->hasPartition(partitionName)) {
       const auto &partition = pTab->partitionWithDupCheck(partitionName)->get();
 
-      Out::println("=== Partition Information ===");
-      Out::println("Name: {}", partition.name());
-      Out::println("Type: {}", partition.isLogicalPartition() ? "Logical" : "Physical");
+      Log::println("=== Partition Information ===");
+      Log::println("Name: {}", partition.name());
+      Log::println("Type: {}", partition.isLogicalPartition() ? "Logical" : "Physical");
 
-      if (!partition.isLogicalPartition()) Out::println("Table: {}", partition.tableName());
+      if (!partition.isLogicalPartition()) Log::println("Table: {}", partition.tableName());
 
-      Out::println("Size: {}", partition.formattedSizeString(PartitionMap::MiB, true));
-      Out::println("Path: {}", partition.absolutePath().string());
+      Log::println("Size: {}", partition.formattedSizeString(PartitionMap::MiB, true));
+      Log::println("Path: {}", partition.absolutePath().string());
 
     } else {
       const auto &partition = dTab->partition(partitionName)->get();
 
-      Out::println("=== Logical Partition Information ===");
-      Out::println("Name: {}", partition.name());
-      Out::println("Size: {}", partition.formattedSizeString(PartitionMap::MiB, true));
-      Out::println("Path: {}", partition.absolutePath().string());
+      Log::println("=== Logical Partition Information ===");
+      Log::println("Name: {}", partition.name());
+      Log::println("Size: {}", partition.formattedSizeString(PartitionMap::MiB, true));
+      Log::println("Path: {}", partition.absolutePath().string());
     }
 
     return true;

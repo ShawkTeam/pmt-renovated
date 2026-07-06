@@ -30,7 +30,7 @@
 #include <nlohmann/json.hpp>
 
 #define PLUGIN "AdvancedExamplePlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 namespace PartitionManager {
 
@@ -60,17 +60,17 @@ class AdvancedExamplePlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
-  std::string logPath;
 
   PLUGIN_SECTION AdvancedExamplePlugin() = default;
   PLUGIN_SECTION ~AdvancedExamplePlugin() override = default;
 
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, const std::string &logpath, BasicFlags &mainFlags) override {
-    logPath = logpath;
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onLoad() trigger. Initializing..." << std::endl;
-
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     flags = &mainFlags;
     cmd = mainApp.addSubcommand("advanced", "Advanced example plugin with complex operations");
+    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     // Partition selection options
     auto *partitionGroup = cmd->addOptionGroup("Partition Selection", "Select which partitions to analyze");
@@ -106,7 +106,7 @@ public:
   }
 
   PLUGIN_SECTION bool onUnload() override {
-    LOGNF(PLUGIN, logPath, INFO) << PLUGIN << "::onUnload() trigger. Bye!" << std::endl;
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
@@ -254,12 +254,12 @@ private:
     }
 
     if (outputFile.empty()) {
-      Out::println("{}", output);
+      Log::println("{}", output);
     } else {
       std::ofstream file(outputFile);
       if (file) {
         file << output;
-        Out::println("Output written to: {}", outputFile);
+        Log::println("Output written to: {}", outputFile);
       } else {
         throw PluginError("Failed to write to file: {}", outputFile);
       }
@@ -299,12 +299,12 @@ private:
     std::string output = j.dump(2);
 
     if (outputFile.empty()) {
-      Out::println("{}", output);
+      Log::println("{}", output);
     } else {
       std::ofstream file(outputFile);
       if (file) {
         file << output;
-        Out::println("JSON output written to: {}", outputFile);
+        Log::println("JSON output written to: {}", outputFile);
       } else {
         throw PluginError("Failed to write to file: {}", outputFile);
       }
