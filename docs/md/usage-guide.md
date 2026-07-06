@@ -1,7 +1,5 @@
 @page usage-guide Usage Guide
 
-# Usage Guide
-
 **Partition Manager Tool** is a powerful command-line utility for **Android** devices, designed to perform various operations on partitions quickly, reliably, and efficiently.  
 This is the **renovated version** of PMT, rewritten in C++ for improved performance, stability, and usability compared to its older variant.
 

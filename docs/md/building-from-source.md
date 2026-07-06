@@ -1,7 +1,5 @@
 @page building-from-source Building PMT From Source
 
-# Building PMT From Source
-
 This guide provides comprehensive instructions for building PMT (Partition Management Tool) from source code on Linux systems.
 
 ## Table of Contents

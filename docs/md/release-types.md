@@ -1,7 +1,5 @@
 @page release-types Release Types, Etc.
 
-# Release Types, Etc.
-
 This project provides multiple release configurations tailored for specific Android device architectures and usage preferences. The build system supports both dynamic and static linking, with optional built-in plugin support.
 
 ---

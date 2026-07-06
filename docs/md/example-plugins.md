@@ -1,7 +1,5 @@
 @page example-plugins Example Plugins (Writing plugins)
 
-# Example Plugins (Writing plugins)
-
 This page contains documentation and notes about the example plugins provided with PMT Renovated. These plugins serve as reference implementations and learning resources for developers who want to create their own plugins for the Partition Manager Tool.
 
 ## Table of Contents
