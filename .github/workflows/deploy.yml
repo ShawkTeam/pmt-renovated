@@ -18,6 +18,12 @@
 name: Build and Deploy Doxygen Docs
 
 on:
+  workflow_dispatch:
+    inputs:
+      DOCS_PATH:
+        description: 'Path for uploading doxygen artifacts.'
+        required: true
+        default: '/var/www/documentations/pmt-renovated-git'
   push:
     branches: [main]
     paths:
@@ -31,6 +37,8 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    env:
+      DOCS_PATH: ${{ github.event.inputs.DOCS_PATH || '/var/www/documentations/pmt-renovated-git' }}
     container:
       image: archlinux:latest
     permissions:
@@ -60,5 +68,4 @@ jobs:
           rsync -avz --delete \
             -e "ssh -i /root/.ssh/id_ed25519 -o UserKnownHostsFile=/root/.ssh/known_hosts" \
             docs/html/ \
-            ${{ secrets.VDS_USER }}@${{ secrets.VDS_HOST }}:/var/www/documentations/pmt-renovated/
-
+            ${{ secrets.VDS_USER }}@${{ secrets.VDS_HOST }}:$DOCS_PATH
