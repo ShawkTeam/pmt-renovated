@@ -16,7 +16,7 @@
 #
 
 # Project info
-cmake_minimum_required(VERSION 3.40)
+cmake_minimum_required(VERSION 3.28)
 project(pmt VERSION 1.8.0)
 
 # Enable assembly.
