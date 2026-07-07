@@ -1320,4 +1320,14 @@ public:
 
 } // namespace Helper::CMDLine
 
+#define HELPER_CMDLINE_PARSE(app, argc, argv)                                                                                         \
+  do {                                                                                                                                \
+    try {                                                                                                                             \
+      app.parse(argc, argv);                                                                                                          \
+    } catch (Helper::CMDLine::Error & e) {                                                                                            \
+      Log::println("{}: {}", argv[0], e.what());                                                                                      \
+      return 1;                                                                                                                       \
+    }                                                                                                                                 \
+  } while (0)
+
 #endif // LIBHELPER_CMDLINE_HPP
