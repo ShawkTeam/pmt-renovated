@@ -648,7 +648,7 @@ class Subcommand {
   std::vector<std::unique_ptr<Option>> options;
   std::vector<std::unique_ptr<Subcommand>> subcommands;
   Subcommand *parent = nullptr;
-  bool is_found = false;
+  bool is_found = false, requires_subcommand = false;
 
 public:
   std::string name;
@@ -776,8 +776,17 @@ public:
     return this;
   }
 
+  /// @brief Set the subcommand requirement.
+  Subcommand *requiresSubcommand(bool required = true) {
+    requires_subcommand = required;
+    return this;
+  }
+
   /// @brief Set the footer.
   void setFooter(const std::string &s) { _footer = s; }
+
+  /// @brief Set the subcommand requirement.
+  void setRequiresSubcommand(bool required = true) { requires_subcommand = required; }
 
   /// @brief Validate the groups.
   void validateGroups() const {
@@ -805,6 +814,9 @@ public:
 
   /// @brief Check if the subcommand is used.
   bool isUsed() const { return is_found; }
+
+  /// @brief Check if the subcommand requires a subcommand.
+  bool requiresAnySubcommand() const { return requires_subcommand; }
 
   /// @brief Get the description.
   std::string getDescription() const { return description; }
@@ -875,17 +887,13 @@ class App {
 
       if (start + chunk_size < _description.length()) {
         size_t space_pos = _description.rfind(' ', start + chunk_size);
-        if (space_pos != std::string::npos && space_pos > start) {
-          chunk_size = space_pos - start;
-        }
+        if (space_pos != std::string::npos && space_pos > start) chunk_size = space_pos - start;
       }
 
       std::cout << std::string(indent_width, ' ') << _description.substr(start, chunk_size) << "\n";
 
       start += chunk_size;
-      if (start < _description.length() && _description[start] == ' ') {
-        start++;
-      }
+      if (start < _description.length() && _description[start] == ' ') start++;
     }
 
     if (_description.empty()) std::cout << "\n";
@@ -1027,7 +1035,7 @@ public:
           has_positional = true;
         }
       }
-      if (!subcmd->subcommands.empty()) std::cout << " [SUBCOMMAND]";
+      if (!subcmd->subcommands.empty()) std::cout << (subcmd->requiresAnySubcommand() ? " SUBCOMMAND" : " [SUBCOMMAND]");
       std::cout << " [OPTIONS]\n";
       if (!subcmd->description.empty()) std::cout << "\nDescription:\n  " << subcmd->description << "\n\n";
       if (!subcmd->getFooter().empty()) std::cout << indentLines(subcmd->getFooter()) << "\n\n";
@@ -1338,7 +1346,18 @@ public:
     for (const auto &grp : groups)
       grp->validate();
 
-    for (auto *active_subcommand : active_chain) {
+    for (size_t i = 0; i < active_chain.size(); ++i) {
+      auto *active_subcommand = active_chain[i];
+
+      if (active_subcommand->requiresAnySubcommand() && !active_subcommand->anySuperiorIsUsed()) {
+        //Log::println("Checking {}, requiresSub={}", active_subcommand->getFullPath(), active_subcommand->requiresSubcommand());
+        if (i + 1 == active_chain.size()) {
+          throw Error("Subcommand '{}' requires a nested subcommand.", active_subcommand->getFullPath())
+              .cmdlineError()
+              .withCode(EX_USAGE);
+        }
+      }
+
       for (const auto &arg : active_subcommand->options) {
         if (arg->getProperties()->is_required && !arg->isUsed() && !active_subcommand->anySuperiorIsUsed())
           throw Error("Missing required subcommand option: {}", arg->getProperties()->valid_names[0])
