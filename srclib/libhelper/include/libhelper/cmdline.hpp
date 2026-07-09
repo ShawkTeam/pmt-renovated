@@ -1350,7 +1350,6 @@ public:
       auto *active_subcommand = active_chain[i];
 
       if (active_subcommand->requiresAnySubcommand() && !active_subcommand->anySuperiorIsUsed()) {
-        //Log::println("Checking {}, requiresSub={}", active_subcommand->getFullPath(), active_subcommand->requiresSubcommand());
         if (i + 1 == active_chain.size()) {
           throw Error("Subcommand '{}' requires a nested subcommand.", active_subcommand->getFullPath())
               .cmdlineError()

@@ -20,47 +20,30 @@
 #include <liblp/metadata_format.h>
 #include <libopenpart/openpart.h>
 
-#define PLUGIN "MetadataReaderPlugin"
-#define PLUGIN_VERSION "1.1"
+#define PLUGIN "LpMetadataPlugin"
+#define PLUGIN_VERSION "1.0"
 
 namespace PartitionManager {
 
-class MetadataReaderPlugin final : public BasicPlugin {
+class LpMetadataPlugin final : public BasicPlugin {
+public:
+  Helper::CMDLine::Subcommand *mainCmd = nullptr, *subCmdFirst = nullptr, *subCmdSecond = nullptr;
+  BasicFlags *flags = nullptr;
+  PartitionMap::DynamicTableData *dTab = nullptr;
+
+private:
   std::vector<std::string> partitions;
 
-public:
-  Helper::CMDLine::Subcommand *cmd = nullptr;
-  BasicFlags *flags = nullptr;
-
-  PLUGIN_SECTION MetadataReaderPlugin() = default;
-  PLUGIN_SECTION ~MetadataReaderPlugin() override = default;
-
-  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
-    flags = &mainFlags;
-    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
-    cmd = mainApp.addSubcommand("read-metadata", "Read logical partition metadata of input partition(s)")
-              ->footer("Use get-all or getvar-all as partition name for reading "
-                       "all logical partition metadata of all logical partitions.");
-    cmd->addOption("partition(s)", partitions, "Partition name(s)")->required();
-    cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
-        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
+  bool readGroupMetadata() {
+    for (const auto &group : dTab->getGroups()) {
+      Log::println("name={} max_size={} flags={}", std::string(group.name), group.maximum_size,
+                   (group.flags & LP_GROUP_SLOT_SUFFIXED ? "slot_suffixed" : ""));
+    }
 
     return true;
   }
 
-  PLUGIN_SECTION bool onUnload() override {
-    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
-    cmd = nullptr;
-    return true;
-  }
-
-  PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
-
-  PLUGIN_SECTION bool run() override {
-    auto dTab = GET_DYNAMIC_TABLE_DATA_PTR();
-    if (!dTab->isSupported()) throw Error("This device doesn't support dynamic partitions.");
-
+  bool readPartitionMetadata() {
     const auto &tableMetadata = dTab->getMetadata();
     auto reader = [&tableMetadata] FOREACH_LP_METADATA_PARTITION_PARAMETERS_CONST -> bool {
       const auto &group = tableMetadata.groups[metadata.group_index];
@@ -107,11 +90,49 @@ public:
     return true;
   }
 
+public:
+  PLUGIN_SECTION LpMetadataPlugin() = default;
+  PLUGIN_SECTION ~LpMetadataPlugin() override = default;
+
+  PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    flags = &mainFlags;
+    Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
+    mainCmd = mainApp.addSubcommand("lp-metadata", "LP metadata operations.")->requiresSubcommand();
+
+    subCmdFirst = mainCmd->addSubcommand("read-groups", "Read exists logical partition group metadata structures.");
+    subCmdSecond = mainCmd->addSubcommand("read-partition", "Read logical partition metadata structures.")
+                       ->footer("Use get-all or getvar-all as partition name for reading all partitions");
+    subCmdSecond->addOption("partition(s)", partitions, "Partition name(s)")->required();
+
+    mainCmd->addFlag("-v,--version", nullptr, "View version of plugin.")
+        ->superior()
+        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
+
+    return true;
+  }
+
+  PLUGIN_SECTION bool onUnload() override {
+    Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
+    mainCmd = nullptr;
+    return true;
+  }
+
+  PLUGIN_SECTION bool used() override { return mainCmd->isUsed(); }
+
+  PLUGIN_SECTION bool run() override {
+    dTab = GET_DYNAMIC_TABLE_DATA_PTR();
+    if (!dTab->isSupported()) throw Error("This device doesn't support dynamic partitions.");
+
+    if (subCmdFirst->isUsed()) return readGroupMetadata();
+    if (subCmdSecond->isUsed()) return readPartitionMetadata();
+    return false;
+  }
+
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
-}; // class MetadataReaderPlugin
+};
 
 } // namespace PartitionManager
 
-REGISTER_PLUGIN(PartitionManager, MetadataReaderPlugin)
+REGISTER_PLUGIN(PartitionManager, LpMetadataPlugin)
