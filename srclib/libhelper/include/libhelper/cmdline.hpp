@@ -35,10 +35,10 @@
 #include <cctype>
 #include <concepts>
 #include <unordered_set>
+#include <sysexits.h>
 #include <libhelper/error.hpp>
 #include <libhelper/definations.hpp>
 #include <libhelper/functions.hpp>
-#include <sysexits.h>
 
 /**
  * @namespace Helper::CMDLine
@@ -152,7 +152,7 @@ struct OptionProperties {
   OptionProperties &operator=(OptionProperties &&other) = default; ///< Move assignment.
 
   OptionProperties(const OptionProperties &other) = default;            ///< Copy constructor.
-  OptionProperties &operator=(const OptionProperties &other) = default; ///> Copy assignment operator.
+  OptionProperties &operator=(const OptionProperties &other) = default; ///< Copy assignment operator.
 
   std::vector<std::string> valid_names;
   std::function<void(const std::string &)> setter;
@@ -646,6 +646,8 @@ class Subcommand {
   friend class App;
 
   std::vector<std::unique_ptr<Option>> options;
+  std::vector<std::unique_ptr<Subcommand>> subcommands;
+  Subcommand *parent = nullptr;
   bool is_found = false;
 
 public:
@@ -729,6 +731,45 @@ public:
     return groups.back().get();
   }
 
+  /// @brief Add a nested subcommand.
+  Subcommand *addSubcommand(const std::string &spec, const std::string &desc = "") {
+    auto cmd = std::make_unique<Subcommand>(spec, desc);
+    cmd->parent = this;
+    subcommands.push_back(std::move(cmd));
+    return subcommands.back().get();
+  }
+
+  /// @brief Add a nested subcommand.
+  void addSubcommand(Subcommand *orig) {
+    if (orig == nullptr) throw Error("Input subcommand pointer is null.").cmdlineError().withCode(EX_CONFIG);
+    orig->parent = this;
+    std::unique_ptr<Subcommand> arg(orig);
+    subcommands.push_back(std::move(arg));
+  }
+
+  /// @brief Get a direct nested subcommand by name.
+  Subcommand *getSubcommand(const std::string &_name) {
+    for (auto &subcmd : subcommands)
+      if (subcmd->name == _name) return subcmd.get();
+    return nullptr;
+  }
+
+  /// @brief Get the name of the used direct nested subcommand, if any.
+  std::optional<std::string> getUsedSubcommandName() {
+    for (const auto &subcmd : subcommands)
+      if (subcmd->isUsed()) return subcmd->name;
+    return std::nullopt;
+  }
+
+  /// @brief Get the nested subcommands.
+  std::vector<std::unique_ptr<Subcommand>> &getSubcommands() { return subcommands; }
+
+  /// @brief Get the nested subcommands.
+  const std::vector<std::unique_ptr<Subcommand>> &getSubcommands() const { return subcommands; }
+
+  /// @brief Get the full space-separated path of subcommand names from the root.
+  std::string getFullPath() const { return parent ? parent->getFullPath() + " " + name : name; }
+
   /// @brief Set the footer.
   Subcommand *footer(const std::string &s) {
     _footer = s;
@@ -744,17 +785,21 @@ public:
       grp->validate();
   }
 
-  /// @brief Check if the subcommand contains a superior option.
+  /// @brief Check if the subcommand (or any of its nested subcommands) contains a superior option.
   bool containsSuperiorOption() const {
     for (const auto &arg : options)
       if (arg->getProperties()->superior) return true;
+    for (const auto &cmd : subcommands)
+      if (cmd->containsSuperiorOption()) return true;
     return false;
   }
 
-  /// @brief Check if any superior option is used.
+  /// @brief Check if any superior option is used in this subcommand or any of its nested subcommands.
   bool anySuperiorIsUsed() const {
     for (const auto &arg : options)
       if (arg->getProperties()->superior && arg->isUsed()) return true;
+    for (const auto &cmd : subcommands)
+      if (cmd->anySuperiorIsUsed()) return true;
     return false;
   }
 
@@ -973,7 +1018,7 @@ public:
   /// @brief Print help.
   void help(const Subcommand *subcmd = nullptr) {
     if (subcmd) {
-      std::cout << "Usage: " << cmd_name << " " << subcmd->name;
+      std::cout << "Usage: " << cmd_name << " " << subcmd->getFullPath();
 
       [[maybe_unused]] bool has_positional = false;
       for (const auto &arg : subcmd->options) {
@@ -982,9 +1027,17 @@ public:
           has_positional = true;
         }
       }
+      if (!subcmd->subcommands.empty()) std::cout << " [SUBCOMMAND]";
       std::cout << " [OPTIONS]\n";
       if (!subcmd->description.empty()) std::cout << "\nDescription:\n  " << subcmd->description << "\n\n";
       if (!subcmd->getFooter().empty()) std::cout << indentLines(subcmd->getFooter()) << "\n\n";
+
+      if (!subcmd->subcommands.empty()) {
+        std::cout << "Subcommands:\n";
+        for (const auto &sc : subcmd->subcommands)
+          printAlignedOption(sc->name, sc->getDescription());
+        std::cout << "\n";
+      }
 
       if (!subcmd->options.empty()) {
         std::unordered_set<const Option *> subcmd_grouped;
@@ -1191,23 +1244,24 @@ public:
     for (int i = 1; i < argc; ++i)
       args.push_back(argv[i]);
 
-    Subcommand *active_subcommand = nullptr;
+    std::vector<Subcommand *> active_chain;
+    std::vector<size_t> chain_positional_index;
     size_t app_positional_index = 0;
-    size_t subcmd_positional_index = 0;
 
     for (size_t i = 0; i < args.size(); ++i) {
       const std::string &token = args[i];
 
       if (auto_help_enabled && (token == "-h" || token == "--help")) {
-        help(active_subcommand);
+        help(active_chain.empty() ? nullptr : active_chain.back());
         std::exit(0);
       }
 
-      if (!active_subcommand && !token.starts_with("-")) {
-        Subcommand *subcmd = getSubcommand(token);
+      if (!token.starts_with("-")) {
+        Subcommand *subcmd = active_chain.empty() ? getSubcommand(token) : active_chain.back()->getSubcommand(token);
         if (subcmd) {
-          active_subcommand = subcmd;
-          active_subcommand->is_found = true;
+          subcmd->is_found = true;
+          active_chain.push_back(subcmd);
+          chain_positional_index.push_back(0);
           continue;
         }
       }
@@ -1226,7 +1280,8 @@ public:
 
         Option *matched_arg = nullptr;
 
-        if (active_subcommand) matched_arg = findOption(arg_name, active_subcommand->options);
+        for (auto it = active_chain.rbegin(); it != active_chain.rend() && !matched_arg; ++it)
+          matched_arg = findOption(arg_name, (*it)->options);
         if (!matched_arg) matched_arg = findOption(arg_name, this->options);
         if (!matched_arg) throw Error("Unknown option: {}", arg_name).cmdlineError().withCode(EX_USAGE);
 
@@ -1249,9 +1304,12 @@ public:
 
       Option *pos_arg = nullptr;
 
-      if (active_subcommand) {
-        pos_arg = getPositionalOption(subcmd_positional_index, active_subcommand->options);
-        if (pos_arg) subcmd_positional_index++;
+      for (size_t lvl = active_chain.size(); lvl-- > 0;) {
+        pos_arg = getPositionalOption(chain_positional_index[lvl], active_chain[lvl]->options);
+        if (pos_arg) {
+          chain_positional_index[lvl]++;
+          break;
+        }
       }
 
       if (!pos_arg) {
@@ -1280,7 +1338,7 @@ public:
     for (const auto &grp : groups)
       grp->validate();
 
-    if (active_subcommand) {
+    for (auto *active_subcommand : active_chain) {
       for (const auto &arg : active_subcommand->options) {
         if (arg->getProperties()->is_required && !arg->isUsed() && !active_subcommand->anySuperiorIsUsed())
           throw Error("Missing required subcommand option: {}", arg->getProperties()->valid_names[0])
