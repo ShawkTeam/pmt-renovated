@@ -569,71 +569,116 @@ public:
   explicit operator bool() const { return properties->is_found; }
 };
 
-/// @brief Option group.
+/**
+ * @class OptionGroup
+ *
+ * @brief Represents a group of command-line options with quantity or dependency constraints.
+ *   This class allows you to group related options (e.g., mutually exclusive flags like `--force`
+ *   and `--interactive`) and enforce strict validation rules regarding how many of them can be used together.
+ */
 class OptionGroup {
   friend class App;
   friend class Subcommand;
 
-  std::vector<Option *> group_options;
+  std::vector<Option *> group_options; ///< Internal list of raw pointers to options belonging to this group.
 
 public:
-  std::string name;
-  std::string description;
-  int min_required = 0;  ///< Min required option count (-1 = no limit)
-  int max_required = -1; ///< Max usable option count (-1 = no limit)
+  std::string name;        ///< Unique name of the group, utilized in error messages and help menus.
+  std::string description; ///< A brief description explaining the purpose or constraints of the group.
+  int min_required = 0;    ///< Minimum number of options required to be set (-1 or 0 indicates no lower bound).
+  int max_required = -1;   ///< Maximum number of options allowed to be set (-1 indicates no upper bound).
 
+  /// @brief Default constructor. Initializes an unconstrained empty option group.
   OptionGroup() = default;
-  OptionGroup(const std::string &name, const std::string &desc = "") : name(name), description(desc) {} ///< Construct an option group.
+
+  /**
+   * @brief Constructs an option group with a specified name and an optional description.
+   * @param name The identifying name of the group.
+   * @param desc A brief description of the group's function or rules.
+   */
+  OptionGroup(const std::string &name, const std::string &desc = "") : name(name), description(desc) {}
 
   OptionGroup(const OptionGroup &) = delete;
   OptionGroup &operator=(const OptionGroup &) = delete;
   OptionGroup(OptionGroup &&) = default;            ///< Move constructor.
   OptionGroup &operator=(OptionGroup &&) = default; ///< Move assignment operator.
 
-  /// @brief Set the required options.
+  /**
+   * @brief Sets the minimum and maximum boundaries for the number of usable options (Fluent Interface).
+   *
+   * @param min The minimum number of options that must be provided.
+   * @param max The maximum number of options allowed (-1 for no limit).
+   * @return A pointer to the current OptionGroup instance for method chaining.
+   */
   OptionGroup *require(int min, int max = -1) {
     min_required = min;
     max_required = max;
     return this;
   }
 
-  /// @brief Set the required options.
+  /**
+   * @brief Enforces that exactly N options from this group must be provided.
+   *
+   * @param n The exact number of options required.
+   * @return A pointer to the current OptionGroup instance for method chaining.
+   */
   OptionGroup *requireExactly(int n) {
     min_required = n;
     max_required = n;
     return this;
   }
 
-  /// @brief Set the required options.
+  /**
+   * @brief Configures the group to be mutually exclusive (at most one option can be selected).
+   *   The user may choose to provide zero options, but providing more than one will trigger a validation error.
+   *
+   * @return A pointer to the current OptionGroup instance for method chaining.
+   */
   OptionGroup *requireAtMostOne() {
     min_required = 0;
     max_required = 1;
     return this;
   }
 
-  /// @brief Set the required options.
+  /**
+   * @brief Enforces that at least one option from this group must be supplied.
+   *
+   * @return A pointer to the current OptionGroup instance for method chaining.
+   */
   OptionGroup *requireAtLeastOne() {
     min_required = 1;
     max_required = -1;
     return this;
   }
 
-  /// @brief Get the options.
+  /**
+   * @brief Retrieves the underlying list of options associated with this group.
+   *
+   * @return A constant reference to the vector containing option pointers.
+   */
   const std::vector<Option *> &getOptions() const { return group_options; }
 
-  /// @brief Validate the options.
+  /**
+   * @brief Validates whether the parsed command-line options adhere to the defined min/max rules.
+   *   This must be executed after the command-line arguments are fully parsed. If any constraint
+   *   is violated, it throws an `Error` with the `EX_USAGE` exit code to indicate incorrect command-line usage.
+   *
+   * @throws Error Thrown if the count of used options falls outside the permitted [min_required, max_required] range.
+   */
   void validate() const {
-    if (min_required <= 0 && max_required < 0) return; // No rule.
+    if (min_required <= 0 && max_required < 0) return; // No constraints defined, skipped.
 
     int used_count = 0;
     for (const auto *opt : group_options)
       if (opt->isUsed()) used_count++;
 
+    // Lower bound validation
     if (min_required > 0 && used_count < min_required)
       throw Error("Option group '{}': at least {} option(s) required, {} given.", name, min_required, used_count)
           .cmdlineError()
           .withCode(EX_USAGE);
 
+    // Upper bound validation
     if (max_required >= 0 && used_count > max_required)
       throw Error("Option group '{}': at most {} option(s) allowed, {} given.", name, max_required, used_count)
           .cmdlineError()
