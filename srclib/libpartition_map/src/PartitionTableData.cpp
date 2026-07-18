@@ -54,7 +54,8 @@ void PartitionTableData::scan() {
           silencer.silence();
         }
       }
-    }
+    } else
+      Log::error("Failed to load partitions from {}.", std::quoted_string(p));
   }
 
   Log::info("Scan complete, sorting partitions by name...");
@@ -295,6 +296,20 @@ bool PartitionTableData::hasPartition(const std::string &name) const {
   });
 
   return found;
+}
+
+bool PartitionTableData::sync() {
+  bool success = true;
+  for (const auto &name : localTableNames) {
+    success &= sync(name);
+  }
+
+  return success;
+}
+
+bool PartitionTableData::sync(const std::string &name) {
+  auto &data = GPTDataOf(name);
+  return data->SaveGPTData(true) && data->SaveMBR();
 }
 
 bool PartitionTableData::hasTable(const std::string &name) const {

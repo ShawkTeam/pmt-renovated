@@ -167,6 +167,23 @@ bool DynamicTableData::hasPartition(const std::string &name) const {
   return found;
 }
 
+bool DynamicTableData::sync() {
+  Log::info("Syncing logical partitions.");
+  bool success = true;
+  for (auto &part : localPartitions)
+    success &= sync(part.name());
+
+  return success;
+}
+
+bool DynamicTableData::sync(const std::string &name) {
+  Log::info("Syncing {} named logical partition.", std::quoted_string(name));
+  auto it = std::ranges::find_if(localPartitions, [&](const Partition_t &part) { return part.name() == name; });
+  if (it == localPartitions.end()) return false;
+  auto op = it->getOpenPart();
+  return openpart_sync(op);
+}
+
 bool DynamicTableData::empty() const {
   Log::info("Checking whether the logical partition list is empty.");
   return localPartitions.empty();

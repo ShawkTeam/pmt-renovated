@@ -60,6 +60,8 @@ public:
   virtual std::optional<std::reference_wrapper<Partition_t>> partition(const std::string &, const std::string & = "") = 0;
 
   virtual bool hasPartition(const std::string &) const = 0;
+  virtual bool sync() = 0;
+  virtual bool sync(const std::string &) = 0;
   virtual bool isSupported() const noexcept = 0;
   virtual constexpr bool isLogical(const std::string &) const = 0;
 
@@ -251,6 +253,10 @@ public:
   bool hasPartition(const std::string &name) const override;
   /// @brief Check whether the partition table is available.
   bool hasTable(const std::string &name) const;
+  /// @brief Sync all partition tables with GPTData::SaveGPTData() and GPTData::SaveMBR().
+  bool sync() override;
+  /// @brief Sync specified partition table with GPTData::SaveGPTData() and GPTData::SaveMBR().
+  bool sync(const std::string &name) override;
   /// @brief Check the device is uses UFS.
   bool isUsesUFS() const;
   /// @brief Check whether the super partition exists in any partition table.
@@ -517,6 +523,12 @@ public:
 
   /// @brief Check the availability of the partition.
   bool hasPartition(const std::string &name) const override;
+
+  /// @brief Sync logical partitions.
+  bool sync() override;
+
+  /// @brief Sync specified logical partition.
+  bool sync(const std::string &name) override;
 
   /// @brief Check whether the partition is logical.
   constexpr bool isLogical(const std::string &) const override { return true; }
