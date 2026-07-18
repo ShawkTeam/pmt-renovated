@@ -158,6 +158,7 @@ public:
   public:
     inline static std::string FILE = "last_logs.log";
     inline static bool PRINT_TO_STDOUT = false, DISABLE = false;
+    inline static int tries = 0;
 
     /**
      * @brief Change log file.
@@ -186,6 +187,7 @@ public:
       FILE = "last_logs.log";
       PRINT_TO_STDOUT = false;
       DISABLE = false;
+      tries = 0;
     }
   };
 
@@ -203,10 +205,15 @@ public:
     std::string logLine = __oss.str();
 
     if (!std::filesystem::exists(logFile)) {
+      if (Properties::tries >= 3) return;
+
       if (std::ofstream tempFile(logFile, std::ios::out); !tempFile) {
+        fprintf(stderr, "[Logger] Cannot create log file %s: %s\n", logFile.c_str(), strerror(errno));
+
         Properties::setFile("last_logs.log");
-        LOG(INFO) << "Cannot create log file: " << logFile << ": " << strerror(errno) << std::endl;
-        LOG(INFO) << "New logging file: last_logs.log" << std::endl;
+        logFile = "last_logs.log";
+
+        fprintf(stderr, "[Logger] Falling back to: %s\n", logFile.c_str());
       }
     }
 
@@ -217,9 +224,20 @@ public:
                    << std::string(46, '-') << std::endl;
       fileStream << logLine;
     } else {
+      if (Properties::tries >= 3) return;
+
+      fprintf(stderr, "[Logger] Cannot write to log file %s: %s\n", logFile.c_str(), strerror(errno));
+
       Properties::setFile("last_logs.log");
-      LOG(INFO) << "Cannot write logs to log file: " << logFile << ": " << strerror(errno)
-                << " Logging file setting up as: last_logs.log." << std::endl;
+      logFile = "last_logs.log";
+
+      fprintf(stderr, "[Logger] Logging file redirected to: %s\n", logFile.c_str());
+      if (std::fstream fallbackStream(logFile, std::ios::app | std::ios::out); fallbackStream)
+        fallbackStream << logLine;
+      else {
+        fprintf(stderr, "[Logger] Fallback file %s also failed!\n", logFile.c_str());
+        ++Properties::tries;
+      }
     }
 
     if (Properties::PRINT_TO_STDOUT) fprintf(stdout, "%s", logLine.c_str());
