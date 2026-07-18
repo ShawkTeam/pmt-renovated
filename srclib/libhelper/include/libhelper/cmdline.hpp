@@ -340,8 +340,8 @@ inline std::function<void(const std::string &)> IsMemberIgnoreCase(std::initiali
 namespace Callbacks {
 
 /// @brief A callback for viewing plugin version.
-inline std::function<void()> ViewPluginVersion(const std::string_view name, const std::string_view &ver, bool do_exit = true) {
-  return [&]() {
+inline std::function<void()> ViewPluginVersion(const std::string_view &name, const std::string_view &ver, bool do_exit = true) {
+  return [name, ver, do_exit]() {
     Log::println("{} v{}", name, ver);
     if (do_exit) std::exit(0);
   };
