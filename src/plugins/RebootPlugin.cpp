@@ -15,6 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file RebootPlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the RebootPlugin for rebooting the device.
+ *
+ * This file implements the RebootPlugin class which provides functionality
+ * to reboot the device with different targets (normal, recovery, bootloader, etc.).
+ */
+
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 
@@ -23,6 +32,12 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for rebooting the device.
+ *
+ * This plugin provides functionality to reboot the device with different
+ * targets (normal, recovery, bootloader, etc.).
+ */
 class RebootPlugin final : public BasicPlugin {
   std::string rebootTarget;
 
@@ -30,9 +45,18 @@ public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
 
+  /// @brief Default constructor.
   PLUGIN_SECTION RebootPlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~RebootPlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommand.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("reboot", "Reboot the device.");
@@ -44,14 +68,29 @@ public:
     return true;
   }
 
+  /**
+   * @brief Unload the plugin and clean up resources.
+   *
+   * @return true if the plugin unloaded successfully.
+   */
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
 
+  /**
+   * @brief Check if the plugin's subcommand was used.
+   *
+   * @return true if the subcommand was used.
+   */
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
+  /**
+   * @brief Run the reboot operation.
+   *
+   * @return true if the operation succeeded.
+   */
   PLUGIN_SECTION bool run() override {
     Log::info("Rebooting device!!! (reboot target: {})", rebootTarget);
 
@@ -63,8 +102,18 @@ public:
     return true;
   }
 
+  /**
+   * @brief Get the plugin name.
+   *
+   * @return std::string The plugin name.
+   */
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /**
+   * @brief Get the plugin version.
+   *
+   * @return std::string The plugin version.
+   */
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 

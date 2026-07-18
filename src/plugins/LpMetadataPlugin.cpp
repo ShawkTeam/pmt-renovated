@@ -15,6 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file LpMetadataPlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the LpMetadataPlugin for displaying logical partition metadata.
+ *
+ * This file implements the LpMetadataPlugin class which provides functionality
+ * to display detailed information about logical partition metadata, including
+ * partition groups, extents, and other metadata from the super partition.
+ */
+
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 #include <liblp/metadata_format.h>
@@ -25,6 +35,13 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for displaying logical partition metadata.
+ *
+ * This plugin provides functionality to display detailed information about
+ * logical partition metadata, including partition groups, extents, and
+ * other metadata from the super partition.
+ */
 class LpMetadataPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *mainCmd = nullptr, *subCmdFirst = nullptr, *subCmdSecond = nullptr;
@@ -34,6 +51,11 @@ public:
 private:
   std::vector<std::string> partitions;
 
+  /**
+   * @brief Read and display partition group metadata.
+   *
+   * @return true if successful.
+   */
   bool readGroupMetadata() {
     for (const auto &group : dTab->getGroups()) {
       Log::println("name={} max_size={} flags={}", std::string(group.name), group.maximum_size,
@@ -43,6 +65,11 @@ private:
     return true;
   }
 
+  /**
+   * @brief Read and display partition metadata.
+   *
+   * @return true if successful.
+   */
   bool readPartitionMetadata() {
     const auto &tableMetadata = dTab->getMetadata();
     auto reader = [&tableMetadata] FOREACH_LP_METADATA_PARTITION_PARAMETERS_CONST -> bool {
@@ -91,9 +118,18 @@ private:
   }
 
 public:
+  /// @brief Default constructor.
   PLUGIN_SECTION LpMetadataPlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~LpMetadataPlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommands.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     flags = &mainFlags;
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
@@ -111,14 +147,29 @@ public:
     return true;
   }
 
+  /**
+   * @brief Unload the plugin and clean up resources.
+   *
+   * @return true if the plugin unloaded successfully.
+   */
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     mainCmd = nullptr;
     return true;
   }
 
+  /**
+   * @brief Check if the plugin's subcommand was used.
+   *
+   * @return true if the subcommand was used.
+   */
   PLUGIN_SECTION bool used() override { return mainCmd->isUsed(); }
 
+  /**
+   * @brief Run the metadata display operation.
+   *
+   * @return true if the operation succeeded.
+   */
   PLUGIN_SECTION bool run() override {
     dTab = GET_DYNAMIC_TABLE_DATA_PTR();
     if (!dTab->isSupported()) throw Error("This device doesn't support dynamic partitions.");
@@ -128,8 +179,18 @@ public:
     return false;
   }
 
+  /**
+   * @brief Get the plugin name.
+   *
+   * @return std::string The plugin name.
+   */
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /**
+   * @brief Get the plugin version.
+   *
+   * @return std::string The plugin version.
+   */
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 

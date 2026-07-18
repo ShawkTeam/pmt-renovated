@@ -15,6 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file TypePlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the TypePlugin for detecting partition types.
+ *
+ * This file implements the TypePlugin class which provides functionality
+ * to detect the type of partitions by checking magic numbers for
+ * filesystems and Android-specific images.
+ */
+
 #include <map>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
@@ -24,6 +34,12 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for detecting partition types.
+ *
+ * This plugin provides functionality to detect the type of partitions by
+ * checking magic numbers for filesystems and Android-specific images.
+ */
 class TypePlugin final : public BasicPlugin {
   std::vector<std::string> contents;
   bool onlyCheckAndroidMagics = false, onlyCheckFileSystemMagics = false;
@@ -33,9 +49,18 @@ public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
 
+  /// @brief Default constructor.
   PLUGIN_SECTION TypePlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~TypePlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommand.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("type", "Get type of the partition(s) or image(s).");
@@ -54,14 +79,29 @@ public:
     return true;
   }
 
+  /**
+   * @brief Unload the plugin and clean up resources.
+   *
+   * @return true if the plugin unloaded successfully.
+   */
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
 
+  /**
+   * @brief Check if the plugin's subcommand was used.
+   *
+   * @return true if the subcommand was used.
+   */
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
+  /**
+   * @brief Run the type detection operation.
+   *
+   * @return true if the operation succeeded.
+   */
   PLUGIN_SECTION bool run() override {
     std::map<uint64_t, std::string> magics;
     if (onlyCheckAndroidMagics)
@@ -94,8 +134,18 @@ public:
     return true;
   }
 
+  /**
+   * @brief Get the plugin name.
+   *
+   * @return std::string The plugin name.
+   */
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /**
+   * @brief Get the plugin version.
+   *
+   * @return std::string The plugin version.
+   */
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 

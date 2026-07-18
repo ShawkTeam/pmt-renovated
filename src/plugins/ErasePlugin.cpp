@@ -15,6 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file ErasePlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the ErasePlugin for erasing partitions.
+ *
+ * This file implements the ErasePlugin class which provides functionality
+ * to securely erase partitions by writing zeros to the entire partition.
+ */
+
 #include <cerrno>
 #include <future>
 #include <fcntl.h>
@@ -26,6 +35,13 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for erasing partitions by writing zeros.
+ *
+ * This plugin provides functionality to securely erase partitions by writing
+ * zeros to the entire partition. It supports configurable buffer sizes and
+ * can process multiple partitions asynchronously.
+ */
 class ErasePlugin final : public BasicPlugin {
   std::vector<std::string> partitions;
   uint64_t bufferSize = 0;
@@ -38,9 +54,18 @@ public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
 
+  /// @brief Default constructor.
   PLUGIN_SECTION ErasePlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~ErasePlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommand.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("erase", "Writes zero bytes to partition(s).");
@@ -57,14 +82,22 @@ public:
     return true;
   }
 
+  /// @brief Unload the plugin and clean up resources.
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
 
+  /// @brief Check if the plugin's subcommand was used.
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
+  /**
+   * @brief Run the erase operation asynchronously for a single partition.
+   *
+   * @param partitionName The name of the partition to erase.
+   * @return AsyncResult_t Result of the asynchronous operation.
+   */
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName) const {
     std::optional<PartitionMap::TableType> tType;
     auto *table = getCorrectTableObj(partitionName, Flags.partitionTables.first.get(), Flags.partitionTables.second.get(), tType);
@@ -117,6 +150,11 @@ public:
     return AsyncResult_t::Success("Successfully wrote zero bytes to partition {}", partitionName);
   }
 
+  /**
+   * @brief Run the erase operation for all specified partitions.
+   *
+   * @return true if all erase operations succeeded.
+   */
   PLUGIN_SECTION bool run() override {
     Helper::AsyncManager<AsyncResult_t> manager;
     for (const auto &partitionName : partitions) {
@@ -128,8 +166,10 @@ public:
     return manager();
   }
 
+  /// @brief Get the plugin name.
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /// @brief Get the plugin version.
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 

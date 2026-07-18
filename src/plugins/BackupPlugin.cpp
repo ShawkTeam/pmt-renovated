@@ -15,6 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file BackupPlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the BackupPlugin for backing up partitions.
+ *
+ * This file implements the BackupPlugin class which provides functionality
+ * to create backups of partitions by reading their contents and writing
+ * them to output files.
+ */
+
 #include <chrono>
 #include <fcntl.h>
 #include <future>
@@ -27,9 +37,16 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for backing up partitions to files.
+ *
+ * This plugin provides functionality to create backups of partitions by reading
+ * their contents and writing them to specified output files. It supports
+ * configurable buffer sizes and optional verification of the backup.
+ */
 class BackupPlugin final : public BasicPlugin {
   std::vector<std::string> partitions, outputNames;
-  std::string rawPartitions, rawOutputNames, outputDirectory;
+  std::string outputDirectory;
   uint64_t bufferSize = 0;
   bool noSetPermissions = false, verify = false;
 
@@ -40,15 +57,24 @@ public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
 
+  /// @brief Default constructor.
   PLUGIN_SECTION BackupPlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~BackupPlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommand.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     flags = &mainFlags;
     cmd = mainApp.addSubcommand("backup", "Backup partition(s) to file(s).");
-    cmd->addOption("partition(s)", rawPartitions, "Partition name(s)")->required();
-    cmd->addOption("output(s)", rawOutputNames, "File name(s) (or path(s)) to save the partition image(s)");
+    cmd->addOption("partition(s)", partitions, "Partition name(s)")->required();
+    cmd->addOption("output(s)", outputNames, "File name(s) (or path(s)) to save the partition image(s)");
     cmd->addOption("-O,--output-directory", outputDirectory, "Directory to save the partition image(s)")
         ->check(Helper::CMDLine::Checkers::ExistingDirectory());
     cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for reading partition(s) and writing to file(s)")
@@ -63,14 +89,24 @@ public:
     return true;
   }
 
+  /// @brief Unload the plugin and clean up resources.
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
 
+  /// @brief Check if the plugin's subcommand was used.
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
+  /**
+   * @brief Run the backup operation asynchronously for a single partition.
+   *
+   * @param partitionName The name of the partition to back up.
+   * @param outputName The output file path for the backup.
+   * @param renderer Optional progress renderer for displaying progress.
+   * @return AsyncResult_t Result of the asynchronous operation.
+   */
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &outputName,
                                         PartitionMap::ProgressRenderer *renderer) const {
     std::optional<PartitionMap::TableType> tType;
@@ -132,8 +168,12 @@ public:
     return AsyncResult_t::Success("Partition {} successfully backed up to {}", partitionName, outputName);
   }
 
+  /**
+   * @brief Run the backup operation for all specified partitions.
+   *
+   * @return true if all backup operations succeeded.
+   */
   PLUGIN_SECTION bool run() override {
-    processCommandLine(partitions, outputNames, rawPartitions, rawOutputNames, ',', true);
     if (!outputNames.empty() && partitions.size() != outputNames.size())
       throw Helper::Error("You must provide an output name(s) as long as the partition name(s)").cmdlineError().withCode(EX_USAGE);
 
@@ -154,8 +194,10 @@ public:
     PLUGIN_END_WITH_RENDERER(renderer, manager);
   }
 
+  /// @brief Get the plugin name.
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /// @brief Get the plugin version.
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 

@@ -15,6 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file MemoryTestPlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the MemoryTestPlugin for testing I/O speed.
+ *
+ * This file implements the MemoryTestPlugin class which provides functionality
+ * to test partition memory by performing read and write operations to verify
+ * data integrity and measure performance.
+ */
+
 #include <chrono>
 #include <cstring>
 #include <random>
@@ -27,6 +37,12 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for testing partition memory.
+ *
+ * This plugin provides functionality to test partition memory by performing
+ * read and write operations to verify data integrity and measure performance.
+ */
 class MemoryTestPlugin final : public BasicPlugin {
   uint64_t bufferSize = MB(4), testFileSize = 0;
   std::filesystem::path testPath;
@@ -36,9 +52,18 @@ public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
 
+  /// @brief Default constructor.
   PLUGIN_SECTION MemoryTestPlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~MemoryTestPlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommand.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("memtest", "Test your write/read speed of device.");
@@ -66,14 +91,29 @@ public:
     return true;
   }
 
+  /**
+   * @brief Unload the plugin and clean up resources.
+   *
+   * @return true if the plugin unloaded successfully.
+   */
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
 
+  /**
+   * @brief Check if the plugin's subcommand was used.
+   *
+   * @return true if the subcommand was used.
+   */
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
+  /**
+   * @brief Run the memory test operation.
+   *
+   * @return true if the operation succeeded.
+   */
   PLUGIN_SECTION bool run() override {
     if (testFileSize > GB(2) && !Flags.forceProcess)
       throw Error("File size is more than 2GB! Sizes over 2GB may not give accurate "
@@ -151,8 +191,18 @@ public:
     return true;
   }
 
+  /**
+   * @brief Get the plugin name.
+   *
+   * @return std::string The plugin name.
+   */
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /**
+   * @brief Get the plugin version.
+   *
+   * @return std::string The plugin version.
+   */
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 

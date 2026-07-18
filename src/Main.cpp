@@ -15,6 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file Main.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Main entry point for the Partition Manager Tool (PMT).
+ *
+ * This file contains the main function that initializes the command-line interface,
+ * handles signal interruptions, parses arguments, loads plugins, and executes
+ * the main logic of the Partition Manager Tool.
+ */
+
 #include <csignal>
 #include <cstdio>
 #include <cstdlib>
@@ -34,6 +44,14 @@ constexpr char kInterruptedMessage[] = "\nInterrupted.\n";
 constexpr char kAbortedMessage[] = "\nAborted.\n";
 } // namespace
 
+/**
+ * @brief Signal handler for SIGINT and SIGABRT.
+ *
+ * This function handles interrupt signals (CTRL+C) and abort signals,
+ * printing an appropriate message and exiting with a status code.
+ *
+ * @param sig The signal number (SIGINT or SIGABRT).
+ */
 static void sigHandler(int sig) {
   if (sig == SIGINT) {
     write(STDERR_FILENO, kInterruptedMessage, sizeof(kInterruptedMessage) - 1);
@@ -45,6 +63,17 @@ static void sigHandler(int sig) {
   }
 }
 
+/**
+ * @brief Main entry point for the Partition Manager Tool.
+ *
+ * This function initializes the command-line interface, sets up signal handlers,
+ * parses command-line arguments, loads plugins, and executes the requested
+ * partition management operations.
+ *
+ * @param argc Argument count.
+ * @param argv Argument vector.
+ * @return int Exit status code (EXIT_SUCCESS on success, EXIT_FAILURE or error code on failure).
+ */
 int main(int argc, char **argv) {
   Helper::CMDLine::App app("Partition Manager Tool", BUILD_VERSION);
   std::vector<char *> argvStorage;

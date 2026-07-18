@@ -15,6 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file RealPathPlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the RealPathPlugin for displaying partition real paths.
+ *
+ * This file implements the RealPathPlugin class which provides functionality
+ * to display the real device paths of partitions.
+ */
+
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 
@@ -23,6 +32,12 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for displaying partition real paths.
+ *
+ * This plugin provides functionality to display the real device paths
+ * of partitions.
+ */
 class RealPathPlugin final : public BasicPlugin {
   std::vector<std::string> partitions;
   bool byName = false;
@@ -31,9 +46,18 @@ public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
 
+  /// @brief Default constructor.
   PLUGIN_SECTION RealPathPlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~RealPathPlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommand.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("real-path", "Tell real paths of partition(s).");
@@ -47,14 +71,29 @@ public:
     return true;
   }
 
+  /**
+   * @brief Unload the plugin and clean up resources.
+   *
+   * @return true if the plugin unloaded successfully.
+   */
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
 
+  /**
+   * @brief Check if the plugin's subcommand was used.
+   *
+   * @return true if the subcommand was used.
+   */
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
+  /**
+   * @brief Run the real path display operation.
+   *
+   * @return true if the operation succeeded.
+   */
   PLUGIN_SECTION bool run() override {
     for (const auto &partition : partitions) {
       std::optional<PartitionMap::TableType> tType;
@@ -78,8 +117,18 @@ public:
     return true;
   }
 
+  /**
+   * @brief Get the plugin name.
+   *
+   * @return std::string The plugin name.
+   */
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /**
+   * @brief Get the plugin version.
+   *
+   * @return std::string The plugin version.
+   */
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 

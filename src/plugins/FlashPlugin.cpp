@@ -15,6 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file FlashPlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the FlashPlugin for flashing images to partitions.
+ *
+ * This file implements the FlashPlugin class which provides functionality
+ * to write image files to partitions. It supports configurable buffer sizes
+ * and can process multiple partitions asynchronously.
+ */
+
 #include <future>
 #include <fcntl.h>
 #include <PartitionManager/PartitionManager.hpp>
@@ -25,9 +35,16 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for flashing images to partitions.
+ *
+ * This plugin provides functionality to write image files to partitions.
+ * It supports configurable buffer sizes, optional deletion of images after
+ * flashing, and can process multiple partitions asynchronously.
+ */
 class FlashPlugin final : public BasicPlugin {
   std::vector<std::string> partitions, imageNames;
-  std::string rawPartitions, rawImageNames, imageDirectory;
+  std::string imageDirectory;
   uint64_t bufferSize = 0;
   bool deleteAfterProgress = false;
 
@@ -38,15 +55,24 @@ public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
 
+  /// @brief Default constructor.
   PLUGIN_SECTION FlashPlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~FlashPlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommand.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     flags = &mainFlags;
     cmd = mainApp.addSubcommand("flash", "Flash image(s) to partition(s).");
-    cmd->addOption("partition(s)", rawPartitions, "Partition name(s)")->required();
-    cmd->addOption("imageFile(s)", rawImageNames, "Name(s) of image file(s)")->required();
+    cmd->addOption("partition(s)", partitions, "Partition name(s)")->required();
+    cmd->addOption("imageFile(s)", imageNames, "Name(s) of image file(s)")->required();
     cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for reading image(s) and writing to partition(s)")
         ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
         ->defaultValue("1MB")
@@ -61,14 +87,24 @@ public:
     return true;
   }
 
+  /// @brief Unload the plugin and clean up resources.
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
 
+  /// @brief Check if the plugin's subcommand was used.
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
+  /**
+   * @brief Run the flash operation asynchronously for a single partition.
+   *
+   * @param partitionName The name of the partition to flash.
+   * @param imageName The path to the image file to flash.
+   * @param renderer Optional progress renderer for displaying progress.
+   * @return AsyncResult_t Result of the asynchronous operation.
+   */
   PLUGIN_SECTION AsyncResult_t runAsync(const std::string &partitionName, const std::string &imageName,
                                         PartitionMap::ProgressRenderer *renderer) const {
     if (!Helper::fileIsExists(imageName)) return AsyncResult_t::Error("Couldn't find image file: {}", imageName);
@@ -123,8 +159,12 @@ public:
     return AsyncResult_t::Success("Image {} successfully flashed to partition {}", imageName, partitionName);
   }
 
+  /**
+   * @brief Run the flash operation for all specified partitions.
+   *
+   * @return true if all flash operations succeeded.
+   */
   PLUGIN_SECTION bool run() override {
-    processCommandLine(partitions, imageNames, rawPartitions, rawImageNames, ',', true);
     if (partitions.size() != imageNames.size())
       throw Error("You must provide an image file(s) as long as the partition name(s)").cmdlineError().withCode(EX_USAGE);
 
@@ -145,8 +185,10 @@ public:
     PLUGIN_END_WITH_RENDERER(renderer, manager);
   }
 
+  /// @brief Get the plugin name.
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /// @brief Get the plugin version.
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 

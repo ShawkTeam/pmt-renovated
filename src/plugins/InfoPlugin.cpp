@@ -15,6 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file InfoPlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the InfoPlugin for displaying partition information.
+ *
+ * This file implements the InfoPlugin class which provides functionality
+ * to display detailed information about partitions, including size, path,
+ * GUID, and other metadata. It supports both human-readable and JSON output formats.
+ */
+
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 #include <nlohmann/json.hpp>
@@ -24,6 +34,13 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for displaying partition information.
+ *
+ * This plugin provides functionality to display detailed information about partitions,
+ * including size, path, etc. It supports both human-readable
+ * and JSON output formats with configurable size units.
+ */
 class InfoPlugin final : public BasicPlugin {
   std::vector<std::string> partitions;
   std::string jNamePartition, jNameTable, jNameSize, jNameLogical;
@@ -34,9 +51,18 @@ public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
 
+  /// @brief Default constructor.
   PLUGIN_SECTION InfoPlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~InfoPlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommand.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     flags = &mainFlags;
@@ -67,14 +93,21 @@ public:
     return true;
   }
 
+  /// @brief Unload the plugin and clean up resources.
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
 
+  /// @brief Check if the plugin's subcommand was used.
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
+  /**
+   * @brief Run the info display operation.
+   *
+   * @return true if the operation succeeded.
+   */
   PLUGIN_SECTION bool run() override {
     std::vector<PartitionMap::Partition_t> jParts;
     PartitionMap::SizeUnit multiple;
@@ -128,8 +161,10 @@ public:
     return true;
   }
 
+  /// @brief Get the plugin name.
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /// @brief Get the plugin version.
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 

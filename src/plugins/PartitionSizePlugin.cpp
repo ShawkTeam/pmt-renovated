@@ -15,6 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/**
+ * @file PartitionSizePlugin.cpp
+ * @author Yağız Zengin ([YZBruh](https://github.com/YZBruh))
+ * @brief Implementation of the PartitionSizePlugin for displaying partition sizes.
+ *
+ * This file implements the PartitionSizePlugin class which provides functionality
+ * to display the size of partitions in various units (bytes, KB, MB, GB).
+ */
+
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 
@@ -23,6 +32,12 @@
 
 namespace PartitionManager {
 
+/**
+ * @brief Plugin for displaying partition sizes.
+ *
+ * This plugin provides functionality to display the size of partitions
+ * in various units (bytes, KB, MB, GB).
+ */
 class PartitionSizePlugin final : public BasicPlugin {
   std::vector<std::string> partitions;
   bool onlySize = false, asByte = false, asKiloBytes = false, asMega = false, asGiga = false;
@@ -31,9 +46,18 @@ public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
   BasicFlags *flags = nullptr;
 
+  /// @brief Default constructor.
   PLUGIN_SECTION PartitionSizePlugin() = default;
+  /// @brief Default destructor.
   PLUGIN_SECTION ~PartitionSizePlugin() override = default;
 
+  /**
+   * @brief Load the plugin and register its subcommand.
+   *
+   * @param mainApp The main application instance.
+   * @param mainFlags The global flags structure.
+   * @return true if the plugin loaded successfully.
+   */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("sizeof", "Tell size(s) of input partition list.")
@@ -58,14 +82,29 @@ public:
     return true;
   }
 
+  /**
+   * @brief Unload the plugin and clean up resources.
+   *
+   * @return true if the plugin unloaded successfully.
+   */
   PLUGIN_SECTION bool onUnload() override {
     Log::info("{}::onUnload() trigger. Bye!", PLUGIN);
     cmd = nullptr;
     return true;
   }
 
+  /**
+   * @brief Check if the plugin's subcommand was used.
+   *
+   * @return true if the subcommand was used.
+   */
   PLUGIN_SECTION bool used() override { return cmd->isUsed(); }
 
+  /**
+   * @brief Run the size display operation.
+   *
+   * @return true if the operation succeeded.
+   */
   PLUGIN_SECTION bool run() override {
     PartitionMap::SizeUnit multiple = {};
     if (asByte) multiple = PartitionMap::BYTE;
@@ -104,8 +143,18 @@ public:
     return true;
   }
 
+  /**
+   * @brief Get the plugin name.
+   *
+   * @return std::string The plugin name.
+   */
   PLUGIN_SECTION std::string getName() override { return PLUGIN; }
 
+  /**
+   * @brief Get the plugin version.
+   *
+   * @return std::string The plugin version.
+   */
   PLUGIN_SECTION std::string getVersion() override { return PLUGIN_VERSION; }
 };
 
