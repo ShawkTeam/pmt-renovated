@@ -119,6 +119,9 @@ private:
       std::string output = file_list.empty() ? n + ".gpt" : file_list[i];
       if (!directory.empty()) output.insert(0, directory + '/');
 
+      if (Helper::fileIsExists(output) && !Flags.forceProcess)
+        throw Helper::Error("Output file {} already exists!", output).cmdlineError().withCode(EX_DATAERR);
+
       auto table = pTab->GPTDataOf(n);
       if (silencer.silence(); table->SaveGPTBackup(output)) {
         silencer.stop();
