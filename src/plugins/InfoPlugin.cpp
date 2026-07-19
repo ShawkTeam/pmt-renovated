@@ -27,7 +27,10 @@
 
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
+#include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
+#include <rapidjson/prettywriter.h>
 
 #define PLUGIN "InfoPlugin"
 #define PLUGIN_VERSION "1.2"
@@ -146,16 +149,56 @@ public:
     }
 
     if (jsonFormat) {
-      nlohmann::json j;
-      j["multipleType"] = PartitionMap::Extra::getSizeUnitAsString(multiple);
-      j["partitions"] = nlohmann::json::array();
-      for (auto &part : jParts)
-        j["partitions"].push_back({{jNamePartition, part.name()},
-                                   {jNameTable, part.isLogicalPartition() ? "" : part.tableName()},
-                                   {jNameSize, std::stoull(part.formattedSizeString(multiple, true))},
-                                   {jNameLogical, part.isLogicalPartition()}});
+      rapidjson::Document d;
+      d.SetObject();
+      auto &allocator = d.GetAllocator();
 
-      Log::println("{}", j.dump(jIndentSize));
+      std::string sizeUnitStr = PartitionMap::Extra::getSizeUnitAsString(multiple);
+      rapidjson::Value multipleTypeVal;
+      multipleTypeVal.SetString(sizeUnitStr.c_str(), sizeUnitStr.length(), allocator);
+      d.AddMember("multipleType", multipleTypeVal, allocator);
+
+      rapidjson::Value partitionsArray(rapidjson::kArrayType);
+
+      for (auto &part : jParts) {
+        rapidjson::Value partObj(rapidjson::kObjectType);
+
+        // --json-partition-name
+        rapidjson::Value kPartition, vPartition;
+        kPartition.SetString(jNamePartition.c_str(), jNamePartition.length(), allocator);
+        vPartition.SetString(part.name().c_str(), part.name().length(), allocator);
+        partObj.AddMember(kPartition, vPartition, allocator);
+
+        // --json-table-name
+        rapidjson::Value kTable, vTable;
+        kTable.SetString(jNameTable.c_str(), jNameTable.length(), allocator);
+        std::string tName = part.isLogicalPartition() ? "" : part.tableName();
+        vTable.SetString(tName.c_str(), tName.length(), allocator);
+        partObj.AddMember(kTable, vTable, allocator);
+
+        // --json-size-name
+        rapidjson::Value kSize;
+        kSize.SetString(jNameSize.c_str(), jNameSize.length(), allocator);
+        uint64_t sizeVal = std::stoull(part.formattedSizeString(multiple, true));
+        partObj.AddMember(kSize, sizeVal, allocator);
+
+        // --json-logical-name
+        rapidjson::Value kLogical;
+        kLogical.SetString(jNameLogical.c_str(), jNameLogical.length(), allocator);
+        partObj.AddMember(kLogical, part.isLogicalPartition(), allocator);
+
+        partitionsArray.PushBack(partObj, allocator);
+      }
+
+      d.AddMember("partitions", partitionsArray, allocator);
+
+      rapidjson::StringBuffer buffer;
+      rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+
+      writer.SetIndent(' ', jIndentSize);
+      d.Accept(writer);
+
+      Log::println("{}", buffer.GetString());
     }
 
     return true;

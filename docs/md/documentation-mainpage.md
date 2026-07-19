@@ -14,7 +14,7 @@ This tool provides a comprehensive solution for managing Android device partitio
 - **Display** partition info (name, size, logical status) in text or JSON.
 - **Resolve** real block device paths and symbolic links.
 - **Read** super metadata and super group metadata.
-- **Re-read** partition tables.
+- **GPT operations**, like re-read tables, read/write GPT backups (only those created by pmt and gdisk/sgdisk).
 - **Identify** partition or image file types via magic number checks.
 - **Reboot** the device into multiple modes (normal, recovery, etc.).
 - **Asynchronous processing** for speed — each partition runs in its own thread.
@@ -41,7 +41,8 @@ This project is licensed under the GNU GPLv3 License - see the [LICENSE](https:/
 ## Credits
 - [CLI11: Command line parser for C++11](https://github.com/CLIUtils/CLI11) - **Not in use since PMT version 1.7.0.**
 - [PicoSHA2: A header-file-only, SHA256 hash generator in C++](https://github.com/okdshin/PicoSHA2) - **Not in use since PMT version 1.7.0.**
-- [nlohmann/json: JSON for Modern C++](https://github.com/nlohmann/json)
+- [nlohmann/json: JSON for Modern C++](https://github.com/nlohmann/json) - **Not in use since PMT version 1.9.0.**
+- [Tencent/rapidjson: A fast JSON parser/generator for C++ with both SAX/DOM style API](https://github.com/Tencent/rapidjson)
 
 ## Support
 For support and questions:

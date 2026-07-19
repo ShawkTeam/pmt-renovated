@@ -27,7 +27,9 @@
 #include <algorithm>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
-#include <nlohmann/json.hpp>
+#include <rapidjson/document.h>
+#include <rapidjson/prettywriter.h>
+#include <rapidjson/stringbuffer.h>
 
 #define PLUGIN "AdvancedExamplePlugin"
 #define PLUGIN_VERSION "1.1"
@@ -271,43 +273,60 @@ private:
    */
   void generateJsonOutput(const std::vector<PartitionMap::Partition_t> &_partitions) {
     PartitionMap::SizeUnit unit = parseSizeUnit();
+    rapidjson::Document doc;
+    doc.SetObject();
+    auto &alc = doc.GetAllocator();
 
-    nlohmann::json j;
-    j["analysis_info"] = {{"total_partitions", _partitions.size()},
-                          {"size_unit", sizeUnit},
-                          {"sort_by", sortBy},
-                          {"reverse_sort", reverseSort},
-                          {"min_size_filter", minSize},
-                          {"max_size_filter", maxSize == UINT64_MAX ? "unlimited" : std::to_string(maxSize)}};
+    // analysis_info object
+    rapidjson::Value info(rapidjson::kObjectType);
+    info.AddMember("total_partitions", (uint64_t)_partitions.size(), alc);
+    info.AddMember("size_unit", rapidjson::Value(sizeUnit.c_str(), alc), alc);
+    info.AddMember("sort_by", rapidjson::Value(sortBy.c_str(), alc), alc);
+    info.AddMember("reverse_sort", reverseSort, alc);
+    info.AddMember("min_size_filter", minSize, alc);
 
-    j["partitions"] = nlohmann::json::array();
+    if (maxSize == UINT64_MAX)
+      info.AddMember("max_size_filter", "unlimited", alc);
+    else
+      info.AddMember("max_size_filter", rapidjson::Value(std::to_string(maxSize).c_str(), alc), alc);
 
+    doc.AddMember("analysis_info", info, alc);
+
+    // partitions array
+    rapidjson::Value arr(rapidjson::kArrayType);
     for (const auto &partition : _partitions) {
-      nlohmann::json part;
-      part["name"] = partition.name();
-      part["type"] = partition.isLogicalPartition() ? "logical" : "physical";
-      part["size"] = {{"bytes", partition.size()}, {"formatted", partition.formattedSizeString(unit, true)}};
-      part["path"] = partition.absolutePath().string();
+      rapidjson::Value part(rapidjson::kObjectType);
+      part.AddMember("name", rapidjson::Value(partition.name().c_str(), alc), alc);
+      part.AddMember("type", rapidjson::Value(partition.isLogicalPartition() ? "logical" : "physical", alc), alc);
 
-      if (!partition.isLogicalPartition() && includeTables) {
-        part["table"] = partition.tableName();
-      }
+      // nested size object
+      rapidjson::Value sz(rapidjson::kObjectType);
+      sz.AddMember("bytes", partition.size(), alc);
+      sz.AddMember("formatted", rapidjson::Value(partition.formattedSizeString(unit, true).c_str(), alc), alc);
+      part.AddMember("size", sz, alc);
 
-      j["partitions"].push_back(part);
+      part.AddMember("path", rapidjson::Value(partition.absolutePath().string().c_str(), alc), alc);
+
+      if (!partition.isLogicalPartition() && includeTables)
+        part.AddMember("table", rapidjson::Value(partition.tableName().c_str(), alc), alc);
+      arr.PushBack(part, alc);
     }
+    doc.AddMember("partitions", arr, alc);
 
-    std::string output = j.dump(2);
+    // Write output
+    rapidjson::StringBuffer buffer;
+    rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+    doc.Accept(writer);
 
-    if (outputFile.empty()) {
-      Log::println("{}", output);
-    } else {
+    if (outputFile.empty())
+      Log::println("{}", buffer.GetString());
+    else {
       std::ofstream file(outputFile);
       if (file) {
-        file << output;
+        file << buffer.GetString();
         Log::println("JSON output written to: {}", outputFile);
-      } else {
+      } else
         throw PluginError("Failed to write to file: {}", outputFile);
-      }
     }
   }
 

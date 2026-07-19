@@ -287,8 +287,7 @@ public:
   /// @brief Get partition size in bytes.
   size_type size() const {
     uint64_t size = openpart_get_size(op);
-    if (size == UINT64_MAX)
-      throw Error("Cannot get size of {}: {}", name(), openpart_strerror(op));
+    if (size == UINT64_MAX) throw Error("Cannot get size of {}: {}", name(), openpart_strerror(op));
     return size;
   }
 

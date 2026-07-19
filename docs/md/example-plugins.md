@@ -244,15 +244,23 @@ auto physicalParts = Tables.partitions();
 
 ```cpp
 // JSON output
-nlohmann::json j;
-j["key"] = "value";
-j["array"] = nlohmann::json::array();
-Log::println("{}", j.dump(2));
+rapidjson::Document j;
+j.SetObject();
+auto& allocator = j.GetAllocator();
+
+j.AddMember("key", "value", allocator);
+rapidjson::Value array(rapidjson::kArrayType);
+j.AddMember("array", array, allocator);
+
+rapidjson::StringBuffer buffer;
+rapidjson::PrettyWriter<rapidjson::StringBuffer> writer(buffer);
+writer.SetIndent(' ', 2); // Add indent
+j.Accept(writer);
 
 // Formatted text output
-Log::println("Name: {} | Size: {}", name, size);
+Log::println("{}", buffer.GetString());
 
-// File output
+// Write to file
 std::ofstream file(outputFile);
 if (file) {
     file << content;
