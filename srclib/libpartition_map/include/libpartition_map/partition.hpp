@@ -102,7 +102,7 @@ public:
         gptPart(other.gptPart), isLogical(other.isLogical) {
     if (other.op) {
       std::string path = other.isLogical ? other.logicalPartitionPath.string() : std::string(openpart_get_part_path(other.op));
-      op = openpart_open(path.c_str(), O_RDWR, 0);
+      op = openpart_open(path.c_str(), OP_RDWR, 0);
       if (!op) throw Error("Cannot create openpart object: {}", openpart_strerror(op));
     } else
       op = nullptr;
@@ -285,7 +285,12 @@ public:
   }
 
   /// @brief Get partition size in bytes.
-  size_type size() const { return openpart_get_size(op); }
+  size_type size() const {
+    uint64_t size = openpart_get_size(op);
+    if (size == UINT64_MAX)
+      throw Error("Cannot get size of {}: {}", name(), openpart_strerror(op));
+    return size;
+  }
 
   /// @brief Get starting byte address.
   size_type start() const {
