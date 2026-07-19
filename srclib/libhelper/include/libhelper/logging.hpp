@@ -197,10 +197,11 @@ public:
 
     const time_t t = time(nullptr);
     const tm *date = localtime(&t);
+    const std::string min = std::to_string(date->tm_min);
     std::ostringstream __oss;
     __oss << "<" << static_cast<char>(level) << "> [ "
           << "<on " << stripQuotes(std::filesystem::path(file).filename()) << ":" << line << "> " << date->tm_mday << "/"
-          << date->tm_mon + 1 << "/" << date->tm_year + 1900 << " " << date->tm_hour << ":" << date->tm_min << ":" << date->tm_sec
+          << date->tm_mon + 1 << "/" << date->tm_year + 1900 << " " << date->tm_hour << ":" << (min.length() == 1 ? "0" + min : min) << ":" << date->tm_sec
           << "] " << function << "(): " << oss.str();
     std::string logLine = __oss.str();
 
