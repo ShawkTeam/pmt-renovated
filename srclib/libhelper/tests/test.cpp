@@ -91,19 +91,6 @@ int main(int argc, char **argv) {
     std::cout << "pathJoin() test 3: " << Helper::pathJoin("mydir/", "/dir2") << std::endl;
     std::cout << "pathJoin() test 4: " << Helper::pathJoin("mydir", "/dir2") << std::endl;
 
-    Helper::PureTuple<int, std::string, bool> values = {{1, "hi", true}, {2, "im", true}, {3, "helper", false}};
-
-    values.insert(std::make_tuple(0, "hi", false));
-    values.insert(2, "im", true);
-    values.insert({3, "helper", true});
-    values.pop({3, "helper", true});
-    values.pop_back();
-
-    std::cout << "pure tuple test: " << std::boolalpha << static_cast<bool>(values.at(0)) << std::endl;
-    for (const auto &[x, y, z] : values) {
-      std::cout << std::boolalpha << "(" << x << ", " << y << ", " << z << ")" << std::endl;
-    }
-
     std::cout << Helper::getLibVersion() << std::endl;
 
     LOG(INFO) << "Info message" << std::endl;
