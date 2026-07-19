@@ -35,7 +35,6 @@
 #include <libhelper/android.hpp>
 #include <libhelper/capsule.hpp>
 #include <libhelper/functions.hpp>
-#include <libhelper/pure_tuple.hpp>
 #include <libhelper/random.hpp>
 
 #endif // #ifndef LIBHELPER_LIB_HPP
