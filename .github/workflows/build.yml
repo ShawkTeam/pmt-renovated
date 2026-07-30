@@ -49,6 +49,7 @@ jobs:
         id: setup-ndk
         run: |
           wget "https://dl.google.com/android/repository/android-ndk-r29-linux.zip"
+          wget "https://dl.google.com/android/repository/android-ndk-r25c-linux.zip"
           unzip *.zip && rm *.zip
         working-directory: ${{ github.workspace }}
 
@@ -56,10 +57,12 @@ jobs:
         id: build
         run: |
           git submodule update --init --recursive --depth 1
-          export ANDROID_NDK="${{ github.workspace }}/android-ndk-r29"
+          export ANDROID_NDK_HOME="${{ github.workspace }}/android-ndk-r29"
+          export ANDROID_NDK_HOME_R25C="${{ github.workspace }}/android-ndk-r25c"
         
           bash build/scripts/build.sh clean
-          bash build/scripts/build.sh build -DCMAKE_BUILD_TYPE=Release
+          bash build/scripts/build.sh build -DCMAKE_BUILD_TYPE=Release --arch arm64-v8a --api 22 --toolchain "${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake"
+          bash build/scripts/build.sh build -DCMAKE_BUILD_TYPE=Release --arch armeabi-v7a --api 19 --toolchain "${ANDROID_NDK_HOME_R25C}/build/cmake/android.toolchain.cmake"
         
           # ARM64-V8A
           cd build_arm64-v8a

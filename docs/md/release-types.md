@@ -30,10 +30,10 @@ Typical release files follow this naming pattern:
 ## Architecture & Bitness Explained
 
 - **ARM64 (arm64-v8a)**:  
-  This is a 64-bit architecture used by newer Android devices. It can handle larger amounts of memory and generally runs faster for heavy tasks.
+  This is a 64-bit architecture used by newer Android devices. It is stably supported up to Android 5.1 (API 22). It can handle larger amounts of memory and generally runs faster for heavy tasks.
 
 - **ARM (armeabi-v7a)**:  
-  This is a 32-bit architecture common on older or less powerful Android devices. It has some limitations compared to 64-bit but is still widely supported.
+  This is a 32-bit architecture common on older or less powerful Android devices. It is stably supported up to Android 4.4 (API 19). It has some limitations compared to 64-bit but is still widely supported.
 
 ---
 
