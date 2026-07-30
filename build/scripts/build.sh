@@ -18,7 +18,7 @@
 
 WORK_DIR="$(pwd)"
 BUILD_PROPERTY="full"
-THIS="$(basename "$0")"
+THIS="${0##*/}"
 TC_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
 TARGET_API=21
 TARGET_ABI_LIST=("arm64-v8a" "armeabi-v7a")
@@ -33,10 +33,6 @@ checks() {
     if ! which cmake &>/dev/null || ! which ninja &>/dev/null || ! which python &>/dev/null; then
         echo "Please verify your CMake, Ninja and Python installation."
         exit 1
-    fi
-    if [ "$(basename $(git config core.hooksPath))" != ".githooks" ]; then
-        git config core.hooksPath "${WORK_DIR}/.githooks"
-        echo "Git hooks configured."
     fi
 }
 
