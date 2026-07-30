@@ -23,7 +23,7 @@
 #include <libpartition_map/table_data_collection.hpp>
 #include <libpartition_map/definations.hpp>
 
-#if defined(__ANDROID__) && __ANDROID_API__ < 21
+#if defined(__ANDROID__) && __ANDROID_API__ <= 21
 namespace std {
 template <> struct hash<std::filesystem::path> {
   size_t operator()(const std::filesystem::path &p) const noexcept { return std::hash<std::string>{}(p.string()); }

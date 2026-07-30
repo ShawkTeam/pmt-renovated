@@ -20,7 +20,7 @@ WORK_DIR="$(pwd)"
 BUILD_PROPERTY="full"
 THIS="$(basename "$0")"
 TC_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
-TARGET_API=22
+TARGET_API=21
 TARGET_ABI_LIST=("arm64-v8a" "armeabi-v7a")
 
 echo() { command echo "[$THIS]: $*"; }
