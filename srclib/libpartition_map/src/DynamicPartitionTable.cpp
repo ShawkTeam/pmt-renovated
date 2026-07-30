@@ -16,7 +16,6 @@
  */
 
 #include <algorithm>
-#include <ranges>
 #include <utility>
 #include <libhelper/functions.hpp>
 #include <libpartition_map/table_data_collection.hpp>
@@ -81,14 +80,14 @@ std::vector<BasicInfo> DynamicTableData::aboutPartitions() const {
   std::vector<BasicInfo> parts;
   for (const auto &p : partitions()) {
     const Partition_t &part = p;
-    parts.emplace_back(part.name(), part.size(), false);
+    parts.push_back({part.name(), part.size(), false});
   }
 
   return parts;
 }
 
 std::optional<std::reference_wrapper<Partition_t>> DynamicTableData::partition(const std::string &name, const std::string &) {
-  auto it = std::ranges::find_if(localPartitions, [&](const Partition_t &p) { return p.name() == name; });
+  auto it = std::find_if(localPartitions.begin(), localPartitions.end(), [&](const Partition_t &p) { return p.name() == name; });
   if (it == localPartitions.end()) return std::nullopt;
 
   Log::info("Providing Partition_t object of {} logical partition.", std::quoted_string(name));
@@ -97,7 +96,7 @@ std::optional<std::reference_wrapper<Partition_t>> DynamicTableData::partition(c
 
 std::optional<std::reference_wrapper<const Partition_t>> DynamicTableData::partition(const std::string &name,
                                                                                      const std::string &) const {
-  auto it = std::ranges::find_if(localPartitions, [&](const Partition_t &p) { return p.name() == name; });
+  auto it = std::find_if(localPartitions.begin(), localPartitions.end(), [&](const Partition_t &p) { return p.name() == name; });
   if (it == localPartitions.end()) return std::nullopt;
 
   Log::info("Providing Partition_t object of {} logical partition.", std::quoted_string(name));
@@ -105,7 +104,8 @@ std::optional<std::reference_wrapper<const Partition_t>> DynamicTableData::parti
 }
 
 std::optional<std::reference_wrapper<LpMetadataPartition>> DynamicTableData::metadata(const std::string &name) {
-  auto it = std::ranges::find_if(lpMetadata->partitions, [&](const LpMetadataPartition &p) { return name == p.name; });
+  auto it = std::find_if(lpMetadata->partitions.begin(), lpMetadata->partitions.end(),
+                         [&](const LpMetadataPartition &p) { return name == p.name; });
   if (it == lpMetadata->partitions.end()) return std::nullopt;
 
   Log::info("Providing LpMetadataPartition object of {} logical partition.", std::quoted_string(name));
@@ -113,7 +113,8 @@ std::optional<std::reference_wrapper<LpMetadataPartition>> DynamicTableData::met
 }
 
 std::optional<std::reference_wrapper<const LpMetadataPartition>> DynamicTableData::metadata(const std::string &name) const {
-  auto it = std::ranges::find_if(lpMetadata->partitions, [&](const LpMetadataPartition &p) { return name == p.name; });
+  auto it = std::find_if(lpMetadata->partitions.begin(), lpMetadata->partitions.end(),
+                         [&](const LpMetadataPartition &p) { return name == p.name; });
   if (it == lpMetadata->partitions.end()) return std::nullopt;
 
   Log::info("Providing LpMetadataPartition object of {} logical partition.", std::quoted_string(name));
@@ -132,7 +133,8 @@ uint64_t DynamicTableData::freeSpace() const {
 
 uint64_t DynamicTableData::freeSpace(const std::string &name) const {
   Log::info("Providing free space of {} group.", std::quoted_string(name));
-  auto it = std::ranges::find_if(lpMetadata->groups, [&](const LpMetadataPartitionGroup &group) { return name == group.name; });
+  auto it = std::find_if(lpMetadata->groups.begin(), lpMetadata->groups.end(),
+                         [&](const LpMetadataPartitionGroup &group) { return name == group.name; });
 
   if (it == lpMetadata->groups.end()) return UINT64_MAX;
 
@@ -151,7 +153,8 @@ uint64_t DynamicTableData::size() const {
 
 uint64_t DynamicTableData::size(const std::string &name) {
   Log::info("Providing maximum size of {} group.", std::quoted_string(name));
-  auto it = std::ranges::find_if(lpMetadata->groups, [&](const LpMetadataPartitionGroup &group) { return name == group.name; });
+  auto it = std::find_if(lpMetadata->groups.begin(), lpMetadata->groups.end(),
+                         [&](const LpMetadataPartitionGroup &group) { return name == group.name; });
 
   if (it == lpMetadata->groups.end()) return UINT64_MAX;
   return (*it).maximum_size;
@@ -160,7 +163,7 @@ uint64_t DynamicTableData::size(const std::string &name) {
 bool DynamicTableData::hasPartition(const std::string &name) const {
   Log::info("Checking {} named logical partition is exists.", std::quoted_string(name));
   bool found = false;
-  std::ranges::for_each(localPartitions, [&](auto &part) {
+  std::for_each(localPartitions.begin(), localPartitions.end(), [&](auto &part) {
     if (part.name() == name) found = true;
   });
 
@@ -178,7 +181,7 @@ bool DynamicTableData::sync() {
 
 bool DynamicTableData::sync(const std::string &name) {
   Log::info("Syncing {} named logical partition.", std::quoted_string(name));
-  auto it = std::ranges::find_if(localPartitions, [&](const Partition_t &part) { return part.name() == name; });
+  auto it = std::find_if(localPartitions.begin(), localPartitions.end(), [&](const Partition_t &part) { return part.name() == name; });
   if (it == localPartitions.end()) return false;
   auto op = it->getOpenPart();
   return openpart_sync(op);

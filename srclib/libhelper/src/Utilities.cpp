@@ -28,15 +28,10 @@
 #include <libhelper/functions.hpp>
 #include <libhelper/management.hpp>
 #include <libhelper/android.hpp>
-#ifndef ANDROID_BUILD
-#include <sys/_system_properties.h>
 #include <generated/buildInfo.hpp>
-#else
 #include <sys/system_properties.h>
-#endif
 #include <cutils/android_reboot.h>
 
-#ifdef __ANDROID__
 // From system/core/libcutils/android_reboot.cpp android16-s2-release
 int android_reboot(const unsigned cmd, int /*flags*/, const char *arg) {
   int ret;
@@ -68,7 +63,6 @@ int android_reboot(const unsigned cmd, int /*flags*/, const char *arg) {
   free(prop_value);
   return ret;
 }
-#endif
 
 namespace Helper {
 
@@ -96,7 +90,7 @@ bool runCommand(const std::string &cmd) {
   return WIFEXITED(status) && (WEXITSTATUS(status) == 0);
 }
 
-bool confirmPropt(const std::string &message, int maxTries) {
+bool confirmPrompt(const std::string &message, int maxTries) {
   Log::info("Trying to get confirmation from user.");
   static int total_tries = 1;
   char p;
@@ -120,7 +114,7 @@ bool confirmPropt(const std::string &message, int maxTries) {
 
   printf("Unexpected answer: '%c'. Try again.\n", p);
   total_tries++;
-  return confirmPropt(message, maxTries);
+  return confirmPrompt(message, maxTries);
 }
 
 std::string currentWorkingDirectory() {
@@ -171,9 +165,11 @@ namespace Android {
 std::set<std::string> getPaths() {
   std::set<std::string> paths;
   std::string_view pathVar = getenv("PATH");
+  std::stringstream ss(pathVar.data());
+  std::string part;
   if (pathVar.empty()) return {};
 
-  for (const auto part : pathVar | std::views::split(':'))
+  while (std::getline(ss, part, ':'))
     paths.insert(std::string(part.begin(), part.end()));
 
   return paths;

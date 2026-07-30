@@ -73,7 +73,8 @@ int main() {
 
     auto readed_gpt_data_collection = partitions.allGPTData();
     std::cout << "Listing readed gpt data paths:" << std::endl;
-    std::ranges::for_each(readed_gpt_data_collection, [](const auto &info) { std::cout << " " << info.first; });
+    std::for_each(readed_gpt_data_collection.begin(), readed_gpt_data_collection.end(),
+                  [](const auto &info) { std::cout << " " << info.first; });
     std::cout << std::endl;
 
     auto data2 = partitions.hasTable("mmcblk0") ? partitions.GPTDataOf("mmcblk0") : partitions.GPTDataOf("sda");

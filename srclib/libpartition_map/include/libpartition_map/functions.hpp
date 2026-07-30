@@ -24,10 +24,6 @@
 #ifndef LIBPARTITION_MAP_FUNCTIONS_HPP
 #define LIBPARTITION_MAP_FUNCTIONS_HPP
 
-#if __cplusplus < 202002L
-#error "libpartition_map/functions.hpp is requires C++20 or higher C++ standarts."
-#endif
-
 #include <string>
 #include <libpartition_map/definations.hpp>
 

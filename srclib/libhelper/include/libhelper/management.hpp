@@ -24,10 +24,6 @@
 #ifndef LIBHELPER_MANAGEMENT_HPP
 #define LIBHELPER_MANAGEMENT_HPP
 
-#if __cplusplus < 202002L
-#error "libhelper/management.hpp is requires C++20 or higher C++ standarts."
-#endif
-
 #include <type_traits>
 #include <utility>
 #include <vector>
@@ -35,11 +31,12 @@
 #include <future>
 #include <sstream>
 #include <iostream>
-#include <ranges>
 #include <filesystem>
+#include <optional>
 #include <dirent.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <fmt/format.h>
 #include <sys/stat.h>
 #include <libhelper/error.hpp>
 
@@ -47,7 +44,7 @@ namespace Helper {
 
 /**
  * @brief It offers a ready-made @c cleanup() function. It is used by other classes.
- *        The default defination takes the type pointer and clears it with @c delete.
+ *        The default definition takes the type pointer and clears it with @c delete.
  *
  * @tparam T Type.
  * @note This class has overloads for @c DIR, @c FILE, and arrays. However, they are not included in this documentation. Please refer
@@ -73,33 +70,65 @@ template <> struct CleanupTraits<DIR> {
   }
 };
 
-/**
- * @brief The deletionability of the entry is checked using the @c delete key. Only for pointers/classes!
- *        This check is performed using @c CleanupTraits. It is used by other classes.
- *
- * @tparam T Variable/type.
- */
-template <typename T>
-concept PointerDeletable = !std::is_void_v<T> && !std::is_array_v<T> && requires(T *p) { CleanupTraits<T>::cleanup(p); };
+template <typename T, typename = std::void_t<>> struct IsHasCleanupHandle : std::false_type {};
+
+template <typename T, typename = std::void_t<>> struct IsHasCleanupArrayHandle : std::false_type {};
 
 /**
- * @brief The deletionability of the entry is checked using the @c delete key. Only for arrays!
- *        This check is performed using @c CleanupTraits. It is used by other classes.
+ * @brief Checks if the pointer of type has a valid @c CleanupTraits<T>::cleanup() handle.
  *
- * @tparam T Variable/type.
+ * @tparam T Input type.
  */
 template <typename T>
-concept ArrayDeletable = !std::is_void_v<T> && requires(T *p) { CleanupTraits<T[]>::cleanup(p); };
+struct IsHasCleanupHandle<T, std::void_t<decltype(CleanupTraits<T>::cleanup(std::declval<T *>()))>> : std::true_type {};
 
 /**
- * @brief The deletionability of the entry is checked using the @c delete key.
+ * @brief Shortcut of @c IsHasCleanupHandle<T>::value.
+ * @relates IsHasCleanupHandle
+ * @tparam T Input type.
+ */
+template <typename T> inline constexpr bool IsHasCleanupHandle_v = IsHasCleanupHandle<T>::value;
+
+/**
+ * @brief The deletion-ability of the entry is checked using the @c delete key. Only for pointers/classes!
  *        This check is performed using @c CleanupTraits. It is used by other classes.
  *
  * @tparam T Variable/type.
- * @note This concept handles both @c PointerDeletable and @c ArrayDeletable controls.
+ */
+template <typename T> inline constexpr bool PointerDeletable_v = !std::is_void_v<T> && !std::is_array_v<T> && IsHasCleanupHandle_v<T>;
+
+/**
+ * @brief Checks if the array of type has a valid @c CleanupTraits<T[]>::cleanup() handle.
+
+ * @tparam T Input type.
  */
 template <typename T>
-concept Deletable = PointerDeletable<T> && ArrayDeletable<T>;
+struct IsHasCleanupArrayHandle<T[], std::void_t<decltype(CleanupTraits<T[]>::cleanup(std::declval<T (*)[]>()))>> : std::true_type {};
+
+/**
+ * @brief Shortcut of @c IsHasCleanupArrayHandle<T>::value.
+ * @relates IsHasCleanupArrayHandle
+ * @tparam T Input type.
+ */
+template <typename T> inline constexpr bool IsHasCleanupArrayHandle_v = Helper::IsHasCleanupArrayHandle<T>::value;
+
+/**
+ * @brief The deletion-ability of the entry is checked using the @c delete key. Only for arrays!
+ *        This check is performed using @c CleanupTraits. It is used by other classes.
+ *
+ * @tparam T Variable/type.
+ */
+template <typename T>
+inline constexpr bool ArrayDeletable_v = !std::is_void_v<T> && std::is_array_v<T> && IsHasCleanupArrayHandle_v<T>;
+
+/**
+ * @brief The deletion-ability of the entry is checked using the @c delete key.
+ *        This check is performed using @c CleanupTraits. It is used by other classes.
+ *
+ * @tparam T Variable/type.
+ * @note This trait handles both @c PointerDeletable and @c ArrayDeletable controls.
+ */
+template <typename T> inline constexpr bool Deletable_v = PointerDeletable_v<T> || ArrayDeletable_v<T>;
 
 /**
  * @brief A simple class for easily managing asynchronous operations.
@@ -198,7 +227,7 @@ public:
    */
   std::vector<RetT> getResults() {
     if (!get) {
-      std::ranges::for_each(futures, [&](auto &future) { results.push_back(future.get()); });
+      std::for_each(futures.begin(), futures.end(), [&](auto &future) { results.push_back(future.get()); });
       get = true;
     }
     return results;
@@ -212,12 +241,9 @@ public:
    *
    * @note It is only available for return types like @c std::pair<std::string, bool> and similar types.
    */
-  bool finalize() const
-    requires requires(RetT v) {
-      { v.first } -> std::convertible_to<std::string>;
-      { v.second } -> std::convertible_to<bool>;
-    }
-  {
+  template <typename _RetT = RetT,
+            typename = std::enable_if_t<Helper::HasFirstMember_v<_RetT, std::string> && Helper::HasSecondMember_v<_RetT, bool>>>
+  bool finalize() const {
     if (!get) return false;
     std::ostringstream oss;
     bool ret = true;
@@ -245,12 +271,9 @@ public:
    *
    * @note It is only available for return types like @c std::pair<std::string, bool> and similar types.
    */
-  bool operator()()
-    requires requires(RetT v) {
-      { v.first } -> std::convertible_to<std::string>;
-      { v.second } -> std::convertible_to<bool>;
-    }
-  {
+  template <typename _RetT = RetT,
+            typename = std::enable_if_t<Helper::HasFirstMember_v<_RetT, std::string> && Helper::HasSecondMember_v<_RetT, bool>>>
+  bool operator()() {
     getResults();
     return finalize();
   }
@@ -308,14 +331,17 @@ public:
  * @tparam Type Needed type.
  * @see Helper::BasicUniqueFD
  * @see Helper::BasicUniqueFP
- * @note The return type of the desired @c close() function/@c operator() must be @c void.
  */
 template <typename Class, typename Type>
-concept IsCloser = requires(Class c, Type t) {
-  { c(t) } -> std::same_as<void>;
-} || requires(Class c, Type t) {
-  { c.close(t) } -> std::same_as<void>;
-};
+struct IsCloser : std::disjunction<Helper::HasCloseFunction<Class, Type>, Helper::HasCallOperator<Class, Type>> {};
+
+/**
+ * @brief Shortcut of @c IsCloser<Class, Type>::value.
+ * @relates IsCloser
+ * @tparam Class Input type.
+ * @tparam Type Parameter type.
+ */
+template <typename Class, typename Type> inline constexpr bool IsCloser_v = IsCloser<Class, Type>::value;
 
 /**
  * @brief Checks if the input class can close the needed thing, either as a @c operator() and using the @c close() function.
@@ -346,48 +372,24 @@ concept IsCloser = requires(Class c, Type t) {
  *    }
  * };
  *
- * // To see how this concept is used, check out Helper::BasicUniqueFD or Helper::BasicUniqueFP.
+ * // To see how this trait is used, check out Helper::BasicUniqueFD or Helper::BasicUniqueFP.
  * @endcode
  *
  * @tparam Class Class.
  * @tparam Type Needed type.
  * @see Helper::BasicUniqueFD
  * @see Helper::BasicUniqueFP
- * @note The return type of the desired @c close() function and @c operator() must be @c void.
  */
 template <typename Class, typename Type>
-concept IsFullCloser = requires(Class c, Type t) {
-  { c(t) } -> std::same_as<void>;
-  { c.close(t) } -> std::same_as<void>;
-};
+struct IsFullCloser : std::conjunction<Helper::HasCloseFunction<Class, Type>, Helper::HasCallOperator<Class, Type>> {};
 
 /**
- * @brief Check the ownership of @c operator() in the closer class.
- *
- * @tparam Class Class.
- * @tparam Type Needed type.
- * @see Helper::BasicUniqueFD
- * @see Helper::BasicUniqueFP
- * @note To see how this concept is used, check out @c Helper::BasicUniqueFD or @c Helper::BasicUniqueFP.
+ * @brief Shortcut of @c IsFullCloser<Class, Type>::value.
+ * @relates IsFullCloser
+ * @tparam Class Input type.
+ * @tparam Type Needed parameter type.
  */
-template <typename Class, typename Type>
-concept IsCloserWithOperator = requires(Class c, Type t) {
-  { c(t) } -> std::same_as<void>;
-};
-
-/**
- * @brief Check the ownership of @c close() in the closer class.
- *
- * @tparam Class Class.
- * @tparam Type Needed type.
- * @see Helper::BasicUniqueFD
- * @see Helper::BasicUniqueFP
- * @note To see how this concept is used, check out @c Helper::BasicUniqueFD or @c Helper::BasicUniqueFP.
- */
-template <typename Class, typename Type>
-concept IsCloserWithFunction = requires(Class c, Type t) {
-  { c.close(t) } -> std::same_as<void>;
-};
+template <typename Class, typename Type> inline constexpr bool IsFullCloser_v = IsFullCloser<Class, Type>::value;
 
 /// @brief Valid file descriptor, file pointer and directory pointer closer class structure. Used by default.
 class Closer {
@@ -424,9 +426,9 @@ public:
  * @see Helper::IsCloserWithOperator
  * @see Helper::Closer
  */
-template <typename Closer = Helper::Closer>
-  requires IsCloser<Closer, int>
-class BasicUniqueFD {
+template <typename Closer = Helper::Closer> class BasicUniqueFD {
+  static_assert(IsCloser_v<Closer, int>, "BasicUniqueFD: Provided Closer type must satisfy IsCloser_v<Closer, int>!");
+
   int fd_ = -1, flags_ = 0;
   std::optional<mode_t> mode_ = std::nullopt;
   std::filesystem::path path_;
@@ -497,7 +499,7 @@ public:
   ~BasicUniqueFD() {
     if (fd_ >= 0 && syncOnClose) fsync();
 
-    if constexpr (IsCloserWithOperator<Closer, int>)
+    if constexpr (Helper::HasCallOperator_v<Closer, int>)
       closer_(fd_);
     else
       closer_.close(fd_);
@@ -595,7 +597,7 @@ public:
   void close() noexcept {
     if (fd_ >= 0 && syncOnClose) fsync();
 
-    if constexpr (IsCloserWithOperator<Closer, int>)
+    if constexpr (Helper::HasCallOperator_v<Closer, int>)
       closer_(fd_);
     else
       closer_.close(fd_);
@@ -630,39 +632,27 @@ public:
   int operator()() noexcept { return fd_; }
   int operator()() const noexcept { return fd_; }
 
-  template <typename T>
-    requires std::is_integral_v<T>
-  bool operator<(T fd) const noexcept {
+  template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>> bool operator<(T fd) const noexcept {
     return fd_ < static_cast<int>(fd);
   }
 
-  template <typename T>
-    requires std::is_integral_v<T>
-  bool operator>(T fd) const noexcept {
+  template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>> bool operator>(T fd) const noexcept {
     return fd_ > static_cast<int>(fd);
   }
 
-  template <typename T>
-    requires std::is_integral_v<T>
-  bool operator<=(T fd) const noexcept {
+  template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>> bool operator<=(T fd) const noexcept {
     return fd_ <= static_cast<int>(fd);
   }
 
-  template <typename T>
-    requires std::is_integral_v<T>
-  bool operator>=(T fd) const noexcept {
+  template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>> bool operator>=(T fd) const noexcept {
     return fd_ >= static_cast<int>(fd);
   }
 
-  template <typename T>
-    requires std::is_integral_v<T>
-  bool operator==(T fd) const noexcept {
+  template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>> bool operator==(T fd) const noexcept {
     return fd_ == static_cast<int>(fd);
   }
 
-  template <typename T>
-    requires std::is_integral_v<T>
-  bool operator!=(T fd) const noexcept {
+  template <typename T, typename = std::enable_if_t<std::is_integral_v<T>>> bool operator!=(T fd) const noexcept {
     return fd_ != static_cast<int>(fd);
   }
 
@@ -699,9 +689,9 @@ public:
  * @see Helper::IsCloserWithOperator
  * @see Helper::Closer
  */
-template <typename Closer = Helper::Closer>
-  requires IsCloser<Closer, FILE *>
-class BasicUniqueFP {
+template <typename Closer = Helper::Closer> class BasicUniqueFP {
+  static_assert(IsCloser_v<Closer, FILE *>, "BasicUniqueFD: Provided Closer type must satisfy IsCloser_v<Closer, FILE *>!");
+
   FILE *fp_ = nullptr;
   std::string_view flags_;
   std::filesystem::path path_;
@@ -774,7 +764,7 @@ public:
 
   /// @brief The destructor that closes the file pointer.
   ~BasicUniqueFP() {
-    if constexpr (IsCloserWithOperator<Closer, FILE *>)
+    if constexpr (Helper::HasCallOperator_v<Closer, FILE *>)
       closer_(fp_);
     else
       closer_.close(fp_);
@@ -839,7 +829,7 @@ public:
   }
 
   void close() noexcept {
-    if constexpr (IsCloserWithOperator<Closer, FILE *>)
+    if constexpr (Helper::HasCallOperator_v<Closer, FILE *>)
       closer_(fp_);
     else
       closer_.close(fp_);
@@ -851,8 +841,8 @@ public:
   int putc(int c) noexcept { return fputc(c, fp_); }
   int puts(const std::string &s) noexcept { return fputs(s.c_str(), fp_); }
 
-  template <typename... Args> int printf(std::format_string<Args...> fmt, Args &&...args) noexcept {
-    std::string end = std::format(fmt, std::forward<Args>(args)...);
+  template <typename... Args> int printf(fmt::format_string<Args...> fmt, Args &&...args) noexcept {
+    std::string end = fmt::format(fmt, std::forward<Args>(args)...);
     return fprintf(fp_, "%s", end.c_str());
   }
 
@@ -935,7 +925,9 @@ using UniqueFP = BasicUniqueFP<Closer>;
  * @see Helper::makeScopeGuard
  * @note Input functions can never be parameterized.
  */
-template <std::invocable F> class ScopeGuard {
+template <typename F> class ScopeGuard {
+  static_assert(std::is_invocable_v<F>, "ScopeGuard: Provided type F must be invocable with no arguments!");
+
   F _fn;
   bool _active = true;
 
@@ -982,35 +974,29 @@ public:
  * @param fn Function.
  * @return Helper::ScopeGuard
  */
-template <std::invocable F> [[nodiscard]] static auto makeScopeGuard(F &&fn) noexcept {
+template <typename F, typename = std::enable_if_t<std::is_invocable_v<F>>> [[nodiscard]] static auto makeScopeGuard(F &&fn) noexcept {
   return ScopeGuard<std::decay_t<F>>(std::forward<F>(fn));
 }
 
 /// @brief Open file (creates file descriptor).
-template <typename... Args>
-  requires(sizeof...(Args) >= 2)
-inline auto openFd(Args &&...args) noexcept {
-  int fd = open(args...);
+template <typename... Args, typename = std::enable_if_t<sizeof...(Args) >= 2>> inline auto openFd(Args &&...args) noexcept {
+  int fd = open(std::forward<Args>(args)...);
   return std::pair{fd, makeScopeGuard([fd] {
                      if (fd >= 0) close(fd);
                    })};
 }
 
 /// @brief Open file (creates file pointer).
-template <typename... Args>
-  requires(sizeof...(Args) >= 2)
-inline auto openFp(Args &&...args) noexcept {
-  FILE *fp = fopen(args...);
+template <typename... Args, typename = std::enable_if_t<sizeof...(Args) >= 2>> inline auto openFp(Args &&...args) noexcept {
+  FILE *fp = fopen(std::forward<Args>(args)...);
   return std::pair{fp, makeScopeGuard([fp] {
                      if (fp != nullptr) fclose(fp);
                    })};
 }
 
 /// @brief Open directory.
-template <typename... Args>
-  requires(sizeof...(Args) >= 1)
-inline auto openDir(Args &&...args) noexcept {
-  DIR *dir = opendir(args...);
+template <typename... Args, typename = std::enable_if_t<sizeof...(Args) >= 1>> inline auto openDir(Args &&...args) noexcept {
+  DIR *dir = opendir(std::forward<Args>(args)...);
   return std::pair{dir, makeScopeGuard([dir] {
                      if (dir != nullptr) closedir(dir);
                    })};

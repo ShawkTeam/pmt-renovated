@@ -28,6 +28,10 @@
 #include <linux/msdos_fs.h>
 #include <uuid/uuid.h>
 
+#ifndef EROFS_SUPER_MAGIC_V1
+#define EROFS_SUPER_MAGIC_V1 0xE0F5E1E2
+#endif
+
 __BEGIN_DECLS
 
 static uint32_t read_le32(const uint8_t *buf)

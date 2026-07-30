@@ -148,7 +148,6 @@ int main(int argc, char **argv) {
         if (entry.path().extension().string() == ".so") manager.loadPlugin(entry.path().string());
     }
 
-    // AppMain.parse(argc, argv);
     app.parse(argc, argv);
 
     if (argc < 2 || (argc == 3 && (!plugins.empty() || !pluginPath.empty()))) {
@@ -178,10 +177,9 @@ int main(int argc, char **argv) {
       throw PartitionManager::Error(
           "Problem(s) have been detected in your device's partition table. Please use -f (--force) to continue.");
 
-    if (Flags.onLogical) {
-      if (!Tables.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
-        throw PartitionManager::Error("This device doesn't contains logical partitions. But you used -l (--logical) flag.");
-    }
+    if (Flags.onLogical &&
+        !Tables.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
+      throw PartitionManager::Error("This device doesn't contains logical partitions. But you used -l (--logical) flag.");
 
     if (manager.getUsed().empty()) throw PartitionManager::Error("Unknown main command speficied! Use --help for more information.");
 
@@ -190,9 +188,9 @@ int main(int argc, char **argv) {
     if (error.isCmdlineError()) {
       fprintf(stderr, "%s: %s\n", argv[0], error.what());
       return error.getErrorCode();
-    } else {
-      fprintf(stderr, "%s%sFAIL:%s\n%s\n", RED, BOLD, STYLE_RESET, error.what());
-      return error.getErrorCode();
     }
+
+    fprintf(stderr, "%s%sFAIL:%s\n%s\n", RED, BOLD, STYLE_RESET, error.what());
+    return error.getErrorCode();
   }
 }

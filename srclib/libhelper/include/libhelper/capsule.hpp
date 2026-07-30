@@ -24,6 +24,9 @@
 #ifndef LIBHELPER_CAPSULE_HPP
 #define LIBHELPER_CAPSULE_HPP
 
+#include <type_traits>
+#include <libhelper/definations.hpp>
+
 namespace Helper {
 
 /**
@@ -32,11 +35,8 @@ namespace Helper {
  * @tparam _Type Contained value type. Must support copy assignment and equality comparison operators.
  * @note Uses C++20 requires clause to enforce type constraints at compile time.
  */
-template <typename _Type>
-  requires requires(_Type v) {
-    v = v;
-    v == v;
-  }
+template <typename _Type, typename = std::enable_if_t<std::is_copy_assignable_v<_Type> && IsEqualityComparable_v<_Type> &&
+                                                      std::is_assignable_v<_Type, _Type>>>
 class Capsule {
 public:
   _Type &value;
@@ -120,7 +120,7 @@ public:
   /**
    * @brief Check if the input data matches the stored data (==).
    *
-   * @param other Other capsule class.
+   * @param _value Input variable.
    * @retval true  The data held is the same.
    * @retval false The data held is the NOT same.
    */
@@ -138,7 +138,7 @@ public:
   /**
    * @brief Check if the input data matches the stored data (!=).
    *
-   * @param other Other capsule class.
+   * @param _value Input variable.
    * @retval true  The data held is the NOT same.
    * @retval false The data held is the same.
    */
@@ -164,6 +164,8 @@ public:
    * @brief Change the held reference (with C++ style).
    *
    * @param _value Input variable.
+   * @param _capsule Reference to the capsule object.
+   * @retval _capsule Reference to the capsule object.
    */
   friend Capsule &operator>>(const _Type &_value, Capsule &_capsule) noexcept {
     _capsule.value = _value;

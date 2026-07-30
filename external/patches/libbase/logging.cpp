@@ -62,7 +62,7 @@ namespace android {
 namespace base {
 
 // BSD-based systems like Android/macOS have getprogname(). Others need us to provide one.
-#if !defined(__APPLE__) && !defined(__BIONIC__)
+#if !defined(__APPLE__) && (!defined(__BIONIC__) || __ANDROID_API__ < 21)
 static const char* getprogname() {
 #ifdef _WIN32
   static bool first = true;
@@ -76,8 +76,11 @@ static const char* getprogname() {
 
   return progname;
 #else
-  return program_invocation_short_name;
+  return "unknown";
 #endif
+}
+extern "C" void android_set_abort_message(const char* msg) {
+  (void)msg;
 }
 #endif
 

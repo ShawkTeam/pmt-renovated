@@ -24,10 +24,6 @@
 #ifndef LIBHELPER_LIB_HPP
 #define LIBHELPER_LIB_HPP
 
-#if __cplusplus < 202002L
-#error "libhelper/lib.hpp is requires C++20 or higher C++ standarts."
-#endif
-
 #include <libhelper/definations.hpp>
 #include <libhelper/management.hpp>
 #include <libhelper/error.hpp>

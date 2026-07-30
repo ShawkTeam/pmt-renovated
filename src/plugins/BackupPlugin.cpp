@@ -134,7 +134,6 @@ public:
     std::shared_ptr<PartitionMap::Progress_t> progress;
     if (renderer) progress = renderer->add(partitionName, partition->size());
 
-    std::error_code ec;
     PartitionMap::Partition_t::IOCallback cb = nullptr;
     if (progress) {
       cb = [&progress](uint64_t done, uint64_t) { progress->done.store(done, std::memory_order_relaxed); };

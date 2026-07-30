@@ -24,10 +24,6 @@
 #ifndef PARTITION_MANAGER_PLUGIN_HPP
 #define PARTITION_MANAGER_PLUGIN_HPP
 
-#if __cplusplus < 202002L
-#error "Partition Manager Tool's plugin system is requires C++20 or higher C++ standarts."
-#endif
-
 #define PM "PluginManager"
 #define PM_VERSION "1.1" ///< PluginManager version.
 
@@ -73,7 +69,7 @@
 #include <unordered_set>
 #include <utility>
 #include <vector>
-#include <format>
+#include <fmt/format.h>
 #include <dlfcn.h>
 #include <libhelper/logging.hpp>
 #include <libhelper/cmdline.hpp>
@@ -112,12 +108,9 @@ public:
 
 using PluginError = Helper::Error;
 
-/// @brief Concept for minimum plugin class.
+/// @brief Trait for minimum plugin class.
 template <typename Class>
-concept minimumPluginClass = requires {
-  requires std::is_class_v<Class>;
-  requires std::is_base_of_v<BasicPlugin, Class>;
-}; // concept minimumPluginClass
+inline constexpr bool IsMinimumPluginClass_v = std::is_class_v<Class> && std::is_base_of_v<BasicPlugin, Class>;
 
 /**
  * @brief Builtin plugin registry.
@@ -130,8 +123,7 @@ concept minimumPluginClass = requires {
  *
  * @tparam PluginClass Plugin class.
  */
-template <typename PluginClass = BasicPlugin>
-  requires minimumPluginClass<PluginClass>
+template <typename PluginClass = BasicPlugin, typename = std::enable_if_t<IsMinimumPluginClass_v<PluginClass>>>
 class BuiltinPluginRegistry {
 public:
   using Factory = std::function<PluginClass *()>; ///< Plugin factory.
@@ -159,9 +151,7 @@ private:
  * @see PartitionManager::BasicPlugin
  * @see PartitionManager::BuiltinPluginRegistry
  */
-template <typename BasePluginClass>
-  requires minimumPluginClass<BasePluginClass>
-class PluginManager {
+template <typename BasePluginClass, typename = std::enable_if_t<IsMinimumPluginClass_v<BasePluginClass>>> class PluginManager {
   using Creator = BasePluginClass *(*)();
   struct Plugin {
     std::string name;
@@ -354,7 +344,8 @@ public:
     auto builtins = getBuiltinPlugins();
 
     all_refs.reserve(builtins.size() + plugins.size());
-    std::ranges::for_each(getPlugins(), [&](Plugin plugin) { all_refs.push_back(std::ref(*plugin.instance)); });
+    auto &p = getPlugins();
+    std::for_each(p.begin(), p.end(), [&](Plugin plugin) { all_refs.push_back(std::ref(*plugin.instance)); });
     all_refs.insert(all_refs.end(), builtins.begin(), builtins.end());
 
     return all_refs;
@@ -366,7 +357,8 @@ public:
     auto builtins = getBuiltinPlugins();
 
     all_refs.reserve(builtins.size() + plugins.size());
-    std::ranges::for_each(getPlugins(), [&](const Plugin plugin) { all_refs.push_back(std::cref(*plugin.instance)); });
+    auto &p = getPlugins();
+    std::for_each(p.begin(), p.end(), [&](const Plugin plugin) { all_refs.push_back(std::cref(*plugin.instance)); });
     all_refs.insert(all_refs.end(), builtins.begin(), builtins.end());
 
     return all_refs;
@@ -401,9 +393,9 @@ public:
   bool isSuccess() const { return result; }
 
   /// @brief Returns an error result.
-  template <typename... Args> static AsyncResult_t Error(std::format_string<Args...> fmt, Args &&...args) {
+  template <typename... Args> static AsyncResult_t Error(fmt::format_string<Args...> fmt, Args &&...args) {
     AsyncResult_t result;
-    result.message = std::format(fmt, std::forward<Args>(args)...);
+    result.message = fmt::format(fmt, std::forward<Args>(args)...);
     result.result = false;
     return result;
   }
@@ -417,9 +409,9 @@ public:
   }
 
   /// @brief Returns a success result.
-  template <typename... Args> static AsyncResult_t Success(std::format_string<Args...> fmt, Args &&...args) {
+  template <typename... Args> static AsyncResult_t Success(fmt::format_string<Args...> fmt, Args &&...args) {
     AsyncResult_t result;
-    result.message = std::format(fmt, std::forward<Args>(args)...);
+    result.message = fmt::format(fmt, std::forward<Args>(args)...);
     result.result = true;
     return result;
   }
@@ -454,7 +446,7 @@ inline auto splitIfHasDelim = [](const std::string &s, const char delim, const b
   if (checkForBadUsage) {
     std::unordered_set<std::string> set;
     for (const auto &str : vec) {
-      if (set.contains(str)) throw Error("Duplicate element in your inputs!").cmdlineError().withCode(EX_USAGE);
+      if (set.find(str) != set.end()) throw Error("Duplicate element in your inputs!").cmdlineError().withCode(EX_USAGE);
       set.insert(str);
     }
   }

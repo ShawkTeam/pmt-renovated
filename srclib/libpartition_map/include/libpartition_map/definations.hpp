@@ -24,10 +24,6 @@
 #ifndef LIBPARTITION_MAP_DEFINATIONS_HPP
 #define LIBPARTITION_MAP_DEFINATIONS_HPP
 
-#if __cplusplus < 202002L
-#error "libpartition_map/definations.hpp is requires C++20 or higher C++ standarts."
-#endif
-
 #include <filesystem>
 #include <string>
 #include <map>
@@ -58,9 +54,7 @@ enum SizeUnit : int { BYTE = 1, KiB = 2, MiB = 3, GiB = 4 };
 enum TableType : int { DYNAMIC = 1, CLASSIC = 2 };
 
 /// @brief A struct that holds basic data about a partition.
-template <typename slot_type>
-  requires std::is_integral_v<slot_type>
-struct basic_data_base {
+template <typename slot_type, typename = std::enable_if_t<std::is_integral_v<slot_type>>> struct basic_data_base {
   GPTPart gptPart;                 ///< @c GPTPart object.
   openpart_t *op;                  ///< @c openpart_t object.
   slot_type index;                 ///< Index of partition.
@@ -68,9 +62,7 @@ struct basic_data_base {
 };
 
 /// @brief Data structure used when providing information about the partition.
-template <typename size_type>
-  requires std::is_integral_v<size_type>
-struct basic_info_base {
+template <typename size_type, typename = std::enable_if_t<std::is_integral_v<size_type>>> struct basic_info_base {
   std::string name;       ///< Partition name.
   uint64_t size{};        ///< Partition size.
   bool isLogical = false; ///< Partition is logical or not.
@@ -80,20 +72,11 @@ using BasicData = basic_data_base<uint32_t>;
 using BasicInfo = basic_info_base<uint64_t>;
 
 /**
- * @brief Verify that the type is @c std::string or @c std::filesystem::path.
- * @tparam T Type.
- * @note References are not accepted.
- */
-template <typename T>
-concept IsStringOrPath = !std::is_reference_v<T> && (std::is_same_v<T, std::filesystem::path> || std::is_same_v<T, std::string>);
-
-/**
  * @brief Verify that the type is @c openpart_t*.
  * @tparam T Type.
  * @note References are not accepted.
  */
-template <typename T>
-concept IsOpenPartPtr = !std::is_reference_v<T> && std::is_same_v<T, openpart_t *>;
+template <typename T> inline constexpr bool IsOpenPartPtr_v = !std::is_reference_v<T> && std::is_same_v<T, openpart_t *>;
 
 /**
  * @brief Verify that the type is non-const @c openpart_t*.
@@ -101,15 +84,7 @@ concept IsOpenPartPtr = !std::is_reference_v<T> && std::is_same_v<T, openpart_t 
  * @note References are not accepted.
  */
 template <typename T>
-concept IsNonConstOpenPartPtr = !std::is_reference_v<T> && !std::is_const_v<T> && std::is_same_v<T, openpart_t *>;
-
-/**
- * @brief Verify that the type is a size type (unsigned, integral or floating point).
- * @tparam T Type.
- * @note References are not accepted.
- */
-template <typename T>
-concept IsSizeType = !std::is_reference_v<T> && std::is_unsigned_v<T> && (std::is_integral_v<T> || std::is_floating_point_v<T>);
+inline constexpr bool IsNonConstOpenPartPtr_v = !std::is_reference_v<T> && !std::is_const_v<T> && std::is_same_v<T, openpart_t *>;
 
 /**
  * @brief Verify that the type is suitable for holding the slot number (unsigned integrals, non-floating point).
@@ -117,7 +92,7 @@ concept IsSizeType = !std::is_reference_v<T> && std::is_unsigned_v<T> && (std::i
  * @note References are not accepted.
  */
 template <typename T>
-concept IsSlotType = !std::is_reference_v<T> && std::is_integral_v<T> && !std::is_floating_point_v<T>;
+inline constexpr bool IsSlotType_v = !std::is_reference_v<T> && std::is_integral_v<T> && !std::is_floating_point_v<T>;
 
 /**
  * @namespace FindInArgs
@@ -129,66 +104,39 @@ namespace FindInArgs {
  * @brief Verify that the argument package has a size type (unsigned, integral or floating point).
  * @tparam Args Template argument package.
  */
-template <typename... Args>
-concept HasSizeType = (IsSizeType<std::decay_t<Args>> || ...);
+template <typename... Args> inline constexpr bool HasSizeType_v = (Helper::IsSizeType_v<std::decay_t<Args>> || ...);
 
 /**
  * @brief Verify that the argument package has type suitable for holding the slot number (unsigned integrals, non-floating point).
  * @tparam Args Template argument package.
  */
-template <typename... Args>
-concept HasSlotType = (IsSlotType<std::decay_t<Args>> || ...);
+template <typename... Args> inline constexpr bool HasSlotType_v = (IsSlotType_v<std::decay_t<Args>> || ...);
 
 /**
  * @brief Verify that the argument package has a @c std::string or @c std::filesystem::path type.
  * @tparam Args Template argument package.
  */
-template <typename... Args>
-concept HasStringOrPath = (IsStringOrPath<std::decay_t<Args>> || ...);
+template <typename... Args> inline constexpr bool HasStringOrPath_v = (Helper::IsStringOrPath_v<std::decay_t<Args>> || ...);
 
 /**
  * @brief Verify that the argument package has a @c GPTPart type.
  * @tparam Args Template argument package.
  */
-template <typename... Args>
-concept HasGPTPart = (std::is_same_v<std::decay_t<Args>, GPTPart> || ...);
+template <typename... Args> inline constexpr bool HasGPTPart_v = (std::is_same_v<std::decay_t<Args>, GPTPart> || ...);
 
 /**
  * @brief Verify that the argument package has a @c openpart_t* type.
  * @tparam Args Template argument package.
  */
-template <typename... Args>
-concept HasOpenPartPtr = (IsOpenPartPtr<std::decay_t<Args>> || ...);
+template <typename... Args> inline constexpr bool HasOpenPartPtr_v = (IsOpenPartPtr_v<std::decay_t<Args>> || ...);
 
 /**
  * @brief Verify that the argument package has a non-const @c openpart_t* type.
  * @tparam Args Template argument package.
  */
-template <typename... Args>
-concept HasNonConstOpenPartPtr = (IsOpenPartPtr<std::decay_t<Args>> || ...);
+template <typename... Args> inline constexpr bool HasNonConstOpenPartPtr_v = (IsNonConstOpenPartPtr_v<std::decay_t<Args>> || ...);
 
 } // namespace FindInArgs
-
-/// @brief Verify that the type has similar properties to @c std::filesystem::path.
-template <typename T>
-concept IsPathTypeLike = requires(T v1, T v2, std::string s, const char *cp) {
-  v1.append(s);
-  v1.append(cp);
-  { v1.filename() } -> IsStringOrPath;
-  requires(std::same_as<std::decay_t<T>, std::filesystem::path>) || requires {
-    { v1.string() } -> std::convertible_to<std::string>;
-  };
-
-  std::is_constructible_v<T>;
-  std::is_constructible_v<T, std::string>;
-  std::is_constructible_v<T, const char *>;
-  std::is_nothrow_move_constructible_v<T>;
-
-  v1 = v2;
-  v1 == v2;
-  v1 != v2;
-  v1 = std::move(v2);
-};
 
 using Error = Helper::Error;
 

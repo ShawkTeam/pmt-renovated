@@ -33,7 +33,6 @@
 #include <algorithm>
 #include <optional>
 #include <cctype>
-#include <concepts>
 #include <unordered_set>
 #include <sysexits.h>
 #include <libhelper/error.hpp>
@@ -76,7 +75,7 @@ template <typename T> inline std::string getTypeName() {
   if constexpr (std::is_same_v<cleanType, char *> || std::is_same_v<cleanType, const char *> ||
                 std::is_same_v<cleanType, std::string> || std::is_same_v<cleanType, std::string_view>)
     return "string";
-  if constexpr (IsContainer<cleanType>) return "list";
+  if constexpr (IsContainer_v<cleanType>) return "list";
 
   return typeid(T).name();
 }
@@ -375,7 +374,7 @@ public:
   explicit Option(const std::string &spec, T &dest, const std::string &desc = "") : properties(std::make_unique<OptionProperties>()) {
     properties->valid_names = split(spec, ',');
 
-    if (!properties->valid_names[0].starts_with("-")) {
+    if (properties->valid_names[0].at(0) != '-') {
       if (properties->valid_names.size() > 1)
         throw Error("A maximum of one positional option name can be specified.").cmdlineError().withCode(EX_CONFIG);
 
@@ -393,14 +392,14 @@ public:
   /**
    * @brief Construct an option (with no destination)
    *
-   * @param spec Option spefication.
+   * @param spec Option specification.
    * @param desc Description.
    */
   explicit Option(const std::string &spec, std::nullptr_t, const std::string &desc = "")
       : properties(std::make_unique<OptionProperties>()) {
     properties->valid_names = split(spec, ',');
 
-    if (!properties->valid_names[0].starts_with("-")) {
+    if (properties->valid_names[0].at(0) != '-') {
       if (properties->valid_names.size() > 1)
         throw Error("A maximum of one positional option name can be specified.").cmdlineError().withCode(EX_CONFIG);
 
@@ -534,14 +533,14 @@ public:
   /// @brief Get the short name.
   std::string shortName() const {
     for (auto &name : properties->valid_names)
-      if (name.starts_with("-") && !name.starts_with("--")) return name;
+      if (name.at(0) == '-' && name.at(1) != '-') return name;
     return {};
   }
 
   /// @brief Get the long name.
   std::string longName() const {
     for (auto &name : properties->valid_names)
-      if (name.starts_with("--")) return name;
+      if (name.at(0) == '-' && name.at(1) == '-') return name;
     return {};
   }
 
@@ -702,7 +701,8 @@ public:
   std::vector<std::unique_ptr<OptionGroup>> groups;
 
   Subcommand() = default;
-  Subcommand(const std::string &name, const std::string desc = "") : name(name), description(desc) {} ///< Construct a subcommand.
+  explicit Subcommand(const std::string &name, const std::string &desc = "")
+      : name(name), description(desc) {} ///< Construct a subcommand.
 
   Subcommand(const Subcommand &) = delete;
   Subcommand &operator=(const Subcommand &) = delete;
@@ -921,13 +921,11 @@ class App {
 
   /// @brief Print an option in a formatted way.
   void printAlignedOption(const std::string &left_part, const std::string &_description) {
-    const size_t indent_width = 8;
-    const size_t max_line_width = 75;
-
     std::cout << "  " << left_part << "\n";
 
     size_t start = 0;
     while (start < _description.length()) {
+      constexpr size_t max_line_width = 75, indent_width = 8;
       size_t chunk_size = max_line_width - indent_width;
 
       if (start + chunk_size < _description.length()) {
@@ -1073,12 +1071,8 @@ public:
     if (subcmd) {
       std::cout << "Usage: " << cmd_name << " " << subcmd->getFullPath();
 
-      [[maybe_unused]] bool has_positional = false;
       for (const auto &arg : subcmd->options) {
-        if (arg->getProperties()->is_positional) {
-          std::cout << " [" << arg->getProperties()->valid_names[0] << "]";
-          has_positional = true;
-        }
+        if (arg->getProperties()->is_positional) std::cout << " [" << arg->getProperties()->valid_names[0] << "]";
       }
       if (!subcmd->subcommands.empty()) std::cout << (subcmd->requiresAnySubcommand() ? " SUBCOMMAND" : " [SUBCOMMAND]");
       std::cout << " [OPTIONS]\n";
@@ -1235,7 +1229,7 @@ public:
     for (size_t i = 0; i < argc; ++i) {
       const std::string &token = argv[i];
 
-      if (token.starts_with("-")) {
+      if (token.at(0) == '-') {
         std::string arg_name = token;
         std::string arg_value = "";
         bool has_equals = false;
@@ -1264,7 +1258,7 @@ public:
           if (has_equals) {
             matched_arg->doToDoList(arg_value);
           } else {
-            if (i + 1 < argc && !std::string_view(argv[i + 1]).starts_with("-")) {
+            if (i + 1 < argc && std::string_view(argv[i + 1]).at(0) != '-') {
               matched_arg->doToDoList(argv[i + 1]);
               i++;
             } else
@@ -1309,9 +1303,8 @@ public:
         std::exit(0);
       }
 
-      if (!token.starts_with("-")) {
-        Subcommand *subcmd = active_chain.empty() ? getSubcommand(token) : active_chain.back()->getSubcommand(token);
-        if (subcmd) {
+      if (token.at(0) != '-') {
+        if (Subcommand *subcmd = active_chain.empty() ? getSubcommand(token) : active_chain.back()->getSubcommand(token)) {
           subcmd->is_found = true;
           active_chain.push_back(subcmd);
           chain_positional_index.push_back(0);
@@ -1319,7 +1312,7 @@ public:
         }
       }
 
-      if (token.starts_with("-")) {
+      if (token.at(0) == '-') {
         std::string arg_name = token;
         std::string arg_value = "";
         bool has_equals = false;
@@ -1345,7 +1338,7 @@ public:
           if (has_equals)
             matched_arg->doToDoList(arg_value);
           else {
-            if (i + 1 < args.size() && !args[i + 1].starts_with("-")) {
+            if (i + 1 < args.size() && args[i + 1].at(0) != '-') {
               matched_arg->doToDoList(args[i + 1]);
               i++;
             } else

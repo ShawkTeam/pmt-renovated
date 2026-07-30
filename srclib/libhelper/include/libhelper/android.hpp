@@ -24,13 +24,13 @@
 #ifndef LIBHELPER_ANDROID_HPP
 #define LIBHELPER_ANDROID_HPP
 
+#ifdef __ANDROID__
+
 #include <string>
 #include <array>
 #include <optional>
 #include <set>
 #include <private/android_filesystem_config.h>
-
-#ifdef __ANDROID__
 
 /**
  * @namespace Helper::Android

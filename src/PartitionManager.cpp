@@ -27,9 +27,7 @@
 
 #include <memory>
 #include <PartitionManager/PartitionManager.hpp>
-#ifndef ANDROID_BUILD
 #include <generated/buildInfo.hpp>
-#endif
 
 namespace PartitionManager {
 
@@ -55,7 +53,7 @@ BasicFlags::BasicFlags()
  * This function is marked with the constructor attribute and is called
  * automatically when the program starts. It enables logging by default.
  */
-__attribute__((constructor)) void init() { Helper::Logger::Properties::setLogging(true); }
+__attribute__((constructor)) static void init() { Helper::Logger::Properties::setLogging(true); }
 
 /**
  * @brief Get the application version string.

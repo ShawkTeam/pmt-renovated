@@ -43,7 +43,7 @@ public:
     } else if constexpr (type == TableType::DYNAMIC) {
       return new DynamicTableData(std::forward<Args>(args)...);
     } else {
-      static_assert(false, "Unknown TableType");
+      static_assert(Helper::AlwaysFalse_v<std::integral_constant<TableType, type>>, "Unknown TableType");
     }
   }
 
@@ -71,7 +71,7 @@ public:
       assert(dynamic_cast<DynamicTableData *>(base) != nullptr);
       return static_cast<DynamicTableData *>(base);
     } else {
-      static_assert(false, "Unknown TableType");
+      static_assert(Helper::AlwaysFalse_v<std::integral_constant<TableType, type>>, "Unknown TableType");
     }
   }
 

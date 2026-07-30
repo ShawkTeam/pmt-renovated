@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
     std::cout << "Run command: 'ls': " << std::boolalpha << Helper::runCommand("ls") << std::endl;
     std::cout << "Spawn confirm propt..." << std::endl;
 
-    const bool p = Helper::confirmPropt("Please answer");
+    const bool p = Helper::confirmPrompt("Please answer");
     std::cout << "Result of confirm propt: " << std::boolalpha << p << std::endl;
 
     std::cout << "Working directory: " << Helper::currentWorkingDirectory() << std::endl;

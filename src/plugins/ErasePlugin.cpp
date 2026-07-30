@@ -73,7 +73,7 @@ public:
     cmd->addOption("partition(s)", partitions, "Partition name(s)")->required();
     cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for writing zero bytes to partition(s)")
         ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
-        ->defaultValue("4KB")
+        ->defaultValue(DEFAULT_BUFFER_SIZE)
         ->check(Helper::CMDLine::Checkers::BufferSizeCheck(MIN_BUFFER_SIZE, MAX_BUFFER_SIZE));
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
         ->superior()
@@ -121,9 +121,9 @@ public:
     if (!pfd) return AsyncResult_t::Error("Can't open partition {}: {}", partitionName, strerror(errno));
 
     if (!Flags.forceProcess) {
-      if (!Helper::confirmPropt("Are you sure you want to continue? This could render your device "
-                                "unusable! Do not continue if you "
-                                "do not know what you are doing!")) {
+      if (!Helper::confirmPrompt("Are you sure you want to continue? This could render your device "
+                                 "unusable! Do not continue if you "
+                                 "do not know what you are doing!")) {
         throw Error("Operation canceled by user.");
       }
     }

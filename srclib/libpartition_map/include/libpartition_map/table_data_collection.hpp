@@ -49,7 +49,7 @@ public:
   BaseTableData(const BaseTableData &) = default;
   BaseTableData(BaseTableData &&) noexcept = default;
 
-  virtual constexpr TableType type() const noexcept = 0;
+  virtual TableType type() const noexcept = 0;
 
   virtual list_t partitions() = 0;
   virtual const_list_t partitions() const = 0;
@@ -63,7 +63,7 @@ public:
   virtual bool sync() = 0;
   virtual bool sync(const std::string &) = 0;
   virtual bool isSupported() const noexcept = 0;
-  virtual constexpr bool isLogical(const std::string &) const = 0;
+  virtual bool isLogical(const std::string &) const = 0;
 
   virtual bool empty() const = 0;
   virtual bool valid() const = 0;
@@ -78,8 +78,8 @@ public:
   virtual const_iterator cbegin() const = 0;
   virtual const_iterator cend() const = 0;
 
-  bool operator==(const BaseTableData &) const = default;
-  bool operator!=(const BaseTableData &) const = default;
+  bool operator==(const BaseTableData &) const;
+  bool operator!=(const BaseTableData &) const;
   virtual explicit operator bool() const = 0;
   virtual bool operator!() const = 0;
 
@@ -115,6 +115,8 @@ public:
   /// @brief Constant iterator.
   using const_iterator = std::vector<Partition_t>::const_iterator;
 
+  static constexpr TableType static_type = TableType::CLASSIC;
+
   /// @note This class cannot be constructible; its purpose is to function like a namespace.
   class Extra {
   public:
@@ -141,7 +143,7 @@ public:
     other.isUFS = false;
   }
 
-  constexpr TableType type() const noexcept override { return TableType::CLASSIC; }
+  TableType type() const noexcept override { return static_type; }
 
   static PartitionTableData *cast(BaseTableData *base) {
     assert(dynamic_cast<PartitionTableData *>(base) != nullptr);
@@ -263,7 +265,7 @@ public:
   bool isHasSuperPartition() const;
 
   /// @brief Check whether the partition is logical.
-  constexpr bool isLogical(const std::string &) const override { return false; }
+  bool isLogical(const std::string &) const override { return Helper::AlwaysFalse_v<>; }
 
   /// @brief Check whether the partition table is supported.
   bool isSupported() const noexcept override { return true; }
@@ -278,8 +280,7 @@ public:
   bool valid() const override;
 
   /// @brief For-each input function for all partitions (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, bool, const Partition_t &>>>
   bool forEach(F &&function) const {
     Log::info("Foreaching input function for all partitions.");
     bool isSuccess = true;
@@ -290,9 +291,7 @@ public:
   }
 
   /// @brief For-each input function for all partitions (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
-  bool forEach(F &&function) {
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, bool, Partition_t &>>> bool forEach(F &&function) {
     Log::info("Foreaching input function for all partitions.");
     bool isSuccess = true;
     for (auto &part : localPartitions)
@@ -302,8 +301,8 @@ public:
   }
 
   /// @brief For-each input function for gpt data collection (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const std::filesystem::path &, const std::shared_ptr<GPTData> &>
+  template <typename F,
+            typename = std::enable_if_t<Helper::Invocable_v<F, bool, const std::filesystem::path &, const std::shared_ptr<GPTData> &>>>
   bool forEachGptData(F &&function) const {
     Log::info("Foreaching input function for all GPTData data.");
     bool isSuccess = true;
@@ -314,8 +313,8 @@ public:
   }
 
   /// @brief For-each input function for gpt data collection (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const std::filesystem::path &, std::shared_ptr<GPTData> &>
+  template <typename F,
+            typename = std::enable_if_t<Helper::Invocable_v<F, bool, const std::filesystem::path &, std::shared_ptr<GPTData> &>>>
   bool forEachGptData(F &&function) {
     Log::info("Foreaching input function for all GPTData data.");
     bool isSuccess = true;
@@ -326,8 +325,7 @@ public:
   }
 
   /// @brief For-each input function for input partition list (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, bool, const Partition_t &>>>
   bool forEachFor(const std::vector<std::string> &list, F &&function) const {
     Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
@@ -339,8 +337,7 @@ public:
   }
 
   /// @brief For-each input function for input partition list (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, bool, Partition_t &>>>
   bool forEachFor(const std::vector<std::string> &list, F &&function) {
     Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
@@ -433,6 +430,8 @@ public:
   /// @brief Constant iterator.
   using const_iterator = std::vector<Partition_t>::const_iterator;
 
+  static constexpr TableType static_type = TableType::DYNAMIC;
+
   DynamicTableData() { scan(); }
 
   /// @brief Copy constructor.
@@ -445,7 +444,7 @@ public:
   DynamicTableData(DynamicTableData &&other) noexcept
       : localPartitions(std::move(other.localPartitions)), lpMetadata(std::move(other.lpMetadata)) {}
 
-  constexpr TableType type() const noexcept override { return TableType::DYNAMIC; }
+  TableType type() const noexcept override { return static_type; }
 
   static DynamicTableData *cast(BaseTableData *base) {
     assert(dynamic_cast<DynamicTableData *>(base) != nullptr);
@@ -531,7 +530,7 @@ public:
   bool sync(const std::string &name) override;
 
   /// @brief Check whether the partition is logical.
-  constexpr bool isLogical(const std::string &) const override { return true; }
+  bool isLogical(const std::string &) const override { return Helper::AlwaysTrue_v<>; }
 
   /// @brief Check whether the partition table is supported.
   bool isSupported() const noexcept override { return supported; }
@@ -546,8 +545,7 @@ public:
   bool validMetadata() const;
 
   /// @brief For-each input function for partitions (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, bool, const Partition_t &>>>
   bool forEach(F &&function) const {
     Log::info("Foreaching input function for all partitions.");
     bool isSuccess = true;
@@ -558,8 +556,7 @@ public:
   }
 
   /// @brief For-each input function for partition metadatas (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const LpMetadataPartition &>
+  template <typename F, std::enable_if_t<Helper::Invocable_v<F, bool, const LpMetadataPartition &>, int> = 0>
   bool forEach(F &&function) const {
     Log::info("Foreaching input function for all partition metadatas.");
     bool isSuccess = true;
@@ -570,9 +567,7 @@ public:
   }
 
   /// @brief For-each input function for partitions (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
-  bool forEach(F &&function) {
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, bool, Partition_t &>>> bool forEach(F &&function) {
     Log::info("Foreaching input function for all partitions.");
     bool isSuccess = true;
     for (auto &part : localPartitions)
@@ -581,9 +576,7 @@ public:
     return isSuccess;
   }
   /// @brief For-each input function for partition metadatas (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, LpMetadataPartition &>
-  bool forEach(F &&function) {
+  template <typename F, std::enable_if_t<Helper::Invocable_v<F, bool, LpMetadataPartition &>, int> = 0> bool forEach(F &&function) {
     Log::info("Foreaching input function for all partition metadatas.");
     bool isSuccess = true;
     for (auto &part : lpMetadata->partitions)
@@ -593,8 +586,7 @@ public:
   }
 
   /// @brief For-each input function for input partition list (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const Partition_t &>
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, bool, const Partition_t &>>>
   bool forEachFor(const std::vector<std::string> &list, F &&function) const {
     Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
@@ -606,8 +598,7 @@ public:
   }
 
   /// @brief For-each input function for input partition list metadata's (constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, const LpMetadataPartition &>
+  template <typename F, std::enable_if_t<Helper::Invocable_v<F, bool, const LpMetadataPartition &>, int> = 0>
   bool forEachFor(const std::vector<std::string> &list, F &&function) const {
     Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
@@ -619,8 +610,7 @@ public:
   }
 
   /// @brief For-each input function for input partition list (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, Partition_t &>
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, bool, Partition_t &>>>
   bool forEachFor(const std::vector<std::string> &list, F &&function) {
     Log::info("Foreaching input function for input list.");
     bool isSuccess = true;
@@ -632,8 +622,7 @@ public:
   }
 
   /// @brief For-each input function for input partition list  metadata's (non-constant).
-  template <typename F>
-    requires Helper::Invocable<F, bool, LpMetadataPartition &>
+  template <typename F, std::enable_if_t<Helper::Invocable_v<F, bool, LpMetadataPartition &>, int> = 0>
   bool forEachFor(const std::vector<std::string> &list, F &&function) {
     Log::info("Foreaching input function for input list.");
     bool isSuccess = true;

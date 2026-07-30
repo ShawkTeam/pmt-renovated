@@ -26,7 +26,9 @@
 
 #include <optional>
 #include <string>
-#include <format>
+#include <array>
+#include <fmt/format.h>
+#include <type_traits>
 #include <filesystem>
 #include <random>
 #include <sys/wait.h>
@@ -36,12 +38,12 @@
 namespace Helper {
 
 /** @cond */
-template <typename __path_type, typename __predicate>
-  requires Invocable<__predicate, bool, unsigned int> &&
-           (HasCStrFunction<__path_type> || std::is_same_v<std::decay_t<__path_type>, const char *>)
+template <typename __path_type, typename __predicate,
+          typename = std::enable_if_t<Invocable_v<__predicate, bool, unsigned int> &&
+                                      (HasCStrFunction_v<__path_type> || std::is_same_v<std::decay_t<__path_type>, const char *>)>>
 bool __stat_check(__path_type &&__path, __predicate &&__pred) {
   struct stat st{};
-  if constexpr (HasCStrFunction<__path_type>) {
+  if constexpr (HasCStrFunction_v<__path_type>) {
     if (stat(__path.c_str(), &st) != 0) return false;
   } else {
     if (stat(__path, &st) != 0) return false;
@@ -50,12 +52,12 @@ bool __stat_check(__path_type &&__path, __predicate &&__pred) {
   return __pred(st.st_mode);
 }
 
-template <typename __path_type, typename __predicate>
-  requires Invocable<__predicate, bool, unsigned int> &&
-           (HasCStrFunction<__path_type> || std::is_same_v<std::decay_t<__path_type>, const char *>)
+template <typename __path_type, typename __predicate,
+          typename = std::enable_if_t<Invocable_v<__predicate, bool, unsigned int> &&
+                                      (HasCStrFunction_v<__path_type> || std::is_same_v<std::decay_t<__path_type>, const char *>)>>
 bool __lstat_check(__path_type &&__path, __predicate &&__pred, bool nlink = false) {
   struct stat st{};
-  if constexpr (HasCStrFunction<__path_type>) {
+  if constexpr (HasCStrFunction_v<__path_type>) {
     if (lstat(__path.c_str(), &st) != 0) return false;
   } else {
     if (lstat(__path, &st) != 0) return false;
@@ -215,8 +217,7 @@ bool eraseDirectoryRecursive(const std::filesystem::path &directory);
  * @tparam ReturnType Return type (default is @c int64_t ).
  * @param file File path.
  */
-template <typename ReturnType = int64_t>
-  requires std::is_integral_v<ReturnType>
+template <typename ReturnType = int64_t, typename = std::enable_if_t<std::is_integral_v<ReturnType>>>
 ReturnType fileSize(const std::filesystem::path &file) {
   Log::info("Getting file size of {}.", file.string());
   struct stat st{};
@@ -254,7 +255,7 @@ std::optional<std::string> sha256Of(const std::filesystem::path &path);
 bool runCommand(const std::string &cmd);
 
 /// Shows message and asks for y/N from user.
-bool confirmPropt(const std::string &message, int maxTries = 10);
+bool confirmPrompt(const std::string &message, int maxTries = 10);
 
 /// @brief Changes file permissions.
 bool changeMode(const std::filesystem::path &file, mode_t mode);
@@ -281,13 +282,12 @@ std::string currentDate();
 std::string currentTime();
 
 /// @brief Run shell command return output as string.
-template <typename ExitCodeType = int>
-  requires std::is_integral_v<ExitCodeType>
+template <typename ExitCodeType = int, typename = std::enable_if_t<std::is_integral_v<ExitCodeType>>>
 std::pair<std::string, ExitCodeType> runCommandWithOutput(const std::string &cmd) {
   Log::info("Running command and catch output: {}.", cmd);
 
   int pipefd[2];
-  if (pipe(pipefd) < 0) return {{}, (ExitCodeType)-1};
+  if (pipe(pipefd) < 0) return {{}, static_cast<ExitCodeType>(-1)};
 
   auto closePipe = makeScopeGuard([&] {
     close(pipefd[0]);
@@ -295,7 +295,7 @@ std::pair<std::string, ExitCodeType> runCommandWithOutput(const std::string &cmd
   });
 
   const pid_t pid = fork();
-  if (pid < 0) return {{}, (ExitCodeType)-1};
+  if (pid < 0) return {{}, static_cast<ExitCodeType>(-1)};
 
   if (pid == 0) {
     close(pipefd[0]);
@@ -326,9 +326,9 @@ std::pair<std::string, ExitCodeType> runCommandWithOutput(const std::string &cmd
     output.append(buffer.get(), n);
 
   ExitCodeType status = 0;
-  if (waitpid(pid, &status, 0) < 0) return {output, (ExitCodeType)-1};
+  if (waitpid(pid, &status, 0) < 0) return {output, static_cast<ExitCodeType>(-1)};
 
-  return {output, (ExitCodeType)(WIFEXITED(status) ? WEXITSTATUS(status) : -1)};
+  return {output, static_cast<ExitCodeType>((WIFEXITED(status) ? WEXITSTATUS(status) : -1))};
 }
 
 /// @brief Joins base path with relative path and returns result.
@@ -341,8 +341,9 @@ std::filesystem::path pathBasename(const std::filesystem::path &entry);
 std::filesystem::path pathDirname(const std::filesystem::path &entry);
 
 /// @brief Get random offset depending on size and bufferSize.
-template <typename Ret = uint64_t, typename T = Ret>
-  requires std::is_integral_v<Ret> && std::is_integral_v<T> && std::is_unsigned_v<Ret> && std::is_unsigned_v<T>
+template <
+    typename Ret = uint64_t, typename T = Ret,
+    typename = std::enable_if_t<std::is_integral_v<Ret> && std::is_integral_v<T> && std::is_unsigned_v<Ret> && std::is_unsigned_v<T>>>
 Ret getRandomOffset(T &&size, T &&bufferSize) {
   if (size <= bufferSize) return 0;
   const Ret maxOffset = size - bufferSize;
@@ -358,8 +359,8 @@ Ret getRandomOffset(T &&size, T &&bufferSize) {
  * @param size Size.
  * @param type Cast type.
  */
-template <typename Ret = int, typename SizeType = uint64_t>
-  requires std::is_integral_v<Ret> && std::is_integral_v<SizeType>
+template <typename Ret = int, typename SizeType = uint64_t,
+          typename = std::enable_if_t<std::is_integral_v<Ret> && std::is_integral_v<SizeType>>>
 Ret convertTo(SizeType size, sizeCastTypes type) {
   if (type == KB) return TO_KB(size);
   if (type == MB) return TO_MB(size);
@@ -371,8 +372,8 @@ Ret convertTo(SizeType size, sizeCastTypes type) {
 std::string multipleToString(sizeCastTypes type);
 
 /// @brief Format it input and return as @c std::string.
-template <typename... Args> std::string format(std::format_string<Args...> fmt, Args &&...args) {
-  const std::string message = std::format(fmt, std::forward<Args>(args)...);
+template <typename... Args> std::string format(fmt::format_string<Args...> fmt, Args &&...args) {
+  const std::string message = fmt::format(fmt, std::forward<Args>(args)...);
   return message;
 }
 

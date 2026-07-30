@@ -25,6 +25,19 @@
 #include <sys/mount.h>
 #include <mntent.h>
 
+#if defined(__ANDROID__) && __ANDROID_API__ < 21
+static inline FILE* setmntent(const char* path, const char* mode) {
+  return fopen(path, mode);
+}
+
+static inline int endmntent(FILE* fp) {
+  if (fp) {
+    fclose(fp);
+  }
+  return 1;
+}
+#endif
+
 __BEGIN_DECLS
 
 int openpart_is_mounted(openpart_t *op)

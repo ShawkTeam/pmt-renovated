@@ -29,10 +29,10 @@ add_library(pmt::interface::nolibs_and_flags ALIAS pmt_interface_nolibs_and_flag
 # Export an empty include dir list.
 set_property(GLOBAL PROPERTY PMT_INCLUDE_DIRECTORIES "")
 
-target_link_options(pmt_interface_shared INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
-target_link_options(pmt_interface_static INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
-target_link_options(pmt_interface_nolibs INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
-target_link_options(pmt_interface_nolibs_and_flags INTERFACE "-Wl,-rpath,/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
+target_link_options(pmt_interface_shared INTERFACE "-Wl,-rpath,/sbin:/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
+target_link_options(pmt_interface_static INTERFACE "-Wl,-rpath,/sbin:/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
+target_link_options(pmt_interface_nolibs INTERFACE "-Wl,-rpath,/sbin:/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
+target_link_options(pmt_interface_nolibs_and_flags INTERFACE "-Wl,-rpath,/sbin:/data/data/com.termux/files/usr/lib" "-Wl,--hash-style=both")
 target_include_directories(pmt_interface_shared INTERFACE BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/external/patches/libc++/include")
 target_include_directories(pmt_interface_static INTERFACE BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/external/patches/libc++/include")
 target_include_directories(pmt_interface_nolibs INTERFACE BEFORE SYSTEM "${CMAKE_SOURCE_DIR}/external/patches/libc++/include")

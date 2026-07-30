@@ -27,7 +27,7 @@
 #include <exception>
 #include <sstream>
 #include <string>
-#include <format>
+#include <fmt/format.h>
 #include <libhelper/logging.hpp>
 
 namespace Helper {
@@ -75,8 +75,8 @@ public:
   Error(const Error &other) noexcept : message(other.message) {}
 
   /// @brief Modern std::print style input field constructor.
-  template <typename... Args> explicit Error(std::format_string<Args...> fmt, Args &&...args) {
-    oss << std::format(fmt, std::forward<Args>(args)...);
+  template <typename... Args> explicit Error(fmt::format_string<Args...> fmt, Args &&...args) {
+    oss << fmt::format(fmt, std::forward<Args>(args)...);
     message = oss.str();
   }
 

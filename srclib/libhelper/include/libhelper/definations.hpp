@@ -24,7 +24,9 @@
 #ifndef LIBHELPER_MACROS_HPP
 #define LIBHELPER_MACROS_HPP
 
-#include <concepts>
+#include <type_traits>
+#include <iterator>
+#include <filesystem>
 #include <unistd.h>
 
 /// @brief Default file permissions.
@@ -51,35 +53,102 @@ enum sizeCastTypes { B = static_cast<int>('B'), KB = static_cast<int>('K'), MB =
  */
 namespace Helper {
 
+template <typename T, typename = std::void_t<>> struct HasCStrFunction : std::false_type {};
+
 /**
  * @brief Checks whether the input type provides a c_str() member function.
- *
+ * @tparam T Input type.
+ */
+template <typename T> struct HasCStrFunction<T, std::void_t<decltype(std::declval<T>().c_str())>> : std::true_type {};
+
+template <typename Class, typename Type, typename = std::void_t<>> struct HasCloseFunction : std::false_type {};
+
+/**
+ * @brief Checks whether the input type provides a valid close() member function.
+ * @tparam Class Input type.
+ * @tparam Type @c close() parameter type.
+ */
+template <typename Class, typename Type>
+struct HasCloseFunction<Class, Type, std::void_t<decltype(std::declval<Class &>().close(std::declval<Type &>()))>> : std::true_type {};
+
+/**
+ * @brief Shortcut of @c HasCloseFunction<Class, Type>::value.
+ * @relates HasCloseFunction
+ * @tparam Class Input type.
+ * @tparam Type @c close() parameter type.
+ */
+template <typename Class, typename Type> inline constexpr bool HasCloseFunction_v = HasCloseFunction<Class, Type>::value;
+
+template <typename Class, typename Type, typename = std::void_t<>> struct HasCallOperator : std::false_type {};
+
+/**
+ * @brief Checks whether the input type provides a valid operator() member function.
+ * @tparam Class Input type.
+ * @tparam Type @c operator() parameter type.
+ */
+template <typename Class, typename Type>
+struct HasCallOperator<Class, Type, std::void_t<decltype(std::declval<Class &>().operator()(std::declval<Type &>()))>>
+    : std::true_type {};
+
+/**
+ * @brief Shortcut of @c HasCallOperator<Class, Type>::value.
+ * @relates HasCallOperator
+ * @tparam Class Input type.
+ * @tparam Type @c operator() parameter type.
+ */
+template <typename Class, typename Type> inline constexpr bool HasCallOperator_v = HasCallOperator<Class, Type>::value;
+
+/**
+ * @brief Shortcut of @c HasCStrFunction<T>::value.
+ * @relates HasCStrFunction
+ * @tparam T Input type.
+ */
+template <typename T> inline constexpr bool HasCStrFunction_v = HasCStrFunction<T>::value;
+
+template <typename T, typename = std::void_t<>> struct HasIterableBounds : std::false_type {};
+
+/**
+ * @brief Checks whether the input type provides @c begin() and @c end() member functions.
  * @tparam T Input type.
  */
 template <typename T>
-concept HasCStrFunction = requires(T v) {
-  { v.c_str() } -> std::constructible_from<char *>;
-};
+struct HasIterableBounds<T, std::void_t<decltype(std::begin(std::declval<T &>())), decltype(std::end(std::declval<T &>()))>>
+    : std::true_type {};
+
+/**
+ * @brief Shortcut of @c HasIterableBounds<T>::value.
+ * @relates HasIterableBounds
+ * @tparam T Input type.
+ */
+template <typename T> inline constexpr bool HasIterableBounds_v = HasIterableBounds<T>::value;
 
 /**
  * @brief Checks whether the input is invocable and returns requested type.
  *
- * @tparam Func Input function.
+ * @tparam Func Input function (specify with using @c decltype() ).
  * @tparam Ret  Needed return type.
  * @tparam Args Arguments of function.
  */
 template <typename Func, typename Ret, typename... Args>
-concept Invocable = std::invocable<Func, Args...> && std::same_as<std::invoke_result_t<Func, Args...>, Ret>;
+inline constexpr bool Invocable_v = std::is_invocable_r_v<Ret, Func &, Args...>;
 
 /**
  * @brief Checks whether the input is a container.
  * @tparam T Input class.
  */
-template <typename T>
-concept IsContainer = requires(T &container) {
-  { std::begin(container) } -> std::input_or_output_iterator;
-  { std::end(container) } -> std::sentinel_for<decltype(std::begin(container))>;
-} && !std::same_as<T, std::string> && !std::same_as<T, std::string_view>;
+template <typename T> struct IsContainer {
+  using Clean_T = std::remove_cv_t<std::remove_reference_t<T>>;
+
+  static constexpr bool value =
+      HasIterableBounds_v<Clean_T> && !std::is_same_v<Clean_T, std::string> && !std::is_same_v<Clean_T, std::string_view>;
+};
+
+/**
+ * @brief Shortcut of @c IsContainer<T>::value.
+ * @relates IsContainer
+ * @tparam T Input type.
+ */
+template <typename T> inline constexpr bool IsContainer_v = IsContainer<T>::value;
 
 /**
  * @brief Add the @c const qualifier to the input type.
@@ -103,7 +172,7 @@ template <typename T> struct DeepConst<T *> {
 /** @endcond */
 
 /**
- * @brief Shorcut of @c DeepConst<T>::type.
+ * @brief Shortcut of @c DeepConst<T>::type.
  *
  * @code
  * std::is_same_v<DeepConst_t<int>, const int> // Equals to true.
@@ -111,7 +180,7 @@ template <typename T> struct DeepConst<T *> {
  *
  * @relates DeepConst
  */
-template <typename T> using DeepConst_t = DeepConst<T>::type;
+template <typename T> using DeepConst_t = typename DeepConst<T>::type;
 
 /**
  * @brief Add the @c const qualifier if input type is @c char*.
@@ -141,7 +210,7 @@ template <> struct ConstIfCharPointer<const char *> {
 /** @endcond */
 
 /**
- * @brief Shorcut of @c ConstIfCharPointer<T>::type.
+ * @brief Shortcut of @c ConstIfCharPointer<T>::type.
  *
  * @code
  * std::is_same_v<ConstIfCharPointer_t<char*>, const char*> // Equals to true.
@@ -150,11 +219,174 @@ template <> struct ConstIfCharPointer<const char *> {
  *
  * @relates ConstIfCharPointer
  */
-template <typename T> using ConstIfCharPointer_t = ConstIfCharPointer<T>::type;
+template <typename T> using ConstIfCharPointer_t = typename ConstIfCharPointer<T>::type;
+
+/**
+ * @brief Verify that the type is @c std::string or @c std::filesystem::path.
+ * @tparam T Type.
+ * @note References are not accepted.
+ */
+template <typename T>
+inline constexpr bool IsStringOrPath_v =
+    !std::is_reference_v<T> && (std::is_same_v<T, std::filesystem::path> || std::is_same_v<T, std::string>);
+
+/**
+ * @brief Verify that the type is a size type (unsigned, integral or floating point).
+ * @tparam T Type.
+ * @note References are not accepted.
+ */
+template <typename T>
+inline constexpr bool IsSizeType_v =
+    !std::is_reference_v<T> && std::is_unsigned_v<T> && (std::is_integral_v<T> || std::is_floating_point_v<T>);
+
+template <typename T, typename = std::void_t<>> struct IsEqualityComparable : std::false_type {};
+
+/**
+ * @brief Checks whether the input type is equality comparable.
+ * @tparam T Input type.
+ */
+template <typename T>
+struct IsEqualityComparable<
+    T, std::void_t<decltype(std::declval<T &>() == std::declval<T &>()), decltype(std::declval<T &>() != std::declval<T &>())>>
+    : std::true_type {};
+
+/**
+ * @brief Shortcut of @c IsEqualityComparable<T>::value.
+ * @relates IsEqualityComparable
+ * @tparam T Input type.
+ */
+template <typename T> inline constexpr bool IsEqualityComparable_v = IsEqualityComparable<T>::value;
+
+template <typename T, typename = std::void_t<>> struct HasPathLikeSyntax : std::false_type {};
+
+/**
+ * @brief Checks whether the input type has path like syntax.
+ * @tparam T Type
+ */
+template <typename T>
+struct HasPathLikeSyntax<
+    T,
+    std::void_t<decltype(std::declval<T &>().append(std::declval<std::string>())),
+                decltype(std::declval<T &>().append(std::declval<const char *>())),
+
+                std::enable_if_t<IsStringOrPath_v<decltype(std::declval<T &>().filename())>>,
+
+                std::enable_if_t<std::is_same_v<std::decay_t<T>, std::filesystem::path> ||
+                                 std::is_convertible_v<decltype(std::declval<T &>().string()), std::string>>,
+
+                decltype(std::declval<T &>() = std::declval<const T &>()), decltype(std::declval<T &>() == std::declval<const T &>()),
+                decltype(std::declval<T &>() != std::declval<const T &>()), decltype(std::declval<T &>() = std::declval<T &&>())>>
+    : std::true_type {};
+
+/// @brief Verify that the type has similar properties to @c std::filesystem::path.
+template <typename T>
+struct IsPathTypeLike : std::conjunction<HasPathLikeSyntax<T>, std::is_default_constructible<T>, std::is_constructible<T, std::string>,
+                                         std::is_constructible<T, const char *>, std::is_nothrow_move_constructible<T>,
+                                         std::is_copy_assignable<T>, std::is_move_assignable<T>> {};
+
+/**
+ * @brief Shortcut of @c IsPathTypeLike<T>::value.
+ * @relates IsPathTypeLike
+ * @tparam T Input type.
+ */
+template <typename T> inline constexpr bool IsPathTypeLike_v = IsPathTypeLike<T>::value;
+
+template <typename T, typename Ret, typename = std::void_t<>> struct HasFirstMember : std::false_type {};
+
+/**
+ * @brief Checks whether the input type has a @c first member.
+ *
+ * @tparam T Input type.
+ * @tparam Ret Needed type of @c first member.
+ */
+template <typename T, typename Ret>
+struct HasFirstMember<T, Ret,
+                      std::void_t<decltype(std::declval<T &>().first),
+                                  std::enable_if_t<std::is_convertible_v<decltype(std::declval<T &>().first), Ret>>>>
+    : std::true_type {};
+
+/**
+ * @brief Shortcut of @c HasFirstMember<T, Ret>::value.
+ * @relates HasFirstMember
+ * @tparam T Input type.
+ * @tparam Ret Needed type of @c first member.
+ */
+template <typename T, typename Ret> inline constexpr bool HasFirstMember_v = HasFirstMember<T, Ret>::value;
+
+template <typename T, typename Ret, typename = std::void_t<>> struct HasSecondMember : std::false_type {};
+
+/**
+ * @brief Checks whether the input type has a @c second member.
+ *
+ * @tparam T Input type.
+ * @tparam Ret Needed type of @c second member.
+ */
+template <typename T, typename Ret>
+struct HasSecondMember<T, Ret,
+                       std::void_t<decltype(std::declval<T &>().second),
+                                   std::enable_if_t<std::is_convertible_v<decltype(std::declval<T &>().second), Ret>>>>
+    : std::true_type {};
+
+/**
+ * @brief Shortcut of @c HasSecondMember<T, Ret>::value.
+ * @relates HasSecondMember
+ * @tparam T Input type.
+ * @tparam Ret Needed type of @c second member.
+ */
+template <typename T, typename Ret> inline constexpr bool HasSecondMember_v = HasSecondMember<T, Ret>::value;
+
+/// @brief Always false.
+template <typename = std::void_t<>> struct AlwaysFalse : std::false_type {};
+
+/// @brief Shortcut of @c AlwaysFalse<T>::value.
+template <typename T = std::void_t<>> inline constexpr bool AlwaysFalse_v = AlwaysFalse<T>::value;
+
+/// @brief Always true.
+template <typename = std::void_t<>> struct AlwaysTrue : std::true_type {};
+
+/// @brief Shortcut of @c AlwaysTrue<T>::value.
+template <typename T = std::void_t<>> inline constexpr bool AlwaysTrue_v = AlwaysTrue<T>::value;
+
+/**
+ * @brief Source location (it is similar to std::source_location in C++20).
+ * @note This is a compile-time only structure.
+ */
+struct SourceLocation {
+private:
+  static constexpr const char *strip_path(const char *path) noexcept {
+    const char *file = path;
+    while (*path) {
+      if (*path == '/' || *path == '\\') file = path + 1;
+      path++;
+    }
+    return file;
+  }
+
+public:
+  const char *file_path;
+  const char *file_name;
+  const char *function;
+  int line;
+
+  static constexpr SourceLocation current(
+#if defined(__GNUC__) || defined(__clang__)
+      const char *file_ = __builtin_FILE(), const char *func_ = __builtin_FUNCTION(), int line_ = __builtin_LINE()
+#else
+      const char *file_ = "unknown", const char *func_ = "unknown", const char *sig_ = "unknown", int line = 0
+#endif
+          ) noexcept {
+    SourceLocation loc{};
+    loc.file_path = file_;
+    loc.file_name = strip_path(file_);
+    loc.function = func_;
+    loc.line = line_;
+    return loc;
+  }
+};
 
 } // namespace Helper
 
-/// @brief Name shorcut for logging.
+/// @brief Name shortcut for logging.
 #define HELPER "libhelper"
 
 /**
@@ -267,7 +499,7 @@ template <typename T> using ConstIfCharPointer_t = ConstIfCharPointer<T>::type;
 #define CYAN "\033[36m"    ///< Cyan (Light Blue) text.
 #define WHITE "\033[37m"   ///< White text.
 
-// Bright roreground colors
+// Bright foreground colors
 #define BRIGHT_BLACK "\033[90m"   ///< Bright Black (Gray) text.
 #define BRIGHT_RED "\033[91m"     ///< Bright Red text.
 #define BRIGHT_GREEN "\033[92m"   ///< Bright Green text.
@@ -296,7 +528,7 @@ template <typename T> using ConstIfCharPointer_t = ConstIfCharPointer<T>::type;
     abort();                                                                                                                          \
   } while (0)
 
-// ERROR(message, exit), ex: ERROR("an error occured.\n", 1)
+// ERROR(message, exit), ex: ERROR("an error occurred.\n", 1)
 #define ERROR(msg, code)                                                                                                              \
   do {                                                                                                                                \
     fprintf(stderr, "%s%sERROR%s: %s", BOLD, RED, STYLE_RESET, msg);                                                                  \

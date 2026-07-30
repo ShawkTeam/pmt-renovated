@@ -79,8 +79,7 @@
 #include <fstream>
 #include <iomanip>
 #include <filesystem>
-#include <source_location>
-
+#include <fmt/format.h>
 #include <libhelper/definations.hpp>
 
 namespace std {
@@ -197,12 +196,12 @@ public:
 
     const time_t t = time(nullptr);
     const tm *date = localtime(&t);
-    const std::string min = std::to_string(date->tm_min);
+    const std::string min = std::to_string(date ? date->tm_min : 0);
     std::ostringstream __oss;
     __oss << "<" << static_cast<char>(level) << "> [ "
-          << "<on " << stripQuotes(std::filesystem::path(file).filename()) << ":" << line << "> " << date->tm_mday << "/"
-          << date->tm_mon + 1 << "/" << date->tm_year + 1900 << " " << date->tm_hour << ":" << (min.length() == 1 ? "0" + min : min)
-          << ":" << date->tm_sec << "] " << function << "(): " << oss.str();
+          << "<on " << stripQuotes(file) << ":" << line << "> " << date->tm_mday << "/" << date->tm_mon + 1 << "/"
+          << date->tm_year + 1900 << " " << date->tm_hour << ":" << (min.length() == 1 ? "0" + min : min) << ":" << date->tm_sec
+          << "] " << function << "(): " << oss.str();
     std::string logLine = __oss.str();
 
     if (!std::filesystem::exists(logFile)) {
@@ -264,8 +263,8 @@ public:
   Logger &operator=(const Logger &) = delete;
 
   /// @brief Function for modern @c std::print style logging.
-  template <typename... Args> Logger &write(std::format_string<Args...> fmt, Args &&...args) {
-    oss << std::format(fmt, std::forward<Args>(args)...);
+  template <typename... Args> Logger &write(fmt::format_string<Args...> fmt, Args &&...args) {
+    oss << fmt::format(fmt, std::forward<Args>(args)...);
     return *this;
   }
 };
@@ -289,7 +288,7 @@ inline Helper::LogLevels ABORT = Helper::LogLevels::ABORT;
  */
 namespace Log {
 
-/// @brief Parses the function name from a full function decleration (from std::source_location::function_name()).
+/// @brief Parses the function name from a full function decleration (from Helper::SourceLocation::func).
 inline std::string parseFunctionName(const std::string &full) {
   auto end = full.find('(');
   if (end == std::string_view::npos) return full;
@@ -305,20 +304,20 @@ inline std::string parseFunctionName(const std::string &full) {
 /// @brief Custom format struct for logger.
 struct log_fmt {
   std::string_view fmt;
-  std::source_location loc;
+  Helper::SourceLocation loc;
 
-  consteval log_fmt(const char *f, std::source_location l = std::source_location::current()) : fmt(f), loc(l) {}
+  constexpr log_fmt(const char *f, Helper::SourceLocation l = Helper::SourceLocation::current()) : fmt(f), loc(l) {}
 };
 
 /// @brief Prints a formatted string to stdout.
-template <typename... Args> inline void print(const std::format_string<Args...> &fmt, Args &&...args) {
-  const std::string message = std::format(fmt, std::forward<Args>(args)...);
+template <typename... Args> inline void print(const fmt::format_string<Args...> &fmt, Args &&...args) {
+  const std::string message = fmt::format(fmt, std::forward<Args>(args)...);
   fprintf(stdout, "%s", message.c_str());
 }
 
 /// @brief Prints a formatted string to stdout and appends a newline.
-template <typename... Args> inline void println(const std::format_string<Args...> &fmt, Args &&...args) {
-  const std::string message = std::format(fmt, std::forward<Args>(args)...);
+template <typename... Args> inline void println(const fmt::format_string<Args...> &fmt, Args &&...args) {
+  const std::string message = fmt::format(fmt, std::forward<Args>(args)...);
   fprintf(stdout, "%s\n", message.c_str());
 }
 
@@ -326,15 +325,14 @@ template <typename... Args> inline void println(const std::format_string<Args...
 template <typename... Args> inline void info(const log_fmt &fmt, Args &&...args) {
   std::string message;
   try {
-    message = std::vformat(fmt.fmt, std::make_format_args(args...));
-  } catch (std::format_error &err) {
+    message = fmt::vformat(fmt.fmt, fmt::make_format_args(args...));
+  } catch (fmt::format_error &err) {
     Log::println("Failed to format string: {}", err.what());
-    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name(), parseFunctionName(fmt.loc.function_name()),
-                 fmt.loc.line());
+    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name, parseFunctionName(fmt.loc.function),
+                 fmt.loc.line);
     exit(EINVAL);
   }
-  Helper::Logger(INFO, parseFunctionName(fmt.loc.function_name()), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name(),
-                 fmt.loc.line())
+  Helper::Logger(INFO, parseFunctionName(fmt.loc.function), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name, fmt.loc.line)
       << message << std::endl;
 }
 
@@ -342,15 +340,15 @@ template <typename... Args> inline void info(const log_fmt &fmt, Args &&...args)
 template <typename... Args> inline void warning(const log_fmt &fmt, Args &&...args) {
   std::string message;
   try {
-    message = std::vformat(fmt.fmt, std::make_format_args(args...));
-  } catch (std::format_error &err) {
+    message = fmt::vformat(fmt.fmt, fmt::make_format_args(args...));
+  } catch (fmt::format_error &err) {
     Log::println("Failed to format string: {}", err.what());
-    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name(), parseFunctionName(fmt.loc.function_name()),
-                 fmt.loc.line());
+    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name, parseFunctionName(fmt.loc.function),
+                 fmt.loc.line);
     exit(EINVAL);
   }
-  Helper::Logger(WARNING, parseFunctionName(fmt.loc.function_name()), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name(),
-                 fmt.loc.line())
+  Helper::Logger(WARNING, parseFunctionName(fmt.loc.function), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name,
+                 fmt.loc.line)
       << message << std::endl;
 }
 
@@ -358,15 +356,14 @@ template <typename... Args> inline void warning(const log_fmt &fmt, Args &&...ar
 template <typename... Args> inline void error(const log_fmt &fmt, Args &&...args) {
   std::string message;
   try {
-    message = std::vformat(fmt.fmt, std::make_format_args(args...));
-  } catch (std::format_error &err) {
+    message = fmt::vformat(fmt.fmt, fmt::make_format_args(args...));
+  } catch (fmt::format_error &err) {
     Log::println("Failed to format string: {}", err.what());
-    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name(), parseFunctionName(fmt.loc.function_name()),
-                 fmt.loc.line());
+    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name, parseFunctionName(fmt.loc.function),
+                 fmt.loc.line);
     exit(EINVAL);
   }
-  Helper::Logger(ERROR, parseFunctionName(fmt.loc.function_name()), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name(),
-                 fmt.loc.line())
+  Helper::Logger(ERROR, parseFunctionName(fmt.loc.function), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name, fmt.loc.line)
       << message << std::endl;
 }
 
@@ -374,15 +371,14 @@ template <typename... Args> inline void error(const log_fmt &fmt, Args &&...args
 template <typename... Args> inline void abort(const log_fmt &fmt, Args &&...args) {
   std::string message;
   try {
-    message = std::vformat(fmt.fmt, std::make_format_args(args...));
-  } catch (std::format_error &err) {
+    message = fmt::vformat(fmt.fmt, fmt::make_format_args(args...));
+  } catch (fmt::format_error &err) {
     Log::println("Failed to format string: {}", err.what());
-    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name(), parseFunctionName(fmt.loc.function_name()),
-                 fmt.loc.line());
+    Log::println("This string format problem occurred on {}:{}():L{}", fmt.loc.file_name, parseFunctionName(fmt.loc.function),
+                 fmt.loc.line);
     exit(EINVAL);
   }
-  Helper::Logger(INFO, parseFunctionName(fmt.loc.function_name()), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name(),
-                 fmt.loc.line())
+  Helper::Logger(INFO, parseFunctionName(fmt.loc.function), Helper::Logger::Properties::FILE.c_str(), fmt.loc.file_name, fmt.loc.line)
       << message << std::endl;
 }
 

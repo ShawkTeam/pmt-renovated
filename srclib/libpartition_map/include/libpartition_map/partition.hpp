@@ -24,13 +24,10 @@
 #ifndef LIBPARTITION_MAP_PARTITION_HPP
 #define LIBPARTITION_MAP_PARTITION_HPP
 
-#if __cplusplus < 202002L
-#error "libpartition_map/partition.hpp is requires C++20 or higher C++ standarts."
-#endif
-
 #include <filesystem>
 #include <ostream>
 #include <tuple>
+#include <type_traits>
 #include <asm-generic/fcntl.h>
 #include <gpt.h>
 #include <libhelper/management.hpp>
@@ -49,8 +46,9 @@
  * @tparam path_type Path type for holding partition path.
  */
 namespace PartitionMap {
-template <typename slot_type, typename size_type, typename path_type>
-  requires IsSlotType<slot_type> && IsSizeType<size_type> && IsPathTypeLike<path_type>
+template <typename slot_type, typename size_type, typename path_type,
+          typename =
+              std::enable_if_t<IsSlotType_v<slot_type> && Helper::IsSizeType_v<size_type> && Helper::IsPathTypeLike_v<path_type>>>
 class BasicPartition_t {
   path_type localTablePath;       // The table path to which the partition belongs (like /dev/block/sdc).
   path_type logicalPartitionPath; // Path of logical partition.
@@ -127,10 +125,11 @@ public:
    *
    * @tparam Args Arguments.
    */
-  template <typename... Args>
-    requires(sizeof...(Args) == 4) && FindInArgs::HasSlotType<Args...> || FindInArgs::HasStringOrPath<Args...> ||
-                FindInArgs::HasGPTPart<Args...> || FindInArgs::HasNonConstOpenPartPtr<Args...>
-            explicit BasicPartition_t(Args &&...args) {
+  template <typename... Args,
+            typename = std::enable_if_t<(sizeof...(Args) == 4) &&
+                                        (FindInArgs::HasSlotType_v<Args...> || FindInArgs::HasStringOrPath_v<Args...> ||
+                                         FindInArgs::HasGPTPart_v<Args...> || FindInArgs::HasNonConstOpenPartPtr_v<Args...>)>>
+  explicit BasicPartition_t(Args &&...args) {
     (process_ctor(std::forward<Args>(args)), ...);
   }
 
@@ -279,7 +278,7 @@ public:
   }
 
   /// @brief Get partition index in GPT table.
-  const slot_type index() const {
+  slot_type index() const {
     if (isLogical) throw Error("Cannot return index: Is logical partition");
     return localIndex;
   }
@@ -374,7 +373,7 @@ public:
 
     if (bytesWrittenSoFar < size()) {
       size_type remainingBytes = size() - bytesWrittenSoFar;
-      std::ranges::fill(buffer, 0x00);
+      std::fill(buffer.begin(), buffer.end(), 0x00);
 
       while (remainingBytes > 0) {
         size_type toWriteSize = std::min<uint64_t>(buffer.size(), remainingBytes);
