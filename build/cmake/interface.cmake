@@ -51,6 +51,12 @@ if("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
     target_compile_options(pmt_interface_nolibs INTERFACE -gdwarf-5 -fsanitize=address -fno-stack-protector)
 endif()
 
+if("${CMAKE_BUILD_TYPE}" STREQUAL "Release")
+    target_link_options(pmt_interface_shared INTERFACE -s)
+    target_link_options(pmt_interface_static INTERFACE -s)
+    target_link_options(pmt_interface_nolibs INTERFACE -s)
+endif()
+
 if(LINK_TIME_OPTIMIZATION_THIN)
     target_compile_options(pmt_interface_shared INTERFACE -flto=thin)
     target_compile_options(pmt_interface_static INTERFACE -flto=thin)
