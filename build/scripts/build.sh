@@ -19,12 +19,14 @@
 WORK_DIR="$(pwd)"
 BUILD_PROPERTY="full"
 THIS="$(basename "$0")"
+TC_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake"
+TARGET_API=22
 TARGET_ABI_LIST=("arm64-v8a" "armeabi-v7a")
 
 echo() { command echo "[$THIS]: $*"; }
 
 checks() {
-    if [ -z "$ANDROID_NDK" ]; then
+    if [ -z "$ANDROID_NDK_HOME" ]; then
         echo "Please set ANDROID_NDK variable as your NDK path."
         exit 1
     fi
@@ -52,8 +54,8 @@ build() {
     command echo -e "Building PMT. About the build..:
     ARCH(S): ${TARGET_ABI_LIST[*]}
     BUILD-SPEFIC CMAKE FLAGS: $@
-    ANDROID_PLATFORM: $ANDROID_PLATFORM
-    ANDROID_TOOLCHAIN_FILE: $ANDROID_NDK/build/cmake/android.toolchain.cmake\n"
+    ANDROID_API: $TARGET_API
+    ANDROID_TOOLCHAIN_FILE: $TC_FILE\n"
 
     for a in "${TARGET_ABI_LIST[@]}"; do
         echo "Configuring for $a..."
@@ -61,12 +63,12 @@ build() {
         if [ "$BUILD_PROPERTY" = "full" ]; then
             mkdir -p "${WORK_DIR}/build_$a" "${WORK_DIR}/build_$a-builtin"
             cmake -B "${WORK_DIR}/build_$a" -G Ninja -S "${WORK_DIR}" "$@" \
-                -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+                -DCMAKE_TOOLCHAIN_FILE="$TC_FILE" \
                 -DANDROID_ABI="$a" \
                 -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
                 -DANDROID_STL:STRING=c++_static
             cmake -B "${WORK_DIR}/build_$a-builtin" -G Ninja -S "${WORK_DIR}" "$@" \
-                -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+                -DCMAKE_TOOLCHAIN_FILE="$TC_FILE" \
                 -DANDROID_ABI="$a" \
                 -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
                 -DANDROID_STL:STRING=c++_static \
@@ -74,14 +76,14 @@ build() {
         elif [ "$BUILD_PROPERTY" = "no-builtins" ]; then
             mkdir -p "${WORK_DIR}/build_$a"
             cmake -B "${WORK_DIR}/build_$a" -G Ninja -S "${WORK_DIR}" "$@" \
-                -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+                -DCMAKE_TOOLCHAIN_FILE="$TC_FILE" \
                 -DANDROID_ABI="$a" \
                 -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
                 -DANDROID_STL:STRING=c++_static
         elif [ "$BUILD_PROPERTY" = "only-builtins" ]; then
             mkdir -p "${WORK_DIR}/build_$a-builtin"
             cmake -B "${WORK_DIR}/build_$a-builtin" -G Ninja -S "${WORK_DIR}" "$@" \
-                -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK/build/cmake/android.toolchain.cmake" \
+                -DCMAKE_TOOLCHAIN_FILE="$TC_FILE" \
                 -DANDROID_ABI="$a" \
                 -DANDROID_PLATFORM="$ANDROID_PLATFORM" \
                 -DANDROID_STL:STRING=c++_static \
@@ -154,6 +156,28 @@ parse_args() {
                 fi
                 shift
                 ;;
+            --api)
+                [ -z "$2" ] && { command echo "$THIS: --api requires a value (integer)"; exit 1; }
+                TARGET_API="$2"
+                shift 2
+                ;;
+            --api=*)
+                local api="${1#--api=}"
+                [ -z "$api" ] && { command echo "$THIS: --api= requires a value (integer)"; exit 1; }
+                TARGET_API="$api"
+                shift
+                ;;
+            --toolchain)
+                [ -z "$2" ] && { command echo "$THIS: --toolchain requires a value"; exit 1; }
+                TC_FILE="$2"
+                shift 2
+                ;;
+            --toolchain=*)
+                local tc="${1#--toolchain=}"
+                [ -z "$tc" ] && { command echo "$THIS: --toolchain= requires a value"; exit 1; }
+                TC_FILE="$tc"
+                shift
+                ;;
             --no-builtin-variants)
                 BUILD_PROPERTY="no-builtins"
                 shift
@@ -173,7 +197,7 @@ parse_args() {
         esac
     done
 
-    [ -z "$command" ] && { command echo "$THIS: No command specified. Use build, rebuild or clean."; exit 1; }
+    [ -z "$command" ] && { command echo "$THIS: No command specified. Use $THIS --help for more information."; exit 1; }
     [ ${#custom_abis[@]} -gt 0 ] && TARGET_ABI_LIST=("${custom_abis[@]}")
 
     PARSED_COMMAND="$command"
@@ -186,6 +210,8 @@ Usage: $THIS COMMAND [OPTIONS]
 
 OPTIONS:
     --arch ABI               # Specify target ABI(s)
+    --api API                # Specify target API level
+    --toolchain PATH         # Specify toolchain file (CMake toolchain file)
     --working-directory PATH # Specify working directory
     --no-builtin-variants    # Do not build builtin variants
     --only-builtin-variants  # Only build builtin variants
@@ -199,7 +225,9 @@ COMMANDS:
     help                     # Show this help message
 
 HINTS:
-    Export ANDROID_PLATFORM if you set min Android target.
+    Export ANDROID_NDK_HOME to set NDK path.
+    Export ANDROID_PLATFORM or use --api argument if you set min Android target.
+    Use --toolchain argument to specify a custom CMake toolchain file.
     Use --arch to override target ABI list (default: ${TARGET_ABI_LIST[*]})
 
 EXAMPLES:
@@ -223,8 +251,8 @@ if [ "$1" = "help" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 0
 fi
 
-[ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-22"
 parse_args "$@"
+[ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-${TARGET_API}"
 checks
 
 case "$PARSED_COMMAND" in
