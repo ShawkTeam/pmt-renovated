@@ -273,7 +273,7 @@ if (file) {
 ```cpp
 // Validation errors
 if (invalidCondition) {
-    throw CLI::ValidationError("Invalid option combination");
+    throw Helper::Error("Invalid option combination");
 }
 
 // Plugin errors

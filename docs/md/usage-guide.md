@@ -388,14 +388,41 @@ pmt clean-logs -L /custom/log/path.log  # Remove custom log file
 ---
 
 ### Reading logical partition metadata
-Read detailed metadata for logical partitions including group, size, and attributes. General syntax:
+Read LP metadata.
 ```bash
-pmt read-metadata partition(s) [OPTIONS]
+pmt lp-metadata SUBCOMMAND ... [OPTIONS]
 ```
 
+**Subcommands:**
+- `read-groups` → Display metadata for logical partition groups including name, maximum size, and flags.
+- `read-partition` → Read detailed metadata for logical partitions including group, size, and attributes.
+
 **Options:**
-- `[partition(s)]` → Partition name(s) to read metadata for (required).
 - `-v`, `--version` → View version of plugin.
+
+#### read-groups
+**Example Usages:**
+```bash
+pmt lp-metadataread-groups  # Display all logical partition groups
+```
+
+**Technical Details:**
+- Requires device support for dynamic partitions
+- Displays all logical partition groups in the system
+- Shows group name, maximum size, and flags (e.g., slot_suffixed)
+- No arguments required - reads all available groups
+- Useful for understanding dynamic partition layout
+- Direct access to liblp metadata format
+
+#### read-partition
+**Example Usages:**
+```bash
+pmt lp-metadata read-partition partition(s)
+pmt lp-metadata read-partition system  # Read metadata for system partition
+pmt lp-metadata read-partition system,vendor  # Read metadata for multiple partitions
+pmt lp-metadata read-partition get-all  # Read metadata for all logical partitions
+pmt lp-metadata read-partition getvar-all  # Same as get-all
+```
 
 **Special Partition Names:**
 - `get-all` or `getvar-all` → Read metadata for all logical partitions.
@@ -409,52 +436,122 @@ pmt read-metadata partition(s) [OPTIONS]
 - Batch processing support for multiple partitions
 - Validates partition existence before reading metadata
 
+---
+
+### GPT Operations
+Perform GPT (GUID Partition Table) partition table operations including reading, backing up, and restoring partition tables. General syntax:
+```bash
+pmt gpt SUBCOMMAND [OPTIONS]
+```
+
+**Subcommands:**
+- `read-table` → Send a command to the Linux kernel to read the specified partition table(s) (using ioctl()).
+- `backup-table` → Backup specified GPT partition table(s) including protective MBR, main and second GPT header and partition entries.
+- `restore-table` → Restore specified GPT partition table(s) from backup files.
+
+**Global Options:**
+- `-v`, `--version` → View version of plugin.
+
+#### read-table
+Send a command to the Linux kernel to read the specified partition table(s) using ioctl(). General syntax:
+```bash
+pmt gpt read-table table(s) [OPTIONS]
+```
+
+**Options:**
+- `table(s)` → Names of the partition tables to read (required).
+
+**Special Table Names:**
+- `read-all` → Read all partition tables.
+
+**Technical Details:**
+- Uses ioctl() system call to re-read partition tables from the kernel
+- Closes opened file descriptors by libpartition_map before reading
+- Validates table existence before attempting re-read operation
+- Resolves actual block device paths (e.g., `/dev/block/sda`)
+- Warning: High probability of errors in normal mode (on normal system)
+- Recommended to use in recovery mode for safer operation
+- Could cause the device to restart suddenly
+- Skips failed tables if `--force` flag is used
+
 **Example Usages:**
 ```bash
-pmt read-metadata system  # Read metadata for system partition
-pmt read-metadata system,vendor  # Read metadata for multiple partitions
-pmt read-metadata get-all  # Read metadata for all logical partitions
-pmt read-metadata getvar-all  # Same as get-all
+pmt gpt read-table sda  # Re-read sda partition table
+pmt gpt read-table sda,sdb  # Re-read multiple partition tables
+pmt gpt read-table read-all  # Re-read all partition tables
+pmt gpt read-table sda --force  # Skip errors and continue
+```
+
+#### backup-table
+Backup specified GPT partition table(s) including protective MBR, main and second GPT header and partition entries. General syntax:
+```bash
+pmt gpt backup-table table(s) [OPTIONS]
+```
+
+**Options:**
+- `table(s)` → Names of the partition tables to backup (required).
+- `output(s)` → Names of the backup files to backup (optional, default: `<table_name>.gpt`).
+- `-o`, `--output-directory DIR` → Directory to save GPT backup(s).
+
+**Special Table Names:**
+- `read-all` → Backup all partition tables.
+
+**Technical Details:**
+- Creates complete backup of GPT structure including:
+  - Protective MBR (Master Boot Record)
+  - Main GPT header
+  - Secondary GPT header
+  - Partition entries
+- Default output naming: `<table_name>.gpt`
+- Validates output file existence (overwrites only with `--force`)
+- Custom output names must match the number of tables provided
+- Directory support for organized backup storage
+- Error isolation: failed backups don't affect other tables
+
+**Example Usages:**
+```bash
+pmt gpt backup-table sda  # Backup sda to sda.gpt
+pmt gpt backup-table sda,sdb  # Backup multiple tables
+pmt gpt backup-table sda custom_backup.gpt  # Custom filename
+pmt gpt backup-table sda,sdb backup1.gpt,backup2.gpt  # Custom names for multiple
+pmt gpt backup-table sda -o /backups  # Save to directory
+pmt gpt backup-table read-all -o /backups  # Backup all tables to directory
+```
+
+#### restore-table
+Restore specified GPT partition table(s) from backup files. General syntax:
+```bash
+pmt gpt restore-table table(s) file(s) [OPTIONS]
+```
+
+**Options:**
+- `table(s)` → Names of the partition tables to restore (required).
+- `file(s)` → Names of the backup files to restore (required).
+- `-F`, `--file-directory DIR` → Directory to restore GPT backup(s) from.
+
+**Special Table Names:**
+- `read-all` → Restore all partition tables.
+
+**Technical Details:**
+- Loads GPT backup files and writes to specified partition tables
+- Automatically syncs changes to disk after loading
+- Validates table existence before restore operation
+- File names must match the number of tables provided
+- Directory support for organized backup storage
+- Error isolation: failed restores don't affect other tables
+- Skips failed tables if `--force` flag is used
+- Writes and syncs changes immediately after loading backup
+
+**Example Usages:**
+```bash
+pmt gpt restore-table sda sda.gpt  # Restore sda from backup
+pmt gpt restore-table sda,sdb sda.gpt,sdb.gpt  # Restore multiple tables
+pmt gpt restore-table sda backup.gpt -F /backups  # Restore from directory
+pmt gpt restore-table sda,sdb backup1.gpt,backup2.gpt -F /backups  # Multiple from directory
+pmt gpt restore-table sda backup.gpt --force  # Skip errors and continue
 ```
 
 ---
-
-### Reading logical partition groups metadata
-Display metadata for logical partition groups including name, maximum size, and flags. General syntax:
-```bash
-pmt read-groups-metadata [OPTIONS]
-```
-
-**Options:**
-- `-v`, `--version` → View version of plugin.
-
-**Technical Details:**
-- Requires device support for dynamic partitions
-- Displays all logical partition groups in the system
-- Shows group name, maximum size, and flags (e.g., slot_suffixed)
-- No arguments required - reads all available groups
-- Useful for understanding dynamic partition layout
-- Direct access to liblp metadata format
-
-**Example Usages:**
-```bash
-pmt read-groups-metadata  # Display all logical partition groups
-```
-
-### Re-reading partition tables.
-Send *"read partition table"* command (with `ioctl()`) to kernel.
-```bash
-pmt re-read-table table(s)
-```
-
-**Options:**
-- `-v`, `--version` → View version of plugin.
-
-**Technical Details:**
-- I recommend using this command in recovery mode, etc.
-- The probability of errors is high in normal mode (on normal system).
-- A command is sent to the Linux kernel to reread the partition tables, and the GPT table is read again.
-- This could cause the device to restart suddenly.
 
 ---
 

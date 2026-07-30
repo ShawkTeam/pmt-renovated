@@ -1,7 +1,7 @@
 # Partition Manager Tool (PMT)
 
 **Partition Manager Tool** is a fast, reliable, and feature-rich CLI application for **Android** devices that enables advanced partition operations such as backup, flashing, erasing, information retrieval, and more.  
-This **renovated edition**, written in modern **C++**, is faster, more stable, and more powerful than its previous versions, thanks to optimized multithreading and improved error handling.
+This **renovated edition**, written in **C++ 17**, is faster, more stable, and more powerful than its previous versions, thanks to optimized multithreading and improved error handling.
 
 PMT is designed for developers, technicians, and Android enthusiasts who need fine-grained control over device partitions via a clean, flexible, and scriptable interface.
 

@@ -23,7 +23,8 @@ This guide provides comprehensive instructions for building PMT (Partition Manag
 ### Required Software
 
 #### Android NDK
-- **Recommended Version**: r28c (or latest stable)
+- **Recommended Version**: r29 (or latest stable)
+- **For older Android versions (like 4.4)**: r25 (r25 LTS has API 19 support with armeabi-v7a)
 - **Download**: [Android NDK Downloads](https://developer.android.com/ndk/downloads)
 
 #### Development Tools
@@ -65,13 +66,13 @@ sudo zypper install git cmake ninja python3
 
 3. **Set environment variable**:
    ```bash
-   export ANDROID_NDK="$HOME/Development/android-ndk-r28c"
+   export ANDROID_NDK_HOME="$HOME/Development/android-ndk-r28c"
    ```
 
 4. **Persist the environment variable** (optional):
    Add to your shell configuration file (`~/.bashrc` or `~/.zshrc`):
    ```bash
-   echo 'export ANDROID_NDK="$HOME/Development/android-ndk-r28c"' >> ~/.bashrc
+   echo 'export ANDROID_NDK_HOME="$HOME/Development/android-ndk-r28c"' >> ~/.bashrc
    source ~/.bashrc
    ```
 
@@ -105,7 +106,7 @@ git submodule update --init --recursive
 git clone https://github.com/ShawkTeam/pmt-renovated
 cd pmt-renovated
 git submodule update --init --recursive
-git switch 20260503  # Example tag
+git switch 20260706 # Example tag
 ```
 
 **List available tags:**
@@ -117,16 +118,15 @@ git tag --sort=-version:refname
 
 PMT uses a sophisticated build system with the following components:
 
-### Modern C++20 Toolchain
+### C++17 Toolchain
 - Uses **CMake 3.20+** with **Ninja** generator for fast builds
-- **C++20** standard with modern features (concepts, modules, etc.)
+- **C++17** standard with modern features (traits, etc.)
 - Supports both **Android NDK** cross-compilation and native builds
 
 ### Build Options
 - `BUILTIN_PLUGINS=ON/OFF` - Enable/disable built-in plugin compilation
 - `LINK_TIME_OPTIMIZATION_THIN=ON/OFF` - Enable/disable link time optimization (thin)
 - `CMAKE_BUILD_TYPE=Debug/Release` - Build configuration
-- `ANDROID_PLATFORM` - Minimum Android API level (default: android-22)
 
 ### Helper Scripts (`build/scripts/`)
 
@@ -135,6 +135,10 @@ PMT uses a sophisticated build system with the following components:
 - **Features**: Multi-architecture support, dependency checking, git hooks configuration
 - **Default Architectures**: `arm64-v8a`, `armeabi-v7a`
 - **Build Types**: Standard and builtin variants
+- **Environment Variables**:
+  - `ANDROID_NDK_HOME`: Path to Android NDK
+  - `ANDROID_PLATFORM`: Minimum Android API level (default: android-22)
+- **Please** use --help flag to get more information.
 
 #### `reformat.sh` - Code Formatting
 - **Purpose**: Maintains consistent code style using clang-format
@@ -233,7 +237,7 @@ Build uses `$(nproc - 2)` threads by default. Modify in `build.sh`.
 
 **NDK not found**:
 ```bash
-export ANDROID_NDK="/path/to/android-ndk"
+export ANDROID_NDK_HOME="/path/to/android-ndk"
 ```
 
 **Missing dependencies**:

@@ -72,7 +72,7 @@ bash build/scripts/reformat.sh
 
 ### Coding Standards
 
-- **Language**: Use **C++20** features where appropriate
+- **Language**: Use **C++17** features where appropriate
 - **Naming Conventions**:
   - Classes: `PascalCase`
   - Functions: `camelCase`
