@@ -15,7 +15,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 THIS="$(basename "$0")"
-DEFAULT_RELEASE="20260207"
+DEFAULT_RELEASE="20260706"
 RELEASE="${DEFAULT_RELEASE}"
 VARIANT=""
 
