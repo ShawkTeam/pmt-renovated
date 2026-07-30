@@ -22,8 +22,8 @@ project(pmt VERSION 1.9.0)
 # Enable assembly.
 enable_language(ASM)
 
-# Use modern C++ 20 standart
-set(CMAKE_CXX_STANDARD 20)
+# Use C++ 17 standart
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -36,6 +36,11 @@ option(LINK_TIME_OPTIMIZATION_THIN "Enable link-time thin optimization (lto-thin
 include(CheckIPOSupported)
 
 if(LINK_TIME_OPTIMIZATION_THIN)
+	if(ANDROID_NATIVE_API_LEVEL LESS 21)
+		message(WARNING "LINK_TIME_OPTIMIZATION_THIN is enabled but Android API level is less than 21.")
+		message(WARNING "Disabling LINK_TIME_OPTIMIZATION_THIN.")
+		set(LINK_TIME_OPTIMIZATION_THIN OFF)
+	endif()
 	check_ipo_supported(RESULT lto_supported OUTPUT lto_error)
 	if(NOT lto_supported)
 		message(WARNING "LINK_TIME_OPTIMIZATION_THIN is enabled but link-time thin optimization (lto-thin) is not supported: ${lto_error}")
@@ -63,6 +68,7 @@ generate_build_info("${FLAGS}")
 add_subdirectory(external)
 add_subdirectory(srclib)
 add_subdirectory(src)
+add_subdirectory(docs/plugin-instructions)
 
 init_include_directories()
 

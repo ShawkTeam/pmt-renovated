@@ -156,25 +156,25 @@ add_super_library(gptf USE_INTERFACE_NOLIBS_NOFLAGS
         DEFINATIONS _FILE_OFFSET_BITS=64
         LIBS ext2_uuid
 )
+add_static_super_library(fmtlib USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
+        SOURCES ${FMTLIB_SOURCES}
+        CPPSTD 17
+        COMPILE_OPTIONS -fno-exceptions -UNDEBUG
+)
 
 if(ANDROID_NATIVE_API_LEVEL LESS 30)
     add_static_super_library(crypto_static USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${crypto_sources} ${crypto_sources_asm}
             CPPSTD 17
-            COMPILE_OPTIONS -fvisibility=hidden -fno-data-sections -fno-function-sections -fno-sanitize=address -Werror -Wno-unused-parameter -Wno-reserved-user-defined-literal
+            COMPILE_OPTIONS -fvisibility=hidden -fno-data-sections -fno-function-sections -fno-sanitize=address -Werror -Wno-unused-parameter -Wno-reserved-user-defined-literal $<$<COMPILE_LANGUAGE:CXX>:-include> $<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/patches/boringssl/src/crypto/fipsmodule/cipher/internal.h>
             DEFINATIONS BORINGSSL_SHARED_LIBRARY BORINGSSL_ANDROID_SYSTEM BORINGSSL_IMPLEMENTATION OPENSSL_SMALL # There is no need for FIPS.
-    )
-    add_static_super_library(fmtlib_static USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
-            SOURCES ${FMTLIB_SOURCES}
-            CPPSTD 17
-            COMPILE_OPTIONS -fno-exceptions -UNDEBUG
     )
     add_static_super_library(base_static USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBBASE_SOURCES}
-            CPPSTD 20
+            CPPSTD $<IF:$<VERSION_LESS:${ANDROID_NDK_MAJOR},22>,2a,20>
             COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
             DEFINATIONS _FILE_OFFSET_BITS=64
-            LIBS fmtlib_static log
+            LIBS fmtlib log
     )
     add_static_super_library(crypto_utils_static USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBCRYPTO_UTILS_SOURCES}
@@ -213,21 +213,16 @@ else()
     add_shared_super_library(crypto USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${crypto_sources} ${crypto_sources_asm}
             CPPSTD 17
-            COMPILE_OPTIONS -fvisibility=hidden -fno-data-sections -fno-function-sections -fno-sanitize=address -Werror -Wno-unused-parameter -Wno-reserved-user-defined-literal
+            COMPILE_OPTIONS -fvisibility=hidden -fno-data-sections -fno-function-sections -fno-sanitize=address -Werror -Wno-unused-parameter -Wno-reserved-user-defined-literal $<$<COMPILE_LANGUAGE:CXX>:-include> $<$<COMPILE_LANGUAGE:CXX>:${CMAKE_CURRENT_SOURCE_DIR}/patches/boringssl/src/crypto/fipsmodule/cipher/internal.h>
             LINKER_OPTIONS -Wl,-Bsymbolic
             DEFINATIONS BORINGSSL_SHARED_LIBRARY BORINGSSL_ANDROID_SYSTEM BORINGSSL_IMPLEMENTATION OPENSSL_SMALL # There is no need for FIPS.
     )
-    add_static_super_library(fmtlib_static USE_INTERFACE_NOLIBS_NOFLAGS NOPREFIX
-            SOURCES ${FMTLIB_SOURCES}
-            CPPSTD 17
-            COMPILE_OPTIONS -fno-exceptions -UNDEBUG
-    )
     add_static_super_library(base_static USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBBASE_SOURCES}
-            CPPSTD 20
+            CPPSTD $<IF:$<VERSION_LESS:${ANDROID_NDK_MAJOR},22>,2a,20>
             COMPILE_OPTIONS -Wexit-time-destructors -Wno-error
             DEFINATIONS _FILE_OFFSET_BITS=64
-            LIBS fmtlib_static log
+            LIBS fmtlib log
     )
     add_shared_super_library(crypto_utils USE_INTERFACE_NOLIBS_NOFLAGS
             SOURCES ${LIBCRYPTO_UTILS_SOURCES}
