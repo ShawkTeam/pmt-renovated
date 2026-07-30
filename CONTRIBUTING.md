@@ -25,17 +25,14 @@ git submodule update --init --recursive
 ### Build Dependencies
 
 The project uses several external libraries managed as Git submodules:
-
-- **CLI11** - Command line interface
-- **PicoSHA2** - SHA256 hash generation
-- **nlohmann/json** - JSON parsing and generation
+- **rapidjson** - JSON parsing and generation
 - **libbase, etc.** - Android system libraries
 
 ### Build Configuration
 
 ```bash
 # Using build scripts
-bash build/scripts/build.sh build
+bash build/scripts/build.sh build # Use --help to get more options
 
 ### OR ###
 
