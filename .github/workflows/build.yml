@@ -141,10 +141,8 @@ jobs:
       - name: Clean up workspace
         if: always()
         run: |
-          rm -rf android-ndk-*
-          bash build/scripts/build.sh clean
+          rm -rf android-ndk-* build_*
           git submodule deinit --all -f
-          
           sudo apt-get clean
         
         
