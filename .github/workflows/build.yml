@@ -33,6 +33,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          clean: true
 
       - name: Cleanup
         id: cleanup
@@ -136,3 +137,14 @@ jobs:
           wait-timeout-seconds: 900
           wait-interval-seconds: 5
           sync-status: false
+
+      - name: Clean up workspace
+        if: always()
+        run: |
+          rm -rf android-ndk-*
+          bash build/scripts/build.sh clean
+          git submodule deinit --all -f
+          
+          sudo apt-get clean
+        
+        
