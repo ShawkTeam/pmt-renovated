@@ -21,7 +21,7 @@ on: [workflow_dispatch]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: epyc-runner
 
     permissions:
       contents: write
