@@ -43,7 +43,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt upgrade -y
-          sudo apt install make ninja-build cmake extra-cmake-modules zip gh -y
+          sudo apt install make ninja-build cmake extra-cmake-modules zip gh python-is-python3 -y
 
       - name: Setup Android NDK
         id: setup-ndk
