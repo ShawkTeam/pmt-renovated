@@ -129,101 +129,6 @@ openpart_t *openpart_open(const char *path, int flags, uint32_t extra_oflags)
   return op;
 }
 
-openpart_t *openpart_read_data_from_file(const char *path, int flags, uint32_t extra_oflags)
-{
-  FILE *f;
-  openpart_t *op;
-  char *part_path;
-  size_t path_len;
-  int oflags = 0;
-
-  if (!openpart_is_valid_save(path))
-    return NULL;
-
-  f = fopen(path, "rb");
-  if (!f)
-    return NULL;
-
-  op = malloc(sizeof(struct openpart));
-  if (!op) {
-    fclose(f);
-    return NULL;
-  }
-
-  /* skip magic */
-  char skip[8];
-  fread(skip, 8, 1, f);
-  if (fread(&path_len, sizeof(path_len), 1, f) != 1) {
-    free(op);
-    fclose(f);
-    return NULL;
-  }
-
-  part_path = malloc(path_len);
-  if (!part_path) {
-    free(op);
-    fclose(f);
-    return NULL;
-  }
-
-  fprintf(stderr, "DEBUG: pos before path_len read: %ld\n", ftell(f));
-  if (fread(part_path, path_len, 1, f) != 1) {
-    free(part_path);
-    free(op);
-    fclose(f);
-    return NULL;
-  }
-  fprintf(stderr, "DEBUG: path_len=%zu\n", path_len);
-
-  if (!(flags & OP_IGNTYPE)) {
-    struct stat st;
-    if (stat(part_path, &st) < 0) {
-      free(part_path);
-      free(op);
-      fclose(f);
-      return NULL;
-    }
-
-    if (!S_ISBLK(st.st_mode)) {
-      free(part_path);
-      free(op);
-      fclose(f);
-      errno = ENOTBLK;
-      return NULL;
-    }
-  }
-
-  if (extra_oflags != 0) oflags = extra_oflags;
-  if (flags & OP_RDONLY) oflags |= O_RDONLY;
-  else if (flags & OP_WRONLY) oflags |= O_WRONLY;
-  else oflags |= O_RDWR;
-  op->fd = open(part_path, oflags);
-  free(part_path);
-  if (op->fd < 0) {
-    free(op);
-    fclose(f);
-    return NULL;
-  }
-
-  if (fread(&op->flags, sizeof(op->flags), 1, f) != 1 ||
-      fread(&op->err, sizeof(op->err), 1, f) != 1 ||
-      fread(&op->size, sizeof(op->size), 1, f) != 1 ||
-      fread(&op->sector_size, sizeof(op->sector_size), 1, f) != 1 ||
-      fread(&op->info_loaded, sizeof(op->info_loaded), 1, f) != 1 ||
-      fread(op->uuid, sizeof(op->uuid), 1, f) != 1 ||
-      fread(op->label, sizeof(op->label), 1, f) != 1 ||
-      fread(op->fstype, sizeof(op->fstype), 1, f) != 1) {
-    close(op->fd);
-    free(op);
-    fclose(f);
-    return NULL;
-  }
-  op->flags = flags;
-
-  fclose(f);
-  return op;
-}
-
 void openpart_close(openpart_t **op)
 {
   if (!op || !*op)
@@ -234,27 +139,6 @@ void openpart_close(openpart_t **op)
   }
   free(*op);
   *op = NULL;
-}
-
-int openpart_is_valid_save(const char* path)
-{
-  FILE* f = fopen(path, "rb");
-  if (!f)
-    return 0;
-
-  char magic[8];
-  if (fread(magic, sizeof(magic), 1, f) != 1) {
-    fclose(f);
-    return 0;
-  }
-  fclose(f);
-
-  if (strncmp(magic, "OPENPART", 8) != 0) {
-    errno = EINVAL;
-    return 0;
-  }
-
-  return 1;
 }
 
 int openpart_errno(openpart_t *op)
