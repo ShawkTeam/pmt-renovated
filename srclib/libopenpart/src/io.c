@@ -421,45 +421,6 @@ const char* openpart_get_part_path(openpart_t* op)
   return path_from_fd(op->fd);
 }
 
-int openpart_save_to_file(const char *path, openpart_t *op)
-{
-  FILE *f;
-
-  if (!path || !op) {
-    errno = EINVAL;
-    return -1;
-  }
-
-  f = fopen(path, "wb");
-  if (!f)
-    return -1;
-
-  const char* p_path = path_from_fd(op->fd);
-  if (!p_path) {
-    fclose(f);
-    return -1;
-  }
-  size_t path_len = strlen(p_path) + 1;
-
-  if (fwrite(op->openpart_magic, sizeof(op->openpart_magic), 1, f) != 1 ||
-      fwrite(&path_len, sizeof(path_len), 1, f) != 1 ||
-      fwrite(p_path, path_len, 1, f) != 1 ||
-      fwrite(&op->flags, sizeof(op->flags), 1, f) != 1 ||
-      fwrite(&op->err, sizeof(op->err), 1, f) != 1 ||
-      fwrite(&op->size, sizeof(op->size), 1, f) != 1 ||
-      fwrite(&op->sector_size, sizeof(op->sector_size), 1, f) != 1 ||
-      fwrite(&op->info_loaded, sizeof(op->info_loaded), 1, f) != 1 ||
-      fwrite(op->uuid, sizeof(op->uuid), 1, f) != 1 ||
-      fwrite(op->label, sizeof(op->label), 1, f) != 1 ||
-      fwrite(op->fstype, sizeof(op->fstype), 1, f) != 1) {
-    fclose(f);
-    return -1;
-  }
-
-  fclose(f);
-  return 1;
-}
-
 void openpart_free(void *out)
 {
   free(out);
