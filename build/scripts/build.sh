@@ -45,6 +45,7 @@ clean() {
 }
 
 build() {
+    checks
     local -a targets=()
     set -e
     command echo -e "Building PMT. About the build..:
@@ -249,7 +250,6 @@ fi
 
 parse_args "$@"
 [ -z "$ANDROID_PLATFORM" ] && ANDROID_PLATFORM="android-${TARGET_API}"
-checks
 
 case "$PARSED_COMMAND" in
     "build")   build "${PARSED_CMAKE_ARGS[@]}" ;;
