@@ -41,30 +41,22 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: epyc-runner
     env:
       DOCS_PATH: ${{ github.event.inputs.DOCS_PATH || '/var/www/documentations/pmt-renovated-git' }}
       USE_GIT_CID: ${{ github.event.inputs.USE_GIT_CID || 'true' }}
-    container:
-      image: archlinux:latest
     permissions:
       contents: read
       pages: write
       id-token: write
 
     steps:
-      - name: Pre-install Git for Checkout
-        run: pacman -Sy && pacman -S --noconfirm git
-
       - uses: actions/checkout@v4
+        with:
+          clean: true
 
-      - name: Install Required Packages
-        run: pacman -S --noconfirm doxygen graphviz rsync openssh
-
-      - name: Fix Environment and Git Safe Directory
-        run: |
-          chown -R root:root .
-          git config --global --add safe.directory '*'
+      - name: Setup Packages
+        run: sudo apt update && sudo apt install git doxygen graphviz -y
 
       - name: Run Doxygen
         run: |
@@ -80,17 +72,11 @@ jobs:
           fi
           doxygen Doxyfile
 
-      - name: Setup SSH
+      - name: Deploy
         run: |
-          mkdir -p /root/.ssh
-          echo "${{ secrets.VDS_SSH_KEY }}" | tr -d '\r' > /root/.ssh/id_ed25519
-          chmod 600 /root/.ssh/id_ed25519
-          ssh-keyscan -H "${{ secrets.VDS_HOST }}" >> /root/.ssh/known_hosts
-          chmod 600 /root/.ssh/known_hosts
+          rsync -avz --delete docs/html/ $DOCS_PATH
 
-      - name: Deploy to VDS
+      - name: Clean up workspace
+        if: always()
         run: |
-          rsync -avz --delete \
-            -e "ssh -i /root/.ssh/id_ed25519 -o UserKnownHostsFile=/root/.ssh/known_hosts" \
-            docs/html/ \
-            ${{ secrets.VDS_USER }}@${{ secrets.VDS_HOST }}:$DOCS_PATH
+          bash build/scripts/build.sh cleanup-generated-docs
