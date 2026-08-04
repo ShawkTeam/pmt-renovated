@@ -51,5 +51,5 @@ namespace std {
 }
 #endif
 
-#endif // __ANDROID_API__ <= 23
-#endif // _F_OFFSET_H
+#endif // #if defined(__ANDROID__) && defined(__ANDROID_API__) && !defined(__LP64__) && __ANDROID_API__ <= 23 && _FILE_OFFSET_BITS == 64
+#endif // #ifndef _F_OFFSET_H

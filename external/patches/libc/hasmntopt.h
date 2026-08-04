@@ -25,4 +25,4 @@ __BEGIN_DECLS
 char *hasmntopt(const struct mntent*, const char*);
 __END_DECLS
 
-#endif
+#endif // #ifndef _HASMNTOPT_H
