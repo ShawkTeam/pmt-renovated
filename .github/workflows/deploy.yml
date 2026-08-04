@@ -74,7 +74,7 @@ jobs:
 
       - name: Deploy
         run: |
-          rsync -avz --delete docs/html/ $DOCS_PATH
+          rsync -avzP --no-g --no-o --delete docs/html/ $DOCS_PATH
 
       - name: Clean up workspace
         if: always()
