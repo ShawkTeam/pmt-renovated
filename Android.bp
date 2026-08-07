@@ -46,9 +46,10 @@ filegroup {
 // Add genrule for generating buildInfo.hpp
 cc_genrule {
     name: "buildInfoHpp_gen",
-    tool_files: ["android_genrule.sh"],
+    srcs: ["CMakeLists.txt"],
+    tool_files: ["build/scripts/android_genrule.sh"],
     out: ["generated/buildInfo.hpp"],
-    cmd: "mkdir -p $$(dirname $(out)) || true && $(location android_genrule.sh) /usr/bin/cmake $(location $$(dirname $(out)/../..)) > $(out)",
+    cmd: "mkdir -p $$(dirname $(out)) && $(location build/scripts/android_genrule.sh) /usr/bin/cmake $$(dirname $(location CMakeLists.txt)) > $(out)",
 }
 
 // Default configurations of pmt
@@ -59,14 +60,12 @@ cc_defaults {
     export_generated_headers : ["buildInfoHpp_gen"],
     cpp_std: "c++17",
     cflags: [
-        "-Wall",
         "-Werror",
         "-Wno-deprecated-declarations",
         "-fexceptions",
         "-DANDROID_BUILD",
         "-DBUILTIN_PLUGINS",
     ],
-    ldflags: ["-Wl,-s"],
     local_include_dirs: ["include"],
     export_include_dirs: ["include"],
     shared_libs: ["libbase"],
