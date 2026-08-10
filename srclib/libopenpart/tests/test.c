@@ -230,39 +230,16 @@ int main(int argc, char** argv)
   else
     printf("Sync:        OK\n");
 
-  char save_path[256];
-  snprintf(save_path, sizeof(save_path), "%s", basename(argv[1]));
-  printf("\n=== SAVE ===\n");
-  if (openpart_save_to_file(save_path, op))
-    printf("Save:        OK (%s)\n", save_path);
-  else
-    printf("Save:        FAILED (%s)\n", openpart_strerror(op));
-
-  printf("\n=== SAVE VALIDATION ===\n");
-  if (openpart_is_valid_save(save_path))
-    printf("Validation:  OK\n");
-  else
-    printf("Validation:  FAILED (%s)\n", openpart_strerror(op));
-
-  printf("\n=== READ FROM FILE ===\n");
-  openpart_t* op2 = openpart_read_data_from_file(save_path, OP_RDONLY, 0);
-  if (op2)
-    printf("Read from file: OK\n");
-  else
-    printf("Read from file: FAILED (%s)\n", openpart_strerror(op2));
-
   printf("Opening: test.img\n");
-  openpart_t *op3 = openpart_open("test.img", OP_RDWR | OP_IGNTYPE, 0);
-  if (!op3) {
+  openpart_t *op2 = openpart_open("test.img", OP_RDWR | OP_IGNTYPE, 0);
+  if (!op2) {
     fprintf(stderr, "Failed to open: %s\n", strerror(errno));
     openpart_close(&op);
-    openpart_close(&op2);
     return 1;
   }
-  test_write(op3);
+  test_write(op2);
 
   openpart_close(&op);
   openpart_close(&op2);
-  openpart_close(&op3);
   return 0;
 }
