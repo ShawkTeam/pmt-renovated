@@ -75,7 +75,10 @@ static void sigHandler(int sig) {
  * @return int Exit status code (EXIT_SUCCESS on success, EXIT_FAILURE or error code on failure).
  */
 int main(int argc, char **argv) {
-  Helper::CMDLine::App app("Partition Manager Tool", BUILD_VERSION);
+  using namespace PartitionManager;
+  using namespace Helper::CMDLine;
+
+  App app("Partition Manager Tool", BUILD_VERSION);
   std::vector<char *> argvStorage;
   std::vector<std::string> args;
   Helper::Silencer silencer(
@@ -107,7 +110,7 @@ int main(int argc, char **argv) {
     argc = static_cast<int>(argvStorage.size());
     argv = argvStorage.data();
 
-    PartitionManager::BasicFlags Flags;
+    BasicFlags Flags;
     std::vector<std::string> plugins;
     std::string pluginPath;
 
@@ -121,21 +124,21 @@ int main(int argc, char **argv) {
     app.addOption("-p,--plugins", plugins, "Load input plugin files.")->early();
     app.addOption("-d,--plugin-directory", pluginPath, "Load plugins from the input directory.")
         ->early()
-        ->check(Helper::CMDLine::Checkers::ExistingDirectory());
+        ->check(Checkers::ExistingDirectory());
 
-    app.addFlag("-V,--verbose", Flags.verboseMode, "Enable verbose output mode.")->early();
-    app.addFlag("-q,--quiet", Flags.quietProcess, "Enable quiet processing.")->early();
-    app.addFlag("-s,--select-on-duplicate", Flags.noWorkOnUsed, "Select partition for work if has input named duplicate partitions.");
-    app.addFlag("-f,--force", Flags.forceProcess, "Force process to be processed.");
-    app.addFlag("-l,--logical", Flags.onLogical, "Specify that the target partition is logical.");
-    app.addFlag("-v,--version", Flags.viewVersion, "Print version and exit.");
-    app.addFlag("--license", Flags.viewLicense, "Print license and exit.");
+    app.addFlag("-V,--verbose", nullptr, "Enable verbose output mode.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::Verbose))->early();
+    app.addFlag("-q,--quiet", nullptr, "Enable quiet processing.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::Quiet))->early();
+    app.addFlag("-s,--select-on-duplicate", nullptr, "Select partition for work if has input named duplicate partitions.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::NoWorkOnUsed));
+    app.addFlag("-f,--force", nullptr, "Force process to be processed.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::Force));
+    app.addFlag("-l,--logical", nullptr, "Specify that the target partition is logical.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::OnLogical));
+    app.addFlag("-v,--version", nullptr, "Print version and exit.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::ViewVersion));
+    app.addFlag("--license", nullptr, "Print license and exit.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::ViewLicense));
 
     app.parse_earlies(argc, argv);
 
-    Helper::Logger::Properties::setPrinting(Flags.verboseMode);
+    Helper::Logger::Properties::setPrinting(Flags.options.hasFlag(BasicFlagOptions::Verbose));
     Helper::Logger::Properties::setFile(Flags.logFile, true);
-    PartitionManager::BasicManager manager(app, Flags);
+    BasicManager manager(app, Flags);
 
     manager.loadBuiltinPlugins(); // Load built-in plugins if existed.
     if (!plugins.empty()) {
@@ -155,8 +158,8 @@ int main(int argc, char **argv) {
       return EXIT_FAILURE;
     }
 
-    if (Flags.quietProcess) silencer.silence();
-    if (Flags.viewLicense) {
+    if (Flags.options.hasFlag(BasicFlagOptions::Quiet)) silencer.silence();
+    if (Flags.options.hasFlag(BasicFlagOptions::ViewLicense)) {
       Log::println("Copyright (C) 2026 Yağız Zengin\n\nThis program is free software: you can redistribute it and/or modify\nit under "
                    "the terms of the GNU General Public License as published by\nthe Free Software Foundation, either version 3 of "
                    "the License, or\n(at your option) any later version.\n\nThis program is distributed in the hope that it will be "
@@ -165,7 +168,7 @@ int main(int argc, char **argv) {
                    "the GNU General Public License\nalong with this program.  If not, see <https://www.gnu.org/licenses/>.");
       return EXIT_SUCCESS;
     }
-    if (Flags.viewVersion) {
+    if (Flags.options.hasFlag(BasicFlagOptions::ViewVersion)) {
       Log::println("{}", PartitionManager::getAppVersion());
       return EXIT_SUCCESS;
     }
@@ -173,11 +176,11 @@ int main(int argc, char **argv) {
     if (!Helper::Android::isHasRootPrivileges()) // Root access is a fundamental requirement for this program.
       throw PartitionManager::Error("This program requires super-user privileges.");
     if (Tables.tableNamesEmpty()) throw PartitionManager::Error("Cannot find any partition table on this device.");
-    if (!Tables && !Flags.forceProcess)
+    if (!Tables && !Flags.options.hasFlag(BasicFlagOptions::Force))
       throw PartitionManager::Error(
           "Problem(s) have been detected in your device's partition table. Please use -f (--force) to continue.");
 
-    if (Flags.onLogical &&
+    if (Flags.options.hasFlag(BasicFlagOptions::OnLogical) &&
         !Tables.isHasSuperPartition()) // If the device doesn't have a super partition, it means there are no logical partitions.
       throw PartitionManager::Error("This device doesn't contains logical partitions. But you used -l (--logical) flag.");
 

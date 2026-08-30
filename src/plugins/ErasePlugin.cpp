@@ -106,8 +106,8 @@ public:
     if (!partition) return AsyncResult_t::Error("Couldn't find partition: {}", partitionName);
     if (partition->size() == 0) return AsyncResult_t::Error("Partition {} is empty", partitionName);
 
-    if (Flags.onLogical && tType != PartitionMap::DYNAMIC) {
-      if (Flags.forceProcess)
+    if (Flags.options.hasFlag(BasicFlagOptions::OnLogical) && tType != PartitionMap::DYNAMIC) {
+      if (Flags.options.hasFlag(BasicFlagOptions::Force))
         Log::warning("Partition {} exists but is not logical. Ignoring (from --force, -f).", partitionName);
       else
         return AsyncResult_t::Error("Used --logical (-l) flag but partition is not logical: {}", partitionName);
@@ -120,7 +120,7 @@ public:
     auto pfd = Helper::UniqueFD(partition->absolutePath(), O_WRONLY);
     if (!pfd) return AsyncResult_t::Error("Can't open partition {}: {}", partitionName, strerror(errno));
 
-    if (!Flags.forceProcess) {
+    if (!Flags.options.hasFlag(BasicFlagOptions::Force)) {
       if (!Helper::confirmPrompt("Are you sure you want to continue? This could render your device "
                                  "unusable! Do not continue if you "
                                  "do not know what you are doing!")) {

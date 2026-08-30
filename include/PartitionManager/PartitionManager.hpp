@@ -37,23 +37,27 @@ namespace PartitionManager {
 /// @brief Returns the version of pmt.
 std::string getAppVersion();
 
+enum BasicFlagOptions : uint8_t {
+  None = 0,
+  OnLogical    = 1 << 0, ///< 0x01, Only process logical partitions.
+  Quiet        = 1 << 1, ///< 0x02, Turn on/off quiet processing.
+  Verbose      = 1 << 2, ///< 0x04, Turn on/off verbose processing.
+  ViewVersion  = 1 << 3, ///< 0x08, Print version and exit.
+  ViewLicense  = 1 << 4, ///< 0x10, View license and exit.
+  Force        = 1 << 5, ///< 0x20, Enable force processes.
+  NoWorkOnUsed = 1 << 6  ///< 0x40, Don't work on used partitions.
+};
+
 /// @brief Basic flag structure of pmt.
 class BasicFlags {
 public:
   BasicFlags();
 
+  std::string logFile; ///< Log file path.
   std::pair<std::unique_ptr<PartitionMap::PartitionTableData>,
             std::unique_ptr<PartitionMap::DynamicTableData>>
       partitionTables; ///< Partition tables.
-  std::string logFile; ///< Log file path.
-
-  bool onLogical;    ///< Only process logical partitions.
-  bool quietProcess; ///< Turn on/off quiet processing.
-  bool verboseMode;  ///< Turn on/off verbose processing.
-  bool viewVersion;  ///< Print version and exit.
-  bool viewLicense;  ///< View license and exit.
-  bool forceProcess; ///< Enable force processes.
-  bool noWorkOnUsed; ///< Don't work on used partitions.
+  Helper::FlagCapsule<BasicFlagOptions> options; ///< Basic options.
 };
 
 using Error = Helper::Error;

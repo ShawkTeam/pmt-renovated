@@ -32,7 +32,7 @@
 
 #define SPAWN_ERROR()                                                                                                                 \
   do {                                                                                                                                \
-    if (Flags.forceProcess) {                                                                                                         \
+    if (Flags.options.hasFlag(BasicFlagOptions::Force)) {                                                                             \
       Log::println(" Skipping...");                                                                                                   \
       return true;                                                                                                                    \
     } else {                                                                                                                          \
@@ -119,7 +119,7 @@ private:
       std::string output = file_list.empty() ? n + ".gpt" : file_list[i];
       if (!directory.empty()) output.insert(0, directory + '/');
 
-      if (Helper::fileIsExists(output) && !Flags.forceProcess)
+      if (Helper::fileIsExists(output) && !Flags.options.hasFlag(BasicFlagOptions::Force))
         throw Helper::Error("Output file {} already exists!", output).cmdlineError().withCode(EX_DATAERR);
 
       auto table = pTab->GPTDataOf(n);

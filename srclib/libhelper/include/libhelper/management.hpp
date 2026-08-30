@@ -1002,6 +1002,43 @@ template <typename... Args, typename = std::enable_if_t<sizeof...(Args) >= 1>> i
                    })};
 }
 
+/// @brief Basic flag options.
+template <typename TheEnum, typename FlagType = uint8_t>
+class FlagCapsule {
+  static_assert(std::is_enum_v<TheEnum>, "FlagCapsule: TheEnum must be an enum!");
+  static_assert(std::is_unsigned_v<FlagType>, "FlagCapsule: FlagType must be an unsigned integer!");
+
+  FlagType flags{0};
+
+public:
+  static constexpr bool YES = true;
+  static constexpr bool NO  = false;
+
+  FlagCapsule() = default;
+
+  /// @brief Set or clear a flag.
+  void setFlag(TheEnum flag, bool value = YES) {
+    const auto mask = static_cast<FlagType>(flag);
+    if (value) flags |= mask;
+    else flags &= ~mask;
+  }
+
+  /// @brief Check if a flag is set.
+  [[nodiscard]] bool hasFlag(TheEnum flag) const {
+    return (flags & static_cast<FlagType>(flag)) != 0;
+  }
+
+  /// @brief Clear all flags.
+  void clear() {
+    flags = 0;
+  }
+
+  /// @brief Get raw underlying value (for binary serialization/logging).
+  [[nodiscard]] FlagType raw() const {
+    return flags;
+  }
+};
+
 /// @brief Redirect stdout and stderr to /dev/null and block std::cout and std::cerr.
 class Silencer {
   std::streambuf *saved_cout = nullptr;

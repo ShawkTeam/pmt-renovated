@@ -119,14 +119,14 @@ public:
     const uint64_t buf = std::clamp<uint64_t>(bufferSize, MIN_BUFFER_SIZE, std::min<uint64_t>(bufferSize, partition->size()));
     Log::info("Backing up {} to {}", partitionName, outputName);
 
-    if (Flags.onLogical && tType != PartitionMap::DYNAMIC) {
-      if (Flags.forceProcess)
+    if (Flags.options.hasFlag(BasicFlagOptions::OnLogical) && tType != PartitionMap::DYNAMIC) {
+      if (Flags.options.hasFlag(BasicFlagOptions::Force))
         Log::warning("Partition {} is exists but not logical. Ignoring (from --force, -f).", partitionName);
       else
         return AsyncResult_t::Error("Used --logical (-l) flag but is not logical partition: {}", partitionName);
     }
 
-    if (Helper::fileIsExists(outputName) && !Flags.forceProcess) {
+    if (Helper::fileIsExists(outputName) && !Flags.options.hasFlag(BasicFlagOptions::Force)) {
       return AsyncResult_t::Error("File {} already exists. Remove it, or use --force (-f) flag.", outputName);
     }
     Log::info("Using buffer size (for backing up {}): {}", partitionName, buf);
@@ -179,7 +179,7 @@ public:
     Helper::AsyncManager<AsyncResult_t> manager;
     manager.print = false;
     std::unique_ptr<PartitionMap::ProgressRenderer> renderer;
-    if (!Flags.quietProcess) renderer = std::make_unique<PartitionMap::ProgressRenderer>();
+    if (!Flags.options.hasFlag(BasicFlagOptions::Quiet)) renderer = std::make_unique<PartitionMap::ProgressRenderer>();
 
     for (size_t i = 0; i < partitions.size(); i++) {
       std::string partitionName = partitions[i];

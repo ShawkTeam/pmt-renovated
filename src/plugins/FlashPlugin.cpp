@@ -126,8 +126,8 @@ public:
                                   partitionName, partition->size());
 
     Log::info("Flashing {} to {}", imageName, partitionName);
-    if (Flags.onLogical && tType != PartitionMap::DYNAMIC) {
-      if (Flags.forceProcess)
+    if (Flags.options.hasFlag(BasicFlagOptions::OnLogical) && tType != PartitionMap::DYNAMIC) {
+      if (Flags.options.hasFlag(BasicFlagOptions::Force))
         Log::warning("Partition {} exists but is not logical. Ignoring (from --force, -f).", partitionName);
       else
         return AsyncResult_t::Error("Used --logical (-l) flag but partition is not logical: {}", partitionName);
@@ -153,7 +153,7 @@ public:
 
     if (deleteAfterProgress) {
       Log::info("Deleting flash file: {}", imageName);
-      if (!Helper::eraseEntry(imageName) && !Flags.quietProcess) Log::warning("Cannot erase flash file: {}", imageName);
+      if (!Helper::eraseEntry(imageName) && !Flags.options.hasFlag(BasicFlagOptions::Quiet)) Log::warning("Cannot erase flash file: {}", imageName);
     }
 
     return AsyncResult_t::Success("Image {} successfully flashed to partition {}", imageName, partitionName);
@@ -175,7 +175,7 @@ public:
     Helper::AsyncManager<AsyncResult_t> manager;
     manager.print = false;
     std::unique_ptr<PartitionMap::ProgressRenderer> renderer;
-    if (!Flags.quietProcess) renderer = std::make_unique<PartitionMap::ProgressRenderer>();
+    if (!Flags.options.hasFlag(BasicFlagOptions::Quiet)) renderer = std::make_unique<PartitionMap::ProgressRenderer>();
 
     for (size_t i = 0; i < partitions.size(); i++) {
       manager.addProcess(&FlashPlugin::runAsync, this, partitions[i], imageNames[i], renderer.get());

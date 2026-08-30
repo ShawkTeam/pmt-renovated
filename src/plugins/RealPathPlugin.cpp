@@ -101,8 +101,8 @@ public:
       const PartitionMap::Partition_t *part = setupPartition(partition, table);
 
       if (!tType && !part) throw Error("Couldn't find partition: {}", partition);
-      if (Flags.onLogical && !part->isLogicalPartition()) {
-        if (Flags.forceProcess)
+      if (Flags.options.hasFlag(BasicFlagOptions::OnLogical) && !part->isLogicalPartition()) {
+        if (Flags.options.hasFlag(BasicFlagOptions::Force))
           Log::warning("Partition {} is exists but not logical. Ignoring (from --force, -f).", partition);
         else
           throw Error("Used --logical (-l) flag but is not logical partition: {}", partition);

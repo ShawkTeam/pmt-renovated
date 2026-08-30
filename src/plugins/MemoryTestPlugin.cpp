@@ -115,7 +115,7 @@ public:
    * @return true if the operation succeeded.
    */
   PLUGIN_SECTION bool run() override {
-    if (testFileSize > GB(2) && !Flags.forceProcess)
+    if (testFileSize > GB(2) && !Flags.options.hasFlag(BasicFlagOptions::Force))
       throw Error("File size is more than 2GB! Sizes over 2GB may not give accurate "
                   "results in the write test. Use -f (--force) for skip this error.");
 

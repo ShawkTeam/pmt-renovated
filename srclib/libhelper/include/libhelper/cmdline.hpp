@@ -143,6 +143,33 @@ template <> inline std::vector<int> from_string<std::vector<int>>(const std::str
 
 template <> inline std::vector<std::string> from_string<std::vector<std::string>>(const std::string &s) { return split(s, ','); }
 
+enum PropertyCollection : uint8_t {
+  None = 0,
+  IsRequired   = 1 << 0, ///< 0x01
+  IsPositional = 1 << 1, ///< 0x02
+  Verbose      = 1 << 2, ///< 0x04
+  IsFlag       = 1 << 3, ///< 0x08
+  IsFound      = 1 << 4, ///< 0x10
+  IsUsedAsLong = 1 << 5, ///< 0x20
+
+  /**
+   * What is the early flag?
+   * ----------------------
+   * The early flag is used to mark options that should be processed
+   * before the rest of the options. This is useful for options that
+   * need to be processed before the rest of the options.
+   */
+  Early        = 1 << 6, ///< 0x40
+
+  /**
+   * What is the superior?
+   * ---------------------
+   * The logic is quite simple. If an option marked as superior is used,
+   * then everything else that is mandatory or similar is ignored.
+   */
+  Superior     = 1 << 7  ///< 0x80
+};
+
 /// @brief Properties of a command line option.
 struct OptionProperties {
   OptionProperties() = default;
@@ -163,34 +190,11 @@ struct OptionProperties {
   std::string option_typename;
   std::string default_value;
   char option_delimiter = ',';
-  bool is_required = false;
-  bool is_positional = false;
-  bool is_flag = false;
-  bool is_found = false;
-  bool is_used_as_long = false;
-
-  /**
-   * What is the early flag?
-   * ----------------------
-   * The early flag is used to mark options that should be processed
-   * before the rest of the options. This is useful for options that
-   * need to be processed before the rest of the options.
-   */
-  bool early = false;
-
-  /**
-   * What is the superior?
-   * ---------------------
-   * The logic is quite simple. If an option marked as superior is used,
-   * then everything else that is mandatory or similar is ignored.
-   */
-  bool superior = false;
+  FlagCapsule<PropertyCollection> flags;
 
   bool operator==(const OptionProperties &other) const {
     return valid_names == other.valid_names && description == other.description && option_typename == other.option_typename &&
-           default_value == other.default_value && option_delimiter == other.option_delimiter && is_required == other.is_required &&
-           is_flag == other.is_flag && is_found == other.is_found && is_used_as_long == other.is_used_as_long &&
-           early == other.early && superior == other.superior;
+           default_value == other.default_value && option_delimiter == other.option_delimiter && flags.raw() == other.flags.raw();
   }
 
   bool operator!=(const OptionProperties &other) const { return !(*this == other); }
@@ -346,6 +350,14 @@ inline std::function<void()> ViewPluginVersion(const std::string_view &name, con
   };
 }
 
+/// @brief A callback for setting a flag (only for @c FlagCapsule ).
+template <typename TheEnum, typename FlagType>
+inline std::function<void()> FlagSetter(FlagCapsule<TheEnum, FlagType>& flags, TheEnum flag, bool v = true) {
+  return [&]() {
+    flags.setFlag(flag, v);
+  };
+}
+
 } // namespace Callbacks
 
 /// @brief A class for representing command-line options.
@@ -378,7 +390,7 @@ public:
       if (properties->valid_names.size() > 1)
         throw Error("A maximum of one positional option name can be specified.").cmdlineError().withCode(EX_CONFIG);
 
-      properties->is_positional = true;
+      properties->flags.setFlag(PropertyCollection::IsPositional);
     } else {
       if (properties->valid_names.size() > 2)
         throw Error("A maximum of two separate option/flag names can be specified.").cmdlineError().withCode(EX_CONFIG);
@@ -403,7 +415,7 @@ public:
       if (properties->valid_names.size() > 1)
         throw Error("A maximum of one positional option name can be specified.").cmdlineError().withCode(EX_CONFIG);
 
-      properties->is_positional = true;
+      properties->flags.setFlag(PropertyCollection::IsPositional);
     } else {
       if (properties->valid_names.size() > 2)
         throw Error("A maximum of two separate option/flag names can be specified.").cmdlineError().withCode(EX_CONFIG);
@@ -419,27 +431,27 @@ public:
     if (properties->transformer) raw = properties->transformer(raw);
     if (properties->checker) properties->checker(raw);
     if (properties->setter) properties->setter(raw);
-    properties->is_found = true;
+    properties->flags.setFlag(PropertyCollection::IsFound);
     if (properties->callback) properties->callback();
   }
 
   /// @brief Set the option as required.
   Option *required(bool v = true) {
-    properties->is_required = v;
+    properties->flags.setFlag(PropertyCollection::IsRequired, v);
     return this;
   }
 
   /// @brief Set the option as required.
-  void setRequired(bool v = true) { properties->is_required = v; }
+  void setRequired(bool v = true) { properties->flags.setFlag(PropertyCollection::IsRequired, v); }
 
   /// @brief Set the option as superior.
   Option *superior(bool v = true) {
-    properties->superior = v;
+    properties->flags.setFlag(PropertyCollection::Superior, v);
     return this;
   }
 
   /// @brief Set the option as superior.
-  void setSuperior(bool v = true) { properties->superior = v; }
+  void setSuperior(bool v = true) { properties->flags.setFlag(PropertyCollection::Superior, v); }
 
   /// @brief Set the callback function.
   Option *callback(std::function<void()> func) {
@@ -498,12 +510,12 @@ public:
 
   /// @brief Set as early flag.
   Option *early(bool v = true) {
-    properties->early = v;
+    properties->flags.setFlag(PropertyCollection::Early, v);
     return this;
   }
 
   /// @brief Set as early flag.
-  void setEarly(bool v = true) { properties->early = v; }
+  void setEarly(bool v = true) { properties->flags.setFlag(PropertyCollection::Early, v); }
 
   /// @brief Set the delimiter.
   Option *delimiter(char delim) {
@@ -519,8 +531,8 @@ public:
 
   /// @brief Set as flag.
   Option *isFlag(bool v = true) {
-    if (properties->is_positional) throw Error("Options marked as positional cannot be flagged.").cmdlineError().withCode(EX_CONFIG);
-    properties->is_flag = v;
+    if (properties->flags.hasFlag(PropertyCollection::IsPositional)) throw Error("Options marked as positional cannot be flagged.").cmdlineError().withCode(EX_CONFIG);
+    properties->flags.setFlag(PropertyCollection::IsFlag, v);
     return this;
   }
 
@@ -546,18 +558,18 @@ public:
 
   /// @brief Get the positional name.
   std::string positionalName() const {
-    if (properties->is_positional) return properties->valid_names[0];
+    if (properties->flags.hasFlag(PropertyCollection::IsPositional)) return properties->valid_names[0];
     return {};
   }
 
   /// @brief Get the usage type.
-  UsageType getUsageType() const { return properties->is_used_as_long ? WITH_LONG_NAME : WITH_SHORT_NAME; }
+  UsageType getUsageType() const { return properties->flags.hasFlag(PropertyCollection::IsUsedAsLong) ? WITH_LONG_NAME : WITH_SHORT_NAME; }
 
   /// @brief Check if the option was used.
-  bool isUsed() const { return properties->is_found; }
+  bool isUsed() const { return properties->flags.hasFlag(PropertyCollection::IsFound); }
 
   /// @brief Check if the option is superior.
-  bool isSuperior() const { return properties->superior; }
+  bool isSuperior() const { return properties->flags.hasFlag(PropertyCollection::Superior); }
 
   /// @brief Get the description.
   std::string getDescription() const { return properties->description; }
@@ -565,7 +577,7 @@ public:
   bool operator==(const Option &other) const { return properties == other.properties; }
   bool operator!=(const Option &other) const { return !(*this == other); }
 
-  explicit operator bool() const { return properties->is_found; }
+  explicit operator bool() const { return properties->flags.hasFlag(PropertyCollection::IsFound); }
 };
 
 /**
@@ -734,7 +746,7 @@ public:
   /// @brief Add a flag.
   template <typename T> Option *addFlag(const std::string &spec, T &dest, const std::string &desc = "") {
     auto arg = std::make_unique<Option>(spec, dest, desc);
-    arg->getProperties()->is_flag = true;
+    arg->getProperties()->flags.setFlag(PropertyCollection::IsFlag);
     options.push_back(std::move(arg));
     return options.back().get();
   }
@@ -742,7 +754,7 @@ public:
   /// @brief Add a flag.
   Option *addFlag(const std::string &spec, std::nullptr_t, const std::string &desc = "") {
     auto arg = std::make_unique<Option>(spec, nullptr, desc);
-    arg->getProperties()->is_flag = true;
+    arg->getProperties()->flags.setFlag(PropertyCollection::IsFlag);
     options.push_back(std::move(arg));
     return options.back().get();
   }
@@ -764,7 +776,7 @@ public:
   /// @brief Add an option.
   void addFlag(Option *orig) {
     if (orig == nullptr) throw Error("Input option pointer is null.").cmdlineError().withCode(EX_CONFIG);
-    orig->getProperties()->is_flag = true;
+    orig->getProperties()->flags.setFlag(PropertyCollection::IsFlag);
     std::unique_ptr<Option> arg(orig);
     options.push_back(std::move(arg));
   }
@@ -842,7 +854,7 @@ public:
   /// @brief Check if the subcommand (or any of its nested subcommands) contains a superior option.
   bool containsSuperiorOption() const {
     for (const auto &arg : options)
-      if (arg->getProperties()->superior) return true;
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior)) return true;
     for (const auto &cmd : subcommands)
       if (cmd->containsSuperiorOption()) return true;
     return false;
@@ -851,7 +863,7 @@ public:
   /// @brief Check if any superior option is used in this subcommand or any of its nested subcommands.
   bool anySuperiorIsUsed() const {
     for (const auto &arg : options)
-      if (arg->getProperties()->superior && arg->isUsed()) return true;
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior) && arg->isUsed()) return true;
     for (const auto &cmd : subcommands)
       if (cmd->anySuperiorIsUsed()) return true;
     return false;
@@ -898,9 +910,8 @@ class App {
   Option *findOption(const std::string &_name, const std::vector<std::unique_ptr<Option>> &arg_list) {
     for (const auto &arg : arg_list) {
       auto props = arg->getProperties();
-      if (std::find(props->valid_names.begin(), props->valid_names.end(), _name) != props->valid_names.end()) {
+      if (std::find(props->valid_names.begin(), props->valid_names.end(), _name) != props->valid_names.end())
         return arg.get();
-      }
     }
     return nullptr;
   }
@@ -909,10 +920,8 @@ class App {
   Option *getPositionalOption(size_t index, const std::vector<std::unique_ptr<Option>> &arg_list) {
     size_t count = 0;
     for (const auto &arg : arg_list) {
-      if (arg->getProperties()->is_positional) {
-        if (count == index) {
-          return arg.get();
-        }
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsPositional)) {
+        if (count == index) return arg.get();
         count++;
       }
     }
@@ -989,7 +998,7 @@ public:
   /// @brief Add a flag.
   Option *addFlag(const std::string &spec, std::nullptr_t, const std::string &desc = "") {
     auto arg = std::make_unique<Option>(spec, nullptr, desc);
-    arg->getProperties()->is_flag = true;
+    arg->getProperties()->flags.setFlag(PropertyCollection::IsFlag);
     options.push_back(std::move(arg));
     return options.back().get();
   }
@@ -1011,7 +1020,7 @@ public:
   /// @brief Add a flag.
   void addFlag(Option *orig) {
     if (orig == nullptr) throw Error("Input option pointer is null.").cmdlineError().withCode(EX_CONFIG);
-    orig->getProperties()->is_flag = true;
+    orig->getProperties()->flags.setFlag(PropertyCollection::IsFlag);
     std::unique_ptr<Option> arg(orig);
     options.push_back(std::move(arg));
   }
@@ -1072,7 +1081,7 @@ public:
       std::cout << "Usage: " << cmd_name << " " << subcmd->getFullPath();
 
       for (const auto &arg : subcmd->options) {
-        if (arg->getProperties()->is_positional) std::cout << " [" << arg->getProperties()->valid_names[0] << "]";
+        if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsPositional)) std::cout << " [" << arg->getProperties()->valid_names[0] << "]";
       }
       if (!subcmd->subcommands.empty()) std::cout << (subcmd->requiresAnySubcommand() ? " SUBCOMMAND" : " [SUBCOMMAND]");
       std::cout << " [OPTIONS]\n";
@@ -1111,9 +1120,9 @@ public:
               left_part += opt->getProperties()->valid_names[i];
               if (i + 1 < opt->getProperties()->valid_names.size()) left_part += ", ";
             }
-            if (opt->getProperties()->is_required) left_part += " (required)";
-            if (opt->getProperties()->superior) left_part += " (superior)";
-            if (!opt->getProperties()->is_flag) left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
+            if (opt->getProperties()->flags.hasFlag(PropertyCollection::IsRequired)) left_part += " (required)";
+            if (opt->getProperties()->flags.hasFlag(PropertyCollection::Superior)) left_part += " (superior)";
+            if (!opt->getProperties()->flags.hasFlag(PropertyCollection::IsFlag)) left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
             printAlignedOption(left_part, opt->getDescription());
           }
           std::cout << "\n";
@@ -1135,9 +1144,9 @@ public:
               left_part += arg->getProperties()->valid_names[i];
               if (i + 1 < arg->getProperties()->valid_names.size()) left_part += ", ";
             }
-            if (arg->getProperties()->is_required) left_part += " (required)";
-            if (arg->getProperties()->superior) left_part += " (superior)";
-            if (!arg->getProperties()->is_flag) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
+            if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired)) left_part += " (required)";
+            if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior)) left_part += " (superior)";
+            if (!arg->getProperties()->flags.hasFlag(PropertyCollection::IsFlag)) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
             printAlignedOption(left_part, arg->getDescription());
           }
           std::cout << "\n";
@@ -1188,9 +1197,9 @@ public:
               left_part += opt->getProperties()->valid_names[i];
               if (i + 1 < opt->getProperties()->valid_names.size()) left_part += ", ";
             }
-            if (opt->getProperties()->is_required) left_part += " (required)";
-            if (opt->getProperties()->superior) left_part += " (superior)";
-            if (!opt->getProperties()->is_flag) left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
+            if (opt->getProperties()->flags.hasFlag(PropertyCollection::IsRequired)) left_part += " (required)";
+            if (opt->getProperties()->flags.hasFlag(PropertyCollection::Superior)) left_part += " (superior)";
+            if (!opt->getProperties()->flags.hasFlag(PropertyCollection::IsFlag)) left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
             printAlignedOption(left_part, opt->getDescription());
           }
           std::cout << "\n";
@@ -1212,9 +1221,9 @@ public:
               left_part += arg->getProperties()->valid_names[i];
               if (i + 1 < arg->getProperties()->valid_names.size()) left_part += ", ";
             }
-            if (arg->getProperties()->is_required) left_part += " (required)";
-            if (arg->getProperties()->superior) left_part += " (superior)";
-            if (!arg->getProperties()->is_flag) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
+            if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired)) left_part += " (required)";
+            if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior)) left_part += " (superior)";
+            if (!arg->getProperties()->flags.hasFlag(PropertyCollection::IsFlag)) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
             printAlignedOption(left_part, arg->getDescription());
           }
         }
@@ -1250,9 +1259,9 @@ public:
         }
 
         auto props = matched_arg->getProperties();
-        if (!props->early) continue;
+        if (!props->flags.hasFlag(PropertyCollection::Early)) continue;
 
-        if (props->is_flag) {
+        if (props->flags.hasFlag(PropertyCollection::IsFlag)) {
           matched_arg->doToDoList("true");
         } else {
           if (has_equals) {
@@ -1271,7 +1280,7 @@ public:
     }
 
     for (const auto &arg : options) {
-      if (arg->getProperties()->is_required && arg->getProperties()->early && !arg->isUsed())
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired) && arg->getProperties()->flags.hasFlag(PropertyCollection::Early) && !arg->isUsed())
         throw Error("Missing required early option: {}", arg->getProperties()->valid_names[0]).cmdlineError().withCode(EX_USAGE);
     }
 
@@ -1332,7 +1341,7 @@ public:
         if (!matched_arg) throw Error("Unknown option: {}", arg_name).cmdlineError().withCode(EX_USAGE);
 
         auto props = matched_arg->getProperties();
-        if (props->is_flag) {
+        if (props->flags.hasFlag(PropertyCollection::IsFlag)) {
           matched_arg->doToDoList("true");
         } else {
           if (has_equals)
@@ -1370,7 +1379,7 @@ public:
     }
 
     for (const auto &arg : options) {
-      if (arg->getProperties()->is_required && !arg->isUsed())
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired) && !arg->isUsed())
         throw Error("Missing required option: {}", arg->getProperties()->valid_names[0]).cmdlineError().withCode(EX_USAGE);
     }
     for (auto &arg : options) {
@@ -1396,7 +1405,7 @@ public:
       }
 
       for (const auto &arg : active_subcommand->options) {
-        if (arg->getProperties()->is_required && !arg->isUsed() && !active_subcommand->anySuperiorIsUsed())
+        if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired) && !arg->isUsed() && !active_subcommand->anySuperiorIsUsed())
           throw Error("Missing required subcommand option: {}", arg->getProperties()->valid_names[0])
               .cmdlineError()
               .withCode(EX_USAGE);
@@ -1416,7 +1425,7 @@ public:
   /// @brief Check if any option is superior.
   bool containsSuperiorOption() const {
     for (const auto &arg : options)
-      if (arg->getProperties()->superior) return true;
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior)) return true;
     for (const auto &cmd : subcommands)
       if (cmd->containsSuperiorOption()) return true;
     return false;
@@ -1425,7 +1434,7 @@ public:
   /// @brief Check if any option is used.
   bool anySuperiorIsUsed() const {
     for (const auto &arg : options)
-      if (arg->getProperties()->superior && arg->isUsed()) return true;
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior) && arg->isUsed()) return true;
     for (const auto &cmd : subcommands)
       if (cmd->anySuperiorIsUsed()) return true;
     return false;
@@ -1434,6 +1443,13 @@ public:
 
 } // namespace Helper::CMDLine
 
+/**
+ * @brief Parse command line arguments.
+ *
+ * @param app  @ref Helper::CMDLine::App object.
+ * @param argc Argument count.
+ * @param argv Arguments.
+ */
 #define HELPER_CMDLINE_PARSE(app, argc, argv)                                                                                         \
   do {                                                                                                                                \
     try {                                                                                                                             \
