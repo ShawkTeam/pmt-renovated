@@ -63,7 +63,6 @@ namespace Helper {
  * @endcode
  */
 class Error final : public std::exception {
-  std::ostringstream oss;
   std::string message;
   int ec = 1;
   bool is_cmdline_error = false;
@@ -72,25 +71,29 @@ public:
   Error() = default;
 
   /// @brief Copy constructor.
-  Error(const Error &other) noexcept : message(other.message) {}
+  Error(const Error &other) noexcept : std::exception(other), message(other.message), ec(other.ec), is_cmdline_error(other.is_cmdline_error) {}
+
+  /// @brief Move constructor.
+  Error(Error &&other) noexcept : message(std::move(other.message)), ec(other.ec), is_cmdline_error(other.is_cmdline_error) {}
 
   /// @brief Modern std::print style input field constructor.
-  template <typename... Args> explicit Error(fmt::format_string<Args...> fmt, Args &&...args) {
-    oss << fmt::format(fmt, std::forward<Args>(args)...);
-    message = oss.str();
-  }
+  template <typename... Args>
+  explicit Error(fmt::format_string<Args...> fmt_str, Args &&...args) : message(fmt::format(fmt_str, std::forward<Args>(args)...)) {}
 
   /// @brief To use the @c << operator for receiving non-function-like inputs.
-  template <typename T> Error &&operator<<(const T &msg) && {
+  template <typename T>
+    Error &operator<<(const T &msg) {
+    std::ostringstream oss;
     oss << msg;
-    message = oss.str();
-    return std::move(*this);
+    message += oss.str();
+    return *this;
   }
 
   /// @brief To receive function-like inputs, use the @c << operator.
-  Error &operator<<(std::ostream &(*msg)(std::ostream &)) {
-    oss << msg;
-    message = oss.str();
+  Error &operator<<(std::ostream &(*manip)(std::ostream &)) {
+    std::ostringstream oss;
+    oss << manip;
+    message += oss.str();
     return *this;
   }
 
@@ -113,7 +116,7 @@ public:
   bool isCmdlineError() const { return is_cmdline_error; }
 
   /// @brief Get error message.
-  [[nodiscard]] const char *what() const noexcept override { return message.data(); }
+  [[nodiscard]] const char *what() const noexcept override { return message.c_str(); }
 };
 
 } // namespace Helper
