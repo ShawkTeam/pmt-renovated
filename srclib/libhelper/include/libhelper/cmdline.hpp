@@ -28,7 +28,6 @@
 #include <vector>
 #include <string>
 #include <memory>
-#include <functional>
 #include <sstream>
 #include <algorithm>
 #include <optional>
@@ -145,11 +144,11 @@ template <> inline std::vector<std::string> from_string<std::vector<std::string>
 
 enum PropertyCollection : uint8_t {
   None = 0,
-  IsRequired   = 1 << 0, ///< 0x01
+  IsRequired = 1 << 0,   ///< 0x01
   IsPositional = 1 << 1, ///< 0x02
-  Verbose      = 1 << 2, ///< 0x04
-  IsFlag       = 1 << 3, ///< 0x08
-  IsFound      = 1 << 4, ///< 0x10
+  Verbose = 1 << 2,      ///< 0x04
+  IsFlag = 1 << 3,       ///< 0x08
+  IsFound = 1 << 4,      ///< 0x10
   IsUsedAsLong = 1 << 5, ///< 0x20
 
   /**
@@ -159,15 +158,15 @@ enum PropertyCollection : uint8_t {
    * before the rest of the options. This is useful for options that
    * need to be processed before the rest of the options.
    */
-  Early        = 1 << 6, ///< 0x40
+  Early = 1 << 6, ///< 0x40
 
   /**
-   * What is the superior?
+   * What is the strong flag?
    * ---------------------
-   * The logic is quite simple. If an option marked as superior is used,
+   * The logic is quite simple. If an option marked as strong,
    * then everything else that is mandatory or similar is ignored.
    */
-  Superior     = 1 << 7  ///< 0x80
+  Strong = 1 << 7 ///< 0x80
 };
 
 /// @brief Properties of a command line option.
@@ -181,11 +180,11 @@ struct OptionProperties {
   OptionProperties &operator=(const OptionProperties &other) = default; ///< Copy assignment operator.
 
   std::vector<std::string> valid_names;
-  std::function<void(const std::string &)> setter;
-  std::function<void()> default_setter;
-  std::function<void()> callback;
-  std::function<void(const std::string &)> checker;
-  std::function<std::string(const std::string &)> transformer;
+  Helper::FunctionCapsule<void(const std::string &)> setter;
+  Helper::FunctionCapsule<void()> default_val_setter;
+  Helper::FunctionCapsule<void()> callback;
+  Helper::FunctionCapsule<void(const std::string &)> checker;
+  Helper::FunctionCapsule<std::string(const std::string &)> transformer;
   std::string description;
   std::string option_typename;
   std::string default_value;
@@ -210,7 +209,7 @@ typedef enum { WITH_LONG_NAME, WITH_SHORT_NAME } UsageType;
 namespace Transformers {
 
 /// @brief Converts a string to a size value. Inspired by the CLI11 project.
-inline std::function<std::string(const std::string &)> AsSizeValue(bool use_si = false) {
+inline auto AsSizeValue(bool use_si = false) {
   return [use_si](const std::string &s) -> std::string {
     if (s.empty()) throw std::invalid_argument("Empty size value");
 
@@ -267,29 +266,29 @@ inline std::function<std::string(const std::string &)> AsSizeValue(bool use_si =
 namespace Checkers {
 
 /// @brief Checks if the entry exists.
-inline std::function<void(const std::string &)> Exists() {
+inline auto Exists() {
   return [](const std::string &s) {
     if (!Helper::isExists(s)) throw Error("{}: Entry is not exists.", s).withCode(EX_USAGE);
   };
 }
 
 /// @brief Checks if the directory exists.
-inline std::function<void(const std::string &)> ExistingDirectory() {
+inline auto ExistingDirectory() {
   return [](const std::string &s) {
     if (!Helper::directoryIsExists(s)) throw Error("{}: Directory is not exists.", s).withCode(EX_USAGE);
   };
 }
 
 /// @brief Checks if the file exists.
-inline std::function<void(const std::string &)> ExistingFile() {
+inline auto ExistingFile() {
   return [](const std::string &s) {
     if (!Helper::fileIsExists(s)) throw Error("{}: File is not exists.", s).withCode(EX_USAGE);
   };
 }
 
 /// @brief Checks if the buffer size is within the specified range.
-template <typename T> inline std::function<void(const std::string &)> BufferSizeCheck(T min, T max) {
-  return [&](const std::string &s) {
+template <typename T> inline auto BufferSizeCheck(T min, T max) {
+  return [min, max](const std::string &s) {
     try {
       uint64_t size = from_string<uint64_t>(s);
       if (size < min || size > max) throw Error("{}: Buffer size is out of range.", s).cmdlineError().withCode(EX_USAGE);
@@ -300,7 +299,7 @@ template <typename T> inline std::function<void(const std::string &)> BufferSize
 }
 
 /// @brief Checks if the value is a member of the allowed list.
-inline std::function<void(const std::string &)> IsMember(std::initializer_list<std::string> allowed) {
+inline auto IsMember(std::initializer_list<std::string> allowed) {
   return [vals = std::vector<std::string>(allowed)](const std::string &s) {
     if (std::find(vals.begin(), vals.end(), s) == vals.end()) {
       std::string options;
@@ -314,7 +313,7 @@ inline std::function<void(const std::string &)> IsMember(std::initializer_list<s
 }
 
 /// @brief Checks if the value is a member of the allowed list (case-insensitive).
-inline std::function<void(const std::string &)> IsMemberIgnoreCase(std::initializer_list<std::string> allowed) {
+inline auto IsMemberIgnoreCase(std::initializer_list<std::string> allowed) {
   return [vals = std::vector<std::string>(allowed)](const std::string &s) {
     std::string lower_s = s;
     std::transform(lower_s.begin(), lower_s.end(), lower_s.begin(), [](unsigned char c) { return std::tolower(c); });
@@ -343,19 +342,23 @@ inline std::function<void(const std::string &)> IsMemberIgnoreCase(std::initiali
 namespace Callbacks {
 
 /// @brief A callback for viewing plugin version.
-inline std::function<void()> ViewPluginVersion(const std::string_view &name, const std::string_view &ver, bool do_exit = true) {
-  return [name, ver, do_exit]() {
-    Log::println("{} v{}", name, ver);
-    if (do_exit) std::exit(0);
+inline auto ViewPluginVersion(std::string_view name, std::string_view ver, bool do_exit = true) {
+  auto tagged_name = reinterpret_cast<std::uintptr_t>(name.data()) | (do_exit ? 1U : 0U);
+  const char *ver_ptr = ver.data();
+
+  return [tagged_name, ver_ptr]() {
+    bool do_exit_flag = (tagged_name & 1U) != 0;
+    const char *real_name = reinterpret_cast<const char *>(tagged_name & ~static_cast<std::uintptr_t>(1U));
+
+    Log::println("{} v{}", real_name, ver_ptr);
+    if (do_exit_flag) std::exit(0);
   };
 }
 
 /// @brief A callback for setting a flag (only for @c FlagCapsule ).
 template <typename TheEnum, typename FlagType>
-inline std::function<void()> FlagSetter(FlagCapsule<TheEnum, FlagType>& flags, TheEnum flag, bool v = true) {
-  return [&]() {
-    flags.setFlag(flag, v);
-  };
+inline auto FlagSetter(FlagCapsule<TheEnum, FlagType> &flags, TheEnum flag, bool v = true) {
+  return [&flags, flag, v]() { flags.setFlag(flag, v); };
 }
 
 } // namespace Callbacks
@@ -444,47 +447,55 @@ public:
   /// @brief Set the option as required.
   void setRequired(bool v = true) { properties->flags.setFlag(PropertyCollection::IsRequired, v); }
 
-  /// @brief Set the option as superior.
-  Option *superior(bool v = true) {
-    properties->flags.setFlag(PropertyCollection::Superior, v);
+  /// @brief Set the option as strong.
+  Option *strong(bool v = true) {
+    properties->flags.setFlag(PropertyCollection::Strong, v);
     return this;
   }
 
-  /// @brief Set the option as superior.
-  void setSuperior(bool v = true) { properties->flags.setFlag(PropertyCollection::Superior, v); }
+  /// @brief Set the option as strong.
+  void setStrong(bool v = true) { properties->flags.setFlag(PropertyCollection::Strong, v); }
 
   /// @brief Set the callback function.
-  Option *callback(std::function<void()> func) {
-    properties->callback = std::move(func);
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, void>>> Option *callback(F &&func) {
+    properties->callback = std::forward<F>(func);
     return this;
   }
 
   /// @brief Set the callback function.
-  void setCallback(std::function<void()> func) { properties->callback = std::move(func); }
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, void>>> void setCallback(F &&func) {
+    properties->callback = std::forward<F>(func);
+  }
 
   /// @brief Get the callback function.
-  const std::function<void()> &getCallback() const { return properties->callback; }
+  const auto getCallback() const { return properties->callback->get(); }
 
   /// @brief Set the checker function.
-  Option *check(std::function<void(const std::string &)> func) {
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, void, const std::string &>>> Option *check(F &&func) {
+    properties->checker = func;
+    return this;
+  }
+
+  /// @brief Set the checker function.
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, void, const std::string &>>> void setChecker(F &&func) {
     properties->checker = std::move(func);
-    return this;
   }
 
-  /// @brief Set the checker function.
-  void setChecker(std::function<void(const std::string &)> func) { properties->checker = std::move(func); }
-
   /// @brief Set the transformer function.
-  Option *transform(std::function<std::string(const std::string &)> func) {
-    properties->transformer = std::move(func);
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, std::string, const std::string &>>>
+  Option *transform(F &&func) {
+    properties->transformer = std::forward<F>(func);
     return this;
   }
 
   /// @brief Set the transformer function.
-  void setTransform(std::function<std::string(const std::string &)> func) { properties->transformer = std::move(func); }
+  template <typename F, typename = std::enable_if_t<Helper::Invocable_v<F, std::string, const std::string &>>>
+  void setTransform(F &&func) {
+    properties->transformer = std::forward<F>(func);
+  }
 
   /// @brief Get the transformer function.
-  const std::function<std::string(const std::string &)> &getTransform() const { return properties->transformer; }
+  const auto getTransform() const { return properties->transformer->get(); }
 
   /// @brief Set the default value.
   template <typename T> Option *defaultValue(T &&v) {
@@ -492,7 +503,7 @@ public:
       properties->default_value = v;
     else
       properties->default_value = std::to_string(v);
-    properties->default_setter = [this]() { properties->setter(properties->default_value); };
+    properties->default_val_setter = [this]() { properties->setter(properties->default_value); };
     return this;
   }
 
@@ -502,7 +513,7 @@ public:
       properties->default_value = v;
     else
       properties->default_value = std::to_string(v);
-    properties->default_setter = [this]() { properties->setter(properties->default_value); };
+    properties->default_val_setter = [this]() { properties->setter(properties->default_value); };
   }
 
   /// @brief Get the default value.
@@ -531,7 +542,8 @@ public:
 
   /// @brief Set as flag.
   Option *isFlag(bool v = true) {
-    if (properties->flags.hasFlag(PropertyCollection::IsPositional)) throw Error("Options marked as positional cannot be flagged.").cmdlineError().withCode(EX_CONFIG);
+    if (properties->flags.hasFlag(PropertyCollection::IsPositional))
+      throw Error("Options marked as positional cannot be flagged.").cmdlineError().withCode(EX_CONFIG);
     properties->flags.setFlag(PropertyCollection::IsFlag, v);
     return this;
   }
@@ -563,13 +575,15 @@ public:
   }
 
   /// @brief Get the usage type.
-  UsageType getUsageType() const { return properties->flags.hasFlag(PropertyCollection::IsUsedAsLong) ? WITH_LONG_NAME : WITH_SHORT_NAME; }
+  UsageType getUsageType() const {
+    return properties->flags.hasFlag(PropertyCollection::IsUsedAsLong) ? WITH_LONG_NAME : WITH_SHORT_NAME;
+  }
 
   /// @brief Check if the option was used.
   bool isUsed() const { return properties->flags.hasFlag(PropertyCollection::IsFound); }
 
-  /// @brief Check if the option is superior.
-  bool isSuperior() const { return properties->flags.hasFlag(PropertyCollection::Superior); }
+  /// @brief Check if the option is strong.
+  bool isStrong() const { return properties->flags.hasFlag(PropertyCollection::Strong); }
 
   /// @brief Get the description.
   std::string getDescription() const { return properties->description; }
@@ -851,21 +865,21 @@ public:
       grp->validate();
   }
 
-  /// @brief Check if the subcommand (or any of its nested subcommands) contains a superior option.
-  bool containsSuperiorOption() const {
+  /// @brief Check if the subcommand (or any of its nested subcommands) contains a strong option.
+  bool containsStrongOption() const {
     for (const auto &arg : options)
-      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior)) return true;
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Strong)) return true;
     for (const auto &cmd : subcommands)
-      if (cmd->containsSuperiorOption()) return true;
+      if (cmd->containsStrongOption()) return true;
     return false;
   }
 
-  /// @brief Check if any superior option is used in this subcommand or any of its nested subcommands.
-  bool anySuperiorIsUsed() const {
+  /// @brief Check if any strong option is used in this subcommand or any of its nested subcommands.
+  bool anyStrongIsUsed() const {
     for (const auto &arg : options)
-      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior) && arg->isUsed()) return true;
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Strong) && arg->isUsed()) return true;
     for (const auto &cmd : subcommands)
-      if (cmd->anySuperiorIsUsed()) return true;
+      if (cmd->anyStrongIsUsed()) return true;
     return false;
   }
 
@@ -910,8 +924,7 @@ class App {
   Option *findOption(const std::string &_name, const std::vector<std::unique_ptr<Option>> &arg_list) {
     for (const auto &arg : arg_list) {
       auto props = arg->getProperties();
-      if (std::find(props->valid_names.begin(), props->valid_names.end(), _name) != props->valid_names.end())
-        return arg.get();
+      if (std::find(props->valid_names.begin(), props->valid_names.end(), _name) != props->valid_names.end()) return arg.get();
     }
     return nullptr;
   }
@@ -1081,7 +1094,8 @@ public:
       std::cout << "Usage: " << cmd_name << " " << subcmd->getFullPath();
 
       for (const auto &arg : subcmd->options) {
-        if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsPositional)) std::cout << " [" << arg->getProperties()->valid_names[0] << "]";
+        if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsPositional))
+          std::cout << " [" << arg->getProperties()->valid_names[0] << "]";
       }
       if (!subcmd->subcommands.empty()) std::cout << (subcmd->requiresAnySubcommand() ? " SUBCOMMAND" : " [SUBCOMMAND]");
       std::cout << " [OPTIONS]\n";
@@ -1121,8 +1135,9 @@ public:
               if (i + 1 < opt->getProperties()->valid_names.size()) left_part += ", ";
             }
             if (opt->getProperties()->flags.hasFlag(PropertyCollection::IsRequired)) left_part += " (required)";
-            if (opt->getProperties()->flags.hasFlag(PropertyCollection::Superior)) left_part += " (superior)";
-            if (!opt->getProperties()->flags.hasFlag(PropertyCollection::IsFlag)) left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
+            if (opt->getProperties()->flags.hasFlag(PropertyCollection::Strong)) left_part += " (strong)";
+            if (!opt->getProperties()->flags.hasFlag(PropertyCollection::IsFlag))
+              left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
             printAlignedOption(left_part, opt->getDescription());
           }
           std::cout << "\n";
@@ -1145,8 +1160,9 @@ public:
               if (i + 1 < arg->getProperties()->valid_names.size()) left_part += ", ";
             }
             if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired)) left_part += " (required)";
-            if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior)) left_part += " (superior)";
-            if (!arg->getProperties()->flags.hasFlag(PropertyCollection::IsFlag)) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
+            if (arg->getProperties()->flags.hasFlag(PropertyCollection::Strong)) left_part += " (strong)";
+            if (!arg->getProperties()->flags.hasFlag(PropertyCollection::IsFlag))
+              left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
             printAlignedOption(left_part, arg->getDescription());
           }
           std::cout << "\n";
@@ -1198,8 +1214,9 @@ public:
               if (i + 1 < opt->getProperties()->valid_names.size()) left_part += ", ";
             }
             if (opt->getProperties()->flags.hasFlag(PropertyCollection::IsRequired)) left_part += " (required)";
-            if (opt->getProperties()->flags.hasFlag(PropertyCollection::Superior)) left_part += " (superior)";
-            if (!opt->getProperties()->flags.hasFlag(PropertyCollection::IsFlag)) left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
+            if (opt->getProperties()->flags.hasFlag(PropertyCollection::Strong)) left_part += " (strong)";
+            if (!opt->getProperties()->flags.hasFlag(PropertyCollection::IsFlag))
+              left_part += " <" + toUpper(opt->getProperties()->option_typename) + ">";
             printAlignedOption(left_part, opt->getDescription());
           }
           std::cout << "\n";
@@ -1222,8 +1239,9 @@ public:
               if (i + 1 < arg->getProperties()->valid_names.size()) left_part += ", ";
             }
             if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired)) left_part += " (required)";
-            if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior)) left_part += " (superior)";
-            if (!arg->getProperties()->flags.hasFlag(PropertyCollection::IsFlag)) left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
+            if (arg->getProperties()->flags.hasFlag(PropertyCollection::Strong)) left_part += " (strong)";
+            if (!arg->getProperties()->flags.hasFlag(PropertyCollection::IsFlag))
+              left_part += " <" + toUpper(arg->getProperties()->option_typename) + ">";
             printAlignedOption(left_part, arg->getDescription());
           }
         }
@@ -1280,15 +1298,16 @@ public:
     }
 
     for (const auto &arg : options) {
-      if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired) && arg->getProperties()->flags.hasFlag(PropertyCollection::Early) && !arg->isUsed())
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired) &&
+          arg->getProperties()->flags.hasFlag(PropertyCollection::Early) && !arg->isUsed())
         throw Error("Missing required early option: {}", arg->getProperties()->valid_names[0]).cmdlineError().withCode(EX_USAGE);
     }
 
     for (auto &arg : options) {
-      if (!arg->isUsed() && arg->getProperties()->default_setter) {
+      if (!arg->isUsed() && arg->getProperties()->default_val_setter) {
         if (arg->getProperties()->transformer)
           arg->getProperties()->default_value = arg->getProperties()->transformer(arg->getProperties()->default_value);
-        arg->getProperties()->default_setter();
+        arg->getProperties()->default_val_setter();
       }
     }
   }
@@ -1383,10 +1402,10 @@ public:
         throw Error("Missing required option: {}", arg->getProperties()->valid_names[0]).cmdlineError().withCode(EX_USAGE);
     }
     for (auto &arg : options) {
-      if (!arg->isUsed() && arg->getProperties()->default_setter) {
+      if (!arg->isUsed() && arg->getProperties()->default_val_setter) {
         if (arg->getProperties()->transformer)
           arg->getProperties()->default_value = arg->getProperties()->transformer(arg->getProperties()->default_value);
-        arg->getProperties()->default_setter();
+        arg->getProperties()->default_val_setter();
       }
     }
 
@@ -1396,7 +1415,7 @@ public:
     for (size_t i = 0; i < active_chain.size(); ++i) {
       auto *active_subcommand = active_chain[i];
 
-      if (active_subcommand->requiresAnySubcommand() && !active_subcommand->anySuperiorIsUsed()) {
+      if (active_subcommand->requiresAnySubcommand() && !active_subcommand->anyStrongIsUsed()) {
         if (i + 1 == active_chain.size()) {
           throw Error("Subcommand '{}' requires a nested subcommand.", active_subcommand->getFullPath())
               .cmdlineError()
@@ -1405,7 +1424,8 @@ public:
       }
 
       for (const auto &arg : active_subcommand->options) {
-        if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired) && !arg->isUsed() && !active_subcommand->anySuperiorIsUsed())
+        if (arg->getProperties()->flags.hasFlag(PropertyCollection::IsRequired) && !arg->isUsed() &&
+            !active_subcommand->anyStrongIsUsed())
           throw Error("Missing required subcommand option: {}", arg->getProperties()->valid_names[0])
               .cmdlineError()
               .withCode(EX_USAGE);
@@ -1413,30 +1433,30 @@ public:
       active_subcommand->validateGroups();
 
       for (auto &arg : active_subcommand->options) {
-        if (!arg->isUsed() && arg->getProperties()->default_setter) {
+        if (!arg->isUsed() && arg->getProperties()->default_val_setter) {
           if (arg->getProperties()->transformer)
             arg->getProperties()->default_value = arg->getProperties()->transformer(arg->getProperties()->default_value);
-          arg->getProperties()->default_setter();
+          arg->getProperties()->default_val_setter();
         }
       }
     }
   }
 
-  /// @brief Check if any option is superior.
-  bool containsSuperiorOption() const {
+  /// @brief Check if any option is strong.
+  bool containsStrongOption() const {
     for (const auto &arg : options)
-      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior)) return true;
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Strong)) return true;
     for (const auto &cmd : subcommands)
-      if (cmd->containsSuperiorOption()) return true;
+      if (cmd->containsStrongOption()) return true;
     return false;
   }
 
   /// @brief Check if any option is used.
-  bool anySuperiorIsUsed() const {
+  bool anyStrongIsUsed() const {
     for (const auto &arg : options)
-      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Superior) && arg->isUsed()) return true;
+      if (arg->getProperties()->flags.hasFlag(PropertyCollection::Strong) && arg->isUsed()) return true;
     for (const auto &cmd : subcommands)
-      if (cmd->anySuperiorIsUsed()) return true;
+      if (cmd->anyStrongIsUsed()) return true;
     return false;
   }
 };

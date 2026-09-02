@@ -1002,42 +1002,201 @@ template <typename... Args, typename = std::enable_if_t<sizeof...(Args) >= 1>> i
                    })};
 }
 
-/// @brief Basic flag options.
-template <typename TheEnum, typename FlagType = uint8_t>
-class FlagCapsule {
+/// @brief A capsule structure for bitwise flags.
+template <typename TheEnum, typename FlagType = uint8_t> class FlagCapsule {
   static_assert(std::is_enum_v<TheEnum>, "FlagCapsule: TheEnum must be an enum!");
-  static_assert(std::is_unsigned_v<FlagType>, "FlagCapsule: FlagType must be an unsigned integer!");
+  static_assert(std::is_integral_v<FlagType>, "FlagCapsule: FlagType must be an integral type!");
+  static_assert(std::is_unsigned_v<FlagType>, "FlagCapsule: FlagType must be an unsigned!");
 
   FlagType flags{0};
 
 public:
   static constexpr bool YES = true;
-  static constexpr bool NO  = false;
+  static constexpr bool NO = false;
 
   FlagCapsule() = default;
 
   /// @brief Set or clear a flag.
-  void setFlag(TheEnum flag, bool value = YES) {
+  [[maybe_unused]] FlagCapsule &setFlag(TheEnum flag, bool value = YES) {
     const auto mask = static_cast<FlagType>(flag);
-    if (value) flags |= mask;
-    else flags &= ~mask;
+    if (value)
+      flags |= mask;
+    else
+      flags &= ~mask;
+
+    return *this;
   }
 
   /// @brief Check if a flag is set.
-  [[nodiscard]] bool hasFlag(TheEnum flag) const {
-    return (flags & static_cast<FlagType>(flag)) != 0;
-  }
+  [[nodiscard]] bool hasFlag(TheEnum flag) const { return (flags & static_cast<FlagType>(flag)) != 0; }
 
   /// @brief Clear all flags.
-  void clear() {
+  [[maybe_unused]] FlagCapsule &clear() {
     flags = 0;
+    return *this;
   }
 
   /// @brief Get raw underlying value (for binary serialization/logging).
-  [[nodiscard]] FlagType raw() const {
-    return flags;
+  [[nodiscard]] FlagType raw() const { return flags; }
+}; // class FlagCapsule
+
+template <typename Signature, size_t SBOSize = 16> class FunctionCapsule;
+
+/**
+ * @brief A lightweight, zero-allocation capsule for holding callables (functions, lambdas, etc.).
+ *
+ * Provides small buffer optimization (SBO) to store stateful lambdas without heap allocations,
+ * while maintaining a fixed signature interface.
+ *
+ * @code
+ * void func1() { ... }
+ * void func2() { ... }
+ * int func3() { ... }
+ *
+ * FunctionCapsule<void()> cap = func1;
+ *
+ * cap = func2;                         // Valid: Same signature.
+ * cap = func3;                         // Invalid: Mismatched return type.
+ * cap = []() -> void { ... };          // Valid: Stateless lambda.
+ *
+ * int x = 10;
+ * cap = [&x]() { x++; };               // Valid: Stateful lambda (stored via SBO, zero allocation).
+ *
+ * cap = []() { return 1; };            // Invalid: Mismatched return type.
+ * @endcode
+ *
+ * @note Supports reassignment to any callable object matching the target signature,
+ * provided its capture size fits within the SBO capacity.
+ *
+ * @tparam Signature Target function signature (e.g., `void(const std::string&)`).
+ * @tparam SBOSize Maximum byte size reserved for capturing stateful lambdas (default: 16).
+ */
+template <typename R, typename... Args, size_t SBOSize> class FunctionCapsule<R(Args...), SBOSize> {
+  alignas(max_align_t) char storage_[SBOSize];
+
+  R (*invoker_)(const void *, Args &&...) = nullptr;
+  void (*deleter_)(void *) = nullptr;
+  void (*cloner_)(void *, const void *) = nullptr;
+
+  /// @brief Reset the function capsule
+  void reset() noexcept {
+    if (deleter_) {
+      deleter_(storage_);
+      deleter_ = nullptr;
+      invoker_ = nullptr;
+      cloner_ = nullptr;
+    }
   }
-};
+
+  /// @brief Assign a callable to the function capsule
+  template <typename F> void assign(F &&callable) {
+    using DecayedF = std::decay_t<F>;
+
+    static_assert(sizeof(DecayedF) <= SBOSize, "Lambda capture size exceeds SBO capacity!");
+    new (storage_) DecayedF(std::forward<F>(callable));
+
+    invoker_ = [](const void *ptr, Args &&...args) -> R {
+      return (*const_cast<DecayedF *>(reinterpret_cast<const DecayedF *>(ptr)))(std::forward<Args>(args)...);
+    };
+
+    deleter_ = [](void *ptr) { reinterpret_cast<DecayedF *>(ptr)->~DecayedF(); };
+
+    cloner_ = [](void *dest_ptr, const void *src_ptr) { new (dest_ptr) DecayedF(*reinterpret_cast<const DecayedF *>(src_ptr)); };
+  }
+
+  /// @brief Copy from another function capsule
+  void copy_from(const FunctionCapsule &other) {
+    invoker_ = other.invoker_;
+    deleter_ = other.deleter_;
+    cloner_ = other.cloner_;
+    if (other.cloner_) other.cloner_(storage_, other.storage_);
+  }
+
+  /// @brief Move from another function capsule
+  void move_from(FunctionCapsule &&other) noexcept {
+    invoker_ = other.invoker_;
+    deleter_ = other.deleter_;
+    cloner_ = other.cloner_;
+    if (other.deleter_) {
+      for (size_t i = 0; i < SBOSize; ++i)
+        storage_[i] = other.storage_[i];
+      other.invoker_ = nullptr;
+      other.deleter_ = nullptr;
+      other.cloner_ = nullptr;
+    }
+  }
+
+public:
+  FunctionCapsule() = default;    ///< Default constructor
+  ~FunctionCapsule() { reset(); } ///< Destructor
+
+  /// @brief Copy constructor
+  FunctionCapsule(const FunctionCapsule &other) { copy_from(other); }
+
+  /// @brief Copy assignment operator
+  FunctionCapsule &operator=(const FunctionCapsule &other) {
+    if (this != &other) {
+      reset();
+      copy_from(other);
+    }
+    return *this;
+  }
+
+  /// @brief Move constructor
+  FunctionCapsule(FunctionCapsule &&other) noexcept { move_from(std::move(other)); }
+
+  /// @brief Move assignment operator
+  FunctionCapsule &operator=(FunctionCapsule &&other) noexcept {
+    if (this != &other) {
+      reset();
+      move_from(std::move(other));
+    }
+    return *this;
+  }
+
+  /// @brief Construct from a callable
+  template <typename F, typename = std::enable_if_t<!std::is_same_v<std::decay_t<F>, FunctionCapsule>>> FunctionCapsule(F &&callable) {
+    assign(std::forward<F>(callable));
+  }
+
+  /// @brief Assignment operator
+  template <typename F, typename = std::enable_if_t<!std::is_same_v<std::decay_t<F>, FunctionCapsule>>>
+  FunctionCapsule &operator=(F &&callable) {
+    reset();
+    assign(std::forward<F>(callable));
+    return *this;
+  }
+
+  /// @brief Call the stored function
+  R operator()(Args... args) const { return invoker_(storage_, std::forward<Args>(args)...); }
+
+  /// @brief Check if the function is valid
+  [[nodiscard]] bool has_value() const noexcept { return invoker_ != nullptr; }
+
+  /// @brief Check if the function is valid
+  explicit operator bool() const noexcept { return has_value(); }
+
+  /// @brief Get the function capsule (const version)
+  constexpr const FunctionCapsule &get() const noexcept { return *this; }
+
+  /// @brief Get the function capsule
+  constexpr FunctionCapsule &get() noexcept { return *this; }
+
+  /// @brief Dereference the function capsule (const version)
+  constexpr const FunctionCapsule &operator*() const noexcept { return *this; }
+
+  /// @brief Dereference the function capsule
+  constexpr FunctionCapsule &operator*() noexcept { return *this; }
+
+  /// @brief Arrow operator (const version)
+  constexpr const FunctionCapsule *operator->() const noexcept { return this; }
+
+  /// @brief Arrow operator
+  constexpr FunctionCapsule *operator->() noexcept { return this; }
+}; // class FunctionCapsule
+
+/// @brief Deduce function capsule.
+template <typename F> FunctionCapsule(F) -> FunctionCapsule<F>;
 
 /// @brief Redirect stdout and stderr to /dev/null and block std::cout and std::cerr.
 class Silencer {
