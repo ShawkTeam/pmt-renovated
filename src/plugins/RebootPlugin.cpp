@@ -63,7 +63,7 @@ public:
     flags = &mainFlags;
     cmd->addOption("rebootTarget", rebootTarget, "Reboot target")->defaultValue("normal");
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
     return true;
   }

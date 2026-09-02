@@ -141,7 +141,7 @@ public:
     subCmdSecond->addOption("partition(s)", partitions, "Partition name(s)")->required();
 
     mainCmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;

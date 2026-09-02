@@ -70,22 +70,20 @@ public:
     flags = &mainFlags;
     cmd->addOption("testDirectory", testPath, "Path to test directory")
         ->defaultValue("/data/local/tmp")
-        ->check([&](const std::string &val) {
+        ->check([](const std::string &val) {
           if (val.find("/sdcard") != std::string::npos || val.find("/storage") != std::string::npos)
-            return std::string("Sequential read tests on FUSE-mounted paths do not give correct "
-                               "results, so its use is prohibited (by pmt)!");
+            throw Error("Sequential read tests on FUSE-mounted paths do not give correct "
+                        "results, so its use is prohibited (by pmt)!");
 
           if (val != "/data/local/tmp" && !Helper::directoryIsExists(val))
-            return std::string("Couldn't find directory: " + val + ", no root? Try executing in ADB shell.");
-
-          return std::string();
+            throw Error("Couldn't find directory: {}, no root? Try executing in ADB shell.", val);
         });
     cmd->addOption("-s,--file-size", testFileSize, "File size of test file")
         ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
         ->defaultValue("1GB");
     cmd->addFlag("--no-read-test", doNotReadTest, "Don't read test data from disk")->defaultValue(false);
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;

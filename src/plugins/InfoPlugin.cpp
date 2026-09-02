@@ -90,7 +90,7 @@ public:
     cmd->addOption("--json-logical-name", jNameLogical, "Specify logical element name for JSON body")->defaultValue("isLogical");
     cmd->addOption("--json-indent-size", jIndentSize, "Set JSON indent size for printing to screen")->defaultValue(2);
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;

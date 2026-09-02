@@ -81,7 +81,7 @@ public:
         ->check(Helper::CMDLine::Checkers::ExistingDirectory());
     cmd->addFlag("-d,--delete", deleteAfterProgress, "Delete flash file(s) after progress.")->defaultValue(false);
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;
@@ -153,7 +153,8 @@ public:
 
     if (deleteAfterProgress) {
       Log::info("Deleting flash file: {}", imageName);
-      if (!Helper::eraseEntry(imageName) && !Flags.options.hasFlag(BasicFlagOptions::Quiet)) Log::warning("Cannot erase flash file: {}", imageName);
+      if (!Helper::eraseEntry(imageName) && !Flags.options.hasFlag(BasicFlagOptions::Quiet))
+        Log::warning("Cannot erase flash file: {}", imageName);
     }
 
     return AsyncResult_t::Success("Image {} successfully flashed to partition {}", imageName, partitionName);

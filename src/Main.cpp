@@ -126,13 +126,22 @@ int main(int argc, char **argv) {
         ->early()
         ->check(Checkers::ExistingDirectory());
 
-    app.addFlag("-V,--verbose", nullptr, "Enable verbose output mode.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::Verbose))->early();
-    app.addFlag("-q,--quiet", nullptr, "Enable quiet processing.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::Quiet))->early();
-    app.addFlag("-s,--select-on-duplicate", nullptr, "Select partition for work if has input named duplicate partitions.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::NoWorkOnUsed));
-    app.addFlag("-f,--force", nullptr, "Force process to be processed.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::Force));
-    app.addFlag("-l,--logical", nullptr, "Specify that the target partition is logical.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::OnLogical));
-    app.addFlag("-v,--version", nullptr, "Print version and exit.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::ViewVersion));
-    app.addFlag("--license", nullptr, "Print license and exit.")->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::ViewLicense));
+    app.addFlag("-V,--verbose", nullptr, "Enable verbose output mode.")
+        ->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::Verbose))
+        ->early();
+    app.addFlag("-q,--quiet", nullptr, "Enable quiet processing.")
+        ->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::Quiet))
+        ->early();
+    app.addFlag("-s,--select-on-duplicate", nullptr, "Select partition for work if has input named duplicate partitions.")
+        ->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::NoWorkOnUsed));
+    app.addFlag("-f,--force", nullptr, "Force process to be processed.")
+        ->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::Force));
+    app.addFlag("-l,--logical", nullptr, "Specify that the target partition is logical.")
+        ->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::OnLogical));
+    app.addFlag("-v,--version", nullptr, "Print version and exit.")
+        ->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::ViewVersion));
+    app.addFlag("--license", nullptr, "Print license and exit.")
+        ->callback(Callbacks::FlagSetter(Flags.options, BasicFlagOptions::ViewLicense));
 
     app.parse_earlies(argc, argv);
 

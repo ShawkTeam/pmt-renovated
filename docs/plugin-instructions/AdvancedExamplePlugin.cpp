@@ -71,7 +71,7 @@ public:
     flags = &mainFlags;
     cmd = mainApp.addSubcommand("advanced", "Advanced example plugin with complex operations");
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     // Partition selection options

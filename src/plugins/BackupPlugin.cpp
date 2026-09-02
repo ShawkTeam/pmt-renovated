@@ -84,7 +84,7 @@ public:
     cmd->addFlag("-n,--no-set-perms", noSetPermissions, "Don't change permission and owner after progress")->defaultValue(false);
     cmd->addFlag("-S,--verify", verify, "Verify SHA-256 of the backup image(s)")->defaultValue(false);
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
     return true;
   }

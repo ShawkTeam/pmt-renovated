@@ -189,7 +189,7 @@ public:
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     mainCmd = mainApp.addSubcommand("gpt", "GPT operations.")->requiresSubcommand();
     mainCmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     subCmdFirst = mainCmd

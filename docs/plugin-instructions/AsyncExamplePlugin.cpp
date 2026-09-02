@@ -59,7 +59,7 @@ public:
     flags = &mainFlags;
     cmd = mainApp.addSubcommand("async-example", "Example plugin demonstrating async operations");
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     cmd->addOption("partition(s)", rawPartitions, "Partition name(s) to process asynchronously")->delimiter(',');

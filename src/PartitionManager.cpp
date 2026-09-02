@@ -37,8 +37,7 @@ namespace PartitionManager {
  * Initializes the BasicFlags structure with default values and creates
  * partition table data objects for both classic and dynamic partitions.
  */
-BasicFlags::BasicFlags()
-    : logFile(Helper::Logger::Properties::FILE) {
+BasicFlags::BasicFlags() : logFile(Helper::Logger::Properties::FILE) {
   try {
     partitionTables.first = std::make_unique<PartitionMap::PartitionTableData>();
     partitionTables.second = std::make_unique<PartitionMap::DynamicTableData>();

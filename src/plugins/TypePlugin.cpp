@@ -73,7 +73,7 @@ public:
     cmd->addFlag("--only-check-filesystem-magics", onlyCheckFileSystemMagics, "Only check filesystem magic values.")
         ->defaultValue(false);
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;

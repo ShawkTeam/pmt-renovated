@@ -65,7 +65,7 @@ public:
     cmd->addOption("partition(s)", partitions, "Partition name(s)")->required();
     cmd->addFlag("--by-name", byName, "Print by-name path(s)")->defaultValue(false);
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
-        ->superior()
+        ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;

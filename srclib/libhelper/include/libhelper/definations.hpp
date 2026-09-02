@@ -45,7 +45,12 @@ inline constexpr int YES = 1;
 inline constexpr int NO = 0;
 
 /// @brief Short names used in dimension type conversions
-enum sizeCastTypes { B = static_cast<int>('B'), KB = static_cast<int>('K'), MB = static_cast<int>('M'), GB = static_cast<int>('G') };
+enum sizeCastTypes {
+  B = static_cast<uint8_t>('B'),
+  KB = static_cast<uint8_t>('K'),
+  MB = static_cast<uint8_t>('M'),
+  GB = static_cast<uint8_t>('G')
+};
 
 /**
  * @namespace Helper
