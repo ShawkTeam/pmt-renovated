@@ -25,6 +25,7 @@
  * GUID, and other metadata. It supports both human-readable and JSON output formats.
  */
 
+#include <format>
 #include <PartitionManager/PartitionManager.hpp>
 #include <PartitionManager/Plugin.hpp>
 #include <rapidjson/document.h>
@@ -33,7 +34,7 @@
 #include <rapidjson/prettywriter.h>
 
 #define PLUGIN "InfoPlugin"
-#define PLUGIN_VERSION "1.2"
+#define PLUGIN_VERSION "1.3"
 
 namespace PartitionManager {
 
@@ -45,10 +46,18 @@ namespace PartitionManager {
  * and JSON output formats with configurable size units.
  */
 class InfoPlugin final : public BasicPlugin {
+  enum FormatOptions : uint8_t {
+    JSON = 1 << 0,
+    AS_BYTE = 1 << 1,
+    AS_KILO_BYTE = 1 << 2,
+    AS_MEGA_BYTE = 1 << 3,
+    AS_GIGA_BYTE = 1 << 4
+  };
+
   std::vector<std::string> partitions;
   std::string jNamePartition, jNameTable, jNameSize, jNameLogical;
   int jIndentSize = 2;
-  bool jsonFormat = false, asByte = true, asKiloBytes = false, asMega = false, asGiga = false;
+  Helper::FlagCapsule<FormatOptions> formatOptions;
 
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
@@ -67,7 +76,9 @@ public:
    * @return true if the plugin loaded successfully.
    */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    using namespace Helper::CMDLine;
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
+    formatOptions.setFlag(FormatOptions::AS_BYTE);
     flags = &mainFlags;
     cmd = mainApp.addSubcommand("info", "Tell info(s) of input partition list.")
               ->footer("Use get-all or getvar-all as partition name for getting "
@@ -76,14 +87,17 @@ public:
                        "Use get-physical as partition name for getting info's of "
                        "physical partitions.");
     cmd->addOption("partition(s)", partitions, "Partition name(s).")->required();
-    cmd->addFlag("-J,--json", jsonFormat,
+    cmd->addFlag("-J,--json", nullptr,
                  "Print info(s) as JSON body. The body of each partition will "
                  "be written separately")
-        ->defaultValue(false);
-    cmd->addFlag("--as-byte", asByte, "View sizes as byte.")->defaultValue(true);
-    cmd->addFlag("--as-kilobyte", asKiloBytes, "View sizes as kilobyte.")->defaultValue(false);
-    cmd->addFlag("--as-megabyte", asMega, "View sizes as megabyte.")->defaultValue(false);
-    cmd->addFlag("--as-gigabyte", asGiga, "View sizes as gigabyte.")->defaultValue(false);
+        ->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::JSON));
+    cmd->addFlag("--as-byte", nullptr, "View sizes as byte.")->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::AS_BYTE));
+    cmd->addFlag("--as-kilobyte", nullptr, "View sizes as kilobyte.")
+        ->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::AS_KILO_BYTE));
+    cmd->addFlag("--as-megabyte", nullptr, "View sizes as megabyte.")
+        ->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::AS_MEGA_BYTE));
+    cmd->addFlag("--as-gigabyte", nullptr, "View sizes as gigabyte.")
+        ->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::AS_GIGA_BYTE));
     cmd->addOption("--json-partition-name", jNamePartition, "Specify partition name element for JSON body")->defaultValue("name");
     cmd->addOption("--json-table-name", jNameTable, "Specify table elemtn name for JSON body")->defaultValue("table");
     cmd->addOption("--json-size-name", jNameSize, "Specify size element name for JSON body")->defaultValue("size");
@@ -114,13 +128,13 @@ public:
   PLUGIN_SECTION bool run() override {
     std::vector<PartitionMap::Partition_t> jParts;
     PartitionMap::SizeUnit multiple;
-    if (asByte) multiple = PartitionMap::BYTE;
-    if (asKiloBytes) multiple = PartitionMap::KiB;
-    if (asMega) multiple = PartitionMap::MiB;
-    if (asGiga) multiple = PartitionMap::GiB;
+    if (formatOptions.hasFlag(FormatOptions::AS_BYTE)) multiple = PartitionMap::BYTE;
+    if (formatOptions.hasFlag(FormatOptions::AS_KILO_BYTE)) multiple = PartitionMap::KiB;
+    if (formatOptions.hasFlag(FormatOptions::AS_MEGA_BYTE)) multiple = PartitionMap::MiB;
+    if (formatOptions.hasFlag(FormatOptions::AS_GIGA_BYTE)) multiple = PartitionMap::GiB;
 
     auto getter = [this, &jParts, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS_CONST -> bool {
-      if (jsonFormat)
+      if (formatOptions.hasFlag(FormatOptions::JSON))
         jParts.push_back(partition);
       else
         Log::println("partition={} table={} size={} isLogical={}", partition.name(),
@@ -148,7 +162,7 @@ public:
       dTab->forEachFor(partitions, getter);
     }
 
-    if (jsonFormat) {
+    if (formatOptions.hasFlag(FormatOptions::JSON)) {
       rapidjson::Document d;
       d.SetObject();
       auto &allocator = d.GetAllocator();

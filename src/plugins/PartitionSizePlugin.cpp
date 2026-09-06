@@ -28,7 +28,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "PartitionSizePlugin"
-#define PLUGIN_VERSION "1.2"
+#define PLUGIN_VERSION "1.3"
 
 namespace PartitionManager {
 
@@ -39,8 +39,16 @@ namespace PartitionManager {
  * in various units (bytes, KB, MB, GB).
  */
 class PartitionSizePlugin final : public BasicPlugin {
+  enum FormatOptions : uint8_t {
+    ONLY_SIZE = 1 << 0,
+    AS_BYTE = 1 << 1,
+    AS_KILO_BYTE = 1 << 2,
+    AS_MEGA_BYTE = 1 << 3,
+    AS_GIGA_BYTE = 1 << 4
+  };
+
   std::vector<std::string> partitions;
-  bool onlySize = false, asByte = false, asKiloBytes = false, asMega = false, asGiga = false;
+  Helper::FlagCapsule<FormatOptions> formatOptions;
 
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
@@ -59,7 +67,9 @@ public:
    * @return true if the plugin loaded successfully.
    */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    using namespace Helper::CMDLine;
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
+    formatOptions.setFlag(FormatOptions::AS_MEGA_BYTE);
     cmd = mainApp.addSubcommand("sizeof", "Tell size(s) of input partition list.")
               ->footer("Use get-all or getvar-all as partition name for getting "
                        "sizes of all partitions.\nUse get-logicals as partition "
@@ -68,14 +78,16 @@ public:
                        "physical partitions.");
     flags = &mainFlags;
     cmd->addOption("partition(s)", partitions, "Partition name(s).")->required();
-    cmd->addFlag("--as-byte", asByte, "Tell input size of partition list as byte.")->defaultValue(false);
-    cmd->addFlag("--as-kilobyte", asKiloBytes, "Tell input size of partition list as kilobyte.")->defaultValue(false);
-    cmd->addFlag("--as-megabyte", asMega, "Tell input size of partition list as megabyte.")->defaultValue(true);
-    cmd->addFlag("--as-gigabyte", asGiga, "Tell input size of partition list as gigabyte.")->defaultValue(false);
-    cmd->addFlag("--only-size", onlySize,
-                 "Tell input size of partition list as not printing multiple "
-                 "and partition name.")
-        ->defaultValue(false);
+    cmd->addFlag("--as-byte", nullptr, "Tell input size of partition list as byte.")
+        ->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::AS_BYTE));
+    cmd->addFlag("--as-kilobyte", nullptr, "Tell input size of partition list as kilobyte.")
+        ->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::AS_KILO_BYTE));
+    cmd->addFlag("--as-megabyte", nullptr, "Tell input size of partition list as megabyte.")
+        ->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::AS_MEGA_BYTE));
+    cmd->addFlag("--as-gigabyte", nullptr, "Tell input size of partition list as gigabyte.")
+        ->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::AS_GIGA_BYTE));
+    cmd->addFlag("--only-size", nullptr, "Tell input size of partition list as not printing multiple and partition name.")
+        ->callback(Callbacks::FlagSetter(formatOptions, FormatOptions::ONLY_SIZE));
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
         ->strong()
         ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
@@ -107,13 +119,13 @@ public:
    */
   PLUGIN_SECTION bool run() override {
     PartitionMap::SizeUnit multiple = {};
-    if (asByte) multiple = PartitionMap::BYTE;
-    if (asKiloBytes) multiple = PartitionMap::KiB;
-    if (asMega) multiple = PartitionMap::MiB;
-    if (asGiga) multiple = PartitionMap::GiB;
+    if (formatOptions.hasFlag(FormatOptions::AS_MEGA_BYTE)) multiple = PartitionMap::MiB;
+    if (formatOptions.hasFlag(FormatOptions::AS_BYTE)) multiple = PartitionMap::BYTE;
+    if (formatOptions.hasFlag(FormatOptions::AS_KILO_BYTE)) multiple = PartitionMap::KiB;
+    if (formatOptions.hasFlag(FormatOptions::AS_GIGA_BYTE)) multiple = PartitionMap::GiB;
 
     auto getter = [this, &multiple] FOREACH_PARTITIONS_LAMBDA_PARAMETERS_CONST -> bool {
-      if (onlySize)
+      if (formatOptions.hasFlag(FormatOptions::ONLY_SIZE))
         Log::println("{}", partition.formattedSizeString(multiple, true));
       else
         Log::println("{}: {}", partition.name().c_str(), partition.formattedSizeString(multiple));

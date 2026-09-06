@@ -30,7 +30,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "TypePlugin"
-#define PLUGIN_VERSION "1.2"
+#define PLUGIN_VERSION "1.2.1"
 
 namespace PartitionManager {
 
@@ -42,8 +42,8 @@ namespace PartitionManager {
  */
 class TypePlugin final : public BasicPlugin {
   std::vector<std::string> contents;
-  bool onlyCheckAndroidMagics = false, onlyCheckFileSystemMagics = false;
   uint64_t bufferSize = 0;
+  bool onlyCheckAndroidMagics = false, onlyCheckFileSystemMagics = false;
 
 public:
   Helper::CMDLine::Subcommand *cmd = nullptr;
