@@ -71,7 +71,8 @@ public:
   Error() = default;
 
   /// @brief Copy constructor.
-  Error(const Error &other) noexcept : std::exception(other), message(other.message), ec(other.ec), is_cmdline_error(other.is_cmdline_error) {}
+  Error(const Error &other) noexcept
+      : std::exception(other), message(other.message), ec(other.ec), is_cmdline_error(other.is_cmdline_error) {}
 
   /// @brief Move constructor.
   Error(Error &&other) noexcept : message(std::move(other.message)), ec(other.ec), is_cmdline_error(other.is_cmdline_error) {}
@@ -81,8 +82,7 @@ public:
   explicit Error(fmt::format_string<Args...> fmt_str, Args &&...args) : message(fmt::format(fmt_str, std::forward<Args>(args)...)) {}
 
   /// @brief To use the @c << operator for receiving non-function-like inputs.
-  template <typename T>
-    Error &operator<<(const T &msg) {
+  template <typename T> Error &operator<<(const T &msg) {
     std::ostringstream oss;
     oss << msg;
     message += oss.str();
