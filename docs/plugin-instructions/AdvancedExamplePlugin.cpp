@@ -238,20 +238,20 @@ private:
 
     std::string output;
     output += "=== Advanced Partition Analysis ===\n";
-    output += std::format("Total partitions: {}\n", _partitions.size());
-    output += std::format("Size unit: {}\n", sizeUnit);
-    output += std::format("Sort by: {} {}\n\n", sortBy, reverseSort ? "(descending)" : "(ascending)");
+    output += fmt::format("Total partitions: {}\n", _partitions.size());
+    output += fmt::format("Size unit: {}\n", sizeUnit);
+    output += fmt::format("Sort by: {} {}\n\n", sortBy, reverseSort ? "(descending)" : "(ascending)");
 
     for (const auto &partition : _partitions) {
-      output += std::format("Name: {}\n", partition.name());
-      output += std::format("  Type: {}\n", partition.isLogicalPartition() ? "Logical" : "Physical");
+      output += fmt::format("Name: {}\n", partition.name());
+      output += fmt::format("  Type: {}\n", partition.isLogicalPartition() ? "Logical" : "Physical");
 
       if (!partition.isLogicalPartition() && includeTables) {
-        output += std::format("  Table: {}\n", partition.tableName());
+        output += fmt::format("  Table: {}\n", partition.tableName());
       }
 
-      output += std::format("  Size: {} ({})\n", partition.formattedSizeString(unit, true), partition.size());
-      output += std::format("  Path: {}\n", partition.absolutePath().string());
+      output += fmt::format("  Size: {} ({})\n", partition.formattedSizeString(unit, true), partition.size());
+      output += fmt::format("  Path: {}\n", partition.absolutePath().string());
       output += "\n";
     }
 
