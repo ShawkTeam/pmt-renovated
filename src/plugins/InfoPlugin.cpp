@@ -45,7 +45,7 @@ namespace PartitionManager {
  * including size, path, etc. It supports both human-readable
  * and JSON output formats with configurable size units.
  */
-class InfoPlugin final : public BasicPlugin {
+class maybe_packed InfoPlugin final : public BasicPlugin {
   enum FormatOptions : uint8_t {
     JSON = 1 << 0,
     AS_BYTE = 1 << 1,

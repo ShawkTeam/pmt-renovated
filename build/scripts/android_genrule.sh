@@ -42,6 +42,7 @@ cat <<EOF
 #define BUILD_TYPE             "Release"
 #define BUILD_DATE             "$(date +%Y-%m-%d)"
 #define BUILD_TIME             "$(date +%H:%M:%S)"
+#define BUILD_FORCED_PACKS     0
 #define COMMIT_ID              "${COMMIT_ID}"
 
 #define BUILD_STR_HELPER(x) #x
@@ -65,6 +66,12 @@ cat <<EOF
     #define BUILD_ARCH         "x86_64"
 #elif defined(__i386__)
     #define BUILD_ARCH         "x86"
+#elif defined(__riscv)
+#if __riscv_xlen == 64
+    #define BUILD_ARCH         "riscv64"
+#else
+    #define BUILD_ARCH         "riscv32"
+#endif // #if __riscv_xlen == 64
 #else
     #define BUILD_ARCH         "unknown"
 #endif

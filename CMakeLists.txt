@@ -31,6 +31,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Build plugins as built-in or dynamic.
 option(BUILTIN_PLUGINS "Enable builtin plugins." OFF)
 
+# Force use of packed (gnu::packed).
+option(FORCED_PACKS "Force use of packed (gnu::packed)." OFF)
+
 # Enable link-time thin optimization (lto-thin).
 option(LINK_TIME_OPTIMIZATION_THIN "Enable link-time thin optimization (lto-thin)." ON)
 include(CheckIPOSupported)

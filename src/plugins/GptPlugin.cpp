@@ -28,7 +28,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "GptPlugin"
-#define PLUGIN_VERSION "1.0"
+#define PLUGIN_VERSION "1.1"
 
 #define SPAWN_ERROR()                                                                                                                 \
   do {                                                                                                                                \
@@ -56,7 +56,7 @@ namespace PartitionManager {
  * This plugin provides functionality to display GPT partition table information
  * and perform GPT-related operations such as displaying table details and partition lists.
  */
-class GptPlugin final : public BasicPlugin {
+class maybe_packed GptPlugin final : public BasicPlugin {
 public:
   Helper::CMDLine::Subcommand *mainCmd = nullptr;
   Helper::CMDLine::Subcommand *subCmdFirst = nullptr, *subCmdSecond = nullptr, *subCmdThird = nullptr;
@@ -66,7 +66,7 @@ private:
   std::vector<std::string> table_names, file_list;
   Helper::Silencer silencer = Helper::Silencer(false);
   std::string directory;
-  bool use_gpt_backups = false;
+  bool use_gpt_backups = false, restore_secondary_as_main = false;
   PartitionMap::PartitionTableData *pTab = nullptr;
 
   /**
@@ -143,7 +143,7 @@ private:
    */
   bool restoreGptTable() {
     if (!file_list.empty() && table_names.size() != file_list.size())
-      throw Helper::Error("You must provide an file name(s) as long as the table name(s)").cmdlineError().withCode(EX_USAGE);
+      throw Helper::Error("You must provide file name(s) as long as the table name(s)").cmdlineError().withCode(EX_USAGE);
 
     for (size_t i = 0; i < table_names.size(); i++) {
       const auto &n = table_names[i];
@@ -152,18 +152,36 @@ private:
       if (!directory.empty()) input.insert(0, directory + '/');
 
       auto table = pTab->GPTDataOf(n);
-      if (silencer.silence(); table->LoadGPTBackup(input)) {
-        silencer.stop();
-        Log::println("{} is loaded on {}. Writing and syncing...", input, n);
-        if (silencer.silence(); !pTab->sync(n)) {
-          silencer.stop();
-          Log::print("Failed to save changes to {}!", n);
+      silencer.silence();
+      bool loaded = table->LoadGPTBackup(input);
+      silencer.stop();
+
+      if (!loaded) {
+        Log::error("Failed to load backup file {}!", input);
+        SPAWN_ERROR();
+        continue;
+      }
+      Log::println("{} loaded into device {}.", input, n);
+
+      if (restore_secondary_as_main) {
+        Log::println("Restoring backup header of {} as main header...", n);
+
+        int valid = table->CheckHeaderValidity();
+        if (valid == 2 || valid == 3)
+          table->LoadSecondTableAsMain();
+        else {
+          Log::error("Backup header of {} is invalid!", n);
           SPAWN_ERROR();
         }
-        silencer.stop();
-      } else {
-        silencer.stop();
-        Log::print("Failed to write {} backup to {}!", input, n);
+      }
+
+      Log::println("Writing GPT data to disk {}...", n);
+      silencer.silence();
+      int result = table->SaveGPTData(1);
+      silencer.stop();
+
+      if (!result) {
+        Log::error("Failed to save GPT data to disk {}!", n);
         SPAWN_ERROR();
       }
     }
@@ -200,7 +218,7 @@ public:
 
     subCmdSecond = mainCmd->addSubcommand("backup-table", "Backup specified GPT partition table(s). This is a backup of all data.")
                        ->footer("It backs up the protective MBR, main and second GPT header and partition entries. Use read-all as "
-                                "table(s) for re-reading all partition tables.");
+                                "table(s) for backupping all partition tables.");
     subCmdSecond->addOption("table(s)", table_names, "Names of the partition tables to backup")->required();
     subCmdSecond->addOption("output(s)", file_list, "Names of the backup files to backup");
     subCmdSecond->addOption("-o,--output-directory", directory, "Directory to save GPT backup(s).");
@@ -209,11 +227,11 @@ public:
         mainCmd
             ->addSubcommand(
                 "restore-table",
-                "Restore specified GPT partition table(s). This is a backup of all data. It only backs up the GPT structure.")
-            ->footer("Use read-all as table(s) for re-reading all partition tables.");
+                "Restore specified GPT partition table(s). This is a backup of all data. It only backs up the GPT structure.");
     subCmdThird->addOption("table(s)", table_names, "Names of the partition tables to restore")->required();
     subCmdThird->addOption("file(s)", file_list, "Names of the backup files to restore")->required();
-    subCmdThird->addOption("-F,--file-directory", directory, "Directory to restore GPT backup(s).");
+    subCmdThird->addOption("-d,--directory", directory, "Directory to restore GPT backup(s).");
+    subCmdThird->addFlag("--restore-secondary-as-main", restore_secondary_as_main, "Restore secondary GPT header (backup header) as main GPT header.")->defaultValue(false);
 
     return true;
   }

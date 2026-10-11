@@ -38,7 +38,7 @@ namespace PartitionManager {
  * This plugin provides functionality to display the size of partitions
  * in various units (bytes, KB, MB, GB).
  */
-class PartitionSizePlugin final : public BasicPlugin {
+class maybe_packed PartitionSizePlugin final : public BasicPlugin {
   enum FormatOptions : uint8_t {
     ONLY_SIZE = 1 << 0,
     AS_BYTE = 1 << 1,

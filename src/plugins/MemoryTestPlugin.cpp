@@ -43,7 +43,7 @@ namespace PartitionManager {
  * This plugin provides functionality to test partition memory by performing
  * read and write operations to verify data integrity and measure performance.
  */
-class MemoryTestPlugin final : public BasicPlugin {
+class maybe_packed MemoryTestPlugin final : public BasicPlugin {
   uint64_t bufferSize = MB(4), testFileSize = 0;
   std::filesystem::path testPath;
   bool doNotReadTest = false;

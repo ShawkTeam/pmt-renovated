@@ -30,7 +30,7 @@
 #include <PartitionManager/Plugin.hpp>
 
 #define PLUGIN "TypePlugin"
-#define PLUGIN_VERSION "1.2.1"
+#define PLUGIN_VERSION "1.2.2"
 
 namespace PartitionManager {
 
@@ -40,7 +40,7 @@ namespace PartitionManager {
  * This plugin provides functionality to detect the type of partitions by
  * checking magic numbers for filesystems and Android-specific images.
  */
-class TypePlugin final : public BasicPlugin {
+class maybe_packed TypePlugin final : public BasicPlugin {
   std::vector<std::string> contents;
   uint64_t bufferSize = 0;
   bool onlyCheckAndroidMagics = false, onlyCheckFileSystemMagics = false;
@@ -62,19 +62,20 @@ public:
    * @return true if the plugin loaded successfully.
    */
   PLUGIN_SECTION bool onLoad(Helper::CMDLine::App &mainApp, BasicFlags &mainFlags) override {
+    using namespace Helper::CMDLine;
     Log::info("{}::onLoad() trigger. Initializing...", PLUGIN);
     cmd = mainApp.addSubcommand("type", "Get type of the partition(s) or image(s).");
     flags = &mainFlags;
     cmd->addOption("content(s)", contents, "Content(s)")->required();
     cmd->addOption("-b,--buffer-size", bufferSize, "Buffer size for max seek depth")
-        ->transform(Helper::CMDLine::Transformers::AsSizeValue(false))
+        ->transform(Transformers::AsSizeValue(false))
         ->defaultValue("4KB");
     cmd->addFlag("--only-check-android-magics", onlyCheckAndroidMagics, "Only check Android magic values.")->defaultValue(false);
     cmd->addFlag("--only-check-filesystem-magics", onlyCheckFileSystemMagics, "Only check filesystem magic values.")
         ->defaultValue(false);
     cmd->addFlag("-v,--version", nullptr, "View version of plugin.")
         ->strong()
-        ->callback(Helper::CMDLine::Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
+        ->callback(Callbacks::ViewPluginVersion(PLUGIN, PLUGIN_VERSION));
 
     return true;
   }
@@ -103,26 +104,27 @@ public:
    * @return true if the operation succeeded.
    */
   PLUGIN_SECTION bool run() override {
+    using namespace PartitionMap;
     std::map<uint64_t, std::string> magics;
     if (onlyCheckAndroidMagics)
-      magics.merge(PartitionMap::Extra::AndroidMagics);
+      magics.merge(Extra::AndroidMagics);
     else if (onlyCheckFileSystemMagics)
-      magics.merge(PartitionMap::Extra::FileSystemMagics);
+      magics.merge(Extra::FileSystemMagics);
     else
-      magics.merge(PartitionMap::Extra::Magics);
+      magics.merge(Extra::Magics);
 
     for (const auto &content : contents) {
-      std::optional<PartitionMap::TableType> tType;
+      std::optional<TableType> tType;
       auto *table = getCorrectTableObj(content, Flags.partitionTables.first.get(), Flags.partitionTables.second.get(), tType);
-      const PartitionMap::Partition_t *partition = setupPartition(content, table);
+      const Partition_t *partition = setupPartition(content, table);
 
       if ((!tType && !partition) && !Helper::fileIsExists(content)) throw Error("Couldn't find partition or image file: {}", content);
 
       bool found = false;
       for (const auto &[magic, name] : magics) {
-        if (PartitionMap::Extra::hasMagic(magic, static_cast<ssize_t>(bufferSize),
+        if (Extra::hasMagic(magic, static_cast<ssize_t>(bufferSize),
                                           Helper::fileIsExists(content) ? content : partition->absolutePath().c_str())) {
-          Log::println("{} contains {} magic ({})", content, name, PartitionMap::Extra::formatMagic(magic));
+          Log::println("{} contains {} magic ({})", content, name, Extra::formatMagic(magic));
           found = true;
           break;
         }

@@ -44,7 +44,7 @@ namespace PartitionManager {
  * their contents and writing them to specified output files. It supports
  * configurable buffer sizes and optional verification of the backup.
  */
-class BackupPlugin final : public BasicPlugin {
+class maybe_packed BackupPlugin final : public BasicPlugin {
   std::vector<std::string> partitions, outputNames;
   std::string outputDirectory;
   uint64_t bufferSize = 0;

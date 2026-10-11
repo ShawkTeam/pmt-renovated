@@ -38,7 +38,7 @@ namespace PartitionManager {
  * This plugin provides functionality to display the real device paths
  * of partitions.
  */
-class RealPathPlugin final : public BasicPlugin {
+class maybe_packed RealPathPlugin final : public BasicPlugin {
   std::vector<std::string> partitions;
   bool byName = false;
 

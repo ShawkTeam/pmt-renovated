@@ -41,6 +41,26 @@
   if (r) { r->stop(); } \
   return m.finalize()
 
+#if BUILD_FORCED_PACKS || (defined(__aarch64__) || defined(__i386__)) && (!defined(__ARM_NEON) && !defined(__ARM_FEATURE_SVE) && !defined(__ARM_FEATURE_ATOMICS))
+#define maybe_packed [[gnu::packed]]
+#else
+#define maybe_packed
+/*
+ * On arm: SIMD instructions is not suitable for packed use.
+ * On x86_64 and i386 (x86): Atomic instructions are not suitable for packed use.
+ * On risc-v (64/32): It significantly reduces performance and is risky.
+ *
+ * BUT: You might notice that when gnu::packed is applied to a plugin etc.
+ * (whatever it is) on aarch64, it doesn't crash and works perfectly...
+ * This is a masterpiece of clang. And it's also a precaution against aarch64 crashes.
+ * However, leaving this in the code might lead to future changes and issues with
+ * different processors, SIGSEGV, etc.
+ *
+ * FORCED USE OF PACKED: Give CMake the -DFORCED_PACKS=ON flag.
+ *        **Don't use this unless you know what you're doing.**
+ */
+#endif // #if BUILD_FORCED_PACKS || (defined(__aarch64__) || defined(__i386__)) && (!defined(__ARM_NEON) && !defined(__ARM_FEATURE_SVE) && !defined(__ARM_FEATURE_ATOMICS))
+
 #ifdef BUILTIN_PLUGINS
 #define PLUGIN_SECTION __attribute__((section(".builtin_modules"))) ///< Custom section macro for builtin plugins.
 

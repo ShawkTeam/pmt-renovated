@@ -42,7 +42,7 @@ namespace PartitionManager {
  * It supports configurable buffer sizes, optional deletion of images after
  * flashing, and can process multiple partitions asynchronously.
  */
-class FlashPlugin final : public BasicPlugin {
+class maybe_packed FlashPlugin final : public BasicPlugin {
   std::vector<std::string> partitions, imageNames;
   std::string imageDirectory;
   uint64_t bufferSize = 0;
