@@ -180,11 +180,11 @@ struct OptionProperties {
   OptionProperties &operator=(const OptionProperties &other) = default; ///< Copy assignment operator.
 
   std::vector<std::string> valid_names;
-  Helper::FunctionCapsule<void(const std::string &)> setter;
-  Helper::FunctionCapsule<void()> default_val_setter;
-  Helper::FunctionCapsule<void()> callback;
-  Helper::FunctionCapsule<void(const std::string &)> checker;
-  Helper::FunctionCapsule<std::string(const std::string &)> transformer;
+  Helper::FunctionCapsule<void(const std::string &), 24> setter;
+  Helper::FunctionCapsule<void(), 24> default_val_setter;
+  Helper::FunctionCapsule<void(), 24> callback;
+  Helper::FunctionCapsule<void(const std::string &), 24> checker;
+  Helper::FunctionCapsule<std::string(const std::string &), 24> transformer;
   std::string description;
   std::string option_typename;
   std::string default_value;
@@ -288,7 +288,7 @@ inline auto ExistingFile() {
 
 /// @brief Checks if the buffer size is within the specified range.
 template <typename T> inline auto BufferSizeCheck(T min, T max) {
-  return [min, max](const std::string &s) {
+  return [&](const std::string &s) {
     try {
       uint64_t size = from_string<uint64_t>(s);
       if (size < min || size > max) throw Error("{}: Buffer size is out of range.", s).cmdlineError().withCode(EX_USAGE);
@@ -358,7 +358,7 @@ inline auto ViewPluginVersion(std::string_view name, std::string_view ver, bool 
 /// @brief A callback for setting a flag (only for @c FlagCapsule ).
 template <typename TheEnum, typename FlagType>
 inline auto FlagSetter(FlagCapsule<TheEnum, FlagType> &flags, TheEnum flag, bool v = true) {
-  return [&flags, flag, v]() { flags.setFlag(flag, v); };
+  return [&]() { flags.setFlag(flag, v); };
 }
 
 } // namespace Callbacks
