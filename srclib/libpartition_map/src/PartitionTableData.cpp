@@ -249,20 +249,21 @@ std::optional<std::reference_wrapper<Partition_t>> PartitionTableData::partition
     }
 
     while (true) {
-      std::cout << std::quoted(name) << " is available on multiple tables:" << std::endl;
+      Log::println("{} is available on multiple tables:", std::quoted_string(name));
       for (const auto &dname : names)
-        std::cout << " - " << std::quoted(dname) << std::endl;
+        Log::println(" - {}", std::quoted_string(dname));
 
-      std::cout << "\nActively used partition " << std::quoted(name) << " is in the " << std::quoted(usedName) << " table.\n"
-                << "Generally, the desired outcome is to perform operations on the currently used partition; "
-                << "others are used as " << std::quoted("backup partition") << " (like xbl) or for a similar purpose.\n"
-                << "Please select a table from the list above.\n>> ";
+      Log::println("\nActively used partition {} is in the {} table.\n"
+                   "Generally, the desired outcome is to the perform operations on the currently used partition; "
+                   "others are used as {} (like xbl) or for a similar purpose.\n"
+                   "Please select a table from the list above.\n>> ",
+                   std::quoted_string(name), std::quoted_string(usedName), std::quoted_string("backup partition"));
 
       std::string choice;
       std::cin >> choice;
       if (std::find(names.begin(), names.end(), choice) != names.end()) return partition(name, choice);
 
-      std::cout << "Invalid choice: " << std::quoted(choice) << ". Try again.\n\n";
+      Log::print("Invalid choice: {}. Try again.\n\n", std::quoted_string(name));
     }
   }
 
@@ -284,20 +285,20 @@ std::optional<std::reference_wrapper<const Partition_t>> PartitionTableData::par
     }
 
     while (true) {
-      std::cout << std::quoted(name) << " is available on multiple tables:" << std::endl;
       for (const auto &dname : names)
-        std::cout << " - " << std::quoted(dname) << std::endl;
+        Log::println(" - {}", std::quoted_string(dname));
 
-      std::cout << "\nActively used partition " << std::quoted(name) << " is in the " << std::quoted(usedName) << " table.\n"
-                << "Generally, the desired outcome is to perform operations on the currently used partition; "
-                << "others are used as " << std::quoted("backup partition") << " (like xbl) or for a similar purpose.\n"
-                << "Please select a table from the list above.\n>> ";
+      Log::println("\nActively used partition {} is in the {} table.\n"
+                   "Generally, the desired outcome is to the perform operations on the currently used partition; "
+                   "others are used as {} (like xbl) or for a similar purpose.\n"
+                   "Please select a table from the list above.\n>> ",
+                   std::quoted_string(name), std::quoted_string(usedName), std::quoted_string("backup partition"));
 
       std::string choice;
       std::cin >> choice;
       if (std::find(names.begin(), names.end(), choice) != names.end()) return partition(name, choice);
 
-      std::cout << "Invalid choice: " << std::quoted(choice) << ". Try again.\n\n";
+      Log::print("Invalid choice: {}. Try again.\n\n", std::quoted_string(name));
     }
   }
 

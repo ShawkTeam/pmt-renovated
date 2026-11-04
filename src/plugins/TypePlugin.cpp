@@ -123,7 +123,7 @@ public:
       bool found = false;
       for (const auto &[magic, name] : magics) {
         if (Extra::hasMagic(magic, static_cast<ssize_t>(bufferSize),
-                                          Helper::fileIsExists(content) ? content : partition->absolutePath().c_str())) {
+                            Helper::fileIsExists(content) ? content : partition->absolutePath().c_str())) {
           Log::println("{} contains {} magic ({})", content, name, Extra::formatMagic(magic));
           found = true;
           break;

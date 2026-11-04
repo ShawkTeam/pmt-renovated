@@ -223,15 +223,16 @@ public:
     subCmdSecond->addOption("output(s)", file_list, "Names of the backup files to backup");
     subCmdSecond->addOption("-o,--output-directory", directory, "Directory to save GPT backup(s).");
 
-    subCmdThird =
-        mainCmd
-            ->addSubcommand(
-                "restore-table",
-                "Restore specified GPT partition table(s). This is a backup of all data. It only backs up the GPT structure.");
+    subCmdThird = mainCmd->addSubcommand(
+        "restore-table",
+        "Restore specified GPT partition table(s). This is a backup of all data. It only backs up the GPT structure.");
     subCmdThird->addOption("table(s)", table_names, "Names of the partition tables to restore")->required();
     subCmdThird->addOption("file(s)", file_list, "Names of the backup files to restore")->required();
     subCmdThird->addOption("-d,--directory", directory, "Directory to restore GPT backup(s).");
-    subCmdThird->addFlag("--restore-secondary-as-main", restore_secondary_as_main, "Restore secondary GPT header (backup header) as main GPT header.")->defaultValue(false);
+    subCmdThird
+        ->addFlag("--restore-secondary-as-main", restore_secondary_as_main,
+                  "Restore secondary GPT header (backup header) as main GPT header.")
+        ->defaultValue(false);
 
     return true;
   }
