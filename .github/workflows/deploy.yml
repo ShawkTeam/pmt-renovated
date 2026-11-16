@@ -58,7 +58,7 @@ jobs:
       - name: Setup Packages
         run: sudo apt update && sudo apt install git doxygen graphviz -y
 
-      - name: Run Doxygen
+      - name: Generate docs
         run: |
           if $USE_GIT_CID; then
             SHORT_SHA=$(git rev-parse --short HEAD)
@@ -70,10 +70,12 @@ jobs:
             fi
             sed -i "s/^PROJECT_NUMBER *=.*/PROJECT_NUMBER         = git-${SHORT_SHA}/" Doxyfile.in
           fi
+          git submodule update --init --recursive --depth 1
           mkdir build_docs && cd build_docs
           cmake ..
           cmake --build . --target docs -j$(($(nproc) - 2))
           cd ..
+          git submodule deinit --all -f
 
       - name: Deploy
         run: |
