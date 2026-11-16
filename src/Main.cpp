@@ -43,6 +43,7 @@
 namespace {
 constexpr char kInterruptedMessage[] = "\nInterrupted.\n";
 constexpr char kAbortedMessage[] = "\nAborted.\n";
+constexpr char kTerminatedMessage[] = "\nTerminated\n";
 } // namespace
 
 /**
@@ -61,6 +62,10 @@ static void sigHandler(int sig) {
   if (sig == SIGABRT) {
     write(STDERR_FILENO, kAbortedMessage, sizeof(kAbortedMessage) - 1);
     exit(128 + SIGABRT);
+  }
+  if (sig == SIGTERM) {
+    write(STDERR_FILENO, kTerminatedMessage, sizeof(kTerminatedMessage) - 1);
+    exit(128 + SIGTERM);
   }
 }
 #endif // #if BUILD_SIGNAL_TRAPPING
@@ -92,6 +97,7 @@ int main(int argc, char **argv) {
 #if BUILD_SIGNAL_TRAPPING
     signal(SIGINT, sigHandler);  // Trap CTRL+C.
     signal(SIGABRT, sigHandler); // Trap abort signals.
+    signal(SIGTERM, sigHandler); // Trap terminate signals.
 #endif
 
     args.reserve(static_cast<size_t>(argc));
