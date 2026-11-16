@@ -39,6 +39,7 @@
 
 #undef Flags
 
+#if BUILD_SIGNAL_TRAPPING
 namespace {
 constexpr char kInterruptedMessage[] = "\nInterrupted.\n";
 constexpr char kAbortedMessage[] = "\nAborted.\n";
@@ -62,6 +63,7 @@ static void sigHandler(int sig) {
     exit(128 + SIGABRT);
   }
 }
+#endif // #if BUILD_SIGNAL_TRAPPING
 
 /**
  * @brief Main entry point for the Partition Manager Tool.
@@ -87,8 +89,10 @@ int main(int argc, char **argv) {
   try {
     // try-catch start
 
+#if BUILD_SIGNAL_TRAPPING
     signal(SIGINT, sigHandler);  // Trap CTRL+C.
     signal(SIGABRT, sigHandler); // Trap abort signals.
+#endif
 
     args.reserve(static_cast<size_t>(argc));
     for (int i = 0; i < argc; ++i)

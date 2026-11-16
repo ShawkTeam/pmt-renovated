@@ -52,6 +52,9 @@ if(LINK_TIME_OPTIMIZATION_THIN)
 	endif()
 endif()
 
+# Support signal trapping
+option(SIGNAL_TRAPPING "Enable signal trapping feature." ON)
+
 # Set compiler flags
 add_compile_options(-Werror -Wno-deprecated-declarations)
 if(NOT "${CMAKE_BUILD_TYPE}" STREQUAL "Debug")

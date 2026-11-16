@@ -126,6 +126,8 @@ PMT uses a sophisticated build system with the following components:
 ### Build Options
 - `BUILTIN_PLUGINS=ON/OFF` - Enable/disable built-in plugin compilation
 - `LINK_TIME_OPTIMIZATION_THIN=ON/OFF` - Enable/disable link time optimization (thin)
+- `FORCED_PACKS=ON/OFF` - Force use of packed (`gnu::packed`). It provides a slight amount of memory savings. To be honest, it’s actually unnecessary, but it was added nonetheless. Also, it might not work properly on older devices
+- `SIGNAL_TRAPPING=ON/OFF` - Enable/disable signal trapping feature. It might be necessary to disable it in older recovery builds
 - `CMAKE_BUILD_TYPE=Debug/Release` - Build configuration
 
 ### Helper Scripts (`build/scripts/`)
