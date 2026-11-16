@@ -112,7 +112,7 @@ parse_args() {
 
     while [ $# -gt 0 ]; do
         case "$1" in
-            build|rebuild|clean|cleanup-generated-docs)
+            build|rebuild|clean)
                 [ -n "$command" ] && { command echo "$THIS: Multiple commands specified: '$command' and '$1'"; exit 1; }
                 command="$1"
                 shift
@@ -233,8 +233,6 @@ EXAMPLES:
     $THIS rebuild --arch armeabi-v7a                                               # Build for armeabi-v7a
     $THIS build --arch arm64-v8a --arch armeabi-v7a                                # Build for arm64-v8a and armeabi-v7a
     $THIS clean                                                                    # Clean build artifacts
-    $THIS only-configure-git-hooks                                                 # Configure git hooks (only)
-    $THIS cleanup-generated-docs                                                   # Cleanup generated doxgen documentation
 EOF
 }
 
@@ -255,5 +253,4 @@ case "$PARSED_COMMAND" in
     "build")   build "${PARSED_CMAKE_ARGS[@]}" ;;
     "clean")   clean ;;
     "rebuild") clean; build "${PARSED_CMAKE_ARGS[@]}" ;;
-    "cleanup-generated-docs") rm -rf "${WORK_DIR}/docs/html" ;;
 esac

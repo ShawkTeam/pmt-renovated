@@ -153,12 +153,12 @@ adb shell getprop ro.product.cpu.abi
 ### 1. Download the Correct Binary
 Download the appropriate release file that matches your device's architecture from [releases](https://github.com/ShawkTeam/pmt-renovated/releases):
 **For General Users (Recommended):**
-- `pmt-static-builtin-arm64-v8a.zip` → For 64-bit devices, most portable
-- `pmt-static-builtin-armeabi-v7a.zip` → For 32-bit devices, most portable
+- `pmt-static-arm64-v8a.zip` → For 64-bit devices, most portable
+- `pmt-static-armeabi-v7a.zip` → For 32-bit devices, most portable
 
 **Alternative Options:**
-- `pmt-static-arm64-v8a.zip` → For 64-bit devices, requires separate plugins
-- `pmt-static-armeabi-v7a.zip` → For 32-bit devices, requires separate plugins
+- `pmt-arm64-v8a-builtin.zip` → For 64-bit devices, requires separate plugins
+- `pmt-armeabi-v7a-builtin.zip` → For 32-bit devices, requires separate plugins
 
 Unzip the downloaded `.zip` file — you should now have a `pmt` binary.
 

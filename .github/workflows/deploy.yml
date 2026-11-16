@@ -68,15 +68,18 @@ jobs:
             else
               echo "Resolved SHORT_SHA: $SHORT_SHA"
             fi
-            sed -i "s/^PROJECT_NUMBER *=.*/PROJECT_NUMBER         = git-${SHORT_SHA}/" Doxyfile
+            sed -i "s/^PROJECT_NUMBER *=.*/PROJECT_NUMBER         = git-${SHORT_SHA}/" Doxyfile.in
           fi
-          doxygen Doxyfile
+          mkdir build_docs && cd build_docs
+          cmake ..
+          cmake --build . --target docs -j$(($(nproc) - 2))
+          cd ..
 
       - name: Deploy
         run: |
-          rsync -avz --delete docs/html/ $DOCS_PATH
+          rsync -avz --delete build_docs/generated_docs/html/ $DOCS_PATH
 
       - name: Clean up workspace
         if: always()
         run: |
-          bash build/scripts/build.sh cleanup-generated-docs
+          rm -rf build_docs

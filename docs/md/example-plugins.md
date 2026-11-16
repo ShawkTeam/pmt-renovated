@@ -222,22 +222,29 @@ Follow these steps when developing a new plugin:
 ### Partition Access Patterns
 
 ```cpp
+// pTab --> partition table
+// dTab --> dynamic partition table (super partition)
+
 // Check if partition exists
-if (Tables.hasPartition(name)) {
-    const auto& partition = Tables.partitionWithDupCheck(name)->get();
+if (pTab->hasPartition(name)) {
+    const auto& partition = pTab->partitionWithDupCheck(name)->get();
     // Use partition
 }
 
 // Iterate over all partitions
-Tables.forEach([](const PartitionMap::Partition_t& partition) -> bool {
+dTab->forEach([](const PartitionMap::Partition_t& partition) -> bool {
     // Process partition
     return true; // Continue iteration
 });
 
 // Get partition lists
-auto allParts = Tables.allPartitions();
-auto logicalParts = Tables.logicalPartitions();
-auto physicalParts = Tables.partitions();
+auto pTab = Flags.partitionTables.first.get();
+auto dTab = Flags.partitionTables.second.get();
+
+// Get partition object quickly
+std::optional<PartitionMap::TableType> tType;
+auto *table = getCorrectTableObj(partitionName, Flags.partitionTables.first.get(), Flags.partitionTables.second.get(), tType);
+const PartitionMap::Partition_t *partition = setupPartition(partitionName, table);
 ```
 
 ### Output Format Patterns

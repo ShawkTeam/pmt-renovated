@@ -11,16 +11,16 @@ It supports **asynchronous operations**, allowing multiple partitions to be proc
 
 ## Features
 
-- **Backup** partitions to files (with optional permissions fix for non-root access).
+- **Backup** partitions to files (with permission adjustments for non-root access).
 - **Flash** image files directly to partitions.
-- **Erase** partitions by filling them with zero bytes.
-- **Get** partition sizes in various units.
-- **Read metadata** of logical partitions.
-- **Read metadata** of dynamic partition groups.
-- **Display** partition information in plain text or JSON format.
-- **Retrieve** real paths and symbolic link paths of partitions.
-- **Identify** file system or image types by checking magic numbers.
-- **Reboot** the device into different modes.
+- **Erase** partitions with zero-byte filling.
+- **Retrieve** partition sizes in multiple units.
+- **Display** partition info (name, size, logical status) in text or JSON.
+- **Resolve** real block device paths and symbolic links.
+- **Read** super metadata and super group metadata.
+- **GPT operations**, like re-read tables, read/write GPT backups (only those created by pmt and gdisk/sgdisk).
+- **Identify** partition or image file types via magic number checks.
+- **Reboot** the device into multiple modes (normal, recovery, etc.).
 - **Test** sequential read/write speed of your memory.
 
 ---
@@ -527,6 +527,7 @@ pmt gpt restore-table table(s) file(s) [OPTIONS]
 **Options:**
 - `table(s)` → Names of the partition tables to restore (required).
 - `file(s)` → Names of the backup files to restore (required).
+- `--restore-secondary-as-main` → Restores secondary GPT as primary GPT.
 - `-F`, `--file-directory DIR` → Directory to restore GPT backup(s) from.
 
 **Special Table Names:**
@@ -548,7 +549,7 @@ pmt gpt restore-table sda sda.gpt  # Restore sda from backup
 pmt gpt restore-table sda,sdb sda.gpt,sdb.gpt  # Restore multiple tables
 pmt gpt restore-table sda backup.gpt -F /backups  # Restore from directory
 pmt gpt restore-table sda,sdb backup1.gpt,backup2.gpt -F /backups  # Multiple from directory
-pmt gpt restore-table sda backup.gpt --force  # Skip errors and continue
+pmt gpt restore-table sda backup.gpt --force --restore-secondary-as-main  # Skip errors and restore secondary GPT as primary GPT
 ```
 
 ---
@@ -570,7 +571,7 @@ pmt gpt restore-table sda backup.gpt --force  # Skip errors and continue
 
 **Partition Manager Tool (PMT)** is built with a modular plugin architecture:
 
-- **Core System**: C++20-based main application with CLI11 command-line interface
+- **Core System**: C++17-based main application with custom command line parser.
 - **Plugin Framework**: Dynamic loading of functionality via plugin system
 - **Built-in Plugins**: 12 core plugins providing all major operations
 - **Asynchronous Processing**: Multi-threaded operations for backup, flash, and erase
@@ -588,9 +589,8 @@ pmt gpt restore-table sda backup.gpt --force  # Skip errors and continue
 - **RebootPlugin**: Device reboot management supporting all Android reboot modes
 - **MemoryTestPlugin**: Sequential storage performance testing with direct I/O and synchronized writes
 - **CleanLogPlugin**: Log management utilities for cleanup and rotation
-- **MetadataReaderPlugin**: Logical partition metadata reader with group, size, and attribute information
-- **GroupMetadataReaderPlugin**: Logical partition groups metadata reader with name, maximum size, and flags
-- **ReReadTablePlugin**: Re-read partition tables
+- **LpMetadataPlugin**: Operations provided for dynamic partitions using liblp
+- **GptPlugin**: Operations about GPT tables
 
 ---
 

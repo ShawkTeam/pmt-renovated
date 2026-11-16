@@ -48,7 +48,7 @@ PROJECT_NAME           = "PMT Renovated"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 2.0.0
+PROJECT_NUMBER         = @PROJECT_VERSION@
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewers a
@@ -67,14 +67,14 @@ PROJECT_LOGO           =
 # when the HTML document is shown. Doxygen will copy the logo to the output
 # directory.
 
-PROJECT_ICON           = docs/favicon.ico
+PROJECT_ICON           = @PROJECT_FAVICON@
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
 # entered, it will be relative to the location where Doxygen was started. If
 # left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = docs/
+OUTPUT_DIRECTORY       = @PROJECT_DOCS_OUTDIR@
 
 # If the CREATE_SUBDIRS tag is set to YES then Doxygen will create up to 4096
 # sub-directories (in 2 levels) under the output directory of each output format
@@ -1026,20 +1026,20 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = include/PartitionManager \
-                         srclib/libhelper/include/libhelper/ \
-                         srclib/libopenpart/include/libopenpart/ \
-                         srclib/libpartition_map/include/libpartition_map/ \
-                         docs/md/documentation-mainpage.md \
-                         docs/md/building-from-source.md \
-                         docs/md/usage-guide.md \
-                         docs/md/release-types.md \
-                         docs/md/using-with-termux-and-adb.md \
-                         docs/md/example-plugins.md \
-                         docs/plugin-instructions/ExamplePlugin.cpp \
-                         docs/plugin-instructions/SimpleExamplePlugin.cpp \
-                         docs/plugin-instructions/AdvancedExamplePlugin.cpp \
-                         docs/plugin-instructions/AsyncExamplePlugin.cpp
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/include/PartitionManager \
+                         @CMAKE_CURRENT_SOURCE_DIR@/srclib/libhelper/include/libhelper/ \
+                         @CMAKE_CURRENT_SOURCE_DIR@/srclib/libopenpart/include/libopenpart/ \
+                         @CMAKE_CURRENT_SOURCE_DIR@/srclib/libpartition_map/include/libpartition_map/ \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/md/documentation-mainpage.md \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/md/building-from-source.md \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/md/usage-guide.md \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/md/release-types.md \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/md/using-with-termux-and-adb.md \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/md/example-plugins.md \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/plugin-instructions/ExamplePlugin.cpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/plugin-instructions/SimpleExamplePlugin.cpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/plugin-instructions/AdvancedExamplePlugin.cpp \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/plugin-instructions/AsyncExamplePlugin.cpp
 
 # This tag can be used to specify the character encoding of the source files
 # that Doxygen parses. Internally Doxygen uses the UTF-8 encoding. Doxygen uses
@@ -1116,7 +1116,7 @@ RECURSIVE              = NO
 # Note that relative paths are relative to the directory from which Doxygen is
 # run.
 
-EXCLUDE                = external/
+EXCLUDE                = @CMAKE_CURRENT_SOURCE_DIR@/external/
 
 # The EXCLUDE_SYMLINKS tag can be used to select whether or not files or
 # directories that are symbolic links (a Unix file system feature) are excluded
@@ -1476,7 +1476,7 @@ HTML_STYLESHEET        =
 # documentation.
 # This tag requires that the tag GENERATE_HTML is set to YES.
 
-HTML_EXTRA_STYLESHEET  = docs/doxygen-awesome.css
+HTML_EXTRA_STYLESHEET  = @AWESOME_CSS_DIR@/doxygen-awesome.css
 
 # The HTML_EXTRA_FILES tag can be used to specify one or more extra images or
 # other source files which should be copied to the HTML output directory. Note
@@ -2605,7 +2605,7 @@ SKIP_FUNCTION_MACROS   = YES
 # the path). If a tag file is not located in the directory in which Doxygen is
 # run, you must also specify the path to the tagfile here.
 
-TAGFILES               = docs/cppreference-doxygen-web.tag.xml=https://cppreference.com/w/
+TAGFILES               = @CMAKE_CURRENT_SOURCE_DIR@/docs/cppreference-doxygen-web.tag.xml=https://cppreference.com/w/
 
 # When a file name is specified after GENERATE_TAGFILE, Doxygen will create a
 # tag file that is based on the input files it reads. See section "Linking to

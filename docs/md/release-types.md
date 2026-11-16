@@ -10,10 +10,10 @@ This project provides multiple release configurations tailored for specific Andr
 
 | Configuration          | Architecture      | Bitness | Library Type  | Plugin Support   | Description                                                               |
 |------------------------|-------------------|---------|---------------|------------------|---------------------------------------------------------------------------|
-| **Dynamic**            | ARM64 (arm64-v8a) | 64-bit  | Dynamic (.so) | External plugins | Uses shared libraries. Requires `libhelper.so` and `libpartition_map.so`. |
-| **Static**             | ARM64 (arm64-v8a) | 64-bit  | Static (.a)   | External plugins | Fully self-contained executable with no external dependencies.            |
+| **Dynamic**            | ARM64 (arm64-v8a) | 64-bit  | Dynamic (.so) | External plugins | Uses shared libraries. Requires `libhelper.so`, `libpartition_map.so`, and plugins. |
+| **Static + Built-in**             | ARM64 (arm64-v8a) | 64-bit  | Static (.a)   | Built-in plugins | Fully self-contained executable with no external dependencies.            |
 | **Dynamic + Built-in** | ARM64 (arm64-v8a) | 64-bit  | Dynamic (.so) | Built-in plugins | Dynamic linking with plugins compiled directly into the binary.           |
-| **Dynamic**            | ARM (armeabi-v7a) | 32-bit  | Dynamic (.so) | External plugins | Uses shared libraries. Requires `libhelper.so` and `libpartition_map.so`. |
+| **Dynamic**            | ARM (armeabi-v7a) | 32-bit  | Dynamic (.so) | External plugins | Uses shared libraries. Requires `libhelper.so`, `libpartition_map.so`, and plugins. |
 | **Dynamic + Built-in** | ARM (armeabi-v7a) | 32-bit  | Dynamic (.so) | Built-in plugins | Dynamic linking with plugins compiled directly into the binary.           |
 | **Static + Built-in**  | ARM (armeabi-v7a) | 32-bit  | Static (.a)   | Built-in plugins | Fully static with built-in plugins - the most portable option.            |
 
@@ -21,9 +21,8 @@ This project provides multiple release configurations tailored for specific Andr
 
 Typical release files follow this naming pattern:
 - `pmt-{architecture}.zip` - Dynamic linking, external plugins
-- `pmt-static-{architecture}.zip` - Static linking, external plugins  
-- `pmt-builtin-{architecture}.zip` - Dynamic linking, built-in plugins
-- `pmt-static-builtin-{architecture}.zip` - Static linking, built-in plugins
+- `pmt-static-{architecture}.zip` - Static linking, built-in plugins
+- `pmt-{architecture}-builtin.zip` - Dynamic linking, built-in plugins
 
 ---
 
@@ -111,22 +110,15 @@ PMT supports a modular plugin architecture for extending functionality.
 
 ---
 
-## Recent Changes (v1.8.0)
+## Recent Changes (v1.9.0)
 
 ### Core Improvements
-- **Enhanced Partition I/O**: Added new library `libopenpart` for partition I/O
-- **Improved Build System**: Better CMake integration
-- **Logging System**: Switched to modern logging methods
-- **Plugins**: Added new plugins like `ReReadTablePlugin` etc.
+- **Switch C++ standart**: The project was switched from the C++20 standard to the C++17 standard to ensure compatibility with older devices.
+- **Improved Build System**: Updated scripts
+- **Plugins**: Added a new plugin to manage GPTs.
 
 ### Library Enhancements
-- **libhelper**: Improved logging
 - **libpartition_map**: Improved partition parsing
-- **libopenpart**: Improved partition I/O with this new library
-
-### Build & Deployment
-- **Android Integration**: Updated Android.bp files for better system integration
-- **Documentation**: Enhanced build and usage documentation
 
 ---
 

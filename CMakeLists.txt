@@ -80,9 +80,22 @@ find_package(Doxygen OPTIONAL_COMPONENTS dot)
 
 # Add custom target for generating
 if(DOXYGEN_FOUND)
+	include(FetchContent)
+	FetchContent_Declare(
+			doxygen-awesome-css
+			URL https://github.com/jothepro/doxygen-awesome-css/archive/refs/heads/main.zip
+	)
+	FetchContent_MakeAvailable(doxygen-awesome-css)
+	FetchContent_GetProperties(doxygen-awesome-css SOURCE_DIR AWESOME_CSS_DIR)
+	set(PROJECT_FAVICON ${CMAKE_CURRENT_SOURCE_DIR}/docs/favicon.ico)
+	set(PROJECT_DOCS_OUTDIR ${CMAKE_CURRENT_BINARY_DIR}/generated_docs)
+	set(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+	set(DOXYFILE_OUT ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile)
+	configure_file(${DOXYFILE_IN} ${DOXYFILE_OUT} @ONLY)
+
 	add_custom_target(docs
-			COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_SOURCE_DIR}/Doxyfile
-			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+			COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/Doxyfile
+			WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
 			VERBATIM
 	)
 endif()

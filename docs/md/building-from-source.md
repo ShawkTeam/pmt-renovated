@@ -23,7 +23,7 @@ This guide provides comprehensive instructions for building PMT (Partition Manag
 ### Required Software
 
 #### Android NDK
-- **Recommended Version**: r29 (or latest stable)
+- **Recommended Version**: r30 (or latest stable)
 - **For older Android versions (like 4.4)**: r25 (r25 LTS has API 19 support with armeabi-v7a)
 - **Download**: [Android NDK Downloads](https://developer.android.com/ndk/downloads)
 
@@ -56,23 +56,23 @@ sudo zypper install git cmake ninja python3
 
 1. **Download the NDK**:
    ```bash
-   wget https://dl.google.com/android/repository/android-ndk-r28c-linux.zip
+   wget https://dl.google.com/android/repository/android-ndk-r30-linux.zip
    ```
 
 2. **Extract to a permanent location**:
    ```bash
-   unzip android-ndk-r28c-linux.zip -d ~/Development/
+   unzip android-ndk-r30-linux.zip -d ~/Development/
    ```
 
 3. **Set environment variable**:
    ```bash
-   export ANDROID_NDK_HOME="$HOME/Development/android-ndk-r28c"
+   export ANDROID_NDK_HOME="$HOME/Development/android-ndk-r30"
    ```
 
 4. **Persist the environment variable** (optional):
    Add to your shell configuration file (`~/.bashrc` or `~/.zshrc`):
    ```bash
-   echo 'export ANDROID_NDK_HOME="$HOME/Development/android-ndk-r28c"' >> ~/.bashrc
+   echo 'export ANDROID_NDK_HOME="$HOME/Development/android-ndk-r30"' >> ~/.bashrc
    source ~/.bashrc
    ```
 
@@ -80,8 +80,8 @@ sudo zypper install git cmake ninja python3
 
 ### Optional Environment Variables
 ```bash
-# Set minimum Android API level (default: android-22)
-export ANDROID_PLATFORM="android-22"
+# Set minimum Android API level (default: android-21)
+export ANDROID_PLATFORM="android-21"
 ```
 
 ## Repository Setup
@@ -106,7 +106,7 @@ git submodule update --init --recursive
 git clone https://github.com/ShawkTeam/pmt-renovated
 cd pmt-renovated
 git submodule update --init --recursive
-git switch 20260706 # Example tag
+git switch 20260730 # Example tag
 ```
 
 **List available tags:**
@@ -119,7 +119,7 @@ git tag --sort=-version:refname
 PMT uses a sophisticated build system with the following components:
 
 ### C++17 Toolchain
-- Uses **CMake 3.20+** with **Ninja** generator for fast builds
+- Uses **CMake 3.28+** with **Ninja** generator for fast builds
 - **C++17** standard with modern features (traits, etc.)
 - Supports both **Android NDK** cross-compilation and native builds
 
@@ -214,7 +214,17 @@ bash build/scripts/build.sh build --arch arm64-v8a --arch x86_64
 | `build`                    | Standard build                 |
 | `rebuild`                  | Clean then build               |
 | `clean`                    | Remove build artifacts         |
-| `cleanup-generated-docs`   | Remove generated documentation |
+
+### Build Flags
+| Flag                    | Description                    |
+|----------------------------|--------------------------------|
+| `--arch <ABI>`                    | Specify target ABI(S)                 |
+| `--api <API>`                  | Specify target API level              |
+| `--toolchain <FILE>`                    | Specify toolchain file for CMake         |
+| `--working-directory <DIR>`| Specify working directory|
+| `--no-builtin-variants`| Do not build builtin variants|
+| `--only-builtin-variants`| Only build builtin variants|
+| `-h\|--help`| Show script's help message|
 
 ### Advanced Configuration
 
@@ -223,9 +233,9 @@ bash build/scripts/build.sh build --arch arm64-v8a --arch x86_64
 bash build/scripts/build.sh build -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTING=ON
 ```
 
-**Custom working directory**:
+**Custom working directory, etc.**:
 ```bash
-bash build/scripts/build.sh build --working-directory /path/to/source
+bash build/scripts/build.sh build --working-directory /path/to/source --arch arm64-v8a --api 30
 ```
 
 **Thread count optimization**:
@@ -244,11 +254,6 @@ export ANDROID_NDK_HOME="/path/to/android-ndk"
 ```bash
 # Verify installations
 which cmake ninja python3 git
-```
-
-**Git hooks not configured**:
-```bash
-bash build/scripts/build.sh only-configure-git-hooks
 ```
 
 **Build fails with permission errors**:
